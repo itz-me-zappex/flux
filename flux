@@ -108,11 +108,12 @@ export_flux_variables(){
 	export FLUX_PROCESS_NAME="$3"
 	export FLUX_PROCESS_EXECUTABLE="$4"
 	export FLUX_PROCESS_OWNER="$5"
+	export FLUX_PROCESS_COMMAND="$6"
 }
 
 # Unset exported variables because those become useless after running command
 unset_flux_variables(){
-	unset FLUX_WINDOW_ID FLUX_PROCESS_PID FLUX_PROCESS_NAME FLUX_PROCESS_EXECUTABLE FLUX_PROCESS_OWNER
+	unset FLUX_WINDOW_ID FLUX_PROCESS_PID FLUX_PROCESS_NAME FLUX_PROCESS_EXECUTABLE FLUX_PROCESS_OWNER FLUX_PROCESS_COMMAND
 }
 
 # Actions on TERM and INT signals
@@ -218,7 +219,7 @@ Options and values:
 			# I need only first line, so break cycle
 			break
 		done < <(LC_ALL='C' bash --version)
-		echo "flux 1.0 (bash $bash_version)
+		echo "flux 1.1 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
@@ -289,7 +290,7 @@ max_cpulimit="$(( cpu_threads * 100 ))"
 unset cpu_threads cpuinfo_line
 
 # Create associative arrays to store values from config
-declare -A config_name config_executable config_owner config_cpulimit config_delay config_focus config_unfocus
+declare -A config_name config_executable config_owner config_cpulimit config_delay config_focus config_unfocus config_command
 
 # INI parser
 while read -r config_line || [[ -n "$config_line" ]]; do
@@ -320,7 +321,7 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 		continue
 	fi
 	# Exit with an error if type of line cannot be defined
-	if [[ "${config_line,,}" =~ ^(name|executable|owner|cpulimit|delay|focus|unfocus)(\ )?=(\ )?.* ]]; then
+	if [[ "${config_line,,}" =~ ^(name|executable|owner|cpulimit|delay|focus|unfocus|command)(\ )?=(\ )?.* ]]; then
 		# Extract value from key by removing key and equal symbol
 		if [[ "$config_line" == *'= '* ]]; then
 			value="${config_line/*= /}" # <-
@@ -387,6 +388,9 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 		;;
 		unfocus* )
 			config_unfocus["$section"]="$value"
+		;;
+		command* )
+			config_command["$section"]="$value"
 		esac
 	else
 		print_error "$error_prefix Cannot define type of line '$config_line'!"
@@ -397,8 +401,8 @@ unset config_line value section
 
 # Check values in sections
 for section_from_array in "${sections_array[@]}"; do
-	# Exit with an error if neither identifier 'name' nor 'executable' is specified
-	if [[ -z "${config_name["$section_from_array"]}" && -z "${config_executable["$section_from_array"]}" ]]; then
+	# Exit with an error if neither identifier 'name' nor 'executable' nor 'command' is specified
+	if [[ -z "${config_name["$section_from_array"]}" && -z "${config_executable["$section_from_array"]}" && -z "${config_command["$section_from_array"]}" ]]; then
 		print_error "$error_prefix At least one process identifier required in section '$section_from_array'!"
 		exit 1
 	fi
@@ -432,7 +436,7 @@ while read -r window_id; do
 	if [[ -n "$previous_section_match" && -n "${config_unfocus["$previous_section_match"]}" && -z "$lazy" ]]; then
 		print_verbose "$verbose_prefix Running command on unfocus event '${config_unfocus["$previous_section_match"]}' from section '$previous_section_match'."
 		# Variables passthrough to interact with them using custom commands in 'unfocus' key
-		export_flux_variables "$previous_window_id" "$previous_process_pid" "$previous_process_name" "$previous_process_executable" "$previous_process_owner"
+		export_flux_variables "$previous_window_id" "$previous_process_pid" "$previous_process_name" "$previous_process_executable" "$previous_process_owner" "$previous_process_command"
 		nohup setsid bash -c "${config_unfocus["$previous_section_match"]}" > /dev/null 2>&1 &
 		unset_flux_variables
 	fi
@@ -459,6 +463,10 @@ while read -r window_id; do
 			fi
 		done < "/proc/$process_pid/status"
 		unset status_line
+		# Extract command of process, a bit complicated to avoid warning about zero bytes trying read file using subshell
+		IFS=$'\0' read -r -a process_command_array < "/proc/$process_pid/cmdline"
+		process_command="${process_command_array[*]}"
+		unset process_command_array IFS
 	else
 		print_error "$warn_prefix Cannot obtain PID of window with ID '$window_id'! Getting process info skipped."
 		process_pid=''
@@ -485,12 +493,18 @@ while read -r window_id; do
 			else
 				owner_match='1'
 			fi
+			# Compare process command with specified in section
+			if [[ -n "${config_command["$section_from_array"]}" && "${config_command["$section_from_array"]}" != "$process_command" ]]; then
+				continue
+			else
+				command_match='1'
+			fi
 			# Mark as matching if all identifiers containing non-zero value
-			if [[ -n "$name_match" && -n "$executable_match" && -n "$owner_match" ]]; then
+			if [[ -n "$name_match" && -n "$executable_match" && -n "$owner_match" && -n "$command_match" ]]; then
 				section_match="$section_from_array"
 				break
 			fi
-			unset name_match executable_match owner_match
+			unset name_match executable_match owner_match command_match
 		done
 		unset section_from_array
 		if [[ -n "$section_match" ]]; then
@@ -620,7 +634,7 @@ while read -r window_id; do
 	# Run command on focus event if exists
 	if [[ -n "$section_match" && -n "${config_focus["$section_match"]}" && -z "$lazy" ]]; then
 		# Variables passthrough to interact with them using custom commands in 'focus' key
-		export_flux_variables "$window_id" "$process_pid" "$process_name" "$process_executable" "$process_owner"
+		export_flux_variables "$window_id" "$process_pid" "$process_name" "$process_executable" "$process_owner" "$process_command"
 		nohup setsid bash -c "${config_focus["$section_match"]}" > /dev/null 2>&1 &
 		unset_flux_variables
 		print_verbose "$verbose_prefix Running command on focus event '${config_focus["$section_match"]}' from section '$section_match'."
@@ -632,6 +646,7 @@ while read -r window_id; do
 	previous_process_executable="$process_executable"
 	previous_process_owner="$process_owner"
 	previous_section_match="$section_match"
+	previous_process_command="$process_command"
 	# Unset for avoid false positive on next cycle
 	unset section_match
 done < <(xprop_event_reader)

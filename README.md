@@ -55,13 +55,14 @@ A simple INI is used for configuration.
 Available keys and description:
 | Key               | Description |
 |-------------------|-------------|
-| `name` | Name of process, gets from `/proc/<PID>/comm`, required if `executable` is not specified. |
-| `executable` | Path to binary of process, gets by reading `/proc/<PID>/exe` symlink, required if `name` is not specified. |
+| `name` | Name of process, gets from `/proc/<PID>/comm`, required if neither `executable` nor `command` is specified. |
+| `executable` | Path to binary of process, gets by reading `/proc/<PID>/exe` symlink, required if neither `name` nor `command` is specified. |
 | `owner` | User ID of process, gets from `/proc/<PID>/status`. |
 | `cpulimit` | CPU-limit between 0 and CPU threads multiplied by 100 (i.e. 2 threads = 200, 8 = 800 etc.), defaults to -1 which means no CPU-limit. |
 | `delay` | Delay before applying CPU-limit, required for avoid freezing app on exit keeping zombie process or longer exiting than should be, which caused by interrupts from 'cpulimit' subprocess. |
 | `focus` | Command to execute on focus event, command runs via bash and won't be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
 | `unfocus` | Command to execute on unfocus event, command runs via bash and won't be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
+| `command` | Command of process, gets from `/proc/<PID>/cmdline`, required if neither `name` nor `executable` is specified. |
 
 #### Config path
 - Daemon searches for following configuration files by priority:
@@ -118,6 +119,7 @@ Flux does not support environment variables, but passes them to commands in 'foc
 | `FLUX_PROCESS_NAME` | Process name of focused window |
 | `FLUX_PROCESS_EXECUTABLE` | Path to process binary |
 | `FLUX_PROCESS_OWNER` | UID of process |
+| `FLUX_PROCESS_COMMAND` | Command of process |
 
 Daemon passes absolutely same values for both 'focus' and 'unfocus' keys.
 
