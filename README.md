@@ -10,6 +10,7 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
   - [Config path](#config-path)
   - [Limitations](#limitations)
   - [Configuration example](#configuration-example)
+- [Variables](#variables)
 - [Possible questions](#possible-questions)
  
 ### Dependencies
@@ -54,13 +55,13 @@ A simple INI is used for configuration.
 Available keys and description:
 | Key               | Description |
 |-------------------|-------------|
-| `name`            | Name of process, gets from `/proc/<PID>/comm`, required if `executable` is not specified. |
-| `executable`      | Path to binary of process, gets by reading `/proc/<PID>/exe` symlink, required if `name` is not specified. |
-| `owner`           | User ID of process, gets from `/proc/<PID>/status`. |
-| `cpulimit`        | CPU-limit between 0 and CPU threads multiplied by 100 (i.e. 2 threads = 200, 8 = 800 etc.), defaults to -1 which means no CPU-limit. |
-| `delay`           | Delay before applying CPU-limit, required for avoid freezing app on exit keeping zombie process or longer exiting than should be, which caused by interrupts from 'cpulimit' subprocess. |
-| `focus`           | Command to execute on focus event, command runs via bash and won't be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
-| `unfocus`         | Command to execute on unfocus event, command runs via bash and won't be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
+| `name` | Name of process, gets from `/proc/<PID>/comm`, required if `executable` is not specified. |
+| `executable` | Path to binary of process, gets by reading `/proc/<PID>/exe` symlink, required if `name` is not specified. |
+| `owner` | User ID of process, gets from `/proc/<PID>/status`. |
+| `cpulimit` | CPU-limit between 0 and CPU threads multiplied by 100 (i.e. 2 threads = 200, 8 = 800 etc.), defaults to -1 which means no CPU-limit. |
+| `delay` | Delay before applying CPU-limit, required for avoid freezing app on exit keeping zombie process or longer exiting than should be, which caused by interrupts from 'cpulimit' subprocess. |
+| `focus` | Command to execute on focus event, command runs via bash and won't be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
+| `unfocus` | Command to execute on unfocus event, command runs via bash and won't be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
 
 #### Config path
 - Daemon searches for following configuration files by priority:
@@ -107,6 +108,19 @@ focus = killall picom
 unfocus = picom
 ```
 
+### Variables
+Flux does not support environment variables, but passes them to commands in 'focus' and 'unfocus' keys.
+
+| Variable | Description |
+|----------|-------------|
+| FLUX_WINDOW_ID | ID of focused window |
+| FLUX_PROCESS_PID | Process PID of focused window |
+| FLUX_PROCESS_NAME | Process name of focused window |
+| FLUX_PROCESS_EXECUTABLE | Path to process binary |
+| FLUX_PROCESS_OWNER | UID of process |
+
+Daemon passes absolutely same variables for both 'focus' and 'unfocus' keys.
+
 ### Possible questions
 - Should I trust you and this utility?
   - You can read entire code. If you are uncomfortable, feel free to avoid using it.
@@ -121,7 +135,7 @@ unfocus = picom
 - Why is code so complicated?
   - Long story short, try removing at least one line of code (that does not affect output, of course) and see what happens. That sounds easy - just apply a CPU-limit to a window when unfocused and remove it when focused, but it is a bit more complicated. Just check how much logic is used for that "easy" task.
 - Can I apply FPS-limits instead of CPU-limits?
-  - No, at least not directly. You can use MangoHud with game, then add commands to 'focus' and 'unfocus' keys to modify 'fps_limit' option in MangoHud config on the fly using 'sed' tool. Since MangoHud reads config on fly, that works like a charm.
+  - No, at least not directly. You can use MangoHud with game, then add commands to 'focus' and 'unfocus' keys to modify 'fps_limit' option in MangoHud config on fly using 'sed' tool. Since MangoHud reads config on fly, that works like a charm.
 - Gamescope exists, Wayland becomes more popular. Are you not late by any chance?
   - Well, not everyone is ready to switch to Wayland, there are a lot of reasons exists. Gamescope does not work well on my Nvidia desktop and Intel laptop, and I can bet it does not work well for others either. Also, there are a lot of old Nvidia GPUs that do not support Wayland at all because of old drivers, what makes Gamescope completely useless for owners of these GPUs.
 - What about Wayland support?
