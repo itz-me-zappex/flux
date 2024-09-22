@@ -113,11 +113,11 @@ Flux does not support environment variables, but passes them to commands in 'foc
 
 | Variable | Description |
 |----------|-------------|
-| FLUX_WINDOW_ID | ID of focused window |
-| FLUX_PROCESS_PID | Process PID of focused window |
-| FLUX_PROCESS_NAME | Process name of focused window |
-| FLUX_PROCESS_EXECUTABLE | Path to process binary |
-| FLUX_PROCESS_OWNER | UID of process |
+| `FLUX_WINDOW_ID` | ID of focused window |
+| `FLUX_PROCESS_PID` | Process PID of focused window |
+| `FLUX_PROCESS_NAME` | Process name of focused window |
+| `FLUX_PROCESS_EXECUTABLE` | Path to process binary |
+| `FLUX_PROCESS_OWNER` | UID of process |
 
 Daemon passes absolutely same variables for both 'focus' and 'unfocus' keys.
 
