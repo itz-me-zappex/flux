@@ -119,7 +119,7 @@ Flux does not support environment variables, but passes them to commands in 'foc
 | `FLUX_PROCESS_EXECUTABLE` | Path to process binary |
 | `FLUX_PROCESS_OWNER` | UID of process |
 
-Daemon passes absolutely same variables for both 'focus' and 'unfocus' keys.
+Daemon passes absolutely same values for both 'focus' and 'unfocus' keys.
 
 ### Possible questions
 - Should I trust you and this utility?
