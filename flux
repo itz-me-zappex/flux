@@ -28,7 +28,7 @@ do_not_print_quiet(){
 	fi
 }
 
-# Exit with error if option repeated
+# Exit with an error if option repeated
 option_repeat_check(){
 	if [[ -n "${!1}" ]]; then
 		print_error "$error_prefix Option '$2' is repeated!$advice_on_option_error"
@@ -64,6 +64,7 @@ refresh_pids(){
 
 # Extract window IDs from xprop events
 xprop_event_reader(){
+	local stacking_windows focused_window stacking_window
 	# Print window IDs of open windows to apply limits immediately if '--hot' option was passed
 	if [[ -n "$hot" ]]; then
 		# Extract IDs of open windows
@@ -79,7 +80,6 @@ xprop_event_reader(){
 				echo "$stacking_window"
 			fi
 		done
-		unset stacking_window stacking_windows hot focused_window
 	fi
 	# Print event for unset '--lazy' option before reading events, otherwise focus and unfocus commands will not work
 	echo 'nolazy'
@@ -219,7 +219,7 @@ Options and values:
 			# I need only first line, so break cycle
 			break
 		done < <(LC_ALL='C' bash --version)
-		echo "flux 1.1.2 (bash $bash_version)
+		echo "flux 1.1.3 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
@@ -425,9 +425,9 @@ declare -A is_cpulimited cpulimit_subprocess_pid
 
 # Read IDs of windows and apply actions
 while read -r window_id; do
-	# Unset '--lazy' option if event was passed, otherwise focus and unfocus commands will not work
+	# Unset '--hot' since unused from this moment and --lazy' option if event was passed, otherwise focus and unfocus commands will not work
 	if [[ "$window_id" == 'nolazy' ]]; then
-		unset lazy
+		unset lazy hot
 		lazy_was_unset=1
 		continue
 	fi
@@ -435,7 +435,7 @@ while read -r window_id; do
 	refresh_pids
 	# Run command on unfocus event for previous window if specified
 	if [[ -n "$previous_section_match" && -n "${config_unfocus["$previous_section_match"]}" && -z "$lazy" ]]; then
-		# Required for avoid running unfocus command when new event appears after previous matching one when '--hot' option is used along with '--lazy'
+		# Required to avoid running unfocus command when new event appears after previous matching one when '--hot' option is used along with '--lazy'
 		if [[ -z "$lazy_was_unset" ]]; then
 			print_verbose "$verbose_prefix Running command on unfocus event '${config_unfocus["$previous_section_match"]}' from section '$previous_section_match'."
 			# Variables passthrough to interact with them using custom commands in 'unfocus' key
@@ -653,6 +653,6 @@ while read -r window_id; do
 	previous_process_owner="$process_owner"
 	previous_section_match="$section_match"
 	previous_process_command="$process_command"
-	# Unset for avoid false positive on next cycle
+	# Unset to avoid false positive on next cycle
 	unset section_match
 done < <(xprop_event_reader)
