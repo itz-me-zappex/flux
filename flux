@@ -131,7 +131,7 @@ exit_on_term(){
 	# Kill cpulimit subprocesses
 	for cpulimit_subprocess in "${cpulimit_subprocesses_array[@]}"; do
 		if ! pkill -P "$cpulimit_subprocess" > /dev/null 2>&1; then
-			print_error "$warn Cannot stop 'cpulimit' subprocess with PID $cpulimit_subprocess!"
+			print_error "$warn_prefix Cannot stop 'cpulimit' subprocess with PID $cpulimit_subprocess!"
 		else
 			print_verbose "$verbose_prefix CPU-limit subprocess with PID '$cpulimit_subprocess' has been killed."
 		fi
