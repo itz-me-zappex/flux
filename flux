@@ -219,7 +219,7 @@ Options and values:
 			# I need only first line, so break cycle
 			break
 		done < <(LC_ALL='C' bash --version)
-		echo "flux 1.1.1 (bash $bash_version)
+		echo "flux 1.1.2 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
@@ -428,17 +428,23 @@ while read -r window_id; do
 	# Unset '--lazy' option if event was passed, otherwise focus and unfocus commands will not work
 	if [[ "$window_id" == 'nolazy' ]]; then
 		unset lazy
+		lazy_was_unset=1
 		continue
 	fi
 	# Refresh PIDs in arrays containing frozen processes and cpulimit subprocesses by removing terminated PIDs
 	refresh_pids
 	# Run command on unfocus event for previous window if specified
 	if [[ -n "$previous_section_match" && -n "${config_unfocus["$previous_section_match"]}" && -z "$lazy" ]]; then
-		print_verbose "$verbose_prefix Running command on unfocus event '${config_unfocus["$previous_section_match"]}' from section '$previous_section_match'."
-		# Variables passthrough to interact with them using custom commands in 'unfocus' key
-		export_flux_variables "$previous_window_id" "$previous_process_pid" "$previous_process_name" "$previous_process_executable" "$previous_process_owner" "$previous_process_command"
-		nohup setsid bash -c "${config_unfocus["$previous_section_match"]}" > /dev/null 2>&1 &
-		unset_flux_variables
+		# Required for avoid running unfocus command when new event appears after previous matching one when '--hot' option is used along with '--lazy'
+		if [[ -z "$lazy_was_unset" ]]; then
+			print_verbose "$verbose_prefix Running command on unfocus event '${config_unfocus["$previous_section_match"]}' from section '$previous_section_match'."
+			# Variables passthrough to interact with them using custom commands in 'unfocus' key
+			export_flux_variables "$previous_window_id" "$previous_process_pid" "$previous_process_name" "$previous_process_executable" "$previous_process_owner" "$previous_process_command"
+			nohup setsid bash -c "${config_unfocus["$previous_section_match"]}" > /dev/null 2>&1 &
+			unset_flux_variables
+		else
+			unset lazy_was_unset
+		fi
 	fi
 	# Extract PID of process
 	process_pid="$(xprop -id "$window_id" _NET_WM_PID)"
