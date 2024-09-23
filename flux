@@ -81,6 +81,7 @@ xprop_event_reader(){
 			fi
 		done
 	fi
+	unset stacking_windows focused_window stacking_window
 	# Print event for unset '--lazy' option before reading events, otherwise focus and unfocus commands will not work
 	echo 'nolazy'
 	# Read events from xprop and print IDs of windows
@@ -219,7 +220,7 @@ Options and values:
 			# I need only first line, so break cycle
 			break
 		done < <(LC_ALL='C' bash --version)
-		echo "flux 1.1.3 (bash $bash_version)
+		echo "flux 1.1.4 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
