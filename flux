@@ -117,6 +117,41 @@ unset_flux_variables(){
 	unset FLUX_WINDOW_ID FLUX_PROCESS_PID FLUX_PROCESS_NAME FLUX_PROCESS_EXECUTABLE FLUX_PROCESS_OWNER FLUX_PROCESS_COMMAND
 }
 
+# Extract process info
+extract_process_info(){
+	# Extract PID of process
+	process_pid="$(xprop -id "$window_id" _NET_WM_PID)"
+	if [[ "$process_pid" != "_NET_WM_PID:  not found." ]]; then
+		process_pid="${process_pid/* = /}"
+		# Extract name of process
+		process_name="$(<"/proc/$process_pid/comm")"
+		# Extract executable path of process
+		process_executable="$(readlink "/proc/$process_pid/exe")"
+		# Extract UID of process
+		while read -r status_line; do
+			if [[ "$status_line" == 'Uid:'* ]]; then
+				column_count=0
+				for status_column in $status_line; do
+					if (( column_count == 3 )); then
+						process_owner="$status_column"
+					else
+						column_count="$(( column_count + 1 ))"
+					fi
+				done
+				unset status_column column_count
+			fi
+		done < "/proc/$process_pid/status"
+		unset status_line
+		# Extract command of process, a bit complicated to avoid warning about zero bytes trying read file using subshell
+		IFS=$'\0' read -r -a process_command_array < "/proc/$process_pid/cmdline"
+		process_command="${process_command_array[*]}"
+		unset process_command_array IFS
+	else
+		process_pid=''
+		return 1
+	fi
+}
+
 # Actions on TERM and INT signals
 exit_on_term(){
 	# Refresh PIDs in arrays containing frozen processes and cpulimit subprocesses by removing terminated PIDs
@@ -186,6 +221,7 @@ Options and values:
     -H, --hot                            Apply actions to already unfocused windows before handling events
     -l, --lazy                           Avoid focus and unfocus commands on hot
     -q, --quiet                          Print errors and warnings only
+    -t, --template                       Print template for config by picking window
     -u, --usage                          Same as '--help'
     -v, --verbose                        Detailed output
     -V, --version                        Display release information
@@ -207,6 +243,33 @@ Options and values:
 		quiet=1
 		shift 1
 	;;
+	--template | -t )
+		# Obtain window ID using xwininfo picker
+		while read -r xwininfo_output; do
+			if [[ "$xwininfo_output" == 'xwininfo: Window id: '* ]]; then
+				window_id="${xwininfo_output/*: /}"
+				window_id="${window_id/ */}"
+				break
+			fi
+		done < <(xwininfo)
+		# Extract process info
+		if extract_process_info; then
+			echo "[$process_name]
+name = $process_name
+executable = $process_executable
+command = $process_command
+owner = $process_owner
+cpulimit = -1
+delay = 0
+focus = 
+unfocus = 
+"
+			exit 0
+		else
+			print_error "$error_prefix Cannot create template for window with ID $window_id since it does not report its PID!"
+			exit 1
+		fi
+	;;
 	--verbose | -v )
 		option_repeat_check verbose --verbose
 		verbose=1
@@ -220,7 +283,7 @@ Options and values:
 			# I need only first line, so break cycle
 			break
 		done < <(LC_ALL='C' bash --version)
-		echo "flux 1.1.4 (bash $bash_version)
+		echo "flux 1.2 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
@@ -447,36 +510,9 @@ while read -r window_id; do
 			unset lazy_was_unset
 		fi
 	fi
-	# Extract PID of process
-	process_pid="$(xprop -id "$window_id" _NET_WM_PID)"
-	if [[ "$process_pid" != "_NET_WM_PID:  not found." ]]; then
-		process_pid="${process_pid/* = /}"
-		# Extract name of process
-		process_name="$(<"/proc/$process_pid/comm")"
-		# Extract executable path of process
-		process_executable="$(readlink "/proc/$process_pid/exe")"
-		# Extract UID of process
-		while read -r status_line; do
-			if [[ "$status_line" == 'Uid:'* ]]; then
-				column_count=0
-				for status_column in $status_line; do
-					if (( column_count == 3 )); then
-						process_owner="$status_column"
-					else
-						column_count="$(( column_count + 1 ))"
-					fi
-				done
-				unset status_column column_count
-			fi
-		done < "/proc/$process_pid/status"
-		unset status_line
-		# Extract command of process, a bit complicated to avoid warning about zero bytes trying read file using subshell
-		IFS=$'\0' read -r -a process_command_array < "/proc/$process_pid/cmdline"
-		process_command="${process_command_array[*]}"
-		unset process_command_array IFS
-	else
-		print_error "$warn_prefix Cannot obtain PID of window with ID '$window_id'! Getting process info skipped."
-		process_pid=''
+	# Extract process info
+	if ! extract_process_info; then
+		print_error "$warn_prefix Cannot obtain PID of window with ID $window_id! Getting process info skipped."
 	fi
 	# Do not find matching section if window does not report its PID
 	if [[ -n "$process_pid" ]]; then
