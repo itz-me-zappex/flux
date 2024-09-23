@@ -28,6 +28,8 @@ Developed and tested on Arch Linux, all dependencies below related to that and b
   - sleep (optional, uses 'read -t \<seconds\>' by default)
 - xorg-xprop (tested with 1.2.7)
   - xprop
+- xorg-xwininfo (tested with 1.1.6)
+  - xwininfo
 
 ### Installation
 This daemon was developed with portability in mind, so all code has been placed in one file.
@@ -42,6 +44,7 @@ Options and values:
     -H, --hot                            Apply actions to already unfocused windows before handling events
     -l, --lazy                           Avoid focus and unfocus commands on hot
     -q, --quiet                          Print errors and warnings only
+    -t, --template                       Print template for config by picking window (since v1.2)
     -u, --usage                          Same as '--help'
     -v, --verbose                        Detailed output
     -V, --version                        Display release information
