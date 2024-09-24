@@ -155,7 +155,7 @@ Daemon passes absolutely same values for both 'focus' and 'unfocus' keys.
 - Nothing is perfect in this world. Almost all bugs I encountered during development have been fixed. If you find a bug, open an issue. Known issues that cannot be fixed are: inability to interact with "glxgears" and "vkcube" windows, as they do not report their PIDs; freezing online games (setting 'cpulimit' to '0') causes disconnects from matches, so use lower CPU-limit to allow game to send/receive packets.
 
 ##### Why is code so complicated?
-- Long story short, try removing at least one line of code (that does not affect output, of course) and see what happens. That sounds easy - just apply a CPU-limit to a window when unfocused and remove it when focused, but it is a bit more complicated. Just check how much logic is used for that "easy" task.
+- Long story short, try removing at least one line of code (that does not affect output, of course) and see what happens. That sounds easy - just apply a CPU-limit to a window when unfocused and remove it when focused, but it is a bit more complicated. Just check how much logic is used for that "easy" task. Also I used built-in stuff in bash like shell parameter expansions instead of 'sed', loops for reading text line-by-line with regexp in 'if' statements instead of 'grep', 'read -t' instead of 'sleep' etc. to make code faster, calling external binaries consumes much more time and CPU resources, but using built-in options does not.
 
 ##### Can I apply FPS-limits instead of CPU-limits?
 - No, at least not directly. You can use MangoHud with game, then add commands to 'focus' and 'unfocus' keys to modify 'fps_limit' option in MangoHud config on fly using 'sed' tool. Since MangoHud reads config on fly, that works like a charm.
