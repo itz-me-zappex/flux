@@ -217,8 +217,7 @@ while (( $# > 0 )); do
 		esac
 	;;
 	--help | -h | --usage | -u )
-		echo "flux - A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
-Usage: flux [option] <value>
+		echo "Usage: flux [option] <value>
 Options and values:
     -c, --config     <path-to-config>    Specify path to config file
     -h, --help                           Display this help
@@ -287,7 +286,8 @@ unfocus = ; optional, put command here or remove this line
 			# I need only first line, so break cycle
 			break
 		done < <(LC_ALL='C' bash --version)
-		echo "flux 1.2.1 (bash $bash_version)
+		echo "A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
+flux 1.2.2 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
@@ -490,6 +490,12 @@ declare -A is_frozen freeze_subrocess_pid
 
 # Declare associative arrays for CPU-limited processes and cpulimit subprocesses
 declare -A is_cpulimited cpulimit_subprocess_pid
+
+# Dumbass protection, exit with an error if that is not a X11 session
+if [[ "$XDG_SESSION_TYPE" != 'x11' ]]; then
+	print_error "$error_prefix Flux was not meant for usage with anything but X11!"
+	exit 1
+fi
 
 # Read IDs of windows and apply actions
 while read -r window_id; do
