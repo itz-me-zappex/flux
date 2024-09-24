@@ -679,6 +679,7 @@ while read -r window_id; do
 			is_cpulimited["$process_pid"]=''
 			# Remove PID of cpulimit subprocess from array
 			for cpulimit_subprocess in "${cpulimit_subprocesses_array[@]}"; do
+				# Skip interrupted subprocess since I want remove it from array
 				if [[ "$cpulimit_subprocess" != "${cpulimit_subprocess_pid["$process_pid"]}" ]]; then
 					cpulimit_subprocesses_array_temp+=("$cpulimit_subprocess")
 				fi
