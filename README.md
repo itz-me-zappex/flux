@@ -12,6 +12,17 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
   - [Configuration example](#configuration-example)
 - [Variables](#variables)
 - [Possible questions](#possible-questions)
+  - [Should I trust you and this utility?](#should-i-trust-you-and-this-utility?)
+  - [Is it safe?](#is-it-safe?)
+  - [Can I get banned in a game because of this daemon?](#Can-i-get-banned-in-a-game-because-of-this-daemon?)
+  - [Why was that daemon developed?](#why-was-that-daemon-developed?)
+  - [Bugs?](#bugs?)
+  - [Why is code so complicated?](#why-is-code-so-complicated?)
+  - [Can I apply FPS-limits instead of CPU-limits?](#can-i-apply-fps-limits-instead-of-cpu-limits?)
+  - [Gamescope exists, Wayland becomes more popular. Are you not late by any chance?](#gamescope-exists,-wayland-becomes-more-popular.-are-you-not-late-by-any-chance?)
+  - [What about Wayland support?](#what-about-wayland-support?)
+
+
  
 ### Dependencies
 Developed and tested on Arch Linux, all dependencies below related to that and based on distros.
@@ -90,11 +101,12 @@ Since INI is not standartized, I should mention all supported features here.
 #### Configuration example
 ```ini
 ; Long example
-[Forza Horizon 4]
-name = ForzaHorizon4.e
-executable = 
+[SuperTux]
+name = supertux2
+executable = /usr/bin/supertux2
+command = /usr/bin/supertux2
 owner = 1000
-cpulimit = 40
+cpulimit = 0
 delay = 1
 focus = killall picom
 unfocus = picom
