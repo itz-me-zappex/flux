@@ -154,8 +154,8 @@ Daemon passes absolutely same values for both 'focus' and 'unfocus' keys.
 ##### Bugs?
 - Nothing is perfect in this world. Almost all bugs I encountered during development have been fixed or will be fixed soon. If you find a bug, open an issue. Known issues that cannot be fixed are:
   - Inability to interact with "glxgears" and "vkcube" windows, as they do not report their PIDs.
-  - Freezing online games (setting 'cpulimit' to '0') causes disconnects from matches, so use less agressive CPU-limit to allow game to send/receive packets.
-  - Stuttery audio in game if CPU-limit is very agressive, since 'cpulimit' interrupts process, that should be expected.
+  - Freezing online games (setting 'cpulimit' to '0') causes disconnects from matches, so use less aggressive CPU-limit to allow game to send/receive packets.
+  - Stuttery audio in game if CPU-limit is very aggressive, since 'cpulimit' interrupts process, that should be expected.
 
 ##### Why is code so complicated?
 - Long story short, try removing at least one line of code (that does not affect output, of course) and see what happens. That sounds easy - just apply a CPU-limit to a window when unfocused and remove it when focused, but it is a bit more complicated. Just check how much logic is used for that "easy" task. Also I used built-in stuff in bash like shell parameter expansions instead of 'sed', loops for reading text line-by-line with regexp in 'if' statements instead of 'grep', 'read -t' instead of 'sleep' etc. to make code faster, calling external binaries consumes much more time and CPU resources, but using built-in options does not.
