@@ -12,15 +12,15 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
   - [Configuration example](#configuration-example)
 - [Variables](#variables)
 - [Possible questions](#possible-questions)
-  - [Should I trust you and this utility?](#should-i-trust-you-and-this-utility?)
-  - [Is it safe?](#is-it-safe?)
-  - [Can I get banned in a game because of this daemon?](#Can-i-get-banned-in-a-game-because-of-this-daemon?)
-  - [Why was that daemon developed?](#why-was-that-daemon-developed?)
-  - [Bugs?](#bugs?)
-  - [Why is code so complicated?](#why-is-code-so-complicated?)
-  - [Can I apply FPS-limits instead of CPU-limits?](#can-i-apply-fps-limits-instead-of-cpu-limits?)
-  - [Gamescope exists, Wayland becomes more popular. Are you not late by any chance?](#gamescope-exists,-wayland-becomes-more-popular.-are-you-not-late-by-any-chance?)
-  - [What about Wayland support?](#what-about-wayland-support?)
+  - [Should I trust you and this utility?](#should-i-trust-you-and-this-utility)
+  - [Is it safe?](#is-it-safe)
+  - [Can I get banned in a game because of this daemon?](#can-i-get-banned-in-a-game-because-of-this-daemon)
+  - [Why was that daemon developed?](#why-was-that-daemon-developed)
+  - [Bugs?](#bugs)
+  - [Why is code so complicated?](#why-is-code-so-complicated)
+  - [Can I apply FPS-limits instead of CPU-limits?](#can-i-apply-fps-limits-instead-of-cpu-limits)
+  - [Gamescope exists, Wayland becomes more popular. Are you not late by any chance?](#gamescope-exists-wayland-becomes-more-popular-are-you-not-late-by-any-chance)
+  - [What about Wayland support?](#what-about-wayland-support)
 
 
  
@@ -139,29 +139,29 @@ Flux does not support environment variables, but passes them to commands in 'foc
 Daemon passes absolutely same values for both 'focus' and 'unfocus' keys.
 
 ### Possible questions
-Should I trust you and this utility?
+##### Should I trust you and this utility?
 - You can read entire code. If you are uncomfortable, feel free to avoid using it.
 
-Is it safe?
+##### Is it safe?
 - Yes, all daemon does is read events from X11 related to window focus. Neither I nor daemon has access to your data.
 
-Can I get banned in a game because of this daemon?
+##### Can I get banned in a game because of this daemon?
 - Nowadays, anti-cheats are pure garbage, developed by freaks without balls, and you can get banned even for a wrong click.
 
-Why was that daemon developed?
+##### Why was that daemon developed?
 - Main task is to reduce CPU usage of games that have been minimized. Almost every engine fails to recognize that game is unfocused and continues to consume a lot of CPU and GPU resources, what can make system slow for other tasks like browsing stuff, transcoding video etc. or even unresponsive at all.
 
-Bugs?
+##### Bugs?
 - Nothing is perfect in this world. Almost all bugs I encountered during development have been fixed. If you find a bug, open an issue. Known issues that cannot be fixed are: inability to interact with "glxgears" and "vkcube" windows, as they do not report their PIDs; freezing online games (setting 'cpulimit' to '0') causes disconnects from matches, so use lower CPU-limit to allow game to send/receive packets.
 
-Why is code so complicated?
+##### Why is code so complicated?
 - Long story short, try removing at least one line of code (that does not affect output, of course) and see what happens. That sounds easy - just apply a CPU-limit to a window when unfocused and remove it when focused, but it is a bit more complicated. Just check how much logic is used for that "easy" task.
 
-Can I apply FPS-limits instead of CPU-limits?
+##### Can I apply FPS-limits instead of CPU-limits?
 - No, at least not directly. You can use MangoHud with game, then add commands to 'focus' and 'unfocus' keys to modify 'fps_limit' option in MangoHud config on fly using 'sed' tool. Since MangoHud reads config on fly, that works like a charm.
 
-Gamescope exists, Wayland becomes more popular. Are you not late by any chance?
+##### Gamescope exists, Wayland becomes more popular. Are you not late by any chance?
 - Well, not everyone is ready to switch to Wayland, there are a lot of reasons exists. Gamescope does not work well on my Nvidia desktop and Intel laptop, and I can bet it does not work well for others either. Also, there are a lot of old Nvidia GPUs that do not support Wayland at all because of old drivers, what makes Gamescope completely useless for owners of these GPUs.
 
-What about Wayland support?
+##### What about Wayland support?
 - That is impossible, there is no any unified way to read window focus events and extract PIDs from windows on Wayland.
