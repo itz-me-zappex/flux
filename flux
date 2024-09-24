@@ -22,7 +22,7 @@ print_verbose(){
 }
 
 # Do not print in quiet mode
-do_not_print_quiet(){
+print_info(){
 	if [[ -z "$quiet" ]]; then
 		echo -e "$@"
 	fi
@@ -176,7 +176,7 @@ exit_on_term(){
 			print_verbose "$verbose_prefix CPU-limit subprocess with PID '$cpulimit_subprocess' has been killed."
 		fi
 	done
-	do_not_print_quiet "$info_prefix Terminated."
+	print_info "$info_prefix Terminated."
 	exit 0
 }
 
@@ -287,7 +287,7 @@ unfocus = ; optional, put command here or remove this line
 			break
 		done < <(LC_ALL='C' bash --version)
 		echo "A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
-flux 1.2.2 (bash $bash_version)
+flux 1.2.3 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
@@ -590,7 +590,7 @@ while read -r window_id; do
 							if ! kill -STOP "$previous_process_pid" > /dev/null 2>&1; then
 								print_error "$warn_prefix Cannot freeze process '$previous_process_name' with PID $previous_process_pid!"
 							else
-								do_not_print_quiet "$info_prefix Process '$previous_process_name' with PID $previous_process_pid has been frozen on unfocus event."
+								print_info "$info_prefix Process '$previous_process_name' with PID $previous_process_pid has been frozen on unfocus event."
 							fi
 						else
 							print_error "$warn_prefix Process '$previous_process_name' with PID $previous_process_pid has been terminated before freezing!"
@@ -619,7 +619,7 @@ while read -r window_id; do
 						fi
 						# Run cpulimit if target process still exists, otherwise throw warning
 						if [[ -d "/proc/$previous_process_pid" ]]; then
-							do_not_print_quiet "$info_prefix Process '$previous_process_name' with PID $previous_process_pid has been CPU-limited to ${config_cpulimit["$previous_section_match"]}/$max_cpulimit on unfocus event."
+							print_info "$info_prefix Process '$previous_process_name' with PID $previous_process_pid has been CPU-limited to ${config_cpulimit["$previous_section_match"]}/$max_cpulimit on unfocus event."
 							if ! cpulimit --limit="${config_cpulimit["$previous_section_match"]}" --pid="$previous_process_pid" --lazy > /dev/null 2>&1; then
 								print_error "$warn_prefix Cannot apply CPU-limit to process '$previous_process_name' with PID $previous_process_pid, 'cpulimit' returned error!"
 							fi
@@ -649,7 +649,7 @@ while read -r window_id; do
 					if ! kill "${freeze_subrocess_pid["$process_pid"]}" > /dev/null 2>&1; then
 						print_error "$warn_prefix Cannot stop 'cpulimit' subprocess with PID '${freeze_subrocess_pid["$process_pid"]}'!"
 					else
-						do_not_print_quiet "$info_prefix Delayed for ${config_delay["$section_match"]} second(s) freezing of process '$process_name' with PID $process_pid was cancelled."
+						print_info "$info_prefix Delayed for ${config_delay["$section_match"]} second(s) freezing of process '$process_name' with PID $process_pid was cancelled."
 					fi
 				fi
 				freeze_subrocess_pid["$process_pid"]=''
@@ -658,7 +658,7 @@ while read -r window_id; do
 			if ! kill -CONT "$process_pid" > /dev/null 2>&1; then
 				print_error "$warn_prefix Cannot unfreeze process '$process_name' with PID $process_pid!"
 			else
-				do_not_print_quiet "$info_prefix Process '$process_name' with PID $process_pid was unfrozen on focus event."
+				print_info "$info_prefix Process '$process_name' with PID $process_pid was unfrozen on focus event."
 			fi
 			is_frozen["$process_pid"]=''
 			# Remove PID from array
@@ -674,7 +674,7 @@ while read -r window_id; do
 			if ! pkill -P "${cpulimit_subprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
 				print_error "$warn_prefix Cannot stop 'cpulimit' subprocess with PID ${cpulimit_subprocess_pid["$process_pid"]}!"
 			else
-				do_not_print_quiet "$info_prefix Process '$process_name' with PID $process_pid was CPU unlimited on focus event."
+				print_info "$info_prefix Process '$process_name' with PID $process_pid was CPU unlimited on focus event."
 			fi
 			is_cpulimited["$process_pid"]=''
 			# Remove PID of cpulimit subprocess from array
