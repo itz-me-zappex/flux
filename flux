@@ -80,10 +80,14 @@ xprop_event_reader(){
 				echo "$stacking_window"
 			fi
 		done
+		unset stacking_windows focused_window stacking_window
+		# Print event for unset '--hot' option since it becomes useless from this moment
+		echo 'nohot'
 	fi
-	unset stacking_windows focused_window stacking_window
 	# Print event for unset '--lazy' option before reading events, otherwise focus and unfocus commands will not work
-	echo 'nolazy'
+	if [[ -n "$lazy" ]]; then
+		echo 'nolazy'
+	fi
 	# Read events from xprop and print IDs of windows
 	while read -r xprop_event; do
 		# Extract ID from line
@@ -259,10 +263,10 @@ name = $process_name
 executable = $process_executable
 command = $process_command
 owner = $process_owner
-cpulimit = -1
-delay = 0
-focus = 
-unfocus = 
+cpulimit = -1 ; default value, you can change CPU-limit or remove this line
+delay = 0 ; default value, you can change delay or remove this line
+focus = ; optinal, put command here or remove this line
+unfocus = ; optional, put command here or remove this line
 "
 			exit 0
 		else
@@ -283,7 +287,7 @@ unfocus =
 			# I need only first line, so break cycle
 			break
 		done < <(LC_ALL='C' bash --version)
-		echo "flux 1.2 (bash $bash_version)
+		echo "flux 1.2.1 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
@@ -489,10 +493,13 @@ declare -A is_cpulimited cpulimit_subprocess_pid
 
 # Read IDs of windows and apply actions
 while read -r window_id; do
-	# Unset '--hot' since unused from this moment and --lazy' option if event was passed, otherwise focus and unfocus commands will not work
+	# Unset '--lazy' option if event was passed, otherwise focus and unfocus commands will not work
 	if [[ "$window_id" == 'nolazy' ]]; then
-		unset lazy hot
+		unset lazy
 		lazy_was_unset=1
+		continue
+	elif [[ "$window_id" == 'nohot' ]]; then # Unset '--hot' since it becomes useless from this moment
+		unset hot
 		continue
 	fi
 	# Refresh PIDs in arrays containing frozen processes and cpulimit subprocesses by removing terminated PIDs
@@ -549,7 +556,7 @@ while read -r window_id; do
 			fi
 			unset name_match executable_match owner_match command_match
 		done
-		unset section_from_array
+		unset section_from_array name_match executable_match owner_match command_match
 		if [[ -n "$section_match" ]]; then
 			print_verbose "$verbose_prefix Process '$process_name' with PID $process_pid matches with section '$section_match'."
 		else
@@ -630,7 +637,9 @@ while read -r window_id; do
 		if [[ -n "${is_frozen["$process_pid"]}" ]]; then
 			# Kill subprocess with delayed freeze command if exists
 			if [[ -n "${freeze_subrocess_pid["$process_pid"]}" ]]; then
+				# Do not kill subprocess if it does not exist anymore
 				if [[ -d "/proc/${freeze_subrocess_pid["$process_pid"]}" ]]; then
+					# Kill subprocess
 					if ! kill "${freeze_subrocess_pid["$process_pid"]}" > /dev/null 2>&1; then
 						print_error "$warn_prefix Cannot stop 'cpulimit' subprocess with PID '${freeze_subrocess_pid["$process_pid"]}'!"
 					else
@@ -648,13 +657,13 @@ while read -r window_id; do
 			is_frozen["$process_pid"]=''
 			# Remove PID from array
 			for frozen_process in "${frozen_processes_array[@]}"; do
+				# Skip current PID since I want remove it from array
 				if [[ "$frozen_process" != "$process_pid" ]]; then
 					frozen_processes_array_temp+=("$frozen_process")
 				fi
 			done
-			unset frozen_process
 			frozen_processes_array=("${frozen_processes_array_temp[@]}")
-			unset frozen_processes_array_temp
+			unset frozen_process frozen_processes_array_temp
 		elif [[ -n "${is_cpulimited["$process_pid"]}" ]]; then # Kill cpulimit subprocess if window is focused
 			if ! pkill -P "${cpulimit_subprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
 				print_error "$warn_prefix Cannot stop 'cpulimit' subprocess with PID ${cpulimit_subprocess_pid["$process_pid"]}!"
@@ -668,10 +677,9 @@ while read -r window_id; do
 					cpulimit_subprocesses_array_temp+=("$cpulimit_subprocess")
 				fi
 			done
-			unset cpulimit_subprocess
 			cpulimit_subprocess_pid["$process_pid"]=''
 			cpulimit_subprocesses_array=("${cpulimit_subprocesses_array_temp[@]}")
-			unset cpulimit_subprocesses_array_temp
+			unset cpulimit_subprocess cpulimit_subprocesses_array_temp
 		fi
 	fi
 	# Run command on focus event if exists
