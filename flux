@@ -146,10 +146,11 @@ extract_process_info(){
 			fi
 		done < "/proc/$process_pid/status"
 		unset status_line
-		# Extract command of process, a bit complicated to avoid warning about zero bytes trying read file using subshell
-		IFS=$'\0' read -r -a process_command_array < "/proc/$process_pid/cmdline"
-		process_command="${process_command_array[*]}"
-		unset process_command_array IFS
+		# I did not get how to do that using built-in bash options
+		# Extract command of process and replace '\0' (used as separator between options) with spaces
+		process_command="$(cat "/proc/$process_pid/cmdline" | tr '\0' ' ')"
+		# Remove last space since '\0' is a last symbol too
+		process_command="${process_command/%\ /}"
 	else
 		process_pid=''
 		return 1
@@ -287,7 +288,7 @@ unfocus = ; optional, put command here or remove this line
 			break
 		done < <(LC_ALL='C' bash --version)
 		echo "A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
-flux 1.2.3 (bash $bash_version)
+flux 1.2.4 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
