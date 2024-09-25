@@ -104,7 +104,7 @@ Since INI is not standartized, I should mention all supported features here.
 [SuperTux]
 name = supertux2
 executable = /usr/bin/supertux2
-command = /usr/bin/supertux2
+command = supertux2 --show-fps
 owner = 1000
 cpulimit = 0
 delay = 1
