@@ -55,7 +55,7 @@ Options and values:
     -H, --hot                            Apply actions to already unfocused windows before handling events
     -l, --lazy                           Avoid focus and unfocus commands on hot
     -q, --quiet                          Print errors and warnings only
-    -t, --template                       Print template for config by picking window (since v1.2)
+    -t, --template                       Print template for config by picking window
     -u, --usage                          Same as '--help'
     -v, --verbose                        Detailed output
     -V, --version                        Display release information
@@ -76,7 +76,7 @@ Available keys and description:
 | `delay` | Delay before applying CPU-limit, required for avoid freezing app on exit keeping zombie process or longer exiting than should be, which caused by interrupts from 'cpulimit' subprocess. |
 | `focus` | Command to execute on focus event, command runs via bash and won't be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
 | `unfocus` | Command to execute on unfocus event, command runs via bash and won't be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
-| `command` | Command of process, gets from `/proc/<PID>/cmdline`, required if neither `name` nor `executable` is specified. (since `v1.1`) |
+| `command` | Command of process, gets from `/proc/<PID>/cmdline`, required if neither `name` nor `executable` is specified. |
 
 #### Config path
 - Daemon searches for following configuration files by priority:
@@ -134,7 +134,7 @@ Flux does not support environment variables, but passes them to commands in 'foc
 | `FLUX_PROCESS_NAME` | Process name of focused window |
 | `FLUX_PROCESS_EXECUTABLE` | Path to process binary |
 | `FLUX_PROCESS_OWNER` | UID of process |
-| `FLUX_PROCESS_COMMAND` | Command of process (since `v1.1`) |
+| `FLUX_PROCESS_COMMAND` | Command of process |
 
 Daemon passes absolutely same values for both 'focus' and 'unfocus' keys.
 
