@@ -23,24 +23,11 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
   - [What about Wayland support?](#what-about-wayland-support)
  
 ### Dependencies
-Developed and tested on Arch Linux, all dependencies below related to that and based on distros.
-- bash (tested with 5.2.032)
-- util-linux (tested with 2.40.2)
-  - kill
-- procps-ng (tested with 4.0.4)
-  - pkill
-- cpulimit (tested with 1:0.2)
-  - cpulimit
-- coreutils (tested with 9.5)
-  - nohup
-  - readlink
-  - sleep
-  - cat
-  - tr
-- xorg-xprop (tested with 1.2.7)
-  - xprop
-- xorg-xwininfo (tested with 1.1.6)
-  - xwininfo
+- Arch Linux and based on it distros:
+
+  `bash util-linux procps-ng cpulimit coreutils xorg-xprop xorg-xwininfo`
+  
+Dependencies for other distros will be added soon.
 
 ### Installation
 This daemon was developed with portability in mind, so all code has been placed in one file.
