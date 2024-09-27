@@ -1,14 +1,5 @@
 #!/usr/bin/bash
 
-# Use built-in 'read -t <seconds>' instead of external '/usr/bin/sleep <seconds>' to minimize usage of external tools
-# Also this method is more accurate and faster since we are not spending time on call external binary, which should load its libs etc.
-# Except that, '/usr/bin/sleep' spawns separate process with its own PID while 'read' does not and everything happens directly in bash
-# If you want to use external '/usr/bin/sleep' binary, just comment function out
-sleep(){
-	read -t "$1"
-	return 0
-}
-
 # Print error (redirect to stderr)
 print_error(){
 	echo -e "$@" >&2
@@ -33,32 +24,6 @@ option_repeat_check(){
 	if [[ -n "${!1}" ]]; then
 		print_error "$error_prefix Option '$2' is repeated!$advice_on_option_error"
 		exit 1
-	fi
-}
-
-# Refresh PIDs in arrays containing frozen processes and cpulimit subprocesses by removing terminated PIDs
-refresh_pids(){
-	# Remove terminated PIDs from array containing frozen PIDs
-	if [[ -n "${frozen_processes_array[*]}" ]]; then
-		for frozen_process in "${frozen_processes_array[@]}"; do
-			if [[ -d "/proc/$frozen_process" ]]; then
-				frozen_processes_array_temp+=("$frozen_process")
-			fi
-		done
-		unset frozen_process
-		frozen_processes_array=("${frozen_processes_array_temp[@]}")
-		unset frozen_processes_array_temp
-	fi
-	# Remove terminated PIDs from array containing cpulimit subprocesses
-	if [[ -n "${cpulimit_subprocesses_array[*]}" ]]; then
-		for cpulimit_subprocess in "${cpulimit_subprocesses_array[@]}"; do
-			if [[ -d "/proc/$cpulimit_subprocess" ]]; then
-				cpulimit_subprocesses_array_temp+=("$cpulimit_subprocess")
-			fi
-		done
-		unset cpulimit_subprocess
-		cpulimit_subprocesses_array=("${cpulimit_subprocesses_array_temp[@]}")
-		unset cpulimit_subprocesses_array_temp
 	fi
 }
 
@@ -97,7 +62,7 @@ xprop_event_reader(){
 			continue
 		else
 			# Do not print bad events, workaround required for some buggy WMs
-			if [[ "$window_id" != '0x0' ]]; then
+			if [[ "$window_id" =~ ^0x[0-9a-fA-F]{7}$ ]]; then
 				echo "$window_id"
 				# Remember ID to compare it with new one, if ID is exactly the same, then event will be skipped
 				previous_window_id="$window_id"
@@ -157,10 +122,38 @@ extract_process_info(){
 	fi
 }
 
+# Change FPS-limit in specified MangoHud config
+mangohud_fps_set(){
+	local config_line config_content config_path="$1" fps_limit="$2" fps_limit_changed
+	# Replace 'fps_limit' value in config if exists
+	while read -r config_line || [[ -n "$config_line" ]]; do
+		# Find 'fps_limit' line
+		if [[ "$config_line" == 'fps_limit='* ]]; then
+			# Set specified FPS-limit
+			if [[ -n "$config_content" ]]; then
+				config_content="$config_content\nfps_limit=$fps_limit"
+			else
+				config_content="$fps_limit=$fps_limit"
+			fi
+			fps_limit_changed='1'
+		else
+			if [[ -n "$config_content" ]]; then
+				config_content="$config_content\n$config_line"
+			else
+				config_content="$config_line"
+			fi
+		fi
+	done < "$config_path"
+	# Add 'fps_limit' line to config if it does not exist, i.e. was not found and changed
+	if [[ -z "$fps_limit_changed" ]]; then
+		echo "fps_limit=$fps_limit" >> "$config_path"
+	else
+		echo -e "$config_content" > "$config_path"
+	fi
+}
+
 # Actions on TERM and INT signals
 exit_on_term(){
-	# Refresh PIDs in arrays containing frozen processes and cpulimit subprocesses by removing terminated PIDs
-	refresh_pids
 	# Unfreeze processes
 	for frozen_process in "${frozen_processes_array[@]}"; do
 		if ! kill -CONT "$frozen_process" > /dev/null 2>&1; then
@@ -174,8 +167,13 @@ exit_on_term(){
 		if ! pkill -P "$cpulimit_subprocess" > /dev/null 2>&1; then
 			print_error "$warn_prefix Cannot stop 'cpulimit' subprocess with PID $cpulimit_subprocess!"
 		else
-			print_verbose "$verbose_prefix CPU-limit subprocess with PID '$cpulimit_subprocess' has been killed."
+			print_verbose "$verbose_prefix CPU-limit subprocess with PID $cpulimit_subprocess has been terminated."
 		fi
+	done
+	# Remove FPS-limits
+	for fps_limited in "${fps_limited_array[@]}"; do
+		mangohud_fps_set "${config_mangohud_config["$fps_limited"]}" "${config_mangohud_fps_unlimit["$fps_limited"]}"
+		print_verbose "$verbose_prefix Process with PID ${fps_limited_pid["$fps_limited"]} has been FPS-unlimited."
 	done
 	print_info "$info_prefix Terminated."
 	exit 0
@@ -191,7 +189,7 @@ verbose_prefix="[v]"
 warn_prefix="[!]"
 
 # Additional text for errors related to option parsing
-advice_on_option_error="\n$info_prefix Try '$0 --help' for more information."
+advice_on_option_error="\n$info_prefix Try 'flux --help' for more information."
 
 # Read options
 while (( $# > 0 )); do
@@ -263,10 +261,13 @@ name = $process_name
 executable = $process_executable
 command = $process_command
 owner = $process_owner
-cpulimit = -1 ; default value, you can change CPU-limit or remove this line
-delay = 0 ; default value, you can change delay or remove this line
-focus = ; optinal, put command here or remove this line
-unfocus = ; optional, put command here or remove this line
+cpulimit = -1
+mangohud-config = ''
+mangohud-fps-limit = ''
+mangohud-fps-unlimit = 0
+delay = 0
+focus = ''
+unfocus = ''
 "
 			exit 0
 		else
@@ -280,7 +281,7 @@ unfocus = ; optional, put command here or remove this line
 		shift 1
 	;;
 	--version | -V )
-		# Get Bash version from output, because variable "$BASH_VERSION" could be overwritten because it is not read-only
+		# Get Bash version from output, because variable "$BASH_VERSION" could be overwritten because it is not protected from writing
 		while read -r bash_version_line; do
 			# Remove 'GNU bash, version ' from line
 			bash_version="${bash_version_line/GNU bash, version /}"
@@ -288,7 +289,7 @@ unfocus = ; optional, put command here or remove this line
 			break
 		done < <(LC_ALL='C' bash --version)
 		echo "A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
-flux 1.2.4 (bash $bash_version)
+flux 1.3 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
@@ -298,7 +299,7 @@ There is NO WARRANTY, to the extent permitted by law.
 	;;
 	* )
 		# Regexp means 2+ symbols after hyphen (combined short options)
-		if [[ "$1" =~ ^-([A-Z]|[a-z]|[0-9]|.){2,}+$ ]]; then
+		if [[ "$1" =~ ^-.{2,}$ ]]; then
 			# Split combined option and add result to array
 			for (( i = 0; i < ${#1} ; i++ )); do
 				options+=("-${1:i:1}")
@@ -359,7 +360,17 @@ max_cpulimit="$(( cpu_threads * 100 ))"
 unset cpu_threads cpuinfo_line
 
 # Create associative arrays to store values from config
-declare -A config_name config_executable config_owner config_cpulimit config_delay config_focus config_unfocus config_command
+declare -A config_name \
+config_executable \
+config_owner \
+config_cpulimit \
+config_delay \
+config_focus \
+config_unfocus \
+config_command \
+config_mangohud_config \
+config_mangohud_fps_limit \
+config_mangohud_fps_unlimit
 
 # INI parser
 while read -r config_line || [[ -n "$config_line" ]]; do
@@ -390,7 +401,7 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 		continue
 	fi
 	# Exit with an error if type of line cannot be defined
-	if [[ "${config_line,,}" =~ ^(name|executable|owner|cpulimit|delay|focus|unfocus|command)(\ )?=(\ )?.* ]]; then
+	if [[ "${config_line,,}" =~ ^(name|executable|owner|cpulimit|delay|focus|unfocus|command|mangohud-config|mangohud-fps-limit|mangohud-fps-unlimit)(\ )?=(\ )?.* ]]; then
 		# Extract value from key by removing key and equal symbol
 		if [[ "$config_line" == *'= '* ]]; then
 			value="${config_line/*= /}" # <-
@@ -460,6 +471,32 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 		;;
 		command* )
 			config_command["$section"]="$value"
+		;;
+		mangohud-config* )
+			# Exit with an error if specified MangoHud config file does not exist
+			if [[ -f "$value" ]]; then
+				config_mangohud_config["$section"]="$value"
+			else
+				print_error "$error_prefix Config file specified in key 'mangohud-config' in section '$section' does not exist!"
+				exit 1
+			fi
+		;;
+		mangohud-fps-limit* )
+			# Exit with an error if value is not integer
+			if [[ "$value" =~ ^[0-9]+$ ]]; then
+				config_mangohud_fps_limit["$section"]="$value"
+			else
+				print_error "$error_prefix FPS specified in key 'mangohud-fps-limit' in section '$section' is not integer!"
+				exit 1
+			fi
+		;;
+		mangohud-fps-unlimit* )
+			if [[ "$value" =~ ^[0-9]+$ ]]; then
+				config_mangohud_fps_unlimit["$section"]="$value"
+			else
+				print_error "$error_prefix FPS specified in key 'mangohud-fps-unlimit' in section '$section' is not integer!"
+				exit 1
+			fi
 		esac
 	else
 		print_error "$error_prefix Cannot define type of line '$config_line'!"
@@ -475,6 +512,30 @@ for section_from_array in "${sections_array[@]}"; do
 		print_error "$error_prefix At least one process identifier required in section '$section_from_array'!"
 		exit 1
 	fi
+	# Exit with an error if MangoHud FPS-limit is not specified along with config path (for the fuck should I know which config should be modified then?)
+	if [[ -n "${config_mangohud_fps_limit["$section_from_array"]}" && -z "${config_mangohud_config["$section_from_array"]}" ]]; then
+		print_error "$error_prefix FPS-limit in key 'mangohud-fps-limit' in section '$section_from_array' is specified without path to MangoHud config!"
+		exit 1
+	fi
+	# Exit with an error if MangoHud FPS-limit is specified along with CPU-limit
+	if [[ -n "${config_mangohud_fps_limit["$section_from_array"]}" && -n "${config_cpulimit["$section_from_array"]}" ]]; then
+		print_error "$error_prefix Do not use FPS-limit along with CPU-limit in section '$section_from_array'!"
+		exit 1
+	fi
+	# Exit with an error if 'mangohud-fps-unlimit' is specified without 'mangohud-fps-limit'
+	if [[ -n "${config_mangohud_fps_unlimit["$section_from_array"]}" && -z "${config_mangohud_fps_limit["$section_from_array"]}" ]]; then
+		print_error "$error_prefix Do not use 'mangohud-fps-unlimit' key without 'mangohud-fps-limit' key in section '$section_from_array'!"
+		exit 1
+	fi
+	# Exit with an error if 'mangohud-config' is specified without 'mangohud-fps-limit'
+	if [[ -n "${config_mangohud_config["$section_from_array"]}" && -z "${config_mangohud_fps_limit["$section_from_array"]}" ]]; then
+		print_error "$error_prefix Do not use 'mangohud-config' key without 'mangohud-fps-limit' key in section '$section_from_array'!"
+		exit 1
+	fi
+	# Set 'mangohud-fps-unlimit' to '0' (none) if it is not specified
+	if [[ -n "${config_mangohud_fps_limit["$section_from_array"]}" && -z "${config_mangohud_fps_unlimit["$section_from_array"]}" ]]; then
+		config_mangohud_fps_unlimit["$section_from_array"]=0
+	fi
 	# Set CPU-limit to '-1' (none) if it is not specified
 	if [[ -z "${config_cpulimit["$section_from_array"]}" ]]; then
 		config_cpulimit["$section_from_array"]='-1'
@@ -486,11 +547,14 @@ for section_from_array in "${sections_array[@]}"; do
 done
 unset section_from_array
 
-# Declare associative arrays for frozen processes and subprocesses to freeze with delay
-declare -A is_frozen freeze_subrocess_pid
-
-# Declare associative arrays for CPU-limited processes and cpulimit subprocesses
-declare -A is_cpulimited cpulimit_subprocess_pid
+# Declare associative arrays
+declare -A is_frozen # For marking frozen processes (PIDs)
+declare -A freeze_subrocess_pid # For subprocesses to freeze with delay
+declare -A is_cpulimited # For marking CPU-limited processes (PIDs)
+declare -A cpulimit_subprocess_pid # For cpulimit subprocesses
+declare -A is_fps_limited # For marking FPS-limited processes (sections)
+declare -A fps_limit_subprocess_pid # For subprocesses to apply FPS-limit with delay
+declare -A fps_limited_pid # To print PID of process in case daemon exit
 
 # Dumbass protection, exit with an error if that is not a X11 session
 if [[ "$XDG_SESSION_TYPE" != 'x11' ]]; then
@@ -509,8 +573,6 @@ while read -r window_id; do
 		unset hot
 		continue
 	fi
-	# Refresh PIDs in arrays containing frozen processes and cpulimit subprocesses by removing terminated PIDs
-	refresh_pids
 	# Run command on unfocus event for previous window if specified
 	if [[ -n "$previous_section_match" && -n "${config_unfocus["$previous_section_match"]}" && -z "$lazy" ]]; then
 		# Required to avoid running unfocus command when new event appears after previous matching one when '--hot' option is used along with '--lazy'
@@ -580,6 +642,8 @@ while read -r window_id; do
 				if [[ -z "${is_frozen["$previous_process_pid"]}" ]]; then
 					# Mark process as frozen
 					is_frozen["$previous_process_pid"]='1'
+					# Save PID to array to unfreeze process in case daemon interruption
+					frozen_processes_array+=("$previous_process_pid")
 					(	
 						# Freeze process with delay if specified, otherwise freeze process immediately
 						if [[ "${config_delay["$previous_section_match"]}" != '0' ]]; then
@@ -597,8 +661,6 @@ while read -r window_id; do
 							print_error "$warn_prefix Process '$previous_process_name' with PID $previous_process_pid has been terminated before freezing!"
 						fi
 					) &
-					# Save PID to array to unfreeze process in case daemon interruption
-					frozen_processes_array+=("$previous_process_pid")
 					# Save PID of subprocess to interrupt it in case focus event appears earlier than delay ends
 					freeze_subrocess_pid["$previous_process_pid"]="$!"
 				fi
@@ -608,14 +670,12 @@ while read -r window_id; do
 					# Mark process as CPU-limited
 					is_cpulimited["$previous_process_pid"]='1'
 					# Run cpulimit subprocess
-					if [[ "${config_delay["$previous_section_match"]}" != '0' ]]; then
-						print_verbose "$verbose_prefix Process '$previous_process_name' with PID $previous_process_pid will be CPU-limited after ${config_delay["$previous_section_match"]} second(s) on unfocus event."
-					fi
 					(
-						# Ignore SIGTERM signal to avoid killing parent subprocess while keeping child process which cpulimit is, that should be processed with 'exit_on_term' function via trap in beginning of code
+						# Ignore SIGTERM signal to avoid termination of parent subprocess while keeping child process which cpulimit is, that should be processed with 'exit_on_term' function via trap in beginning of code
 						trap '' SIGTERM
 						# Wait in case delay is specified
 						if [[ "${config_delay["$previous_section_match"]}" != '0' ]]; then
+							print_verbose "$verbose_prefix Process '$previous_process_name' with PID $previous_process_pid will be CPU-limited after ${config_delay["$previous_section_match"]} second(s) on unfocus event."
 							sleep "${config_delay["$previous_section_match"]}"
 						fi
 						# Run cpulimit if target process still exists, otherwise throw warning
@@ -633,6 +693,31 @@ while read -r window_id; do
 					# Save PID of subprocess to interrupt it on focus event
 					cpulimit_subprocess_pid["$previous_process_pid"]="$!"
 				fi
+			elif [[ -n "$previous_section_match" && -n "${config_mangohud_fps_limit["$previous_section_match"]}" ]]; then # Check for existence of previous match and FPS-limit
+				# Apply FPS-limit if was not applied before
+				if [[ -z "${is_fps_limited["$previous_section_match"]}" ]]; then
+					# Mark process as FPS-limited
+					is_fps_limited["$previous_process_pid"]='1'
+					# Save matching section name of process to array to unset FPS-limits on daemon exit
+					fps_limited_array+=("$previous_section_match")
+					# Save PID to print it in case daemon exit
+					fps_limited_pid["$previous_section_match"]="$previous_process_pid"
+					# Set FPS-limit
+					(
+						# Wait in case delay is specified
+						if [[ "${config_delay["$previous_section_match"]}" != '0' ]]; then
+							print_verbose "$verbose_prefix Process '$previous_process_name' with PID $previous_process_pid will be FPS-limited after ${config_delay["$previous_section_match"]} second(s) on unfocus event."
+							sleep "${config_delay["$previous_section_match"]}"
+						fi
+						# Apply FPS-limit if target still exists, otherwise throw warning
+						if [[ -d "/proc/$previous_process_pid" ]]; then
+							print_info "$info_prefix Process '$previous_process_name' with PID $previous_process_pid has been FPS-limited to ${config_mangohud_fps_limit["$previous_section_match"]} FPS on unfocus event."
+							mangohud_fps_set "${config_mangohud_config["$previous_section_match"]}" "${config_mangohud_fps_limit["$previous_section_match"]}"
+						fi
+					) &
+					# Save PID of subprocess to interrupt it on focus event
+					fps_limit_subprocess_pid["$previous_process_pid"]="$!"
+				fi
 			fi
 		elif [[ -n "$previous_process_owner" ]]; then
 			print_error "$warn_prefix Cannot apply CPU-limit to process '$previous_process_name' with PID $previous_process_pid, UID of process - $previous_process_owner, UID of user - $UID!"
@@ -642,26 +727,24 @@ while read -r window_id; do
 	if [[ -n "$process_pid" ]]; then
 		# Unfreeze process if window is focused
 		if [[ -n "${is_frozen["$process_pid"]}" ]]; then
-			# Kill subprocess with delayed freeze command if exists
-			if [[ -n "${freeze_subrocess_pid["$process_pid"]}" ]]; then
-				# Do not kill subprocess if it does not exist anymore
-				if [[ -d "/proc/${freeze_subrocess_pid["$process_pid"]}" ]]; then
-					# Kill subprocess
-					if ! kill "${freeze_subrocess_pid["$process_pid"]}" > /dev/null 2>&1; then
-						print_error "$warn_prefix Cannot stop 'cpulimit' subprocess with PID '${freeze_subrocess_pid["$process_pid"]}'!"
-					else
-						print_info "$info_prefix Delayed for ${config_delay["$section_match"]} second(s) freezing of process '$process_name' with PID $process_pid was cancelled."
-					fi
+			# Do not terminate subprocess if it does not exist anymore
+			if [[ -d "/proc/${freeze_subrocess_pid["$process_pid"]}" ]]; then
+				# Terminate subprocess
+				if ! kill "${freeze_subrocess_pid["$process_pid"]}" > /dev/null 2>&1; then
+					print_error "$warn_prefix Cannot stop 'cpulimit' subprocess with PID '${freeze_subrocess_pid["$process_pid"]}'!"
+				else
+					print_info "$info_prefix Delayed for ${config_delay["$section_match"]} second(s) freezing of process '$process_name' with PID $process_pid has been cancelled."
 				fi
-				freeze_subrocess_pid["$process_pid"]=''
 			fi
+			freeze_subrocess_pid["$process_pid"]=''
 			# Unfreeze process
 			if ! kill -CONT "$process_pid" > /dev/null 2>&1; then
 				print_error "$warn_prefix Cannot unfreeze process '$process_name' with PID $process_pid!"
 			else
-				print_info "$info_prefix Process '$process_name' with PID $process_pid was unfrozen on focus event."
+				print_info "$info_prefix Process '$process_name' with PID $process_pid has been unfrozen on focus event."
 			fi
 			is_frozen["$process_pid"]=''
+			fps_limited_pid["$section_match"]=''
 			# Remove PID from array
 			for frozen_process in "${frozen_processes_array[@]}"; do
 				# Skip current PID since I want remove it from array
@@ -671,14 +754,15 @@ while read -r window_id; do
 			done
 			frozen_processes_array=("${frozen_processes_array_temp[@]}")
 			unset frozen_process frozen_processes_array_temp
-		elif [[ -n "${is_cpulimited["$process_pid"]}" ]]; then # Kill cpulimit subprocess if window is focused
+		elif [[ -n "${is_cpulimited["$process_pid"]}" ]]; then # Check for CPU-limit via 'cpulimit' subprocess
+			# Terminate 'cpulimit' subprocess
 			if ! pkill -P "${cpulimit_subprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
 				print_error "$warn_prefix Cannot stop 'cpulimit' subprocess with PID ${cpulimit_subprocess_pid["$process_pid"]}!"
 			else
-				print_info "$info_prefix Process '$process_name' with PID $process_pid was CPU unlimited on focus event."
+				print_info "$info_prefix Process '$process_name' with PID $process_pid has been CPU unlimited on focus event."
 			fi
 			is_cpulimited["$process_pid"]=''
-			# Remove PID of cpulimit subprocess from array
+			# Remove PID of 'cpulimit' subprocess from array
 			for cpulimit_subprocess in "${cpulimit_subprocesses_array[@]}"; do
 				# Skip interrupted subprocess since I want remove it from array
 				if [[ "$cpulimit_subprocess" != "${cpulimit_subprocess_pid["$process_pid"]}" ]]; then
@@ -688,6 +772,28 @@ while read -r window_id; do
 			cpulimit_subprocess_pid["$process_pid"]=''
 			cpulimit_subprocesses_array=("${cpulimit_subprocesses_array_temp[@]}")
 			unset cpulimit_subprocess cpulimit_subprocesses_array_temp
+		elif [[ -n "${is_fps_limited["$process_pid"]}" ]]; then
+			# Do not terminate FPS-limit subprocess if it does not exist anymore
+			if [[ -d "/proc/${fps_limit_subprocess_pid["$process_pid"]}" ]]; then
+				if ! kill "${fps_limit_subprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
+					print_error "$warn_prefix Cannot stop FPS-limit subprocess with PID ${fps_limit_subprocess_pid["$process_pid"]}!"
+				else
+					print_info "$info_prefix Delayed for ${config_delay["$section_match"]} second(s) FPS-limiting of process '$process_name' with PID $process_pid has been cancelled."
+				fi
+			fi
+			# Unset FPS-limit
+			print_info "$info_prefix Process '$process_name' with PID $process_pid has been FPS-unlimited on focus event."
+			mangohud_fps_set "${config_mangohud_config["$section_match"]}" "${config_mangohud_fps_unlimit["$section_match"]}"
+			is_fps_limited["$process_pid"]=''
+			# Remove section from from array
+			for fps_limited in "${fps_limited_array[@]}"; do
+				# Skip FPS-unlimited section since I want remove it from array
+				if [[ "$fps_limited" != "$section_match" ]]; then
+					fps_limited_array_temp+=("$fps_limited")
+				fi
+			done
+			fps_limited_array=("${fps_limited_array_temp[@]}")
+			unset fps_limited fps_limited_array_temp
 		fi
 	fi
 	# Run command on focus event if exists
