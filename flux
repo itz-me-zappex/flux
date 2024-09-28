@@ -156,18 +156,22 @@ mangohud_fps_set(){
 exit_on_term(){
 	# Unfreeze processes
 	for frozen_process in "${frozen_processes_array[@]}"; do
-		if ! kill -CONT "$frozen_process" > /dev/null 2>&1; then
-			print_error "$warn_prefix Cannot unfreeze process with PID $frozen_process!"
-		else
-			print_verbose "$verbose_prefix Process with PID $frozen_process has been unfrozen."
+		if [[ -d "/proc/$frozen_process" ]]; then
+			if ! kill -CONT "$frozen_process" > /dev/null 2>&1; then
+				print_error "$warn_prefix Cannot unfreeze process with PID $frozen_process!"
+			else
+				print_verbose "$verbose_prefix Process with PID $frozen_process has been unfrozen."
+			fi
 		fi
 	done
 	# Kill cpulimit subprocesses
 	for cpulimit_subprocess in "${cpulimit_subprocesses_array[@]}"; do
-		if ! pkill -P "$cpulimit_subprocess" > /dev/null 2>&1; then
-			print_error "$warn_prefix Cannot stop 'cpulimit' subprocess with PID $cpulimit_subprocess!"
-		else
-			print_verbose "$verbose_prefix CPU-limit subprocess with PID $cpulimit_subprocess has been terminated."
+		if [[ -d "/proc/$cpulimit_subprocess" ]]; then
+			if ! pkill -P "$cpulimit_subprocess" > /dev/null 2>&1; then
+				print_error "$warn_prefix Cannot stop 'cpulimit' subprocess with PID $cpulimit_subprocess!"
+			else
+				print_verbose "$verbose_prefix CPU-limit subprocess with PID $cpulimit_subprocess has been terminated."
+			fi
 		fi
 	done
 	# Remove FPS-limits
@@ -247,16 +251,17 @@ Options and values:
 	;;
 	--template | -t )
 		# Obtain window ID using xwininfo picker
-		while read -r xwininfo_output; do
-			if [[ "$xwininfo_output" == 'xwininfo: Window id: '* ]]; then
-				window_id="${xwininfo_output/*: /}"
-				window_id="${window_id/ */}"
-				break
-			fi
-		done < <(xwininfo)
-		# Extract process info
-		if extract_process_info; then
-			echo "[$process_name]
+		if xwininfo_output="$(xwininfo 2>/dev/null)"; then
+			while read -r xwininfo_output; do
+				if [[ "$xwininfo_output" == 'xwininfo: Window id: '* ]]; then
+					window_id="${xwininfo_output/*: /}"
+					window_id="${window_id/ */}"
+					break
+				fi
+			done <<< "$xwininfo_output"
+			# Extract process info
+			if extract_process_info; then
+				echo "[$process_name]
 name = $process_name
 executable = $process_executable
 command = $process_command
@@ -269,9 +274,13 @@ delay = 0
 focus = ''
 unfocus = ''
 "
-			exit 0
+				exit 0
+			else
+				print_error "$error_prefix Cannot create template for window with ID $window_id since it does not report its PID!"
+				exit 1
+			fi
 		else
-			print_error "$error_prefix Cannot create template for window with ID $window_id since it does not report its PID!"
+			print_error "$error_prefix Cannot grab cursor to pick a window!"
 			exit 1
 		fi
 	;;
@@ -289,7 +298,7 @@ unfocus = ''
 			break
 		done < <(LC_ALL='C' bash --version)
 		echo "A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
-flux 1.3 (bash $bash_version)
+flux 1.3.1 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
