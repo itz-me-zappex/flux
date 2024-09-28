@@ -25,7 +25,7 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
   - [Gamescope exists, Wayland becomes more popular. Are you not late by any chance?](#gamescope-exists-wayland-becomes-more-popular-are-you-not-late-by-any-chance)
   - [What about Wayland support?](#what-about-wayland-support)
   - [Why did you write it on Bash?](#why-did-you-write-it-on-bash)
-  - [Will that daemon reduce performance?](#will-that-daemon-reduce-performance)
+  - [Does that daemon reduce performance?](#does-that-daemon-reduce-performance)
  
 ### Dependencies
 - `Arch Linux` family:
