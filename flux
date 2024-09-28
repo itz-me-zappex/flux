@@ -125,30 +125,35 @@ extract_process_info(){
 # Change FPS-limit in specified MangoHud config
 mangohud_fps_set(){
 	local config_line config_content config_path="$1" fps_limit="$2" fps_limit_changed
-	# Replace 'fps_limit' value in config if exists
-	while read -r config_line || [[ -n "$config_line" ]]; do
-		# Find 'fps_limit' line
-		if [[ "$config_line" == 'fps_limit='* ]]; then
-			# Set specified FPS-limit
-			if [[ -n "$config_content" ]]; then
-				config_content="$config_content\nfps_limit=$fps_limit"
+	# Dumbass protection, check if config file exists before continue in case ball between chair and monitor removed it on fly
+	if [[ -f "$config_path" ]]; then
+		# Replace 'fps_limit' value in config if exists
+		while read -r config_line || [[ -n "$config_line" ]]; do
+			# Find 'fps_limit' line
+			if [[ "$config_line" == 'fps_limit='* ]]; then
+				# Set specified FPS-limit
+				if [[ -n "$config_content" ]]; then
+					config_content="$config_content\nfps_limit=$fps_limit"
+				else
+					config_content="$fps_limit=$fps_limit"
+				fi
+				fps_limit_changed='1'
 			else
-				config_content="$fps_limit=$fps_limit"
+				if [[ -n "$config_content" ]]; then
+					config_content="$config_content\n$config_line"
+				else
+					config_content="$config_line"
+				fi
 			fi
-			fps_limit_changed='1'
+		done < "$config_path"
+		# Add 'fps_limit' line to config if it does not exist, i.e. was not found and changed
+		if [[ -z "$fps_limit_changed" ]]; then
+			echo "fps_limit=$fps_limit" >> "$config_path"
 		else
-			if [[ -n "$config_content" ]]; then
-				config_content="$config_content\n$config_line"
-			else
-				config_content="$config_line"
-			fi
+			echo -e "$config_content" > "$config_path"
 		fi
-	done < "$config_path"
-	# Add 'fps_limit' line to config if it does not exist, i.e. was not found and changed
-	if [[ -z "$fps_limit_changed" ]]; then
-		echo "fps_limit=$fps_limit" >> "$config_path"
 	else
-		echo -e "$config_content" > "$config_path"
+		print_error "$warn_prefix Config file '$config_path' was not found!"
 	fi
 }
 
@@ -298,7 +303,7 @@ unfocus = ''
 			break
 		done < <(LC_ALL='C' bash --version)
 		echo "A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
-flux 1.3.1 (bash $bash_version)
+flux 1.3.2 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
