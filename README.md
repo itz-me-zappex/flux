@@ -29,6 +29,7 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
  
 ### Dependencies
 - `Arch Linux` family:
+
   `bash util-linux procps-ng cpulimit coreutils xorg-xprop xorg-xwininfo`
   
 Dependencies for other distros will be added soon.
