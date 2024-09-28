@@ -308,7 +308,7 @@ unfocus = ''
 			break
 		done < <(LC_ALL='C' bash --version)
 		echo "A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
-flux 1.3.3 (bash $bash_version)
+flux 1.3.4 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
@@ -364,7 +364,7 @@ fi
 
 # Exit with an error if config file is not found
 if [[ -z "$config" ]]; then
-	print_error "$error_prefix Config file was not found!$advice_on_option_error"
+	print_error "$error_prefix Config file is not found!$advice_on_option_error"
 	exit 1
 fi
 
@@ -399,7 +399,7 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 	fi
 	# Exit with an error if first line is not a section, otherwise remember section name
 	if [[ ! "$config_line" =~ ^\[.*\]$ && -z "$section" ]]; then
-		print_error "$error_prefix Initial section was not found in config '$config'!"
+		print_error "$error_prefix Initial section is not found in config '$config'!"
 		exit 1
 	elif [[ "$config_line" =~ ^\[.*\]$ ]]; then
 		if [[ -n "${sections_array[*]}" ]]; then
@@ -505,7 +505,7 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 			if [[ "$value" =~ ^[0-9]+$ ]]; then
 				config_mangohud_fps_limit["$section"]="$value"
 			else
-				print_error "$error_prefix FPS specified in key 'mangohud-fps-limit' in section '$section' is not integer!"
+				print_error "$error_prefix FPS specified in key 'mangohud-fps-limit' in section '$section' is not an integer!"
 				exit 1
 			fi
 		;;
@@ -513,7 +513,7 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 			if [[ "$value" =~ ^[0-9]+$ ]]; then
 				config_mangohud_fps_unlimit["$section"]="$value"
 			else
-				print_error "$error_prefix FPS specified in key 'mangohud-fps-unlimit' in section '$section' is not integer!"
+				print_error "$error_prefix FPS specified in key 'mangohud-fps-unlimit' in section '$section' is not an integer!"
 				exit 1
 			fi
 		esac
@@ -553,7 +553,7 @@ for section_from_array in "${sections_array[@]}"; do
 	fi
 	# Set 'mangohud-fps-unlimit' to '0' (none) if it is not specified
 	if [[ -n "${config_mangohud_fps_limit["$section_from_array"]}" && -z "${config_mangohud_fps_unlimit["$section_from_array"]}" ]]; then
-		config_mangohud_fps_unlimit["$section_from_array"]=0
+		config_mangohud_fps_unlimit["$section_from_array"]='0'
 	fi
 	# Set CPU-limit to '-1' (none) if it is not specified
 	if [[ -z "${config_cpulimit["$section_from_array"]}" ]]; then
@@ -577,7 +577,7 @@ declare -A fps_limited_pid # To print PID of process in case daemon exit
 
 # Dumbass protection, exit with an error if that is not a X11 session
 if [[ "$XDG_SESSION_TYPE" != 'x11' ]]; then
-	print_error "$error_prefix Flux was not meant for usage with anything but X11!"
+	print_error "$error_prefix Flux is not meant to use it with anything but X11!"
 	exit 1
 fi
 
@@ -586,7 +586,7 @@ while read -r window_id; do
 	# Unset '--lazy' option if event was passed, otherwise focus and unfocus commands will not work
 	if [[ "$window_id" == 'nolazy' ]]; then
 		unset lazy
-		lazy_was_unset='1'
+		lazy_is_unset='1'
 		continue
 	elif [[ "$window_id" == 'nohot' ]]; then # Unset '--hot' since it becomes useless from this moment
 		unset hot
@@ -595,14 +595,14 @@ while read -r window_id; do
 	# Run command on unfocus event for previous window if specified
 	if [[ -n "$previous_section_match" && -n "${config_unfocus["$previous_section_match"]}" && -z "$lazy" ]]; then
 		# Required to avoid running unfocus command when new event appears after previous matching one when '--hot' option is used along with '--lazy'
-		if [[ -z "$lazy_was_unset" ]]; then
+		if [[ -z "$lazy_is_unset" ]]; then
 			print_verbose "$verbose_prefix Running command on unfocus event '${config_unfocus["$previous_section_match"]}' from section '$previous_section_match'."
 			# Variables passthrough to interact with them using custom commands in 'unfocus' key
 			export_flux_variables "$previous_window_id" "$previous_process_pid" "$previous_process_name" "$previous_process_executable" "$previous_process_owner" "$previous_process_command"
 			nohup setsid bash -c "${config_unfocus["$previous_section_match"]}" > /dev/null 2>&1 &
 			unset_flux_variables
 		else
-			unset lazy_was_unset
+			unset lazy_is_unset
 		fi
 	fi
 	# Extract process info
