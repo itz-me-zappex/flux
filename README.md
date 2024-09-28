@@ -21,13 +21,27 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
   - [Can I apply FPS-limits instead of CPU-limits?](#can-i-apply-fps-limits-instead-of-cpu-limits)
   - [Gamescope exists, Wayland becomes more popular. Are you not late by any chance?](#gamescope-exists-wayland-becomes-more-popular-are-you-not-late-by-any-chance)
   - [What about Wayland support?](#what-about-wayland-support)
+  - [Why did you write it on Bash?](#why-did-you-write-it-on-bash)
  
 ### Dependencies
-- Arch Linux and based on it distros:
-
-  `bash util-linux procps-ng cpulimit coreutils xorg-xprop xorg-xwininfo`
-  
-Dependencies for other distros will be added soon.
+Developed and tested on Arch Linux, all dependencies below related to that and based on distros.
+- bash (tested with 5.2.032)
+- util-linux (tested with 2.40.2)
+  - kill
+- procps-ng (tested with 4.0.4)
+  - pkill
+- cpulimit (tested with 1:0.2)
+  - cpulimit
+- coreutils (tested with 9.5)
+  - nohup
+  - readlink
+  - sleep
+  - cat
+  - tr
+- xorg-xprop (tested with 1.2.7)
+  - xprop
+- xorg-xwininfo (tested with 1.1.6)
+  - xwininfo
 
 ### Installation
 This daemon was developed with portability in mind, so all code has been placed in one file.
@@ -161,3 +175,6 @@ Daemon passes absolutely same values for both 'focus' and 'unfocus' keys.
 
 ##### What about Wayland support?
 - That is impossible, there is no any unified way to read window focus events and extract PIDs from windows on Wayland.
+
+##### Why did you write it on Bash?
+- That is (scripting) language I know pretty good, despite a fact that Bash as all interpretators works slower than compilable languages, it still fits my needs almost perfectly.
