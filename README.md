@@ -169,7 +169,7 @@ Daemon passes absolutely same values for both 'focus' and 'unfocus' keys.
 - Long story short, try removing at least one line of code (that does not affect output, of course) and see what happens. That sounds easy - just apply a CPU-limit to a window when unfocused and remove it when focused, but that is a bit more complicated. Just check how much logic is used for that "easy" task. Also I used built-in stuff in bash like shell parameter expansions instead of 'sed', loops for reading text line-by-line with regexp in 'if' statements instead of 'grep' etc. to make code faster, calling external binaries consumes much more time and CPU resources than built-in options.
 
 ##### Can I apply FPS-limits instead of CPU-limits?
-- No, at least not directly. You can use MangoHud with game, then add commands to 'focus' and 'unfocus' keys to modify 'fps_limit' option in MangoHud config on fly using 'sed' tool. Since MangoHud reads config on fly, that works like a charm.
+- Since v1.3 using MangoHud.
 
 ##### Gamescope exists, Wayland becomes more popular. Are you not late by any chance?
 - Well, not everyone is ready to switch to Wayland, there are a lot of reasons exists. Gamescope does not work well on my Nvidia desktop and Intel laptop, and I can bet it does not work well for others either. Also, there are a lot of old Nvidia GPUs that do not support Wayland at all because of old drivers, what makes Gamescope completely useless for owners of these GPUs.
