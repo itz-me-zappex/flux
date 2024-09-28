@@ -22,6 +22,7 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
   - [Gamescope exists, Wayland becomes more popular. Are you not late by any chance?](#gamescope-exists-wayland-becomes-more-popular-are-you-not-late-by-any-chance)
   - [What about Wayland support?](#what-about-wayland-support)
   - [Why did you write it on Bash?](#why-did-you-write-it-on-bash)
+  - [Will that daemon reduce performance?](#will-that-daemon-reduce-performance)
  
 ### Dependencies
 Developed and tested on Arch Linux, all dependencies below related to that and based on distros.
@@ -156,7 +157,7 @@ Daemon passes absolutely same values for both 'focus' and 'unfocus' keys.
 - Nowadays, anti-cheats are pure garbage, developed by freaks without balls, and you can get banned even for a wrong click.
 
 ##### Why was that daemon developed?
-- Main task is to reduce CPU usage of games that have been minimized. Almost every engine fails to recognize that game is unfocused and continues to consume a lot of CPU and GPU resources, what can make system slow for other tasks like browsing stuff, transcoding video etc. or even unresponsive at all.
+- Main task is to reduce CPU usage of games that have been minimized. Almost every engine fails to recognize that game is unfocused and continues to consume a lot of CPU and GPU resources, what can make system slow for other tasks like browsing stuff, transcoding video etc. or even unresponsive at all. Imagine users with weak laptop who upgraded their RAM to maximum and suffer from a weak processor, now they can simply play a game and then minimize it if needed without carrying about CPU usage or battery level since process just will hang in RAM. There are a lot of situations and usecases for it.
 
 ##### Bugs?
 - Nothing is perfect in this world. Almost all bugs I encountered during development have been fixed or will be fixed soon. If you find a bug, open an issue. Known issues that cannot be fixed are:
@@ -178,3 +179,6 @@ Daemon passes absolutely same values for both 'focus' and 'unfocus' keys.
 
 ##### Why did you write it on Bash?
 - That is (scripting) language I know pretty good, despite a fact that Bash as all interpretators works slower than compilable languages, it still fits my needs almost perfectly.
+
+##### Will that daemon reduce performance?
+- Depends. It uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time, but it just chill out when you playing game or working in single window. Long story short, difference in performance and battery life should not be noticeable.
