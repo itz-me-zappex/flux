@@ -13,7 +13,10 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
 - [Variables](#variables)
 - [Possible questions](#possible-questions)
   - [Should I trust you and this utility?](#should-i-trust-you-and-this-utility)
+  - [Which DE or WM should I use for best compatibility?](#which-de-or-wm-should-i-use-for-best-compatibility)
+  - [Does it increase input lag and/or record my screen to detect window focus/unfocus events?](#does-it-increase-input-lag-and-or-record-my-screen-to-detect-window-focus-unfocus-events)
   - [Is it safe?](#is-it-safe)
+  - [Is not running commands on focus and unfocus makes system vulnerable?](#is-not-running-commands-on-focus-and-unfocus-makes-system-vulnerable)
   - [Can I get banned in a game because of this daemon?](#can-i-get-banned-in-a-game-because-of-this-daemon)
   - [Why was that daemon developed?](#why-was-that-daemon-developed)
   - [Bugs?](#bugs)
@@ -25,24 +28,10 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
   - [Will that daemon reduce performance?](#will-that-daemon-reduce-performance)
  
 ### Dependencies
-Developed and tested on Arch Linux, all dependencies below related to that and based on distros.
-- bash (tested with 5.2.032)
-- util-linux (tested with 2.40.2)
-  - kill
-- procps-ng (tested with 4.0.4)
-  - pkill
-- cpulimit (tested with 1:0.2)
-  - cpulimit
-- coreutils (tested with 9.5)
-  - nohup
-  - readlink
-  - sleep
-  - cat
-  - tr
-- xorg-xprop (tested with 1.2.7)
-  - xprop
-- xorg-xwininfo (tested with 1.1.6)
-  - xwininfo
+- `Arch Linux` family:
+  `bash util-linux procps-ng cpulimit coreutils xorg-xprop xorg-xwininfo`
+  
+Dependencies for other distros will be added soon.
 
 ### Installation
 This daemon was developed with portability in mind, so all code has been placed in one file.
@@ -150,8 +139,17 @@ Daemon passes absolutely same values for both 'focus' and 'unfocus' keys.
 ##### Should I trust you and this utility?
 - You can read entire code. If you are uncomfortable, feel free to avoid using it.
 
+##### Which DE or WM should I use for best compatibility?
+- Daemon compatible with all X11 window managers and desktop environments, since it relies on X11 event system.
+
+##### Does it increase input lag and/or record my screen to detect window focus/unfocus events?
+- No, all it does is read events from X11 related to window focus.
+
 ##### Is it safe?
-- Yes, all daemon does is read events from X11 related to window focus. Neither I nor daemon has access to your data.
+- Yes, read above. Neither I nor daemon has access to your data.
+
+##### Is not running commands on focus and unfocus makes system vulnerable?
+- Just put config file to `/etc/flux.ini` and make it read-only.
 
 ##### Can I get banned in a game because of this daemon?
 - Nowadays, anti-cheats are pure garbage, developed by freaks without balls, and you can get banned even for a wrong click.
