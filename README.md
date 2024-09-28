@@ -32,7 +32,7 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
 
   `bash util-linux procps-ng cpulimit coreutils xorg-xprop xorg-xwininfo mangohud lib32-mangohud`
 
-- `Debian` branch:
+- `Debian`/`Ubuntu` branch:
   
   `bash procps cpulimit coreutils x11-utils mangohud mangohud:i386`
 
