@@ -30,11 +30,13 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
 ### Dependencies
 - `Arch Linux` branch:
 
-  `bash util-linux procps-ng cpulimit coreutils xorg-xprop xorg-xwininfo mangohud lib32-mangohud`
+  Required: `bash util-linux procps-ng cpulimit coreutils xorg-xprop xorg-xwininfo`
+  Optional: `mangohud lib32-mangohud`
 
 - `Debian`/`Ubuntu` branch:
   
-  `bash procps cpulimit coreutils x11-utils mangohud mangohud:i386`
+  Required: `bash procps cpulimit coreutils x11-utils`
+  Optional: `mangohud mangohud:i386`
 
 Dependencies for other distros will be added soon.
 
