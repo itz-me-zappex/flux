@@ -14,7 +14,7 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
 - [Possible questions](#possible-questions)
   - [Should I trust you and this utility?](#should-i-trust-you-and-this-utility)
   - [Which DE or WM should I use for best compatibility?](#which-de-or-wm-should-i-use-for-best-compatibility)
-  - [Does it increase input lag and/or record my screen to detect window focus/unfocus events?](#does-it-increase-input-lag-and-or-record-my-screen-to-detect-window-focus-unfocus-events)
+  - [Does it increase input lag and/or record my screen to detect window focus/unfocus events?](#does-it-increase-input-lag-andor-record-my-screen-to-detect-window-focusunfocus-events)
   - [Is it safe?](#is-it-safe)
   - [Is not running commands on focus and unfocus makes system vulnerable?](#is-not-running-commands-on-focus-and-unfocus-makes-system-vulnerable)
   - [Can I get banned in a game because of this daemon?](#can-i-get-banned-in-a-game-because-of-this-daemon)
