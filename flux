@@ -53,22 +53,27 @@ xprop_event_reader(){
 	if [[ -n "$lazy" ]]; then
 		echo 'nolazy'
 	fi
-	# Read events from xprop and print IDs of windows
-	while read -r xprop_event; do
-		# Extract ID from line
-		window_id="${xprop_event/* \# /}"
-		# Skip cycle if window ID is exactly the same as previous one, workaround required for some buggy WMs
-		if [[ "$window_id" == "$previous_window_id" ]]; then
-			continue
-		else
-			# Do not print bad events, workaround required for some buggy WMs
-			if [[ "$window_id" =~ ^0x[0-9a-fA-F]{7}$ ]]; then
-				echo "$window_id"
-				# Remember ID to compare it with new one, if ID is exactly the same, then event will be skipped
-				previous_window_id="$window_id"
+	# Dumbass protection, restart event reading if 'xprop' process has been terminated by ball between chair and monitor
+	while true; do
+		# Read events from xprop and print IDs of windows
+		while read -r xprop_event; do
+			# Extract ID from line
+			window_id="${xprop_event/* \# /}"
+			# Skip cycle if window ID is exactly the same as previous one, workaround required for some buggy WMs
+			if [[ "$window_id" == "$previous_window_id" ]]; then
+				continue
+			else
+				# Do not print bad events, workaround required for some buggy WMs
+				if [[ "$window_id" =~ ^0x[0-9a-fA-F]{7}$ ]]; then
+					echo "$window_id"
+					# Remember ID to compare it with new one, if ID is exactly the same, then event will be skipped
+					previous_window_id="$window_id"
+				fi
 			fi
-		fi
-	done < <(xprop -root -spy _NET_ACTIVE_WINDOW)
+		done < <(xprop -root -spy _NET_ACTIVE_WINDOW)
+		# If event reading ends, that means 'xprop' process died, so I can easily print error without checking exit code
+		print_error "$warn_prefix Process 'xprop' required for reading X11 events restarted after termination by user!"
+	done
 }
 
 # Export variables for focus and unfocus commands
@@ -99,7 +104,7 @@ extract_process_info(){
 		# Extract UID of process
 		while read -r status_line; do
 			if [[ "$status_line" == 'Uid:'* ]]; then
-				column_count=0
+				column_count='0'
 				for status_column in $status_line; do
 					if (( column_count == 3 )); then
 						process_owner="$status_column"
@@ -113,7 +118,7 @@ extract_process_info(){
 		unset status_line
 		# I did not get how to do that using built-in bash options
 		# Extract command of process and replace '\0' (used as separator between options) with spaces
-		process_command="$(cat "/proc/$process_pid/cmdline" | tr '\0' ' ')"
+		process_command="$(tr '\0' ' ' < "/proc/$process_pid/cmdline")"
 		# Remove last space since '\0' is a last symbol too
 		process_command="${process_command/%\ /}"
 	else
@@ -206,7 +211,7 @@ while (( $# > 0 )); do
 	--config | -c | --config=* )
 		# Remember that option was passed in case if path was not specified
 		option_repeat_check config_option --config
-		config_option=1
+		config_option='1'
 		# Define option type (short, long or long+value) and remember specified path
 		case "$1" in
 		--config | -c )
@@ -241,17 +246,17 @@ Options and values:
 	;;
 	--hot | -H )
 		option_repeat_check hot --hot
-		hot=1
+		hot='1'
 		shift 1
 	;;
 	--lazy | -l )
 		option_repeat_check lazy --lazy
-		lazy=1
+		lazy='1'
 		shift 1
 	;;
 	--quiet | -q )
 		option_repeat_check quiet --quiet
-		quiet=1
+		quiet='1'
 		shift 1
 	;;
 	--template | -t )
@@ -291,7 +296,7 @@ unfocus = ''
 	;;
 	--verbose | -v )
 		option_repeat_check verbose --verbose
-		verbose=1
+		verbose='1'
 		shift 1
 	;;
 	--version | -V )
@@ -303,7 +308,7 @@ unfocus = ''
 			break
 		done < <(LC_ALL='C' bash --version)
 		echo "A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
-flux 1.3.2 (bash $bash_version)
+flux 1.3.3 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
@@ -581,7 +586,7 @@ while read -r window_id; do
 	# Unset '--lazy' option if event was passed, otherwise focus and unfocus commands will not work
 	if [[ "$window_id" == 'nolazy' ]]; then
 		unset lazy
-		lazy_was_unset=1
+		lazy_was_unset='1'
 		continue
 	elif [[ "$window_id" == 'nohot' ]]; then # Unset '--hot' since it becomes useless from this moment
 		unset hot
