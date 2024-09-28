@@ -166,7 +166,7 @@ Daemon passes absolutely same values for both 'focus' and 'unfocus' keys.
   - Stuttery audio in game if CPU-limit is very aggressive, since 'cpulimit' interrupts process, that should be expected.
 
 ##### Why is code so complicated?
-- Long story short, try removing at least one line of code (that does not affect output, of course) and see what happens. That sounds easy - just apply a CPU-limit to a window when unfocused and remove it when focused, but that is a bit more complicated. Just check how much logic is used for that "easy" task. Also I used built-in stuff in bash like shell parameter expansions instead of 'sed', loops for reading text line-by-line with regexp in 'if' statements instead of 'grep', 'read -t' instead of 'sleep' etc. to make code faster, calling external binaries consumes much more time and CPU resources than built-in options.
+- Long story short, try removing at least one line of code (that does not affect output, of course) and see what happens. That sounds easy - just apply a CPU-limit to a window when unfocused and remove it when focused, but that is a bit more complicated. Just check how much logic is used for that "easy" task. Also I used built-in stuff in bash like shell parameter expansions instead of 'sed', loops for reading text line-by-line with regexp in 'if' statements instead of 'grep' etc. to make code faster, calling external binaries consumes much more time and CPU resources than built-in options.
 
 ##### Can I apply FPS-limits instead of CPU-limits?
 - No, at least not directly. You can use MangoHud with game, then add commands to 'focus' and 'unfocus' keys to modify 'fps_limit' option in MangoHud config on fly using 'sed' tool. Since MangoHud reads config on fly, that works like a charm.
