@@ -181,4 +181,4 @@ Daemon passes absolutely same values for both 'focus' and 'unfocus' keys.
 - That is (scripting) language I know pretty good, despite a fact that Bash as all interpretators works slower than compilable languages, it still fits my needs almost perfectly.
 
 ##### Will that daemon reduce performance?
-- Depends. It uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time, but it just chill out when you playing game or working in single window. Long story short, difference in performance and battery life should not be noticeable.
+- Depends. It uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time, but it just chills out when you playing game or working in single window. Long story short, difference in performance and battery life should not be noticeable.
