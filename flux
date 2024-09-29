@@ -37,8 +37,8 @@ xprop_event_reader(){
 		stacking_windows_id="${stacking_windows_id/* \# /}"
 		stacking_windows_id="${stacking_windows_id//\,/}"
 		# Extract ID of focused window
-		focused_window="$(xprop -root _NET_ACTIVE_WINDOW)"
-		focused_window="${focused_window/* \# /}"
+		focused_window_id="$(xprop -root _NET_ACTIVE_WINDOW)"
+		focused_window_id="${focused_window_id/* \# /}"
 		# Print IDs of windows, but skip currently focused window
 		for stacking_window_id in $stacking_windows_id; do
 			if [[ "$stacking_window_id" != "$focused_window_id" ]]; then
@@ -97,30 +97,46 @@ extract_process_info(){
 	process_pid="$(xprop -id "$window_id" _NET_WM_PID)"
 	if [[ "$process_pid" != "_NET_WM_PID:  not found." ]]; then
 		process_pid="${process_pid/* = /}"
-		# Extract name of process
-		process_name="$(<"/proc/$process_pid/comm")"
-		# Extract executable path of process
-		process_executable="$(readlink "/proc/$process_pid/exe")"
-		# Extract UID of process
-		while read -r status_line; do
-			if [[ "$status_line" == 'Uid:'* ]]; then
-				column_count='0'
-				for status_column in $status_line; do
-					if (( column_count == 3 )); then
-						process_owner="$status_column"
-					else
-						column_count="$(( column_count + 1 ))"
-					fi
-				done
-				unset status_column column_count
-			fi
-		done < "/proc/$process_pid/status"
-		unset status_line
-		# I did not get how to do that using built-in bash options
-		# Extract command of process and replace '\0' (used as separator between options) with spaces
-		process_command="$(tr '\0' ' ' < "/proc/$process_pid/cmdline")"
-		# Remove last space since '\0' is a last symbol too
-		process_command="${process_command/%\ /}"
+		# Check if info about process exists in cache
+		if [[ -z "${cache_process_name["$process_pid"]}" ]]; then
+			# Extract name of process
+			process_name="$(<"/proc/$process_pid/comm")"
+			# Extract executable path of process
+			process_executable="$(readlink "/proc/$process_pid/exe")"
+			# Extract UID of process
+			while read -r status_line; do
+				if [[ "$status_line" == 'Uid:'* ]]; then
+					column_count='0'
+					for status_column in $status_line; do
+						if (( column_count == 3 )); then
+							process_owner="$status_column"
+						else
+							(( column_count++ ))
+						fi
+					done
+					unset status_column column_count
+				fi
+			done < "/proc/$process_pid/status"
+			unset status_line
+			# I did not get how to do that using built-in bash options
+			# Extract command of process and replace '\0' (used as separator between options) with spaces
+			process_command="$(tr '\0' ' ' < "/proc/$process_pid/cmdline")"
+			# Remove last space since '\0' is a last symbol too
+			process_command="${process_command/%\ /}"
+			# Add all variables to cache
+			cache_process_name["$process_pid"]="$process_name"
+			cache_process_executable["$process_pid"]="$process_pid"
+			cache_process_owner["$process_pid"]="$process_owner"
+			cache_process_command["$process_pid"]="$process_command"
+			# Save PID to array to make it easier to remove info from cache in case process does not exist
+			cached_pids_array+=("$process_pid")
+		else
+			# Set values from cache
+			process_name="${cache_process_name["$process_pid"]}"
+			process_executable="${cache_process_executable["$process_pid"]}"
+			process_owner="${cache_process_owner["$process_pid"]}"
+			process_command="${cache_process_command["$process_pid"]}"
+		fi
 	else
 		process_pid=''
 		return 1
@@ -276,11 +292,11 @@ name = $process_name
 executable = $process_executable
 command = $process_command
 owner = $process_owner
-cpulimit = -1
+cpu-limit = ''
 mangohud-config = ''
 mangohud-fps-limit = ''
-mangohud-fps-unlimit = 0
-delay = 0
+mangohud-fps-unlimit = ''
+delay = ''
 focus = ''
 unfocus = ''
 "
@@ -308,7 +324,7 @@ unfocus = ''
 			break
 		done < <(LC_ALL='C' bash --version)
 		echo "A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
-flux 1.3.6 (bash $bash_version)
+flux 1.4 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
@@ -372,17 +388,17 @@ fi
 cpu_threads='0'
 while read -r cpuinfo_line; do
 	if [[ "$cpuinfo_line" == 'processor'* ]]; then
-		cpu_threads="$(( cpu_threads + 1 ))"
+		(( cpu_threads++ ))
 	fi
 done < '/proc/cpuinfo'
-max_cpulimit="$(( cpu_threads * 100 ))"
+max_cpu_limit="$(( cpu_threads * 100 ))"
 unset cpu_threads cpuinfo_line
 
 # Create associative arrays to store values from config
 declare -A config_key_name \
 config_key_executable \
 config_key_owner \
-config_key_cpulimit \
+config_key_cpu_limit \
 config_key_delay \
 config_key_focus \
 config_key_unfocus \
@@ -420,7 +436,7 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 		continue
 	fi
 	# Exit with an error if type of line cannot be defined
-	if [[ "${config_line,,}" =~ ^(name|executable|owner|cpulimit|delay|focus|unfocus|command|mangohud-config|mangohud-fps-limit|mangohud-fps-unlimit)(\ )?=(\ )?.* ]]; then
+	if [[ "${config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|focus|unfocus|command|mangohud-config|mangohud-fps-limit|mangohud-fps-unlimit)(\ )?=(\ )?.* ]]; then
 		# Extract value from key by removing key and equal symbol
 		if [[ "$config_line" == *'= '* ]]; then
 			value="${config_line/*= /}" # <-
@@ -462,10 +478,10 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 				exit 1
 			fi
 		;;
-		cpulimit* )
+		cpu-limit* )
 			# Exit with an error if CPU-limit is specified incorrectly
-			if [[ "$value" =~ ^[0-9]+$ || "$value" == '-1' ]] && (( value <= max_cpulimit )); then
-				config_key_cpulimit["$section"]="$value"
+			if [[ "$value" =~ ^[0-9]+$ || "$value" == '-1' ]] && (( value <= max_cpu_limit )); then
+				config_key_cpu_limit["$section"]="$value"
 			else
 				print_error "$error_prefix Value '$value' in key 'cpulimit' in section '$section' is invalid!"
 				exit 1
@@ -537,7 +553,7 @@ for section_from_array in "${sections_array[@]}"; do
 		exit 1
 	fi
 	# Exit with an error if MangoHud FPS-limit is specified along with CPU-limit
-	if [[ -n "${config_key_mangohud_fps_limit["$section_from_array"]}" && -n "${config_key_cpulimit["$section_from_array"]}" ]]; then
+	if [[ -n "${config_key_mangohud_fps_limit["$section_from_array"]}" && -n "${config_key_cpu_limit["$section_from_array"]}" ]]; then
 		print_error "$error_prefix Do not use FPS-limit along with CPU-limit in section '$section_from_array'!"
 		exit 1
 	fi
@@ -556,8 +572,8 @@ for section_from_array in "${sections_array[@]}"; do
 		config_key_mangohud_fps_unlimit["$section_from_array"]='0'
 	fi
 	# Set CPU-limit to '-1' (none) if it is not specified
-	if [[ -z "${config_key_cpulimit["$section_from_array"]}" ]]; then
-		config_key_cpulimit["$section_from_array"]='-1'
+	if [[ -z "${config_key_cpu_limit["$section_from_array"]}" ]]; then
+		config_key_cpu_limit["$section_from_array"]='-1'
 	fi
 	# Set 'delay' to '0' if it is not specified
 	if [[ -z "${config_key_delay["$section_from_array"]}" ]]; then
@@ -566,7 +582,7 @@ for section_from_array in "${sections_array[@]}"; do
 done
 unset section_from_array
 
-# Declare associative arrays
+# Declare associative arrays to store info about applied actions
 declare -A is_frozen_pid # For marking frozen processes (PIDs)
 declare -A freeze_subrocess_pid # For subprocesses to freeze with delay
 declare -A is_cpu_limited_pid # For marking CPU-limited processes (PIDs)
@@ -575,11 +591,17 @@ declare -A is_fps_limited_section # For marking FPS-limited processes (sections)
 declare -A fps_limit_subprocess_pid # For subprocesses to apply FPS-limit with delay
 declare -A fps_limited_pid # To print PID of process in case daemon exit
 
+# Declare associative arrays to store info about windows to avoid obtaining it every time to speed up code and reduce CPU-usage
+declare -A cache_process_name cache_process_executable cache_process_owner cache_process_command
+
 # Dumbass protection, exit with an error if that is not a X11 session
 if [[ "$XDG_SESSION_TYPE" != 'x11' ]]; then
 	print_error "$error_prefix Flux is not meant to use it with anything but X11!"
 	exit 1
 fi
+
+# Set cycle counter to clean cache every 50th cycle to avoid memory leak
+cycle_counter='0'
 
 # Read IDs of windows and apply actions
 while read -r window_id; do
@@ -591,6 +613,48 @@ while read -r window_id; do
 	elif [[ "$window_id" == 'nohot' ]]; then # Unset '--hot' since it becomes useless from this moment
 		unset hot
 		continue
+	fi
+	# Increase count of cycles
+	if [[ -z "$hot" ]]; then
+		(( cycle_counter++ ))
+	fi
+	# Clean cache which stores info about processes every 50th cycle to avoid memory leak
+	if (( cycle_counter % 50 == 0 )); then
+		# Read PIDs from array
+		for cached_pid in "${cached_pids_array[@]}"; do
+			# Remove info about process if it does not exist anymore
+			if [[ ! -d "/proc/$cached_pid" ]]; then
+				print_verbose "$verbose_prefix Cache of process '${cache_process_name["$cached_pid"]}' with PID $cached_pid has been removed."
+				cache_process_name["$cached_pid"]=''
+				cache_process_executable["$cached_pid"]=''
+				cache_process_owner["$cached_pid"]=''
+				cache_process_command["$cached_pid"]=''
+				cached_pids_to_remove_array+=("$cached_pid")
+			fi
+		done
+		# Remove terminated PIDs from array
+		if [[ -n "${cached_pids_to_remove_array[*]}" ]]; then 
+			# Read array with PIDs
+			for cached_pid in "${cached_pids_array[@]}"; do
+				# Unset flag which responds for matching of PID I want remove from main array
+				unset found
+				# Read array with PIDs I want remove
+				for cached_pid_to_remove in "${cached_pids_to_remove_array[@]}"; do
+					# Mark PID as found if it matches
+					if [[ "$cached_pid" == "$cached_pid_to_remove" ]]; then
+						found='1'
+						break
+					fi
+				done
+				# Add PID to temporary array if it does not match
+				if [[ -z "$found" ]]; then
+					cached_pids_array_temp+=("$cached_pid")
+				fi
+			done
+			cached_pids_array=("${cached_pids_array_temp[@]}")
+			unset cached_pid cached_pid_to_remove cached_pids_array_temp cached_pids_to_remove_array
+		fi
+		print_info "$info_prefix Cache of process information has been cleaned up."
 	fi
 	# Run command on unfocus event for previous window if specified
 	if [[ -n "$previous_section_name" && -n "${config_key_unfocus["$previous_section_name"]}" && -z "$lazy" ]]; then
@@ -654,9 +718,9 @@ while read -r window_id; do
 	# Check if PID is not the same as previous one
 	if [[ "$process_pid" != "$previous_process_pid" ]]; then
 		# Avoid applying CPU-limit if owner does not have rights
-		if [[ -n "$previous_process_owner" && "$previous_process_owner" == "$UID" || "$UID" == '0' && "${config_key_cpulimit["$previous_section_name"]}" != '-1' ]]; then
+		if [[ -n "$previous_process_owner" && "$previous_process_owner" == "$UID" || "$UID" == '0' && "${config_key_cpu_limit["$previous_section_name"]}" != '-1' ]]; then
 			# Check for existence of previous match and if CPU-limit is set to 0
-			if [[ -n "$previous_section_name" && "${config_key_cpulimit["$previous_section_name"]}" == '0' ]]; then
+			if [[ -n "$previous_section_name" && "${config_key_cpu_limit["$previous_section_name"]}" == '0' ]]; then
 				# Freeze process if it has not been frozen
 				if [[ -z "${is_frozen_pid["$previous_process_pid"]}" ]]; then
 					# Mark process as frozen
@@ -683,7 +747,7 @@ while read -r window_id; do
 					# Save PID of subprocess to interrupt it in case focus event appears earlier than delay ends
 					freeze_subrocess_pid["$previous_process_pid"]="$!"
 				fi
-			elif [[ -n "$previous_section_name" ]] && (( "${config_key_cpulimit["$previous_section_name"]}" > 0 )); then # Check for existence of previous match and CPU-limit specified greater than 0
+			elif [[ -n "$previous_section_name" ]] && (( "${config_key_cpu_limit["$previous_section_name"]}" > 0 )); then # Check for existence of previous match and CPU-limit specified greater than 0
 				# Run cpulimit subprocess if CPU-limit has not been applied
 				if [[ -z "${is_cpu_limited_pid["$previous_process_pid"]}" ]]; then
 					# Mark process as CPU-limited
@@ -699,8 +763,8 @@ while read -r window_id; do
 						fi
 						# Run cpulimit if target process still exists, otherwise throw warning
 						if [[ -d "/proc/$previous_process_pid" ]]; then
-							print_info "$info_prefix Process '$previous_process_name' with PID $previous_process_pid has been CPU-limited to ${config_key_cpulimit["$previous_section_name"]}/$max_cpulimit on unfocus event."
-							if ! cpulimit --limit="${config_key_cpulimit["$previous_section_name"]}" --pid="$previous_process_pid" --lazy > /dev/null 2>&1; then
+							print_info "$info_prefix Process '$previous_process_name' with PID $previous_process_pid has been CPU-limited to ${config_key_cpu_limit["$previous_section_name"]}/$max_cpu_limit on unfocus event."
+							if ! cpulimit --limit="${config_key_cpu_limit["$previous_section_name"]}" --pid="$previous_process_pid" --lazy > /dev/null 2>&1; then
 								print_error "$warn_prefix Cannot apply CPU-limit to process '$previous_process_name' with PID $previous_process_pid, 'cpulimit' returned error!"
 							fi
 						else
