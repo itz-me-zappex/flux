@@ -308,7 +308,7 @@ unfocus = ''
 			break
 		done < <(LC_ALL='C' bash --version)
 		echo "A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
-flux 1.3.5 (bash $bash_version)
+flux 1.3.6 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
@@ -378,7 +378,7 @@ done < '/proc/cpuinfo'
 max_cpulimit="$(( cpu_threads * 100 ))"
 unset cpu_threads cpuinfo_line
 
-# Create associative arrays to store values from config TODO
+# Create associative arrays to store values from config
 declare -A config_key_name \
 config_key_executable \
 config_key_owner \
@@ -816,7 +816,7 @@ while read -r window_id; do
 		fi
 	fi
 	# Run command on focus event if exists
-	if [[ -n "$v" && -n "${config_key_focus["$section_name"]}" && -z "$lazy" ]]; then
+	if [[ -n "$section_name" && -n "${config_key_focus["$section_name"]}" && -z "$lazy" ]]; then
 		# Variables passthrough to interact with them using custom commands in 'focus' key
 		export_flux_variables "$window_id" "$process_pid" "$process_name" "$process_executable" "$process_owner" "$process_command"
 		nohup setsid bash -c "${config_key_focus["$section_name"]}" > /dev/null 2>&1 &
