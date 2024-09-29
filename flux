@@ -324,7 +324,7 @@ unfocus = ''
 			break
 		done < <(LC_ALL='C' bash --version)
 		echo "A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
-flux 1.4 (bash $bash_version)
+flux 1.4.1 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
@@ -619,7 +619,7 @@ while read -r window_id; do
 		(( cycle_counter++ ))
 	fi
 	# Clean cache which stores info about processes every 50th cycle to avoid memory leak
-	if (( cycle_counter % 50 == 0 )); then
+	if (( cycle_counter != 0 && cycle_counter % 50 == 0 )); then
 		# Read PIDs from array
 		for cached_pid in "${cached_pids_array[@]}"; do
 			# Remove info about process if it does not exist anymore
