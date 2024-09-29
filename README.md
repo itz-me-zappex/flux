@@ -72,8 +72,8 @@ Available keys and description:
 | `name` | Name of process, gets from `/proc/<PID>/comm`, required if neither `executable` nor `command` is specified. |
 | `executable` | Path to binary of process, gets by reading `/proc/<PID>/exe` symlink, required if neither `name` nor `command` is specified. |
 | `owner` | User ID of process, gets from `/proc/<PID>/status`. |
-| `cpulimit` | CPU-limit between 0 and CPU threads multiplied by 100 (i.e. 2 threads = 200, 8 = 800 etc.), defaults to -1 which means no CPU-limit. |
-| `delay` | Delay before applying CPU-limit, required for avoid freezing app on exit keeping zombie process or longer exiting than should be, which caused by interrupts from 'cpulimit' subprocess. |
+| `cpu-limit` | CPU-limit between 0 and CPU threads multiplied by 100 (i.e. 2 threads = 200, 8 = 800 etc.), defaults to -1 which means no CPU-limit. |
+| `delay` | Delay before applying CPU-limit, preferable to avoid freezing app on exit when windows closes but process still exists if `cpu-limit` equal to `0`, defaults to `0`. |
 | `focus` | Command to execute on focus event, command runs via bash and won't be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
 | `unfocus` | Command to execute on unfocus event, command runs via bash and won't be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
 | `command` | Command of process, gets from `/proc/<PID>/cmdline`, required if neither `name` nor `executable` is specified. |
@@ -109,7 +109,7 @@ name = GeometryDash.ex
 executable = /run/media/zappex/Samsung-EVO/Steam/steamapps/common/Proton 9.0 (Beta)/files/bin/wine64-preloader
 command = D:\Steam\steamapps\common\Geometry Dash\GeometryDash.exe
 owner = 1000
-;cpulimit = 0
+;cpu-limit = 0
 mangohud-config = /run/media/zappex/Samsung-EVO/Steam/steamapps/common/Geometry Dash/MangoHud.conf
 mangohud-fps-limit = 5
 mangohud-fps-unlimit = 0
@@ -120,7 +120,7 @@ unfocus = picom
 ; Short example
 [SuperTux]
 name = supertux2
-cpulimit = 0
+cpu-limit = 0
 delay = 1
 
 ; Do not apply limits, execute commands on events instead
@@ -169,8 +169,8 @@ Daemon passes absolutely same values for both 'focus' and 'unfocus' keys.
 ##### Bugs?
 - Nothing is perfect in this world. Almost all bugs I encountered during development have been fixed or will be fixed soon. If you find a bug, open an issue. Known issues that cannot be fixed are:
   - Inability to interact with "glxgears" and "vkcube" windows, as they do not report their PIDs.
-  - Freezing online games (setting 'cpulimit' to '0') causes disconnects from matches, so use less aggressive CPU-limit to allow game to send/receive packets.
-  - Stuttery audio in game if CPU-limit is very aggressive, since 'cpulimit' interrupts process, that should be expected.
+  - Freezing online games (setting 'cpu-limit' to '0') causes disconnects from matches, so use less aggressive CPU-limit to allow game to send/receive packets.
+  - Stuttery audio in game if CPU-limit is very aggressive, since 'cpulimit' tool interrupts process, that should be expected.
 
 ##### Why is code so complicated?
 - Long story short, try removing at least one line of code (that does not affect output, of course) and see what happens. That sounds easy - just apply a CPU-limit to a window when unfocused and remove it when focused, but that is a bit more complicated. Just check how much logic is used for that "easy" task. Also I used built-in stuff in bash like shell parameter expansions instead of 'sed', loops for reading text line-by-line with regexp in 'if' statements instead of 'grep' etc. to make code faster, calling external binaries consumes much more time and CPU resources than built-in options.
