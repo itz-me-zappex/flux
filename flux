@@ -45,7 +45,7 @@ xprop_event_reader(){
 				echo "$stacking_window_id"
 			fi
 		done
-		unset stacking_windows focused_window_id stacking_window_id
+		unset stacking_windows_id focused_window_id stacking_window_id
 		# Print event for unset '--hot' option since it becomes useless from this moment
 		echo 'nohot'
 	fi
@@ -324,7 +324,7 @@ unfocus = ''
 			break
 		done < <(LC_ALL='C' bash --version)
 		echo "A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
-flux 1.4.1 (bash $bash_version)
+flux 1.4.2 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
@@ -652,7 +652,7 @@ while read -r window_id; do
 				fi
 			done
 			cached_pids_array=("${cached_pids_array_temp[@]}")
-			unset cached_pid cached_pid_to_remove cached_pids_array_temp cached_pids_to_remove_array
+			unset cached_pid cached_pid_to_remove cached_pids_array_temp cached_pids_to_remove_array found
 		fi
 		print_info "$info_prefix Cache of process information has been cleaned up."
 	fi
@@ -829,14 +829,14 @@ while read -r window_id; do
 			is_frozen_pid["$process_pid"]=''
 			fps_limited_pid["$section_name"]=''
 			# Remove PID from array
-			for frozen_process in "${frozen_processes_pids_array[@]}"; do
+			for frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
 				# Skip current PID since I want remove it from array
-				if [[ "$frozen_process" != "$process_pid" ]]; then
-					frozen_processes_pids_array_temp+=("$frozen_process")
+				if [[ "$frozen_process_pid" != "$process_pid" ]]; then
+					frozen_processes_pids_array_temp+=("$frozen_process_pid")
 				fi
 			done
 			frozen_processes_pids_array=("${frozen_processes_pids_array_temp[@]}")
-			unset frozen_process frozen_processes_pids_array_temp
+			unset frozen_process_pid frozen_processes_pids_array_temp
 		elif [[ -n "${is_cpu_limited_pid["$process_pid"]}" ]]; then # Check for CPU-limit via 'cpulimit' subprocess
 			# Terminate 'cpulimit' subprocess
 			if ! pkill -P "${cpulimit_subprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
