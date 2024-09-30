@@ -103,17 +103,31 @@ Since INI is not standartized, I should mention all supported features here.
 
 #### Configuration example
 ```ini
-; Long example
+; Long example using FPS-limit
 [Geometry Dash]
 name = GeometryDash.ex
 executable = /run/media/zappex/Samsung-EVO/Steam/steamapps/common/Proton 9.0 (Beta)/files/bin/wine64-preloader
 command = D:\Steam\steamapps\common\Geometry Dash\GeometryDash.exe
 owner = 1000
-;cpu-limit = 0
-mangohud-config = /run/media/zappex/Samsung-EVO/Steam/steamapps/common/Geometry Dash/MangoHud.conf
+cpu-limit = -1
+mangohud-config = /home/zappex/.config/MangoHud/wine-GeometryDash.conf
 mangohud-fps-limit = 5
 mangohud-fps-unlimit = 0
 delay = 0
+focus = killall picom
+unfocus = picom
+
+; Long example using CPU-limit (freezing) with one second delay
+[Geometry Dash]
+name = GeometryDash.ex
+executable = /run/media/zappex/Samsung-EVO/Steam/steamapps/common/Proton 9.0 (Beta)/files/bin/wine64-preloader
+command = D:\Steam\steamapps\common\Geometry Dash\GeometryDash.exe
+owner = 1000
+cpu-limit = 0
+mangohud-config = ''
+mangohud-fps-limit = ''
+mangohud-fps-unlimit = ''
+delay = 1
 focus = killall picom
 unfocus = picom
 
