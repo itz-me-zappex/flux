@@ -11,6 +11,7 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
   - [Limitations](#limitations)
   - [Configuration example](#configuration-example)
 - [Variables](#variables)
+- [Tips and tricks](#tips-and-tricks)
 - [Possible questions](#possible-questions)
   - [Should I trust you and this utility?](#should-i-trust-you-and-this-utility)
   - [Which DE or WM should I use for best compatibility?](#which-de-or-wm-should-i-use-for-best-compatibility)
@@ -159,6 +160,22 @@ Flux does not support environment variables, but passes them to commands in 'foc
 | `FLUX_PROCESS_COMMAND` | Command of process |
 
 Daemon passes absolutely same values for both 'focus' and 'unfocus' keys.
+
+### Tips and tricks
+##### Keybinding to obtain template from focused window for config.
+- All you need is install `xclip` tool and bind this command: `$ flux --focus | xclip -selection clipboard`.
+Now you can easily grab templates from windows to use them in config by pasting content using `Ctrl+v`.
+
+##### Apply changes in config file.
+- Create shortcut for `$ killall flux ; flux --hot --lazy` command which restarts daemon and use it when you done config file editing.
+
+##### Improve performance of daemon.
+- Geeks only, casual users should not care about that. To do that, run daemon with `SCHED_BATCH` scheduling policy which is designed to improve performance of non-interactive tasks like daemons, timers, scripts etc.. To do that, use command like `$ chrt --batch 0 flux --hot --lazy`.
+
+##### Types of limits and which you should use.
+- FPS-limits recommended for online games and if you don't mind to use MangoHud, this method reduces resource consumption when game unfocused/minimized.
+- CPU-limits greater than zero recommended for online games in case you don't use MangoHud, but you should be ready to stuttery audio since 'cpulimit' tool interrupts process with `SIGSTOP` and `SIGCONT` signals.
+- CPU-limit equal to zero recommended for single player games, this method freezes game completely to make it just hang in RAM without using any CPU or GPU resources.
 
 ### Possible questions
 ##### Should I trust you and this utility?
