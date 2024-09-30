@@ -76,7 +76,7 @@ xprop_event_reader(){
 				fi
 			fi
 		done < <(xprop -root -spy _NET_ACTIVE_WINDOW)
-		# If event reading ends, that means 'xprop' process died, so I can easily print error without checking exit code
+		# If event reading ends, that means 'xprop' process died, so I can easily print warning without checking exit code
 		print_warn "Process 'xprop' required for reading X11 events restarted after termination by user!"
 	done
 }
@@ -189,9 +189,9 @@ exit_on_term(){
 	for frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
 		if [[ -d "/proc/$frozen_process_pid" ]]; then
 			if ! kill -CONT "$frozen_process_pid" > /dev/null 2>&1; then
-				print_warn "Cannot unfreeze process with PID $frozen_process_pid!"
+				print_warn "Cannot unfreeze process with PID $frozen_process_pid on daemon termination!"
 			else
-				print_verbose "Process with PID $frozen_process_pid has been unfrozen."
+				print_verbose "Process with PID $frozen_process_pid has been unfrozen on daemon termination."
 			fi
 		fi
 	done
@@ -199,18 +199,18 @@ exit_on_term(){
 	for cpulimit_subprocess_pid in "${cpulimit_subprocesses_pids_array[@]}"; do
 		if [[ -d "/proc/$cpulimit_subprocess_pid" ]]; then
 			if ! pkill -P "$cpulimit_subprocess_pid" > /dev/null 2>&1; then
-				print_warn "Cannot stop 'cpulimit' subprocess with PID $cpulimit_subprocess_pid!"
+				print_warn "Cannot stop 'cpulimit' subprocess with PID $cpulimit_subprocess_pid on daemon termination!"
 			else
-				print_verbose "CPU-limit subprocess with PID $cpulimit_subprocess_pid has been terminated."
+				print_verbose "CPU-limit subprocess with PID $cpulimit_subprocess_pid has been terminated on daemon termination."
 			fi
 		fi
 	done
 	# Remove FPS-limits
 	for fps_limited_section in "${fps_limited_sections_array[@]}"; do
 		mangohud_fps_set "${config_key_mangohud_config["$fps_limited_section"]}" "${config_key_mangohud_fps_unlimit["$fps_limited_section"]}"
-		print_verbose "Process with PID ${fps_limited_pid["$fps_limited_section"]} has been FPS-unlimited."
+		print_verbose "Process with PID ${fps_limited_pid["$fps_limited_section"]} has been FPS-unlimited on daemon termination."
 	done
-	print_info "Terminated."
+	print_info "Daemon terminated."
 	exit 0
 }
 
@@ -231,8 +231,8 @@ while (( $# > 0 )); do
 	case "$1" in
 	--config | -c | --config=* )
 		# Remember that option was passed in case if path was not specified
-		option_repeat_check config_option --config
-		config_option='1'
+		option_repeat_check config_is_passed --config
+		config_is_passed='1'
 		# Define option type (short, long or long+value) and remember specified path
 		case "$1" in
 		--config | -c )
@@ -327,7 +327,7 @@ unfocus = ''
 			break
 		done < <(LC_ALL='C' bash --version)
 		echo "A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
-flux 1.4.3 (bash $bash_version)
+flux 1.4.4 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
@@ -359,7 +359,7 @@ if [[ -n "$verbose" && -n "$quiet" ]]; then
 fi
 
 # Exit with an error if '--config' option is specified without a path to config file
-if [[ -n "$config_option" && -z "$config" ]]; then
+if [[ -n "$config_is_passed" && -z "$config" ]]; then
 	print_error "Option '--config' is specified without path to config file!$advice_on_option_error"
 fi
 
@@ -585,7 +585,7 @@ if [[ "$XDG_SESSION_TYPE" != 'x11' ]]; then
 	print_error "Flux is not meant to use it with anything but X11!"
 fi
 
-# Set cycle counter to clean cache every 50th cycle to avoid memory leak
+# Set cycle counter to zero, required to clean up cache per N cycles
 cycle_counter='0'
 
 # Read IDs of windows and apply actions
@@ -603,8 +603,8 @@ while read -r window_id; do
 	if [[ -z "$hot" ]]; then
 		(( cycle_counter++ ))
 	fi
-	# Clean cache which stores info about processes every 50th cycle to avoid memory leak
-	if (( cycle_counter != 0 && cycle_counter % 50 == 0 )); then
+	# Clean cache which stores info about processes every 1000th cycle to avoid memory leak
+	if (( cycle_counter != 0 && cycle_counter % 1000 == 0 )); then
 		# Read PIDs from array
 		for cached_pid in "${cached_pids_array[@]}"; do
 			# Remove info about process if it does not exist anymore
@@ -621,7 +621,7 @@ while read -r window_id; do
 		if [[ -n "${cached_pids_to_remove_array[*]}" ]]; then 
 			# Read array with PIDs
 			for cached_pid in "${cached_pids_array[@]}"; do
-				# Unset flag which responds for matching of PID I want remove from main array
+				# Unset flag which responds for matching of PID I want remove from main array to avoid false positive
 				unset found
 				# Read array with PIDs I want remove
 				for cached_pid_to_remove in "${cached_pids_to_remove_array[@]}"; do
@@ -765,7 +765,7 @@ while read -r window_id; do
 				# Apply FPS-limit if was not applied before
 				if [[ -z "${is_fps_limited_section["$previous_section_name"]}" ]]; then
 					# Mark process as FPS-limited
-					is_fps_limited_section["$previous_process_pid"]='1'
+					is_fps_limited_section["$previous_section_name"]='1'
 					# Save matching section name of process to array to unset FPS-limits on daemon exit
 					fps_limited_sections_array+=("$previous_section_name")
 					# Save PID to print it in case daemon exit
@@ -840,7 +840,7 @@ while read -r window_id; do
 			cpulimit_subprocess_pid["$process_pid"]=''
 			cpulimit_subprocesses_pids_array=("${cpulimit_subprocesses_pids_array_temp[@]}")
 			unset cpulimit_subprocess cpulimit_subprocesses_pids_array_temp
-		elif [[ -n "${is_fps_limited_section["$process_pid"]}" ]]; then
+		elif [[ -n "$section_name" && -n "${is_fps_limited_section["$section_name"]}" ]]; then
 			# Do not terminate FPS-limit subprocess if it does not exist anymore
 			if [[ -d "/proc/${fps_limit_subprocess_pid["$process_pid"]}" ]]; then
 				if ! kill "${fps_limit_subprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
@@ -852,7 +852,7 @@ while read -r window_id; do
 			# Unset FPS-limit
 			print_info "Process '$process_name' with PID $process_pid has been FPS-unlimited on focus event."
 			mangohud_fps_set "${config_key_mangohud_config["$section_name"]}" "${config_key_mangohud_fps_unlimit["$section_name"]}"
-			is_fps_limited_section["$process_pid"]=''
+			is_fps_limited_section["$section_name"]=''
 			# Remove section from from array
 			for fps_limited_section in "${fps_limited_sections_array[@]}"; do
 				# Skip FPS-unlimited section since I want remove it from array
