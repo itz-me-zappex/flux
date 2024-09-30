@@ -50,12 +50,14 @@ All you need is just download [flux](https://github.com/itz-me-zappex/flux/blob/
 ```
 Usage: flux [option] <value>
 Options and values:
-    -c, --config     <path-to-config>    Specify path to config file
+    -c, --changelog                      Display changelog
+    -C, --config     <path-to-config>    Specify path to config file
+    -f, --focused                        Display template for config from focused window
     -h, --help                           Display this help
     -H, --hot                            Apply actions to already unfocused windows before handling events
     -l, --lazy                           Avoid focus and unfocus commands on hot
-    -q, --quiet                          Print errors and warnings only
-    -t, --template                       Print template for config by picking window
+    -p, --pick                           Display template for config by picking window
+    -q, --quiet                          Display errors and warnings only
     -u, --usage                          Same as '--help'
     -v, --verbose                        Detailed output
     -V, --version                        Display release information
@@ -77,9 +79,9 @@ Available keys and description:
 | `focus` | Command to execute on focus event, command runs via bash and won't be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
 | `unfocus` | Command to execute on unfocus event, command runs via bash and won't be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
 | `command` | Command of process, gets from `/proc/<PID>/cmdline`, required if neither `name` nor `executable` is specified. |
-| `mangohud-config` | Path to MangoHud config, required if you want change FPS-limits and requires `mangohud-fps-limit`. |
-| `mangohud-fps-limit` | FPS to set on unfocus, required by and requires `mangohud-config`. |
-| `mangohud-fps-unlimit` | FPS to set on focus, requires `mangohud-fps-limit`, defaults to `0` (i.e. full unlimit). |
+| `mangohud-config` | Path to MangoHud config, required if you want change FPS-limits and requires `fps-limit`. |
+| `fps-limit` | FPS to set on unfocus, required by and requires `mangohud-config`. |
+| `fps-unlimit` | FPS to set on focus, requires `fps-limit`, defaults to `0` (i.e. full unlimit). |
 
 #### Config path
 - Daemon searches for following configuration files by priority:
