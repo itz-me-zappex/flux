@@ -51,7 +51,7 @@ Dependencies for other distros will be added soon.
 This daemon was developed with portability in mind, so all code has been placed in one file.
 All you need is just download [flux](https://github.com/itz-me-zappex/flux/blob/main/flux) file, make it executable and put in place you want, but preferably put it somewhere in $PATH to avoid calling daemon with directly specified path every time.
 
-There is also [PKGBUILD](https://github.com/itz-me-zappex/flux/blob/main/PKGBUILD) for Arch Linux (based) distro(s).
+There is also [PKGBUILD](https://github.com/itz-me-zappex/flux/blob/main/PKGBUILD) for Arch Linux (based) distro(s). You can find PKGBUILD for every version in [Releases](https://github.com/itz-me-zappex/flux/releases) tab.
 
 ### Usage
 ```
