@@ -17,6 +17,7 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
   - [Improve performance of daemon](#improve-performance-of-daemon)
   - [Types of limits and which you should use](#types-of-limits-and-which-you-should-use)
 - [Possible questions](#possible-questions)
+  - [How does daemon work?](#how-does-daemon-work)
   - [Should I trust you and this utility?](#should-i-trust-you-and-this-utility)
   - [Which DE or WM should I use for best compatibility?](#which-de-or-wm-should-i-use-for-best-compatibility)
   - [Does it increase input lag and/or record my screen to detect window focus/unfocus events?](#does-it-increase-input-lag-andor-record-my-screen-to-detect-window-focusunfocus-events)
@@ -179,11 +180,14 @@ Now you can easily grab templates from windows to use them in config by pasting 
 - Geeks only, casual users should not care about that. To do that, run daemon with `SCHED_BATCH` scheduling policy which is designed to improve performance of non-interactive tasks like daemons, timers, scripts etc.. To do that, use command like `$ chrt --batch 0 flux --hot --lazy`.
 
 ##### Types of limits and which you should use
-- FPS-limits recommended for online games and if you do not mind to use MangoHud, this method reduces resource consumption when game unfocused/minimized.
-- CPU-limits greater than zero recommended for online games in case you do not use MangoHud, but you should be ready to stuttery audio since `cpulimit` tool interrupts process with `SIGSTOP` and `SIGCONT` signals.
-- CPU-limit equal to zero recommended for single player games, this method freezes game completely to make it just hang in RAM without using any CPU or GPU resources.
+- FPS-limits recommended for online and multiplayer games and if you do not mind to use MangoHud, this method reduces resource consumption when game unfocused/minimized.
+- CPU-limits greater than zero recommended for online and multiplayer games in case you do not use MangoHud, but you should be ready to stuttery audio since `cpulimit` tool interrupts process with `SIGSTOP` and `SIGCONT` signals.
+- CPU-limit equal to zero recommended for single player games or online games in offline mode, this method freezes game completely to make it just hang in RAM without using any CPU or GPU resources.
 
 ### Possible questions
+##### How does daemon work?
+- Daemon reads X11 events related to window focus, then it gets PID of process using window ID and uses it to collect info about process (process name, its executable path, command which is used and UID) to compare it with identifiers in config, when it finds window which matches with identifier(s) specified in specific section in config, it runs command from `focus` key (if specified), when you switching to another window - applies FPS or CPU-limit (if specified) and runs command from `unfocus` key (if specified). When window does not match with any section in config, nothing happens. To reduce CPU usage and speed up daemon a caching algorithm was implemented which stores info about windows into associative arrays, that allows to just collect info of process once, and then get that info from cache immediately after obtaining its PID when window appears focused again.
+
 ##### Should I trust you and this utility?
 - You can read entire code. If you are uncomfortable, feel free to avoid using it.
 
