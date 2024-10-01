@@ -37,7 +37,7 @@ xprop_event_reader(){
 	local stacking_windows_id focused_window_id stacking_window_id
 	# Exit with an error if xprop fails (like in case when it unable to open display)
 	if ! xprop -root > /dev/null 2>&1; then
-		print_error "Cannot start X11 event reading because 'xprop' exits with an error!"
+		print_error "Cannot start daemon because process 'xprop' required for reading X11 events exits with an error!"
 	fi
 	# Print window IDs of open windows to apply limits immediately if '--hot' option was passed
 	if [[ -n "$hot" ]]; then
@@ -64,8 +64,23 @@ xprop_event_reader(){
 	fi
 	# Dumbass protection, restart event reading if 'xprop' process has been terminated by ball between chair and monitor
 	while true; do
+		# Break loop if exit variable appears not blank
+		if [[ -n "$exit" ]]; then
+			break
+		fi
+		# Print warning in case loop was restarted
+		if [[ -n "$first_loop" ]]; then
+			print_warn "Process 'xprop' required for reading X11 events restarted after termination by user!"
+		else
+			first_loop='1'
+		fi
 		# Read events from xprop and print IDs of windows
 		while read -r xprop_event; do
+			# Print event for safe exit in case X server dies
+			if [[ "$xprop_event" =~ 'X connection to :'[0-9]+' broken (explicit kill or server shutdown).' ]]; then
+				echo 'exit'
+				exit='1'
+			fi
 			# Extract ID from line
 			window_id="${xprop_event/* \# /}"
 			# Skip cycle if window ID is exactly the same as previous one, workaround required for some buggy WMs
@@ -79,9 +94,7 @@ xprop_event_reader(){
 					previous_window_id="$window_id"
 				fi
 			fi
-		done < <(xprop -root -spy _NET_ACTIVE_WINDOW)
-		# If event reading ends, that means 'xprop' process died, so I can easily print warning without checking exit code
-		print_warn "Process 'xprop' required for reading X11 events restarted after termination by user!"
+		done < <(xprop -root -spy _NET_ACTIVE_WINDOW 2>&1)
 	done
 }
 
@@ -234,7 +247,14 @@ advice_on_option_error="\n$info_prefix Try 'flux --help' for more information."
 while (( $# > 0 )); do
 	case "$1" in
 	--changelog | -c )
-		echo 'Changelog for flux 1.5.1:
+		echo 'Changelog for flux 1.5.2:
+- Fixed issues with output of `--focus` and `--pick` options in some cases.
+- Added check for ability to obtain window ID before template creation.
+- Removed displaying of bash version in output of `--version` option because of its uselessness.
+- Fixed a bug when daemon attempts to restart `xprop` process infinitely when X server on current display dies.
+- Small fixes and improvements.
+
+Changelog for flux 1.5.1:
 - Added check for ability to read X11 events before start.
 
 Changelog for flux 1.5:
@@ -272,6 +292,10 @@ Changelog for flux 1.5:
 		esac
 	;;
 	--focus | -f | --pick | -p )
+		# Exit with an error if xprop unable to open display, I don't really care, both xprop and xwininfo will fail in this case
+		if ! xprop -root > /dev/null 2>&1; then
+			print_error "Cannot obtain process info because process 'xprop' or 'xwininfo' required to obtain window ID exits with an error!"
+		fi
 		# Select command depending by type of option
 		case "$1" in
 		--focus | -f )
@@ -297,18 +321,18 @@ Changelog for flux 1.5:
 		esac
 		# Extract process info
 		if extract_process_info; then
-			echo "[$process_name]
-name = $process_name
-executable = $process_executable
-command = $process_command
-owner = $process_owner
-cpu-limit = ''
-mangohud-config = ''
-fps-limit = ''
-fps-unlimit = ''
-delay = ''
-focus = ''
-unfocus = ''
+			echo "["$process_name"]
+name = "$process_name"
+executable = "$process_executable"
+command = "$process_command"
+owner = "$process_owner"
+cpu-limit = 
+mangohud-config = 
+fps-limit = 
+fps-unlimit = 
+delay = 
+focus = 
+unfocus = 
 "
 			exit 0
 		else
@@ -353,15 +377,8 @@ Options and values:
 		shift 1
 	;;
 	--version | -V )
-		# Get Bash version from output, because variable "$BASH_VERSION" could be overwritten because it is not protected from writing
-		while read -r bash_version_line; do
-			# Remove 'GNU bash, version ' from line
-			bash_version="${bash_version_line/GNU bash, version /}"
-			# I need only first line, so break cycle
-			break
-		done < <(LC_ALL='C' bash --version)
 		echo "A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
-flux 1.5.1 (bash $bash_version)
+flux 1.5.2
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
@@ -625,6 +642,11 @@ cycle_counter='0'
 
 # Read IDs of windows and apply actions
 while read -r window_id; do
+	# Exit in case X11 server termination
+	if [[ "$window_id" == 'exit' ]]; then
+		print_warn "X server on display '$DISPLAY' has been terminated!"
+		exit_on_term
+	fi
 	# Unset '--lazy' option if event was passed, otherwise focus and unfocus commands will not work
 	if [[ "$window_id" == 'nolazy' ]]; then
 		unset lazy
