@@ -35,6 +35,10 @@ option_repeat_check(){
 # Extract window IDs from xprop events
 xprop_event_reader(){
 	local stacking_windows_id focused_window_id stacking_window_id
+	# Exit with an error if xprop fails (like in case when it unable to open display)
+	if ! xprop -root > /dev/null 2>&1; then
+		print_error "Cannot start X11 event reading because 'xprop' exits with an error!"
+	fi
 	# Print window IDs of open windows to apply limits immediately if '--hot' option was passed
 	if [[ -n "$hot" ]]; then
 		# Extract IDs of open windows
@@ -230,7 +234,10 @@ advice_on_option_error="\n$info_prefix Try 'flux --help' for more information."
 while (( $# > 0 )); do
 	case "$1" in
 	--changelog | -c )
-		echo 'Changelog for flux 1.5:
+		echo 'Changelog for flux 1.5.1:
+- Added check for ability to read X11 events before start.
+
+Changelog for flux 1.5:
 - Added option `--focus` to create template for config from focused window, `--template` option is renamed to `--pick`.
 - Config keys `mangohud-fps-limit` and `mangohud-fps-unlimit` are renamed to `fps-limit` and `fps-unlimit` respectively.
 - Added `--changelog` option to display changelog.
@@ -354,7 +361,7 @@ Options and values:
 			break
 		done < <(LC_ALL='C' bash --version)
 		echo "A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
-flux 1.5 (bash $bash_version)
+flux 1.5.1 (bash $bash_version)
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
