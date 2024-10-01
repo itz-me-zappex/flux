@@ -83,8 +83,8 @@ Available keys and description:
 | `owner` | User ID of process, gets from `/proc/<PID>/status`. |
 | `cpu-limit` | CPU-limit between 0 and CPU threads multiplied by 100 (i.e. 2 threads = 200, 8 = 800 etc.), defaults to -1 which means no CPU-limit. |
 | `delay` | Delay before applying CPU-limit, preferable to avoid freezing app on exit when windows closes but process still exists if `cpu-limit` equal to `0`, defaults to `0`. |
-| `focus` | Command to execute on focus event, command runs via bash and won't be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
-| `unfocus` | Command to execute on unfocus event, command runs via bash and won't be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
+| `focus` | Command to execute on focus event, command runs via bash and will not be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
+| `unfocus` | Command to execute on unfocus event, command runs via bash and will not be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
 | `command` | Command of process, gets from `/proc/<PID>/cmdline`, required if neither `name` nor `executable` is specified. |
 | `mangohud-config` | Path to MangoHud config, required if you want change FPS-limits and requires `fps-limit`. |
 | `fps-limit` | FPS to set on unfocus, required by and requires `mangohud-config`. |
@@ -154,7 +154,7 @@ unfocus = picom
 ```
 
 ### Variables
-Flux does not support environment variables, but passes them to commands in 'focus' and 'unfocus' keys.
+Flux does not support environment variables, but passes them to commands in `focus` and `unfocus` keys.
 
 | Variable | Description |
 |----------|-------------|
@@ -165,7 +165,7 @@ Flux does not support environment variables, but passes them to commands in 'foc
 | `FLUX_PROCESS_OWNER` | UID of process |
 | `FLUX_PROCESS_COMMAND` | Command of process |
 
-Daemon passes absolutely same values for both 'focus' and 'unfocus' keys.
+Daemon passes absolutely same values for both `focus` and `unfocus` keys.
 
 ### Tips and tricks
 ##### Keybinding to obtain template from focused window for config
@@ -179,8 +179,8 @@ Now you can easily grab templates from windows to use them in config by pasting 
 - Geeks only, casual users should not care about that. To do that, run daemon with `SCHED_BATCH` scheduling policy which is designed to improve performance of non-interactive tasks like daemons, timers, scripts etc.. To do that, use command like `$ chrt --batch 0 flux --hot --lazy`.
 
 ##### Types of limits and which you should use
-- FPS-limits recommended for online games and if you don't mind to use MangoHud, this method reduces resource consumption when game unfocused/minimized.
-- CPU-limits greater than zero recommended for online games in case you don't use MangoHud, but you should be ready to stuttery audio since 'cpulimit' tool interrupts process with `SIGSTOP` and `SIGCONT` signals.
+- FPS-limits recommended for online games and if you do not mind to use MangoHud, this method reduces resource consumption when game unfocused/minimized.
+- CPU-limits greater than zero recommended for online games in case you do not use MangoHud, but you should be ready to stuttery audio since `cpulimit` tool interrupts process with `SIGSTOP` and `SIGCONT` signals.
 - CPU-limit equal to zero recommended for single player games, this method freezes game completely to make it just hang in RAM without using any CPU or GPU resources.
 
 ### Possible questions
@@ -208,11 +208,11 @@ Now you can easily grab templates from windows to use them in config by pasting 
 ##### Bugs?
 - Nothing is perfect in this world. Almost all bugs I encountered during development have been fixed or will be fixed soon. If you find a bug, open an issue. Known issues that cannot be fixed are:
   - Inability to interact with "glxgears" and "vkcube" windows, as they do not report their PIDs.
-  - Freezing online games (setting 'cpu-limit' to '0') causes disconnects from matches, so use less aggressive CPU-limit to allow game to send/receive packets.
-  - Stuttery audio in game if CPU-limit is very aggressive, since 'cpulimit' tool interrupts process, that should be expected.
+  - Freezing online games (setting `cpu-limit` to `0`) causes disconnects from matches, so use less aggressive CPU-limit to allow game to send/receive packets.
+  - Stuttery audio in game if CPU-limit is very aggressive, since `cpulimit` tool interrupts process, that should be expected.
 
 ##### Why is code so complicated?
-- Long story short, try removing at least one line of code (that does not affect output, of course) and see what happens. That sounds easy - just apply a CPU-limit to a window when unfocused and remove it when focused, but that is a bit more complicated. Just check how much logic is used for that "easy" task. Also I used built-in stuff in bash like shell parameter expansions instead of 'sed', loops for reading text line-by-line with regexp in 'if' statements instead of 'grep' etc. to make code faster, calling external binaries consumes much more time and CPU resources than built-in options.
+- Long story short, try removing at least one line of code (that does not affect output, of course) and see what happens. That sounds easy - just apply a CPU-limit to a window when unfocused and remove it when focused, but that is a bit more complicated. Just check how much logic is used for that "easy" task. Also I used built-in stuff in bash like shell parameter expansions instead of `sed`, loops for reading text line-by-line with regexp in `if` statements instead of `grep` etc. to make code faster, calling external binaries consumes much more time and CPU resources than built-in options.
 
 ##### Can I apply FPS-limits instead of CPU-limits?
 - Since v1.3 using MangoHud.
