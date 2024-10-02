@@ -119,7 +119,7 @@ extract_process_info(){
 	process_pid="$(xprop -id "$window_id" _NET_WM_PID)"
 	if [[ "$process_pid" != "_NET_WM_PID:  not found." ]]; then
 		process_pid="${process_pid/* = /}"
-		# Check if info about process exists in cache and it is not marked as mismatched
+		# Check if info about process exists in cache
 		if [[ -z "${cache_process_name["$process_pid"]}" ]]; then
 			# Extract name of process
 			process_name="$(<"/proc/$process_pid/comm")"
