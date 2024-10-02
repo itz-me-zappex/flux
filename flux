@@ -217,6 +217,7 @@ mangohud_fps_set(){
 		# Return an error if something gone wrong
 		if (( $? > 0 )); then
 			print_warn "Unable to modify MangoHud config file '$config_path'!"
+			return 1
 		fi
 	else
 		print_warn "MangoHud config file '$config_path' was not found!"
@@ -382,7 +383,7 @@ Options and values:
 		shift 1
 	;;
 	--version | -V )
-		echo "flux 1.6
+		echo "flux 1.6.1
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
