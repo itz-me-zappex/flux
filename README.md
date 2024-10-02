@@ -84,8 +84,8 @@ Available keys and description:
 | `name` | Name of process, gets from `/proc/<PID>/comm`, required if neither `executable` nor `command` is specified. |
 | `executable` | Path to binary of process, gets by reading `/proc/<PID>/exe` symlink, required if neither `name` nor `command` is specified. |
 | `owner` | User ID of process, gets from `/proc/<PID>/status`. |
-| `cpu-limit` | CPU-limit between 0 and CPU threads multiplied by 100 (i.e. 2 threads = 200, 8 = 800 etc.), defaults to -1 which means no CPU-limit. |
-| `delay` | Delay before applying CPU-limit, preferable to avoid freezing app on exit when windows closes but process still exists if `cpu-limit` equal to `0`, defaults to `0`. |
+| `cpu-limit` | CPU-limit between `0%` and `100%`, defaults to `-1%` which means no CPU-limit, `%` symbol is optional. |
+| `delay` | Delay before applying CPU-limit, preferable to avoid freezing app on exit when windows closes but process still exists if `cpu-limit` equal to `0%`, defaults to `0`. |
 | `focus` | Command to execute on focus event, command runs via bash and will not be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
 | `unfocus` | Command to execute on unfocus event, command runs via bash and will not be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
 | `command` | Command of process, gets from `/proc/<PID>/cmdline`, required if neither `name` nor `executable` is specified. |
