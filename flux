@@ -383,7 +383,7 @@ Options and values:
 		shift 1
 	;;
 	--version | -V )
-		echo "flux 1.6.1
+		echo "flux 1.6.2
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
@@ -394,7 +394,7 @@ There is NO WARRANTY, to the extent permitted by law.
 	;;
 	* )
 		# Regexp means 2+ symbols after hyphen (combined short options)
-		if [[ "$1" =~ ^-.{2,}$ ]]; then
+		if [[ "$1" =~ ^-.{2,}$ && ! "$1" =~ ^--.* ]]; then
 			# Split combined option and add result to array
 			for (( i = 0; i < ${#1} ; i++ )); do
 				options+=("-${1:i:1}")
