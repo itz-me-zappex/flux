@@ -60,8 +60,7 @@ There are also PKGBUILDs to build a package for Arch Linux, you can find them in
 ```
 Usage: flux [option] <value>
 Options and values:
-    -c, --changelog                      Display changelog
-    -C, --config     <path-to-config>    Specify path to config file
+    -c, --config     <path-to-config>    Specify path to config file
     -f, --focused                        Display template for config from focused window
     -h, --help                           Display this help
     -H, --hot                            Apply actions to already unfocused windows before handling events
