@@ -152,12 +152,14 @@ extract_process_info(){
 			cache_process_command["$process_pid"]="$process_command"
 			# Save PID to array to make it easier to remove info from cache in case process does not exist
 			cached_pids_array+=("$process_pid")
+			print_verbose "Process '$process_name' with PID $process_pid information is stored to cache."
 		else
 			# Set values from cache
 			process_name="${cache_process_name["$process_pid"]}"
 			process_executable="${cache_process_executable["$process_pid"]}"
 			process_owner="${cache_process_owner["$process_pid"]}"
 			process_command="${cache_process_command["$process_pid"]}"
+			print_verbose "Process '$process_name' with PID $process_pid information is obtained from cache."
 		fi
 	else
 		process_pid=''
@@ -245,22 +247,26 @@ advice_on_option_error="\n$info_prefix Try 'flux --help' for more information."
 while (( $# > 0 )); do
 	case "$1" in
 	--changelog | -c )
-		echo 'Changelog for flux 1.5.3:
+		echo 'Changelog for 1.5.4:
+- Now matching sections are stored in and obtained from cache to reduce CPU usage and speed up daemon. Do not ask why I did not implement that before.
+- Small fixes and improvements.
+
+Changelog for 1.5.3:
 - Added positive exit code instead of zero in case X server dies.
 - Key `cpulimit` now accepts only values between `0%` and `100%`, `%` symbol is optional.
 - Small fixes and improvements.
 
-Changelog for flux 1.5.2:
+Changelog for 1.5.2:
 - Fixed issues with output of `--focus` and `--pick` options in some cases.
 - Added check for ability to obtain window ID before template creation.
 - Removed displaying of bash version in output of `--version` option because of its uselessness.
 - Fixed a bug when daemon attempts to restart `xprop` process infinitely when X server on current display dies.
 - Small fixes and improvements.
 
-Changelog for flux 1.5.1:
+Changelog for 1.5.1:
 - Added check for ability to read X11 events before start.
 
-Changelog for flux 1.5:
+Changelog for 1.5:
 - Added option `--focus` to create template for config from focused window, `--template` option is renamed to `--pick`.
 - Config keys `mangohud-fps-limit` and `mangohud-fps-unlimit` are renamed to `fps-limit` and `fps-unlimit` respectively.
 - Added `--changelog` option to display changelog.
@@ -380,7 +386,7 @@ Options and values:
 		shift 1
 	;;
 	--version | -V )
-		echo "flux 1.5.3
+		echo "flux 1.5.4
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
@@ -633,7 +639,7 @@ declare -A fps_limit_subprocess_pid # For subprocesses to apply FPS-limit with d
 declare -A fps_limited_pid # To print PID of process in case daemon exit
 
 # Declare associative arrays to store info about windows to avoid obtaining it every time to speed up code and reduce CPU-usage
-declare -A cache_process_name cache_process_executable cache_process_owner cache_process_command
+declare -A cache_process_name cache_process_executable cache_process_owner cache_process_command cache_section
 
 # Dumbass protection, exit with an error if that is not a X11 session
 if [[ "$XDG_SESSION_TYPE" != 'x11' ]]; then
@@ -675,6 +681,7 @@ while read -r window_id; do
 				cache_process_executable["$cached_pid"]=''
 				cache_process_owner["$cached_pid"]=''
 				cache_process_command["$cached_pid"]=''
+				cache_section["$cached_pid"]=''
 				cached_pids_to_remove_array+=("$cached_pid")
 			fi
 		done
@@ -721,44 +728,51 @@ while read -r window_id; do
 	fi
 	# Do not find matching section if window does not report its PID
 	if [[ -n "$process_pid" ]]; then
-		# Attempt to find a matching section in config
-		for section_from_array in "${sections_array[@]}"; do
-			# Compare process name with specified in section
-			if [[ -n "${config_key_name["$section_from_array"]}" && "${config_key_name["$section_from_array"]}" != "$process_name" ]]; then
-				continue
+		# Find matching section if was not found previously and store it to cache
+		if [[ -z "${cache_section["$process_pid"]}" ]]; then
+			# Attempt to find a matching section in config
+			for section_from_array in "${sections_array[@]}"; do
+				# Compare process name with specified in section
+				if [[ -n "${config_key_name["$section_from_array"]}" && "${config_key_name["$section_from_array"]}" != "$process_name" ]]; then
+					continue
+				else
+					name_match='1'
+				fi
+				# Compare process executable path with specified in section
+				if [[ -n "${config_key_executable["$section_from_array"]}" && "${config_key_executable["$section_from_array"]}" != "$process_executable" ]]; then
+					continue
+				else
+					executable_match='1'
+				fi
+				# Compare UID of process with specified in section
+				if [[ -n "${config_key_owner["$section_from_array"]}" && "${config_key_owner["$section_from_array"]}" != "$process_owner" ]]; then
+					continue
+				else
+					owner_match='1'
+				fi
+				# Compare process command with specified in section
+				if [[ -n "${config_key_command["$section_from_array"]}" && "${config_key_command["$section_from_array"]}" != "$process_command" ]]; then
+					continue
+				else
+					command_match='1'
+				fi
+				# Mark as matching if all identifiers containing non-zero value
+				if [[ -n "$name_match" && -n "$executable_match" && -n "$owner_match" && -n "$command_match" ]]; then
+					section_name="$section_from_array"
+					cache_section["$process_pid"]="$section_from_array"
+					break
+				fi
+				unset name_match executable_match owner_match command_match
+			done
+			unset section_from_array name_match executable_match owner_match command_match
+			if [[ -n "$section_name" ]]; then
+				print_verbose "Matching section '$section_name' for process '$process_name' with PID $process_pid is stored to cache."
 			else
-				name_match='1'
+				print_verbose "Process '$process_name' with PID $process_pid does not match with any section."
 			fi
-			# Compare process executable path with specified in section
-			if [[ -n "${config_key_executable["$section_from_array"]}" && "${config_key_executable["$section_from_array"]}" != "$process_executable" ]]; then
-				continue
-			else
-				executable_match='1'
-			fi
-			# Compare UID of process with specified in section
-			if [[ -n "${config_key_owner["$section_from_array"]}" && "${config_key_owner["$section_from_array"]}" != "$process_owner" ]]; then
-				continue
-			else
-				owner_match='1'
-			fi
-			# Compare process command with specified in section
-			if [[ -n "${config_key_command["$section_from_array"]}" && "${config_key_command["$section_from_array"]}" != "$process_command" ]]; then
-				continue
-			else
-				command_match='1'
-			fi
-			# Mark as matching if all identifiers containing non-zero value
-			if [[ -n "$name_match" && -n "$executable_match" && -n "$owner_match" && -n "$command_match" ]]; then
-				section_name="$section_from_array"
-				break
-			fi
-			unset name_match executable_match owner_match command_match
-		done
-		unset section_from_array name_match executable_match owner_match command_match
-		if [[ -n "$section_name" ]]; then
-			print_verbose "Process '$process_name' with PID $process_pid matches with section '$section_name'."
-		else
-			print_verbose "Process '$process_name' with PID $process_pid does not match with any section."
+		else # Obtain matching section from cache
+			section_name="${cache_section["$process_pid"]}"
+			print_verbose "Matching section '$section_name' for process '$process_name' with PID $process_pid is obtained from cache."
 		fi
 	fi
 	# Check if PID is not the same as previous one
