@@ -266,7 +266,7 @@ Changelog for 1.5.2:
 
 Changelog for 1.5.3:
 - Added positive exit code instead of zero in case X server dies.
-- Key `cpulimit` now accepts only values between `0%` and `100%`, `%` symbol is optional.
+- Key `cpu-limit` now accepts only values between `0%` and `100%`, `%` symbol is optional.
 - Small fixes and improvements.
 
 Changelog for 1.5.4:
