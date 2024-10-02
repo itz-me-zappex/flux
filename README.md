@@ -122,7 +122,7 @@ name = witcher3.exe
 executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wine64-preloader
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\The Witcher 3\bin\x64\witcher3.exe 
 owner = 1000
-cpu-limit = 0
+cpu-limit = 0%
 delay = 1
 focus = killall picom
 unfocus = picom
@@ -145,7 +145,7 @@ name = GeometryDash.ex
 executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wine64-preloader
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\Geometry Dash\GeometryDash.exe 
 owner = 1000
-cpu-limit = 40
+cpu-limit = 2%
 delay = 1
 focus = killall picom
 unfocus = picom
@@ -156,7 +156,7 @@ unfocus = picom
 ; Example using freezing with delay as that is single player game
 [The Witcher 3: Wild Hunt]
 name = witcher3.exe
-cpu-limit = 0
+cpu-limit = 0%
 delay = 1
 
 ; Example using FPS-limit as that is online game and I use MangoHud
@@ -169,7 +169,7 @@ fps-unlimit = 60 ; I have 60 FPS lock, so I want restore it on focus event
 ; Example using CPU-limit to show this example, as game has connection to network, I do not want to freeze it completely in cases like downloading music or saving data on background
 [Geometry Dash]
 name = GeometryDash.ex
-cpu-limit = 40
+cpu-limit = 2%
 delay = 1
 ```
 
