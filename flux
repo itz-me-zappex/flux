@@ -247,14 +247,15 @@ advice_on_option_error="\n$info_prefix Try 'flux --help' for more information."
 while (( $# > 0 )); do
 	case "$1" in
 	--changelog | -c )
-		echo 'Changelog for 1.5.4:
-- Now matching sections are stored in and obtained from cache to reduce CPU usage and speed up daemon. Do not ask why I did not implement that before.
+		echo 'Changelog for 1.5:
+- Added option `--focus` to create template for config from focused window, `--template` option is renamed to `--pick`.
+- Config keys `mangohud-fps-limit` and `mangohud-fps-unlimit` are renamed to `fps-limit` and `fps-unlimit` respectively.
+- Added `--changelog` option to display changelog.
+- Short option for `--config` is renamed from `-c` to `-C`, because `--changelog` has higher alphabetical order, so now `-c` equal to `--changelog`.
 - Small fixes and improvements.
 
-Changelog for 1.5.3:
-- Added positive exit code instead of zero in case X server dies.
-- Key `cpulimit` now accepts only values between `0%` and `100%`, `%` symbol is optional.
-- Small fixes and improvements.
+Changelog for 1.5.1:
+- Added check for ability to read X11 events before start.
 
 Changelog for 1.5.2:
 - Fixed issues with output of `--focus` and `--pick` options in some cases.
@@ -263,14 +264,17 @@ Changelog for 1.5.2:
 - Fixed a bug when daemon attempts to restart `xprop` process infinitely when X server on current display dies.
 - Small fixes and improvements.
 
-Changelog for 1.5.1:
-- Added check for ability to read X11 events before start.
+Changelog for 1.5.3:
+- Added positive exit code instead of zero in case X server dies.
+- Key `cpulimit` now accepts only values between `0%` and `100%`, `%` symbol is optional.
+- Small fixes and improvements.
 
-Changelog for 1.5:
-- Added option `--focus` to create template for config from focused window, `--template` option is renamed to `--pick`.
-- Config keys `mangohud-fps-limit` and `mangohud-fps-unlimit` are renamed to `fps-limit` and `fps-unlimit` respectively.
-- Added `--changelog` option to display changelog.
-- Short option for `--config` is renamed from `-c` to `-C`, because `--changelog` has higher alphabetical order, so now `-c` equal to `--changelog`.
+Changelog for 1.5.4:
+- Now matching sections are stored in and obtained from cache to reduce CPU usage and speed up daemon. Do not ask why I did not implement that before.
+- Small fixes and improvements.
+
+Changelog for 1.5.5:
+- Fixed a bug when daemon exits with error if `cpu-limit` key is specified to `-1%` (i.e. disabled) along with `fps-limit`.
 - Small fixes and improvements.
 '
 		exit 0
@@ -386,7 +390,7 @@ Options and values:
 		shift 1
 	;;
 	--version | -V )
-		echo "flux 1.5.4
+		echo "flux 1.5.5
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
@@ -538,10 +542,14 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 		;;
 		cpu-limit* )
 			# Exit with an error if CPU-limit is specified incorrectly
-			if [[ "$value" =~ ^[0-9]+(\%)?$ || "$value" =~ ^('-1'|'-1%') ]] && (( "${value/%\%/}" * cpu_threads <= max_cpu_limit )); then
-				config_key_cpu_limit["$section"]="$(( "${value/%\%/}" * cpu_threads ))"
+			if [[ "$value" =~ ^[0-9]+(\%)?$ || "$value" =~ ^('-1'|'-1%')$ ]] && (( "${value/%\%/}" * cpu_threads <= max_cpu_limit )); then
+				if [[ "$value" =~ ^('-1'|'-1%')$ ]]; then
+					config_key_cpu_limit["$section"]="${value/%\%/}"
+				else
+					config_key_cpu_limit["$section"]="$(( "${value/%\%/}" * cpu_threads ))"
+				fi
 			else
-				print_error "Value '$value' in key 'cpulimit' in section '$section' is invalid!"
+				print_error "Value '$value' in key 'cpulimit' in section '$section' is invalid! Allowed values are 0-100%."
 			fi
 		;;
 		delay* )
@@ -603,7 +611,7 @@ for section_from_array in "${sections_array[@]}"; do
 		print_error "FPS-limit in key 'fps-limit' in section '$section_from_array' is specified without path to MangoHud config!"
 	fi
 	# Exit with an error if MangoHud FPS-limit is specified along with CPU-limit
-	if [[ -n "${config_key_fps_limit["$section_from_array"]}" && -n "${config_key_cpu_limit["$section_from_array"]}" ]]; then
+	if [[ -n "${config_key_fps_limit["$section_from_array"]}" && -n "${config_key_cpu_limit["$section_from_array"]}" && "${config_key_cpu_limit["$section_from_array"]}" != '-1' ]]; then
 		print_error "Do not use FPS-limit along with CPU-limit in section '$section_from_array'!"
 	fi
 	# Exit with an error if 'fps-unlimit' is specified without 'fps-limit'
