@@ -10,6 +10,8 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
   - [Config path](#config-path)
   - [Limitations](#limitations)
   - [Configuration example](#configuration-example)
+    - [Long examples](#long-examples)
+    - [Short examples](#short-examples)
 - [Variables](#variables)
 - [Tips and tricks](#tips-and-tricks)
   - [Keybinding to obtain template from focused window for config](#keybinding-to-obtain-template-from-focused-window-for-config)
@@ -112,46 +114,63 @@ Since INI is not standartized, I should mention all supported features here.
   - Anything else what unmentioned above.
 
 #### Configuration example
+##### Long examples
 ```ini
-; Long example using FPS-limit
-[Geometry Dash]
-name = GeometryDash.ex
-executable = /run/media/zappex/Samsung-EVO/Steam/steamapps/common/Proton 9.0 (Beta)/files/bin/wine64-preloader
-command = D:\Steam\steamapps\common\Geometry Dash\GeometryDash.exe
-owner = 1000
-cpu-limit = -1
-mangohud-config = /home/zappex/.config/MangoHud/wine-GeometryDash.conf
-fps-limit = 5
-fps-unlimit = 0
-delay = 0
-focus = killall picom
-unfocus = picom
-
-; Long example using CPU-limit (freezing) with one second delay
-[Geometry Dash]
-name = GeometryDash.ex
-executable = /run/media/zappex/Samsung-EVO/Steam/steamapps/common/Proton 9.0 (Beta)/files/bin/wine64-preloader
-command = D:\Steam\steamapps\common\Geometry Dash\GeometryDash.exe
+; Example using freezing with delay as that is single player game
+[The Witcher 3: Wild Hunt]
+name = witcher3.exe
+executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wine64-preloader
+command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\The Witcher 3\bin\x64\witcher3.exe 
 owner = 1000
 cpu-limit = 0
-mangohud-config = ''
-fps-limit = ''
-fps-unlimit = ''
 delay = 1
 focus = killall picom
 unfocus = picom
 
-; Short example
-[SuperTux]
-name = supertux2
+; Example using FPS-limit as that is online game and I use MangoHud
+[Forza Horizon 4]
+name = ForzaHorizon4.e
+executable = /run/media/zappex/WD-BLUE/Games/Steam/steamapps/common/Proton 9.0 (Beta)/files/bin/wine64-preloader
+command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\ForzaHorizon4\ForzaHorizon4.exe 
+owner = 1000
+mangohud-config = /home/zappex/.config/MangoHud/wine-ForzaHorizon4.conf
+fps-limit = 5 ; FPS to set on unfocus event
+fps-unlimit = 60 ; I have 60 FPS lock, so I want restore it on focus event
+focus = killall picom
+unfocus = picom
+
+; Example using CPU-limit to show this example, as game has connection to network, I do not want to freeze it completely in cases like downloading music or saving data on background
+[Geometry Dash]
+name = GeometryDash.ex
+executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wine64-preloader
+command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\Geometry Dash\GeometryDash.exe 
+owner = 1000
+cpu-limit = 40
+delay = 1
+focus = killall picom
+unfocus = picom
+```
+
+##### Short examples
+```ini
+; Example using freezing with delay as that is single player game
+[The Witcher 3: Wild Hunt]
+name = witcher3.exe
 cpu-limit = 0
 delay = 1
 
-; Do not apply limits, execute commands on events instead
-[Mednafen]
-name = mednafen
-focus = killall picom
-unfocus = picom
+; Example using FPS-limit as that is online game and I use MangoHud
+[Forza Horizon 4]
+name = ForzaHorizon4.e
+mangohud-config = /home/zappex/.config/MangoHud/wine-ForzaHorizon4.conf
+fps-limit = 5 ; FPS to set on unfocus event
+fps-unlimit = 60 ; I have 60 FPS lock, so I want restore it on focus event
+
+; Example using CPU-limit to show this example, as game has connection to network, I do not want to freeze it completely in cases like downloading music or saving data on background
+[Geometry Dash]
+name = GeometryDash.ex
+cpu-limit = 40
+delay = 1
 ```
 
 ### Variables
