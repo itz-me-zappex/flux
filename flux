@@ -227,12 +227,10 @@ exit_on_term(){
 		mangohud_fps_set "${config_key_mangohud_config["$fps_limited_section"]}" "${config_key_fps_unlimit["$fps_limited_section"]}"
 		print_verbose "Process with PID ${fps_limited_pid["$fps_limited_section"]} has been FPS-unlimited on daemon termination."
 	done
-	print_info "Daemon terminated."
-	exit 0
 }
 
 # Remove CPU-limit for processes on exit
-trap 'exit_on_term' SIGTERM SIGINT
+trap 'exit_on_term ; print_info "Daemon has been terminated successfully." ; exit 0' SIGTERM SIGINT
 
 # Prefixes for output
 error_prefix="[x]"
@@ -247,7 +245,12 @@ advice_on_option_error="\n$info_prefix Try 'flux --help' for more information."
 while (( $# > 0 )); do
 	case "$1" in
 	--changelog | -c )
-		echo 'Changelog for flux 1.5.2:
+		echo 'Changelog for flux 1.5.3:
+- Added positive exit code instead of zero in case X server dies.
+- Key `cpulimit` now accepts only values between `0%` and `100%`, `%` symbol is optional.
+- Small fixes and improvements.
+
+Changelog for flux 1.5.2:
 - Fixed issues with output of `--focus` and `--pick` options in some cases.
 - Added check for ability to obtain window ID before template creation.
 - Removed displaying of bash version in output of `--version` option because of its uselessness.
@@ -377,8 +380,8 @@ Options and values:
 		shift 1
 	;;
 	--version | -V )
-		echo "A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
-flux 1.5.2
+		echo "flux 1.5.3
+A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
 This is free software: you are free to change and redistribute it.
@@ -435,7 +438,7 @@ if [[ -z "$config" ]]; then
 	print_error "Config file is not found!$advice_on_option_error"
 fi
 
-# Calculate maximum allowable CPU-limit
+# Calculate maximum allowable CPU-limit and CPU threads
 cpu_threads='0'
 while read -r cpuinfo_line; do
 	if [[ "$cpuinfo_line" == 'processor'* ]]; then
@@ -443,7 +446,7 @@ while read -r cpuinfo_line; do
 	fi
 done < '/proc/cpuinfo'
 max_cpu_limit="$(( cpu_threads * 100 ))"
-unset cpu_threads cpuinfo_line
+unset cpuinfo_line
 
 # Create associative arrays to store values from config
 declare -A config_key_name \
@@ -529,8 +532,8 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 		;;
 		cpu-limit* )
 			# Exit with an error if CPU-limit is specified incorrectly
-			if [[ "$value" =~ ^[0-9]+$ || "$value" == '-1' ]] && (( value <= max_cpu_limit )); then
-				config_key_cpu_limit["$section"]="$value"
+			if [[ "$value" =~ ^[0-9]+(\%)?$ || "$value" =~ ^('-1'|'-1%') ]] && (( "${value/%\%/}" * cpu_threads <= max_cpu_limit )); then
+				config_key_cpu_limit["$section"]="$(( "${value/%\%/}" * cpu_threads ))"
 			else
 				print_error "Value '$value' in key 'cpulimit' in section '$section' is invalid!"
 			fi
@@ -646,6 +649,7 @@ while read -r window_id; do
 	if [[ "$window_id" == 'exit' ]]; then
 		print_warn "X server on display '$DISPLAY' has been terminated!"
 		exit_on_term
+		print_error "Daemon has been terminated unexpectedly!"
 	fi
 	# Unset '--lazy' option if event was passed, otherwise focus and unfocus commands will not work
 	if [[ "$window_id" == 'nolazy' ]]; then
@@ -805,7 +809,7 @@ while read -r window_id; do
 						fi
 						# Run cpulimit if target process still exists, otherwise throw warning
 						if [[ -d "/proc/$previous_process_pid" ]]; then
-							print_info "Process '$previous_process_name' with PID $previous_process_pid has been CPU-limited to ${config_key_cpu_limit["$previous_section_name"]}/$max_cpu_limit on unfocus event."
+							print_info "Process '$previous_process_name' with PID $previous_process_pid has been CPU-limited to $(( ${config_key_cpu_limit["$previous_section_name"]} / cpu_threads ))% from 100% on unfocus event."
 							if ! cpulimit --limit="${config_key_cpu_limit["$previous_section_name"]}" --pid="$previous_process_pid" --lazy > /dev/null 2>&1; then
 								print_warn "Cannot apply CPU-limit to process '$previous_process_name' with PID $previous_process_pid, 'cpulimit' returned error!"
 							fi
