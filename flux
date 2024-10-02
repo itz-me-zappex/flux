@@ -269,54 +269,13 @@ advice_on_option_error="\n$info_prefix Try 'flux --help' for more information."
 # Read options
 while (( $# > 0 )); do
 	case "$1" in
-	--changelog | -c )
-		echo 'Changelog for 1.5:
-- Added option `--focus` to create template for config from focused window, `--template` option is renamed to `--pick`.
-- Config keys `mangohud-fps-limit` and `mangohud-fps-unlimit` are renamed to `fps-limit` and `fps-unlimit` respectively.
-- Added `--changelog` option to display changelog.
-- Short option for `--config` is renamed from `-c` to `-C`, because `--changelog` has higher alphabetical order, so now `-c` equal to `--changelog`.
-- Small fixes and improvements.
-
-Changelog for 1.5.1:
-- Added check for ability to read X11 events before start.
-
-Changelog for 1.5.2:
-- Fixed issues with output of `--focus` and `--pick` options in some cases.
-- Added check for ability to obtain window ID before template creation.
-- Removed displaying of bash version in output of `--version` option because of its uselessness.
-- Fixed a bug when daemon attempts to restart `xprop` process infinitely when X server on current display dies.
-- Small fixes and improvements.
-
-Changelog for 1.5.3:
-- Added positive exit code instead of zero in case X server dies.
-- Key `cpu-limit` now accepts only values between `0%` and `100%`, `%` symbol is optional.
-- Small fixes and improvements.
-
-Changelog for 1.5.4:
-- Now matching sections are stored in and obtained from cache to reduce CPU usage and speed up daemon. Do not ask why I did not implement that before.
-- Small fixes and improvements.
-
-Changelog for 1.5.5:
-- Fixed a bug when daemon exits with error if `cpu-limit` key is specified to `-1%` (i.e. disabled) along with `fps-limit`.
-- Small fixes and improvements.
-
-Changelog for 1.5.6:
-- Now daemon does not try to find matching sections every time for already mismatched processes, another optimization update.
-- Removed annoying even for me output related to cache.
-- Fixed a bug when PID associated with executable path of process when obtaining info about process.
-
-Changelog for 1.5.7:
-- Attempt to make daemon more realiable by add more checks and workarounds for different type of errors.
-'
-		exit 0
-	;;
-	--config | -C | --config=* )
+	--config | -c | --config=* )
 		# Remember that option was passed in case if path was not specified
 		option_repeat_check config_is_passed --config
 		config_is_passed='1'
 		# Define option type (short, long or long+value) and remember specified path
 		case "$1" in
-		--config | -C )
+		--config | -c )
 			# Remember config path only if path was specified, otherwise shift option
 			if [[ -n "$2" && -f "$2" ]]; then
 				config="$2"
@@ -389,8 +348,7 @@ unfocus =
 	--help | -h | --usage | -u )
 		echo "Usage: flux [option] <value>
 Options and values:
-    -c, --changelog                      Display changelog
-    -C, --config     <path-to-config>    Specify path to config file
+    -c, --config     <path-to-config>    Specify path to config file
     -f, --focused                        Display template for config from focused window
     -h, --help                           Display this help
     -H, --hot                            Apply actions to already unfocused windows before handling events
@@ -424,7 +382,7 @@ Options and values:
 		shift 1
 	;;
 	--version | -V )
-		echo "flux 1.5.7
+		echo "flux 1.6
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
