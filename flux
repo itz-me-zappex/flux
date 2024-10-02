@@ -1,9 +1,8 @@
 #!/usr/bin/bash
 
-# Print error (redirect to stderr and exit)
+# Print error (redirect to stderr)
 print_error(){
 	echo -e "$error_prefix $*" >&2
-	exit 1
 }
 
 # Print warning (redirect to stderr)
@@ -29,6 +28,7 @@ print_info(){
 option_repeat_check(){
 	if [[ -n "${!1}" ]]; then
 		print_error "Option '$2' is repeated!$advice_on_option_error"
+		exit 1
 	fi
 }
 
@@ -38,16 +38,29 @@ xprop_event_reader(){
 	# Exit with an error if xprop fails (like in case when it unable to open display)
 	if ! xprop -root > /dev/null 2>&1; then
 		print_error "Cannot start daemon because process 'xprop' required for reading X11 events exits with an error!"
+		exit 1
 	fi
 	# Print window IDs of open windows to apply limits immediately if '--hot' option was passed
 	if [[ -n "$hot" ]]; then
 		# Extract IDs of open windows
-		stacking_windows_id="$(xprop -root _NET_CLIENT_LIST_STACKING)"
-		stacking_windows_id="${stacking_windows_id/* \# /}"
-		stacking_windows_id="${stacking_windows_id//\,/}"
+		stacking_windows_id="$(xprop -root _NET_CLIENT_LIST_STACKING 2>/dev/null)"
+		if [[ "$stacking_windows_id" != '_NET_CLIENT_LIST_STACKING:  no such atom on any window.' ]]; then
+			stacking_windows_id="${stacking_windows_id/* \# /}"
+			stacking_windows_id="${stacking_windows_id//\,/}"
+		else
+			# Print event for safe exit if cannot obtain list of stacking windows
+			print_error "An error occured trying get list of stacking windows!"
+			echo 'exit'
+		fi
 		# Extract ID of focused window
-		focused_window_id="$(xprop -root _NET_ACTIVE_WINDOW)"
-		focused_window_id="${focused_window_id/* \# /}"
+		focused_window_id="$(xprop -root _NET_ACTIVE_WINDOW 2>/dev/null)"
+		if [[ "$focused_window_id" != '_NET_ACTIVE_WINDOW:  no such atom on any window.' ]]; then
+			focused_window_id="${focused_window_id/* \# /}"
+		else
+			# Print event for safe exit if cannot obtain ID of focused window
+			print_error "An error occured trying get ID of focused window!"
+			echo 'exit'
+		fi
 		# Print IDs of windows, but skip currently focused window
 		for stacking_window_id in $stacking_windows_id; do
 			if [[ "$stacking_window_id" != "$focused_window_id" ]]; then
@@ -62,7 +75,7 @@ xprop_event_reader(){
 	if [[ -n "$lazy" ]]; then
 		echo 'nolazy'
 	fi
-	# Dumbass protection, restart event reading if 'xprop' process has been terminated by ball between chair and monitor
+	# Restart event reading if 'xprop' process has been terminated
 	while true; do
 		# Break loop if exit variable appears not blank
 		if [[ -n "$exit" ]]; then
@@ -78,6 +91,7 @@ xprop_event_reader(){
 		while read -r xprop_event; do
 			# Print event for safe exit in case X server dies
 			if [[ "$xprop_event" =~ 'X connection to :'[0-9]+' broken (explicit kill or server shutdown).' ]]; then
+				print_error "X server on display '$DISPLAY' has been terminated!"
 				echo 'exit'
 				exit='1'
 			fi
@@ -167,36 +181,46 @@ extract_process_info(){
 
 # Change FPS-limit in specified MangoHud config
 mangohud_fps_set(){
-	local config_line config_content config_path="$1" fps_limit="$2" fps_limit_is_changed
-	# Dumbass protection, check if config file exists before continue in case ball between chair and monitor removed it on fly
+	local config_line config_content new_content_config config_path="$1" fps_limit="$2" fps_limit_is_changed
+	# Check if config file exists before continue in case it has been removed
 	if [[ -f "$config_path" ]]; then
+		# Return an error if file is not readable
+		if ! config_content="$(<"$config_path")"; then
+			print_warn "Unable to read MangoHud config file '$config_path'!"
+			return 1
+		fi
 		# Replace 'fps_limit' value in config if exists
 		while read -r config_line || [[ -n "$config_line" ]]; do
 			# Find 'fps_limit' line
 			if [[ "$config_line" == 'fps_limit='* ]]; then
 				# Set specified FPS-limit
-				if [[ -n "$config_content" ]]; then
-					config_content="$config_content\nfps_limit=$fps_limit"
+				if [[ -n "$new_config_content" ]]; then
+					new_config_content="$new_config_content\nfps_limit=$fps_limit"
 				else
-					config_content="$fps_limit=$fps_limit"
+					new_config_content="$fps_limit=$fps_limit"
 				fi
 				fps_limit_is_changed='1'
 			else
-				if [[ -n "$config_content" ]]; then
-					config_content="$config_content\n$config_line"
+				if [[ -n "$new_config_content" ]]; then
+					new_config_content="$new_config_content\n$config_line"
 				else
-					config_content="$config_line"
+					new_config_content="$config_line"
 				fi
 			fi
-		done < "$config_path"
+		done <<< "$config_content"
 		# Add 'fps_limit' line to config if it does not exist, i.e. was not found and changed
 		if [[ -z "$fps_limit_is_changed" ]]; then
 			echo "fps_limit=$fps_limit" >> "$config_path"
 		else
-			echo -e "$config_content" > "$config_path"
+			echo -e "$new_config_content" > "$config_path"
+		fi
+		# Return an error if something gone wrong
+		if (( $? > 0 )); then
+			print_warn "Unable to modify MangoHud config file '$config_path'!"
 		fi
 	else
-		print_warn "Config file '$config_path' was not found!"
+		print_warn "MangoHud config file '$config_path' was not found!"
+		return 1
 	fi
 }
 
@@ -224,8 +248,9 @@ exit_on_term(){
 	done
 	# Remove FPS-limits
 	for fps_limited_section in "${fps_limited_sections_array[@]}"; do
-		mangohud_fps_set "${config_key_mangohud_config["$fps_limited_section"]}" "${config_key_fps_unlimit["$fps_limited_section"]}"
-		print_verbose "Process with PID ${fps_limited_pid["$fps_limited_section"]} has been FPS-unlimited on daemon termination."
+		if mangohud_fps_set "${config_key_mangohud_config["$fps_limited_section"]}" "${config_key_fps_unlimit["$fps_limited_section"]}"; then
+			print_verbose "Process with PID ${fps_limited_pid["$fps_limited_section"]} has been FPS-unlimited on daemon termination."
+		fi
 	done
 }
 
@@ -279,6 +304,9 @@ Changelog for 1.5.6:
 - Now daemon does not try to find matching sections every time for already mismatched processes, another optimization update.
 - Removed annoying even for me output related to cache.
 - Fixed a bug when PID associated with executable path of process when obtaining info about process.
+
+Changelog for 1.5.7:
+- Attempt to make daemon more realiable by add more checks and workarounds for different type of errors.
 '
 		exit 0
 	;;
@@ -311,6 +339,7 @@ Changelog for 1.5.6:
 		# Exit with an error if xprop unable to open display, I don't really care, both xprop and xwininfo will fail in this case
 		if ! xprop -root > /dev/null 2>&1; then
 			print_error "Cannot obtain process info because process 'xprop' or 'xwininfo' required to obtain window ID exits with an error!"
+			exit 1
 		fi
 		# Select command depending by type of option
 		case "$1" in
@@ -324,6 +353,7 @@ Changelog for 1.5.6:
 			# Get xwininfo output containing window ID
 			if ! window_id="$(xwininfo 2>/dev/null)"; then
 				print_error "Cannot grab cursor to pick a window!"
+				exit 1
 			else
 				# Extract ID of focused window
 				while read -r window_id_line; do
@@ -353,6 +383,7 @@ unfocus =
 			exit 0
 		else
 			print_error "Cannot create template for window with ID $window_id since it does not report its PID!"
+			exit 1
 		fi
 	;;
 	--help | -h | --usage | -u )
@@ -393,7 +424,7 @@ Options and values:
 		shift 1
 	;;
 	--version | -V )
-		echo "flux 1.5.6
+		echo "flux 1.5.7
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
@@ -416,6 +447,7 @@ There is NO WARRANTY, to the extent permitted by law.
 			unset options i
 		else
 			print_error "Unknown option '$1'!$advice_on_option_error"
+			exit 1
 		fi
 	esac
 done
@@ -423,11 +455,13 @@ done
 # Exit with an error if verbose and quiet modes are specified at the same time
 if [[ -n "$verbose" && -n "$quiet" ]]; then
 	print_error "Do not use verbose and quiet modes at the same time!$advice_on_option_error"
+	exit 1
 fi
 
 # Exit with an error if '--config' option is specified without a path to config file
 if [[ -n "$config_is_passed" && -z "$config" ]]; then
 	print_error "Option '--config' is specified without path to config file!$advice_on_option_error"
+	exit 1
 fi
 
 # Automatically set a path to config file if it is not specified
@@ -449,6 +483,7 @@ fi
 # Exit with an error if config file is not found
 if [[ -z "$config" ]]; then
 	print_error "Config file is not found!$advice_on_option_error"
+	exit 1
 fi
 
 # Calculate maximum allowable CPU-limit and CPU threads
@@ -484,12 +519,14 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 	# Exit with an error if first line is not a section, otherwise remember section name
 	if [[ ! "$config_line" =~ ^\[.*\]$ && -z "$section" ]]; then
 		print_error "Initial section is not found in config '$config'!"
+		exit 1
 	elif [[ "$config_line" =~ ^\[.*\]$ ]]; then
 		# Exit with an error if section repeated
 		if [[ -n "${sections_array[*]}" ]]; then
 			for section_from_array in "${sections_array[@]}"; do
 				if [[ "[$section_from_array]" == "$config_line" ]]; then
 					print_error "Section name '$section' is repeated!"
+					exit 1
 				fi
 			done
 			unset section_from_array
@@ -542,6 +579,7 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 				config_key_owner["$section"]="$value"
 			else
 				print_error "Value '$value' in key 'owner' in section '$section' is not UID!"
+				exit 1
 			fi
 		;;
 		cpu-limit* )
@@ -554,6 +592,7 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 				fi
 			else
 				print_error "Value '$value' in key 'cpulimit' in section '$section' is invalid! Allowed values are 0-100%."
+				exit 1
 			fi
 		;;
 		delay* )
@@ -564,6 +603,7 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 				config_key_delay["$section"]="$value"
 			else
 				print_error "Value '$value' in key 'delay' in section '$section' is neither integer nor float!"
+				exit 1
 			fi
 		;;
 		focus* )
@@ -581,6 +621,7 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 				config_key_mangohud_config["$section"]="$value"
 			else
 				print_error "Config file specified in key 'mangohud-config' in section '$section' does not exist!"
+				exit 1
 			fi
 		;;
 		fps-limit* )
@@ -589,6 +630,7 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 				config_key_fps_limit["$section"]="$value"
 			else
 				print_error "FPS specified in key 'fps-limit' in section '$section' is not an integer!"
+				exit 1
 			fi
 		;;
 		fps-unlimit* )
@@ -596,10 +638,12 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 				config_key_fps_unlimit["$section"]="$value"
 			else
 				print_error "FPS specified in key 'fps-unlimit' in section '$section' is not an integer!"
+				exit 1
 			fi
 		esac
 	else
 		print_error "Cannot define type of line '$config_line'!"
+		exit 1
 	fi
 done < "$config"
 unset config_line value section
@@ -609,22 +653,27 @@ for section_from_array in "${sections_array[@]}"; do
 	# Exit with an error if neither identifier 'name' nor 'executable' nor 'command' is specified
 	if [[ -z "${config_key_name["$section_from_array"]}" && -z "${config_key_executable["$section_from_array"]}" && -z "${config_key_command["$section_from_array"]}" ]]; then
 		print_error "At least one process identifier required in section '$section_from_array'!"
+		exit 1
 	fi
 	# Exit with an error if MangoHud FPS-limit is not specified along with config path (for the fuck should I know which config should be modified then?)
 	if [[ -n "${config_key_fps_limit["$section_from_array"]}" && -z "${config_key_mangohud_config["$section_from_array"]}" ]]; then
 		print_error "FPS-limit in key 'fps-limit' in section '$section_from_array' is specified without path to MangoHud config!"
+		exit 1
 	fi
 	# Exit with an error if MangoHud FPS-limit is specified along with CPU-limit
 	if [[ -n "${config_key_fps_limit["$section_from_array"]}" && -n "${config_key_cpu_limit["$section_from_array"]}" && "${config_key_cpu_limit["$section_from_array"]}" != '-1' ]]; then
 		print_error "Do not use FPS-limit along with CPU-limit in section '$section_from_array'!"
+		exit 1
 	fi
 	# Exit with an error if 'fps-unlimit' is specified without 'fps-limit'
 	if [[ -n "${config_key_fps_unlimit["$section_from_array"]}" && -z "${config_key_fps_limit["$section_from_array"]}" ]]; then
 		print_error "Do not use 'fps-unlimit' key without 'fps-limit' key in section '$section_from_array'!"
+		exit 1
 	fi
 	# Exit with an error if 'mangohud-config' is specified without 'fps-limit'
 	if [[ -n "${config_key_mangohud_config["$section_from_array"]}" && -z "${config_key_fps_limit["$section_from_array"]}" ]]; then
 		print_error "Do not use 'mangohud-config' key without 'fps-limit' key in section '$section_from_array'!"
+		exit 1
 	fi
 	# Set 'fps-unlimit' to '0' (none) if it is not specified
 	if [[ -n "${config_key_fps_limit["$section_from_array"]}" && -z "${config_key_fps_unlimit["$section_from_array"]}" ]]; then
@@ -660,9 +709,10 @@ cache_process_command \
 cache_section \
 cache_mismatch
 
-# Dumbass protection, exit with an error if that is not a X11 session
+# Exit with an error if that is not a X11 session
 if [[ "$XDG_SESSION_TYPE" != 'x11' ]]; then
 	print_error "Flux is not meant to use it with anything but X11!"
+	exit 1
 fi
 
 # Set cycle counter to zero, required to clean up cache per N cycles
@@ -670,14 +720,12 @@ cycle_counter='0'
 
 # Read IDs of windows and apply actions
 while read -r window_id; do
-	# Exit in case X11 server termination
+	# Exit with an error in case 'exit' event appears
 	if [[ "$window_id" == 'exit' ]]; then
-		print_warn "X server on display '$DISPLAY' has been terminated!"
 		exit_on_term
 		print_error "Daemon has been terminated unexpectedly!"
-	fi
-	# Unset '--lazy' option if event was passed, otherwise focus and unfocus commands will not work
-	if [[ "$window_id" == 'nolazy' ]]; then
+		exit 1
+	elif [[ "$window_id" == 'nolazy' ]]; then # Unset '--lazy' option if event was passed, otherwise focus and unfocus commands will not work
 		unset lazy
 		lazy_is_unset='1'
 		continue
@@ -880,8 +928,9 @@ while read -r window_id; do
 						fi
 						# Apply FPS-limit if target still exists, otherwise throw warning
 						if [[ -d "/proc/$previous_process_pid" ]]; then
-							print_info "Process '$previous_process_name' with PID $previous_process_pid has been FPS-limited to ${config_key_fps_limit["$previous_section_name"]} FPS on unfocus event."
-							mangohud_fps_set "${config_key_mangohud_config["$previous_section_name"]}" "${config_key_fps_limit["$previous_section_name"]}"
+							if mangohud_fps_set "${config_key_mangohud_config["$previous_section_name"]}" "${config_key_fps_limit["$previous_section_name"]}"; then
+								print_info "Process '$previous_process_name' with PID $previous_process_pid has been FPS-limited to ${config_key_fps_limit["$previous_section_name"]} FPS on unfocus event."
+							fi
 						fi
 					) &
 					# Save PID of subprocess to interrupt it on focus event
@@ -951,8 +1000,9 @@ while read -r window_id; do
 				fi
 			fi
 			# Unset FPS-limit
-			print_info "Process '$process_name' with PID $process_pid has been FPS-unlimited on focus event."
-			mangohud_fps_set "${config_key_mangohud_config["$section_name"]}" "${config_key_fps_unlimit["$section_name"]}"
+			if mangohud_fps_set "${config_key_mangohud_config["$section_name"]}" "${config_key_fps_unlimit["$section_name"]}"; then
+				print_info "Process '$process_name' with PID $process_pid has been FPS-unlimited on focus event."
+			fi
 			is_fps_limited_section["$section_name"]=''
 			# Remove section from from array
 			for fps_limited_section in "${fps_limited_sections_array[@]}"; do
