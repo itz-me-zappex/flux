@@ -181,7 +181,7 @@ extract_process_info(){
 
 # Change FPS-limit in specified MangoHud config
 mangohud_fps_set(){
-	local config_line config_content new_content_config config_path="$1" fps_limit="$2" fps_limit_is_changed
+	local config_line config_content new_config_content config_path="$1" fps_limit="$2" fps_limit_is_changed
 	# Check if config file exists before continue in case it has been removed
 	if [[ -f "$config_path" ]]; then
 		# Return an error if file is not readable
@@ -197,7 +197,7 @@ mangohud_fps_set(){
 				if [[ -n "$new_config_content" ]]; then
 					new_config_content="$new_config_content\nfps_limit=$fps_limit"
 				else
-					new_config_content="$fps_limit=$fps_limit"
+					new_config_content="$new_config_content=$fps_limit"
 				fi
 				fps_limit_is_changed='1'
 			else
@@ -386,8 +386,8 @@ command = "$process_command"
 owner = "$process_owner"
 cpu-limit = 
 mangohud-config = 
-fps-limit = 
-fps-unlimit = 
+fps-unfocus = 
+fps-focus = 
 delay = 
 focus = 
 unfocus = 
@@ -435,7 +435,7 @@ Options and values:
 		shift 1
 	;;
 	--version | -V )
-		echo "flux 1.6.4
+		echo "flux 1.6.5
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
@@ -551,7 +551,7 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 		continue
 	fi
 	# Exit with an error if type of line cannot be defined
-	if [[ "${config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|focus|unfocus|command|mangohud-config|fps-limit|fps-unlimit)(\ )?=(\ )?.* ]]; then
+	if [[ "${config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|focus|unfocus|command|mangohud-config|fps-unfocus|fps-focus)(\ )?=(\ )?.* ]]; then
 		# Extract value from key by removing key and equal symbol
 		if [[ "$config_line" == *'= '* ]]; then
 			value="${config_line/*= /}" # <-
@@ -633,20 +633,20 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 				exit 1
 			fi
 		;;
-		fps-limit* )
+		fps-unfocus* )
 			# Exit with an error if value is not integer
 			if [[ "$value" =~ ^[0-9]+$ ]]; then
 				config_key_fps_limit["$section"]="$value"
 			else
-				print_error "FPS specified in key 'fps-limit' in section '$section' is not an integer!"
+				print_error "FPS specified in key 'fps-unfocus' in section '$section' is not an integer!"
 				exit 1
 			fi
 		;;
-		fps-unlimit* )
+		fps-focus* )
 			if [[ "$value" =~ ^[0-9]+$ ]]; then
 				config_key_fps_unlimit["$section"]="$value"
 			else
-				print_error "FPS specified in key 'fps-unlimit' in section '$section' is not an integer!"
+				print_error "FPS specified in key 'fps-focus' in section '$section' is not an integer!"
 				exit 1
 			fi
 		esac
@@ -666,7 +666,7 @@ for section_from_array in "${sections_array[@]}"; do
 	fi
 	# Exit with an error if MangoHud FPS-limit is not specified along with config path (for the fuck should I know which config should be modified then?)
 	if [[ -n "${config_key_fps_limit["$section_from_array"]}" && -z "${config_key_mangohud_config["$section_from_array"]}" ]]; then
-		print_error "FPS-limit in key 'fps-limit' in section '$section_from_array' is specified without path to MangoHud config!"
+		print_error "FPS-limit in key 'fps-unfocus' in section '$section_from_array' is specified without path to MangoHud config!"
 		exit 1
 	fi
 	# Exit with an error if MangoHud FPS-limit is specified along with CPU-limit
@@ -674,17 +674,17 @@ for section_from_array in "${sections_array[@]}"; do
 		print_error "Do not use FPS-limit along with CPU-limit in section '$section_from_array'!"
 		exit 1
 	fi
-	# Exit with an error if 'fps-unlimit' is specified without 'fps-limit'
+	# Exit with an error if 'fps-focus' is specified without 'fps-unfocus'
 	if [[ -n "${config_key_fps_unlimit["$section_from_array"]}" && -z "${config_key_fps_limit["$section_from_array"]}" ]]; then
-		print_error "Do not use 'fps-unlimit' key without 'fps-limit' key in section '$section_from_array'!"
+		print_error "Do not use 'fps-focus' key without 'fps-unfocus' key in section '$section_from_array'!"
 		exit 1
 	fi
-	# Exit with an error if 'mangohud-config' is specified without 'fps-limit'
+	# Exit with an error if 'mangohud-config' is specified without 'fps-unfocus'
 	if [[ -n "${config_key_mangohud_config["$section_from_array"]}" && -z "${config_key_fps_limit["$section_from_array"]}" ]]; then
-		print_error "Do not use 'mangohud-config' key without 'fps-limit' key in section '$section_from_array'!"
+		print_error "Do not use 'mangohud-config' key without 'fps-unfocus' key in section '$section_from_array'!"
 		exit 1
 	fi
-	# Set 'fps-unlimit' to '0' (none) if it is not specified
+	# Set 'fps-focus' to '0' (none) if it is not specified
 	if [[ -n "${config_key_fps_limit["$section_from_array"]}" && -z "${config_key_fps_unlimit["$section_from_array"]}" ]]; then
 		config_key_fps_unlimit["$section_from_array"]='0'
 	fi
@@ -897,7 +897,7 @@ while read -r window_id; do
 					# Save PID to print it in case daemon exit
 					fps_limited_pid["$previous_section_name"]="$previous_process_pid"
 					# Set FPS-limit
-					set_fps &
+					fps_set &
 					# Save PID of subprocess to interrupt it on focus event
 					fps_limit_subprocess_pid["$previous_process_pid"]="$!"
 				fi
