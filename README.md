@@ -24,20 +24,18 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
   - [Types of limits and which you should use](#types-of-limits-and-which-you-should-use)
 - [Possible questions](#possible-questions)
   - [How does daemon work?](#how-does-daemon-work)
-  - [Should I trust you and this utility?](#should-i-trust-you-and-this-utility)
-  - [Which DE or WM should I use for best compatibility?](#which-de-or-wm-should-i-use-for-best-compatibility)
-  - [Does it increase input lag and/or record my screen to detect window focus/unfocus events?](#does-it-increase-input-lag-andor-record-my-screen-to-detect-window-focusunfocus-events)
+  - [Does that daemon reduce performance?](#does-that-daemon-reduce-performance)
   - [Is it safe?](#is-it-safe)
+  - [Should I trust you and this utility?](#should-i-trust-you-and-this-utility)
+  - [With which DE/WM/GPU daemon works correctly?](#with-which-dewmgpu-daemon-works-correctly)
   - [Is not running commands on focus and unfocus makes system vulnerable?](#is-not-running-commands-on-focus-and-unfocus-makes-system-vulnerable)
   - [Can I get banned in a game because of this daemon?](#can-i-get-banned-in-a-game-because-of-this-daemon)
   - [Why was that daemon developed?](#why-was-that-daemon-developed)
   - [Bugs?](#bugs)
   - [Why is code so complicated?](#why-is-code-so-complicated)
-  - [Can I apply FPS-limits instead of CPU-limits?](#can-i-apply-fps-limits-instead-of-cpu-limits)
-  - [Gamescope exists, Wayland becomes more popular. Are you not late by any chance?](#gamescope-exists-wayland-becomes-more-popular-are-you-not-late-by-any-chance)
+  - [Gamescope which allows limit FPS on unfocus exists, Wayland becomes more popular. Are you not late by any chance?](#gamescope-which-allows-limit-fps-on-unfocus-exists-wayland-becomes-more-popular-are-you-not-late-by-any-chance)
   - [What about Wayland support?](#what-about-wayland-support)
   - [Why did you write it on Bash?](#why-did-you-write-it-on-bash)
-  - [Does that daemon reduce performance?](#does-that-daemon-reduce-performance)
  
 ### Dependencies
 - `Arch Linux` branch:
@@ -94,7 +92,7 @@ $ makepkg -sric # build a package and install it
 ```bash
 $ mkdir flux && cd flux # create build directory
 $ wget https://github.com/itz-me-zappex/flux/releases/download/v1.6.5/build-deb.sh # download build script
-$ chmod +x build-deb.sh # make it execitable
+$ chmod +x build-deb.sh # make it executable
 $ ./build-deb.sh # build a package
 $ sudo dpkg -i flux-v1.6.5.deb ; sudo apt install -f # install a package
 ```
@@ -241,7 +239,7 @@ Now you can easily grab templates from windows to use them in config by pasting 
 - Create shortcut for `$ killall flux ; flux --hot --lazy` command which restarts daemon and use it when you done config file editing.
 
 ##### Improve performance of daemon
-- Geeks only, casual users should not care about that. To do that, run daemon with `SCHED_BATCH` scheduling policy which is designed to improve performance of non-interactive tasks like daemons, timers, scripts etc.. To do that, use command like `$ chrt --batch 0 flux --hot --lazy`.
+- Geeks only, casual users should not care about that. To do that, run daemon using command like `$ chrt --batch 0 flux --hot --lazy`. `SCHED_BATCH` scheduling policy is designed to improve performance of non-interactive tasks like daemons, timers, scripts etc..
 
 ##### Types of limits and which you should use
 - FPS-limits recommended for online and multiplayer games and if you do not mind to use MangoHud, this method reduces resource consumption when game unfocused/minimized.
@@ -252,23 +250,23 @@ Now you can easily grab templates from windows to use them in config by pasting 
 ##### How does daemon work?
 - Daemon reads X11 events related to window focus, then it gets PID of process using window ID and uses it to collect info about process (process name, its executable path, command which is used and UID) to compare it with identifiers in config, when it finds window which matches with identifier(s) specified in specific section in config, it runs command from `focus` key (if specified), when you switching to another window - applies FPS or CPU-limit (if specified) and runs command from `unfocus` key (if specified). When window does not match with any section in config, nothing happens. To reduce CPU usage and speed up daemon a caching algorithm was implemented which stores info about windows into associative arrays, that allows to just collect info of process once, and then get that info from cache immediately after obtaining its PID when window appears focused again.
 
-##### Should I trust you and this utility?
-- You can read entire code. If you are uncomfortable, feel free to avoid using it.
-
-##### Which DE or WM should I use for best compatibility?
-- Daemon compatible with all X11 window managers and desktop environments, since it relies on X11 event system.
-
-##### Does it increase input lag and/or record my screen to detect window focus/unfocus events?
-- No, all it does is read events from X11 related to window focus.
+##### Does that daemon reduce performance?
+- Long story short, difference in performance and battery life should not be noticeable. It uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time, but it just chills out when you playing game or working in single window.
 
 ##### Is it safe?
 - Yes, read above. Neither I nor daemon has access to your data.
 
+##### Should I trust you and this utility?
+- You can read entire code. If you are uncomfortable, feel free to avoid using it.
+
+##### With which DE/WM/GPU daemon works correctly?
+- Daemon compatible with all X11 window managers and desktop environments and does not depend on neither GPU nor driver version as it relies on X11 event system.
+
 ##### Is not running commands on focus and unfocus makes system vulnerable?
-- Just put config file to `/etc/flux.ini` and make it read-only.
+- Just put config file to `/etc/flux.ini` and make it read-only, also do something like that with scripts you interacting with from config file.
 
 ##### Can I get banned in a game because of this daemon?
-- Nowadays, anti-cheats are pure garbage, developed by freaks without balls, and you can get banned even for a wrong click.
+- Nowadays, anti-cheats are pure garbage, developed by freaks without balls, and you can get banned even for a wrong click. But that is should not be bannable except you are farmer and using sandboxing. Do not write me if you got a ban in game.
 
 ##### Why was that daemon developed?
 - Main task is to reduce CPU usage of games that have been minimized. Almost every engine fails to recognize that game is unfocused and continues to consume a lot of CPU and GPU resources, what can make system slow for other tasks like browsing stuff, transcoding video etc. or even unresponsive at all. Imagine users with weak laptop who upgraded their RAM to maximum and suffer from a weak processor, now they can simply play a game and then minimize it if needed without carrying about CPU usage or battery level since process just will hang in RAM. There are a lot of situations and usecases for it.
@@ -276,16 +274,13 @@ Now you can easily grab templates from windows to use them in config by pasting 
 ##### Bugs?
 - Nothing is perfect in this world. Almost all bugs I encountered during development have been fixed or will be fixed soon. If you find a bug, open an issue. Known issues that cannot be fixed are:
   - Inability to interact with "glxgears" and "vkcube" windows, as they do not report their PIDs.
-  - Freezing online games (setting `cpu-limit` to `0`) causes disconnects from matches, so use less aggressive CPU-limit to allow game to send/receive packets.
+  - Freezing online games (setting `cpu-limit` to `0%`) causes disconnects from matches, so use less aggressive CPU-limit to allow game to send/receive packets.
   - Stuttery audio in game if CPU-limit is very aggressive, since `cpulimit` tool interrupts process, that should be expected.
 
 ##### Why is code so complicated?
 - Long story short, try removing at least one line of code (that does not affect output, of course) and see what happens. That sounds easy - just apply a CPU-limit to a window when unfocused and remove it when focused, but that is a bit more complicated. Just check how much logic is used for that "easy" task. Also I used built-in stuff in bash like shell parameter expansions instead of `sed`, loops for reading text line-by-line with regexp in `if` statements instead of `grep` etc. to make code faster, calling external binaries consumes much more time and CPU resources than built-in options.
 
-##### Can I apply FPS-limits instead of CPU-limits?
-- Since v1.3 using MangoHud.
-
-##### Gamescope exists, Wayland becomes more popular. Are you not late by any chance?
+##### Gamescope which allows limit FPS on unfocus exists, Wayland becomes more popular. Are you not late by any chance?
 - Well, not everyone is ready to switch to Wayland, there are a lot of reasons exists. Gamescope does not work well on my Nvidia desktop and Intel laptop, and I can bet it does not work well for others either. Also, there are a lot of old Nvidia GPUs that do not support Wayland at all because of old drivers, what makes Gamescope completely useless for owners of these GPUs.
 
 ##### What about Wayland support?
@@ -293,6 +288,3 @@ Now you can easily grab templates from windows to use them in config by pasting 
 
 ##### Why did you write it on Bash?
 - That is (scripting) language I know pretty good, despite a fact that Bash as all interpretators works slower than compilable languages, it still fits my needs almost perfectly.
-
-##### Does that daemon reduce performance?
-- Depends. It uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time, but it just chills out when you playing game or working in single window. Long story short, difference in performance and battery life should not be noticeable.
