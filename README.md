@@ -52,6 +52,12 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
 
   Optional: `mangohud mangohud:i386`
 
+- `Void Linux`:
+
+  Required: `bash util-linux cpulimit coreutils xprop xwininfo`
+
+  Optional: `MangoHud MangoHud-32bit`
+
 Dependencies for other distributions will be added soon.
 
 ### Installation
