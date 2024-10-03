@@ -51,10 +51,19 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
 Dependencies for other distros will be added soon.
 
 ### Installation
-This daemon was developed with portability in mind, so all code has been placed in one file.
-All you need is just download [flux](https://github.com/itz-me-zappex/flux/blob/main/flux) file, make it executable and put in place you want, but preferably put it somewhere in $PATH to avoid calling daemon with directly specified path every time.
+#### Manual installation
+All you need is install required dependencies and download [flux](https://github.com/itz-me-zappex/flux/blob/main/flux) file, make it executable and put in place you want, but preferably put it somewhere in `$PATH` to avoid calling daemon with directly specified path every time.
 
-There are also PKGBUILDs to build a package for Arch Linux, you can find them in tab with releases.
+#### Arch Linux (and based distros)
+Make sure you have installed `base-devel` package before continue.
+```
+$ mkdir flux && cd flux # create build directory
+$ wget https://github.com/itz-me-zappex/flux/releases/download/v1.6.5/PKGBUILD # download PKGBUILD
+$ makepkg -sric # build a package and install it
+```
+
+#### Other distributions
+Script for build `.deb` package for Debian and Ubuntu (and based distros) will be added soon, users of other distros should use manual method for now.
 
 ### Usage
 ```
