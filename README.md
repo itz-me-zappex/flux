@@ -6,6 +6,7 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
 - [Installation](#installation)
   - [Manual installation](#manual-installation)
   - [Arch Linux (and based distributions)](#arch-linux-and-based-distributions)
+  - [Debian/Ubuntu (and based distributions)](#debianubuntu-and-based-distributions)
   - [Other distributions](#other-distributions)
 - [Usage](#usage)
   - [Autostart](#autostart)
@@ -59,14 +60,23 @@ All you need is install required dependencies and download [flux](https://github
 
 #### Arch Linux (and based distributions)
 Make sure you have installed `base-devel` package before continue.
-```
+``` bash
 $ mkdir flux && cd flux # create build directory
 $ wget https://github.com/itz-me-zappex/flux/releases/download/v1.6.5/PKGBUILD # download PKGBUILD
 $ makepkg -sric # build a package and install it
 ```
 
+#### Debian/Ubuntu (and based distributions)
+```bash
+$ mkdir flux && cd flux # create build directory
+$ wget https://github.com/itz-me-zappex/flux/releases/download/v1.6.5/build-deb.sh # download build script
+$ chmod +x build-deb.sh # make it execitable
+$ ./build-deb.sh # build a package
+$ sudo dpkg -i flux-v1.6.5.deb ; sudo apt install -f # install a package
+```
+
 #### Other distributions
-Script for build `.deb` package for Debian and Ubuntu (and based distributions) will be added soon, users of other distributions should use manual method for now.
+Use manual method, or if you can, help me create packages for other distributions.
 
 ### Usage
 ```
