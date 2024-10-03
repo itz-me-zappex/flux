@@ -88,9 +88,9 @@ Available keys and description:
 | `focus` | Command to execute on focus event, command runs via bash and will not be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
 | `unfocus` | Command to execute on unfocus event, command runs via bash and will not be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
 | `command` | Command of process, gets from `/proc/<PID>/cmdline`, required if neither `name` nor `executable` is specified. |
-| `mangohud-config` | Path to MangoHud config, required if you want change FPS-limits and requires `fps-limit`. |
-| `fps-limit` | FPS to set on unfocus, required by and requires `mangohud-config`. |
-| `fps-unlimit` | FPS to set on focus, requires `fps-limit`, defaults to `0` (i.e. full unlimit). |
+| `mangohud-config` | Path to MangoHud config, required if you want change FPS-limits and requires `fps-unfocus`. |
+| `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`. |
+| `fps-focus` | FPS to set on focus, requires `fps-unfocus`, defaults to `0` (i.e. full unlimit). |
 
 #### Config path
 - Daemon searches for following configuration files by priority:
@@ -133,8 +133,8 @@ executable = /run/media/zappex/WD-BLUE/Games/Steam/steamapps/common/Proton 9.0 (
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\ForzaHorizon4\ForzaHorizon4.exe 
 owner = 1000
 mangohud-config = /home/zappex/.config/MangoHud/wine-ForzaHorizon4.conf
-fps-limit = 5 ; FPS to set on unfocus event
-fps-unlimit = 60 ; I have 60 FPS lock, so I want restore it on focus event
+fps-unfocus = 5 ; FPS to set on unfocus event
+fps-focus = 60 ; I have 60 FPS lock, so I want restore it on focus event
 focus = killall picom
 unfocus = picom
 
@@ -162,8 +162,8 @@ delay = 1
 [Forza Horizon 4]
 name = ForzaHorizon4.e
 mangohud-config = /home/zappex/.config/MangoHud/wine-ForzaHorizon4.conf
-fps-limit = 5 ; FPS to set on unfocus event
-fps-unlimit = 60 ; I have 60 FPS lock, so I want restore it on focus event
+fps-unfocus = 5 ; FPS to set on unfocus event
+fps-focus = 60 ; I have 60 FPS lock, so I want restore it on focus event
 
 ; Example using CPU-limit to show this example, as game has connection to network, I do not want to freeze it completely in cases like downloading music or saving data on background
 [Geometry Dash]
