@@ -225,6 +225,59 @@ mangohud_fps_set(){
 	fi
 }
 
+# Apply CPU-limit via 'cpulimit' tool on unfocus event, function required to run it on background to avoid stopping a whole code if delay specified
+cpulimit_run(){
+	local cpulimit_pid
+	# Wait for delay if specified
+	if [[ "${config_key_delay["$previous_section_name"]}" != '0' ]]; then
+		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be CPU limited after ${config_key_delay["$previous_section_name"]} second(s) on unfocus event."
+		sleep "${config_key_delay["$previous_section_name"]}"
+	else
+		print_verbose "Process '$previous_process_name' with PID $previous_process_pid has been CPU limited on unfocus event."
+	fi
+	# Apply CPU-limit
+	cpulimit --lazy --limit="${config_key_cpu_limit["$previous_section_name"]}" --pid="$previous_process_pid" > /dev/null 2>&1 &
+	# Remember PID, set action to kill it on INT/TERM signals and wait until it done
+	cpulimit_pid="$!"
+	trap "kill $cpulimit_pid" SIGINT SIGTERM
+	wait "$cpulimit_pid"
+}
+
+# Freeze process on unfocus event, function required to run it on background to avoid stopping a whole code if delay specified
+freeze_process(){
+	trap 'exit 0' SIGINT SIGTERM
+	# Freeze process with delay if specified, otherwise freeze process immediately
+	if [[ "${config_key_delay["$previous_section_name"]}" != '0' ]]; then
+		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be frozen after ${config_key_delay["$previous_section_name"]} second(s) on unfocus event."
+		sleep "${config_key_delay["$previous_section_name"]}"
+	fi
+	# Freeze process if it still exists, otherwise throw warning
+	if [[ -d "/proc/$previous_process_pid" ]]; then
+		if ! kill -STOP "$previous_process_pid" > /dev/null 2>&1; then
+			print_warn "Cannot freeze process '$previous_process_name' with PID $previous_process_pid!"
+		else
+			print_info "Process '$previous_process_name' with PID $previous_process_pid has been frozen on unfocus event."
+		fi
+	else
+		print_warn "Process '$previous_process_name' with PID $previous_process_pid has been terminated before freezing!"
+	fi
+}
+
+# Set specified FPS on unfocus, function required to run it on background to avoid stopping a whole code if delay specified
+fps_set(){
+	# Wait in case delay is specified
+	if [[ "${config_key_delay["$previous_section_name"]}" != '0' ]]; then
+		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be FPS-limited after ${config_key_delay["$previous_section_name"]} second(s) on unfocus event."
+		sleep "${config_key_delay["$previous_section_name"]}"
+	fi
+	# Apply FPS-limit if target still exists, otherwise throw warning
+	if [[ -d "/proc/$previous_process_pid" ]]; then
+		if mangohud_fps_set "${config_key_mangohud_config["$previous_section_name"]}" "${config_key_fps_limit["$previous_section_name"]}"; then
+			print_info "Process '$previous_process_name' with PID $previous_process_pid has been FPS-limited to ${config_key_fps_limit["$previous_section_name"]} FPS on unfocus event."
+		fi
+	fi
+}
+
 # Actions on TERM and INT signals
 exit_on_term(){
 	# Unfreeze processes
@@ -240,7 +293,7 @@ exit_on_term(){
 	# Kill cpulimit subprocesses
 	for cpulimit_subprocess_pid in "${cpulimit_subprocesses_pids_array[@]}"; do
 		if [[ -d "/proc/$cpulimit_subprocess_pid" ]]; then
-			if ! pkill -P "$cpulimit_subprocess_pid" > /dev/null 2>&1; then
+			if ! kill "$cpulimit_subprocess_pid" > /dev/null 2>&1; then
 				print_warn "Cannot stop 'cpulimit' subprocess with PID $cpulimit_subprocess_pid on daemon termination!"
 			else
 				print_verbose "CPU-limit subprocess with PID $cpulimit_subprocess_pid has been terminated on daemon termination."
@@ -383,7 +436,7 @@ Options and values:
 		shift 1
 	;;
 	--version | -V )
-		echo "flux 1.6.2
+		echo "flux 1.6.3
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
@@ -557,8 +610,6 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 		delay* )
 			# Exit with an error if value is neither an integer nor a float (that is what regexp means)
 			if [[ "$value" =~ ^[0-9]+((\.|\,)[0-9]+)?$ ]]; then
-				# Replace comma with a dot if that is a float value, 'read -t <seconds>' used as alternative to '/usr/bin/sleep <seconds>' does not eat commas
-				value="${value/\,/\.}"
 				config_key_delay["$section"]="$value"
 			else
 				print_error "Value '$value' in key 'delay' in section '$section' is neither integer nor float!"
@@ -820,23 +871,8 @@ while read -r window_id; do
 					is_frozen_pid["$previous_process_pid"]='1'
 					# Save PID to array to unfreeze process in case daemon interruption
 					frozen_processes_pids_array+=("$previous_process_pid")
-					(	
-						# Freeze process with delay if specified, otherwise freeze process immediately
-						if [[ "${config_key_delay["$previous_section_name"]}" != '0' ]]; then
-							print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be frozen after ${config_key_delay["$previous_section_name"]} second(s) on unfocus event."
-							sleep "${config_key_delay["$previous_section_name"]}"
-						fi
-						# Freeze process if it still exists, otherwise throw warning
-						if [[ -d "/proc/$previous_process_pid" ]]; then
-							if ! kill -STOP "$previous_process_pid" > /dev/null 2>&1; then
-								print_warn "Cannot freeze process '$previous_process_name' with PID $previous_process_pid!"
-							else
-								print_info "Process '$previous_process_name' with PID $previous_process_pid has been frozen on unfocus event."
-							fi
-						else
-							print_warn "Process '$previous_process_name' with PID $previous_process_pid has been terminated before freezing!"
-						fi
-					) &
+					# Freeze process
+					freeze_process &
 					# Save PID of subprocess to interrupt it in case focus event appears earlier than delay ends
 					freeze_subrocess_pid["$previous_process_pid"]="$!"
 				fi
@@ -845,25 +881,8 @@ while read -r window_id; do
 				if [[ -z "${is_cpu_limited_pid["$previous_process_pid"]}" ]]; then
 					# Mark process as CPU-limited
 					is_cpu_limited_pid["$previous_process_pid"]='1'
-					# Run cpulimit subprocess
-					(
-						# Ignore SIGTERM signal to avoid termination of parent subprocess while keeping child process which cpulimit is, that should be processed with 'exit_on_term' function via trap in beginning of code
-						trap '' SIGTERM
-						# Wait in case delay is specified
-						if [[ "${config_key_delay["$previous_section_name"]}" != '0' ]]; then
-							print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be CPU-limited after ${config_key_delay["$previous_section_name"]} second(s) on unfocus event."
-							sleep "${config_key_delay["$previous_section_name"]}"
-						fi
-						# Run cpulimit if target process still exists, otherwise throw warning
-						if [[ -d "/proc/$previous_process_pid" ]]; then
-							print_info "Process '$previous_process_name' with PID $previous_process_pid has been CPU-limited to $(( ${config_key_cpu_limit["$previous_section_name"]} / cpu_threads ))% from 100% on unfocus event."
-							if ! cpulimit --limit="${config_key_cpu_limit["$previous_section_name"]}" --pid="$previous_process_pid" --lazy > /dev/null 2>&1; then
-								print_warn "Cannot apply CPU-limit to process '$previous_process_name' with PID $previous_process_pid, 'cpulimit' returned error!"
-							fi
-						else
-							print_warn "Process '$previous_process_name' with PID $previous_process_pid has been terminated before applying CPU-limit!"
-						fi
-					) &
+					# Apply CPU-limit
+					cpulimit_run &
 					# Save PID of subprocess to array to interrupt it in case daemon exit
 					cpulimit_subprocesses_pids_array+=("$!")
 					# Save PID of subprocess to interrupt it on focus event
@@ -879,19 +898,7 @@ while read -r window_id; do
 					# Save PID to print it in case daemon exit
 					fps_limited_pid["$previous_section_name"]="$previous_process_pid"
 					# Set FPS-limit
-					(
-						# Wait in case delay is specified
-						if [[ "${config_key_delay["$previous_section_name"]}" != '0' ]]; then
-							print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be FPS-limited after ${config_key_delay["$previous_section_name"]} second(s) on unfocus event."
-							sleep "${config_key_delay["$previous_section_name"]}"
-						fi
-						# Apply FPS-limit if target still exists, otherwise throw warning
-						if [[ -d "/proc/$previous_process_pid" ]]; then
-							if mangohud_fps_set "${config_key_mangohud_config["$previous_section_name"]}" "${config_key_fps_limit["$previous_section_name"]}"; then
-								print_info "Process '$previous_process_name' with PID $previous_process_pid has been FPS-limited to ${config_key_fps_limit["$previous_section_name"]} FPS on unfocus event."
-							fi
-						fi
-					) &
+					set_fps &
 					# Save PID of subprocess to interrupt it on focus event
 					fps_limit_subprocess_pid["$previous_process_pid"]="$!"
 				fi
@@ -933,7 +940,7 @@ while read -r window_id; do
 			unset frozen_process_pid frozen_processes_pids_array_temp
 		elif [[ -n "${is_cpu_limited_pid["$process_pid"]}" ]]; then # Check for CPU-limit via 'cpulimit' subprocess
 			# Terminate 'cpulimit' subprocess
-			if ! pkill -P "${cpulimit_subprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
+			if ! kill "${cpulimit_subprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
 				print_warn "Cannot stop 'cpulimit' subprocess with PID ${cpulimit_subprocess_pid["$process_pid"]}!"
 			else
 				print_info "Process '$process_name' with PID $process_pid has been CPU unlimited on focus event."
