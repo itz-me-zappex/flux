@@ -70,6 +70,12 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
 
   [Optional](https://software.opensuse.org/search?baseproject=openSUSE%3AFactory&q=mangohud): `MangoHud mangohud-32bit`
 
+- `Gentoo`:
+
+  Required: `app-shells/bash sys-apps/util-linux app-admin/cpulimit sys-apps/coreutils x11-apps/xprop x11-apps/xwininfo`
+
+  Optional: [`mangohud`](https://github.com/flightlessmango/MangoHud) (is not packaged)
+
 Dependencies for other distributions will be added soon.
 
 ### Installation
