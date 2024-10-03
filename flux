@@ -232,9 +232,8 @@ cpulimit_run(){
 	if [[ "${config_key_delay["$previous_section_name"]}" != '0' ]]; then
 		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be CPU limited after ${config_key_delay["$previous_section_name"]} second(s) on unfocus event."
 		sleep "${config_key_delay["$previous_section_name"]}"
-	else
-		print_verbose "Process '$previous_process_name' with PID $previous_process_pid has been CPU limited on unfocus event."
 	fi
+	print_verbose "Process '$previous_process_name' with PID $previous_process_pid has been CPU limited to $(( ${config_key_cpu_limit["$previous_section_name"]} / cpu_threads ))% on unfocus event."
 	# Apply CPU-limit
 	cpulimit --lazy --limit="${config_key_cpu_limit["$previous_section_name"]}" --pid="$previous_process_pid" > /dev/null 2>&1 &
 	# Remember PID, set action to kill it on INT/TERM signals and wait until it done
@@ -436,7 +435,7 @@ Options and values:
 		shift 1
 	;;
 	--version | -V )
-		echo "flux 1.6.3
+		echo "flux 1.6.4
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
