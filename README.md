@@ -58,6 +58,12 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
 
   Optional: `MangoHud MangoHud-32bit`
 
+- `Fedora` branch:
+
+  Required: `bash util-linux cpulimit coreutils xprop xwininfo`
+
+  Optional: `mangohud mangohud.i686`
+
 Dependencies for other distributions will be added soon.
 
 ### Installation
