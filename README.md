@@ -98,7 +98,7 @@ $ sudo dpkg -i flux-v1.6.5.deb ; sudo apt install -f # install a package
 ```
 
 #### Other distributions
-Use manual method, or if you can, help me create packages for other distributions.
+Use [manual method](#manual-installation), or if you can, help me create packages for other distributions.
 
 ### Usage
 ```
@@ -248,10 +248,10 @@ Now you can easily grab templates from windows to use them in config by pasting 
 
 ### Possible questions
 ##### How does daemon work?
-- Daemon reads X11 events related to window focus, then it gets PID of process using window ID and uses it to collect info about process (process name, its executable path, command which is used and UID) to compare it with identifiers in config, when it finds window which matches with identifier(s) specified in specific section in config, it runs command from `focus` key (if specified), when you switching to another window - applies FPS or CPU-limit (if specified) and runs command from `unfocus` key (if specified). When window does not match with any section in config, nothing happens. To reduce CPU usage and speed up daemon a caching algorithm was implemented which stores info about windows into associative arrays, that allows to just collect info of process once, and then get that info from cache immediately after obtaining its PID when window appears focused again.
+- Daemon reads X11 events related to window focus, then it gets PID of process using window ID and uses it to collect info about process (process name, its executable path, command which is used and UID) to compare it with identifiers in config, when it finds window which matches with identifier(s) specified in specific section in config, it runs command from `focus` key (if specified), when you switching to another window - applies FPS or CPU-limit (if specified) and runs command from `unfocus` key (if specified). When window does not match with any section in config, nothing happens. To reduce CPU usage and speed up daemon a caching algorithm was implemented which stores info about windows into associative arrays, that allows to just collect info about process once and then use cache to get process info immediately after obtaining its PID when window appears focused again.
 
 ##### Does that daemon reduce performance?
-- Long story short, difference in performance and battery life should not be noticeable. It uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time, but it just chills out when you playing game or working in single window.
+- Long story short, impact on neither performance nor battery life should be noticeable. It uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time, but it just chills out when you playing game or working in single window.
 
 ##### Is it safe?
 - Yes, read above. Neither I nor daemon has access to your data.
