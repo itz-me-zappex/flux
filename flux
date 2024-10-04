@@ -130,8 +130,10 @@ unset_flux_variables(){
 # Extract process info
 extract_process_info(){
 	# Extract PID of process
-	process_pid="$(xprop -id "$window_id" _NET_WM_PID)"
-	if [[ "$process_pid" != "_NET_WM_PID:  not found." ]]; then
+	if ! process_pid="$(xprop -id "$window_id" _NET_WM_PID 2>/dev/null)"; then
+		process_pid='_NET_WM_PID:  not found.'
+	fi
+	if [[ "$process_pid" != '_NET_WM_PID:  not found.' ]]; then
 		process_pid="${process_pid/* = /}"
 		# Check if info about process exists in cache
 		if [[ -z "${cache_process_name["$process_pid"]}" ]]; then
@@ -226,7 +228,7 @@ mangohud_fps_set(){
 }
 
 # Apply CPU-limit via 'cpulimit' tool on unfocus event, function required to run it on background to avoid stopping a whole code if delay specified
-cpulimit_run(){
+background_cpulimit(){
 	local cpulimit_pid
 	# Wait for delay if specified
 	if [[ "${config_key_delay["$previous_section_name"]}" != '0' ]]; then
@@ -243,7 +245,7 @@ cpulimit_run(){
 }
 
 # Freeze process on unfocus event, function required to run it on background to avoid stopping a whole code if delay specified
-freeze_process(){
+background_freeze_process(){
 	trap 'exit 0' SIGINT SIGTERM
 	# Freeze process with delay if specified, otherwise freeze process immediately
 	if [[ "${config_key_delay["$previous_section_name"]}" != '0' ]]; then
@@ -263,7 +265,7 @@ freeze_process(){
 }
 
 # Set specified FPS on unfocus, function required to run it on background to avoid stopping a whole code if delay specified
-fps_set(){
+background_mangohud_fps_set(){
 	# Wait in case delay is specified
 	if [[ "${config_key_delay["$previous_section_name"]}" != '0' ]]; then
 		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be FPS-limited after ${config_key_delay["$previous_section_name"]} second(s) on unfocus event."
@@ -435,7 +437,7 @@ Options and values:
 		shift 1
 	;;
 	--version | -V )
-		echo "flux 1.6.7
+		echo "flux 1.6.8
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
@@ -871,7 +873,7 @@ while read -r window_id; do
 					# Save PID to array to unfreeze process in case daemon interruption
 					frozen_processes_pids_array+=("$previous_process_pid")
 					# Freeze process
-					freeze_process &
+					background_freeze_process &
 					# Save PID of background command to interrupt it in case focus event appears earlier than delay ends
 					freeze_bgprocess_pid["$previous_process_pid"]="$!"
 				fi
@@ -881,7 +883,7 @@ while read -r window_id; do
 					# Mark process as CPU-limited
 					is_cpu_limited_pid["$previous_process_pid"]='1'
 					# Apply CPU-limit
-					cpulimit_run &
+					background_cpulimit &
 					# Save PID of background process to array to interrupt it in case daemon exit
 					cpulimit_bgprocesses_pids_array+=("$!")
 					# Save PID of background process to interrupt it on focus event
@@ -897,7 +899,7 @@ while read -r window_id; do
 					# Save PID to print it in case daemon exit
 					fps_limited_pid["$previous_section_name"]="$previous_process_pid"
 					# Set FPS-limit
-					fps_set &
+					background_mangohud_fps_set &
 					# Save PID of background process to interrupt it on focus event
 					fps_limit_bgprocess_pid["$previous_process_pid"]="$!"
 				fi
@@ -998,4 +1000,10 @@ while read -r window_id; do
 	previous_process_command="$process_command"
 	# Unset to avoid false positive on next cycle
 	unset section_name
+	# Unset info about process to avoid using it in some rare cases (idk why that happens, noticed that only once after a few hours of using daemon)
+	process_pid=''
+	process_name=''
+	process_executable=''
+	process_owner=''
+	process_command=''
 done < <(xprop_event_reader)
