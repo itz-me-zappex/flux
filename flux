@@ -435,7 +435,7 @@ Options and values:
 		shift 1
 	;;
 	--version | -V )
-		echo "flux 1.6.6
+		echo "flux 1.6.7
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
@@ -702,7 +702,7 @@ unset section_from_array
 # Declare associative arrays to store info about applied actions
 declare -A \
 is_frozen_pid \
-freeze_subrocess_pid \
+freeze_bgprocess_pid \
 is_cpu_limited_pid \
 cpulimit_bgprocess_pid \
 is_fps_limited_section \
@@ -873,7 +873,7 @@ while read -r window_id; do
 					# Freeze process
 					freeze_process &
 					# Save PID of background command to interrupt it in case focus event appears earlier than delay ends
-					freeze_subrocess_pid["$previous_process_pid"]="$!"
+					freeze_bgprocess_pid["$previous_process_pid"]="$!"
 				fi
 			elif [[ -n "$previous_section_name" ]] && (( "${config_key_cpu_limit["$previous_section_name"]}" > 0 )); then # Check for existence of previous match and CPU-limit specified greater than 0
 				# Run 'cpulimit' on background if CPU-limit has not been applied
@@ -911,15 +911,15 @@ while read -r window_id; do
 		# Unfreeze process if window is focused
 		if [[ -n "${is_frozen_pid["$process_pid"]}" ]]; then
 			# Do not terminate background process if it does not exist anymore
-			if [[ -d "/proc/${freeze_subrocess_pid["$process_pid"]}" ]]; then
+			if [[ -d "/proc/${freeze_bgprocess_pid["$process_pid"]}" ]]; then
 				# Terminate background process
-				if ! kill "${freeze_subrocess_pid["$process_pid"]}" > /dev/null 2>&1; then
-					print_warn "Cannot stop 'cpulimit' background process with PID '${freeze_subrocess_pid["$process_pid"]}'!"
+				if ! kill "${freeze_bgprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
+					print_warn "Cannot stop 'cpulimit' background process with PID '${freeze_bgprocess_pid["$process_pid"]}'!"
 				else
 					print_info "Delayed for ${config_key_delay["$section_name"]} second(s) freezing of process '$process_name' with PID $process_pid has been cancelled."
 				fi
 			fi
-			freeze_subrocess_pid["$process_pid"]=''
+			freeze_bgprocess_pid["$process_pid"]=''
 			# Unfreeze process
 			if ! kill -CONT "$process_pid" > /dev/null 2>&1; then
 				print_warn "Cannot unfreeze process '$process_name' with PID $process_pid!"
