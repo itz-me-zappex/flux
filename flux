@@ -290,12 +290,12 @@ exit_on_term(){
 		fi
 	done
 	# Kill cpulimit background process
-	for cpulimit_subprocess_pid in "${cpulimit_subprocesses_pids_array[@]}"; do
-		if [[ -d "/proc/$cpulimit_subprocess_pid" ]]; then
-			if ! kill "$cpulimit_subprocess_pid" > /dev/null 2>&1; then
-				print_warn "Cannot stop 'cpulimit' subprocess with PID $cpulimit_subprocess_pid on daemon termination!"
+	for cpulimit_bgprocess_pid in "${cpulimit_bgprocesses_pids_array[@]}"; do
+		if [[ -d "/proc/$cpulimit_bgprocess_pid" ]]; then
+			if ! kill "$cpulimit_bgprocess_pid" > /dev/null 2>&1; then
+				print_warn "Cannot stop 'cpulimit' background process with PID $cpulimit_bgprocess_pid on daemon termination!"
 			else
-				print_verbose "CPU-limit subprocess with PID $cpulimit_subprocess_pid has been terminated on daemon termination."
+				print_verbose "CPU-limit background process with PID $cpulimit_bgprocess_pid has been terminated on daemon termination."
 			fi
 		fi
 	done
@@ -435,7 +435,7 @@ Options and values:
 		shift 1
 	;;
 	--version | -V )
-		echo "flux 1.6.5
+		echo "flux 1.6.6
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0
 Repository: https://github.com/itz-me-zappex/flux
@@ -704,9 +704,9 @@ declare -A \
 is_frozen_pid \
 freeze_subrocess_pid \
 is_cpu_limited_pid \
-cpulimit_subprocess_pid \
+cpulimit_bgprocess_pid \
 is_fps_limited_section \
-fps_limit_subprocess_pid \
+fps_limit_bgprocess_pid \
 fps_limited_pid
 
 # Declare associative arrays to store info about windows to avoid obtaining it every time to speed up code and reduce CPU-usage
@@ -883,9 +883,9 @@ while read -r window_id; do
 					# Apply CPU-limit
 					cpulimit_run &
 					# Save PID of background process to array to interrupt it in case daemon exit
-					cpulimit_subprocesses_pids_array+=("$!")
+					cpulimit_bgprocesses_pids_array+=("$!")
 					# Save PID of background process to interrupt it on focus event
-					cpulimit_subprocess_pid["$previous_process_pid"]="$!"
+					cpulimit_bgprocess_pid["$previous_process_pid"]="$!"
 				fi
 			elif [[ -n "$previous_section_name" && -n "${config_key_fps_limit["$previous_section_name"]}" ]]; then # Check for existence of previous match and FPS-limit
 				# Apply FPS-limit if was not applied before
@@ -899,7 +899,7 @@ while read -r window_id; do
 					# Set FPS-limit
 					fps_set &
 					# Save PID of background process to interrupt it on focus event
-					fps_limit_subprocess_pid["$previous_process_pid"]="$!"
+					fps_limit_bgprocess_pid["$previous_process_pid"]="$!"
 				fi
 			fi
 		elif [[ -n "$previous_process_owner" ]]; then
@@ -914,7 +914,7 @@ while read -r window_id; do
 			if [[ -d "/proc/${freeze_subrocess_pid["$process_pid"]}" ]]; then
 				# Terminate background process
 				if ! kill "${freeze_subrocess_pid["$process_pid"]}" > /dev/null 2>&1; then
-					print_warn "Cannot stop 'cpulimit' subprocess with PID '${freeze_subrocess_pid["$process_pid"]}'!"
+					print_warn "Cannot stop 'cpulimit' background process with PID '${freeze_subrocess_pid["$process_pid"]}'!"
 				else
 					print_info "Delayed for ${config_key_delay["$section_name"]} second(s) freezing of process '$process_name' with PID $process_pid has been cancelled."
 				fi
@@ -939,27 +939,27 @@ while read -r window_id; do
 			unset frozen_process_pid frozen_processes_pids_array_temp
 		elif [[ -n "${is_cpu_limited_pid["$process_pid"]}" ]]; then # Check for CPU-limit via 'cpulimit' background process
 			# Terminate 'cpulimit' background process
-			if ! kill "${cpulimit_subprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
-				print_warn "Cannot stop 'cpulimit' subprocess with PID ${cpulimit_subprocess_pid["$process_pid"]}!"
+			if ! kill "${cpulimit_bgprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
+				print_warn "Cannot stop 'cpulimit' background process with PID ${cpulimit_bgprocess_pid["$process_pid"]}!"
 			else
 				print_info "Process '$process_name' with PID $process_pid has been CPU unlimited on focus event."
 			fi
 			is_cpu_limited_pid["$process_pid"]=''
 			# Remove PID of 'cpulimit' background process from array
-			for cpulimit_subprocess in "${cpulimit_subprocesses_pids_array[@]}"; do
+			for cpulimit_bgprocess in "${cpulimit_bgprocesses_pids_array[@]}"; do
 				# Skip interrupted background process since I want remove it from array
-				if [[ "$cpulimit_subprocess" != "${cpulimit_subprocess_pid["$process_pid"]}" ]]; then
-					cpulimit_subprocesses_pids_array_temp+=("$cpulimit_subprocess")
+				if [[ "$cpulimit_bgprocess" != "${cpulimit_bgprocess_pid["$process_pid"]}" ]]; then
+					cpulimit_bgprocesses_pids_array_temp+=("$cpulimit_bgprocess")
 				fi
 			done
-			cpulimit_subprocess_pid["$process_pid"]=''
-			cpulimit_subprocesses_pids_array=("${cpulimit_subprocesses_pids_array_temp[@]}")
-			unset cpulimit_subprocess cpulimit_subprocesses_pids_array_temp
+			cpulimit_bgprocess_pid["$process_pid"]=''
+			cpulimit_bgprocesses_pids_array=("${cpulimit_bgprocesses_pids_array_temp[@]}")
+			unset cpulimit_bgprocess cpulimit_bgprocesses_pids_array_temp
 		elif [[ -n "$section_name" && -n "${is_fps_limited_section["$section_name"]}" ]]; then
 			# Do not terminate FPS-limit background process if it does not exist anymore
-			if [[ -d "/proc/${fps_limit_subprocess_pid["$process_pid"]}" ]]; then
-				if ! kill "${fps_limit_subprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
-					print_warn "Cannot stop FPS-limit subprocess with PID ${fps_limit_subprocess_pid["$process_pid"]}!"
+			if [[ -d "/proc/${fps_limit_bgprocess_pid["$process_pid"]}" ]]; then
+				if ! kill "${fps_limit_bgprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
+					print_warn "Cannot stop FPS-limit background process with PID ${fps_limit_bgprocess_pid["$process_pid"]}!"
 				else
 					print_info "Delayed for ${config_key_delay["$section_name"]} second(s) FPS-limiting of process '$process_name' with PID $process_pid has been cancelled."
 				fi
