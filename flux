@@ -277,7 +277,7 @@ fps_set(){
 	fi
 }
 
-# Actions on TERM and INT signals
+# Actions on SIGTERM and SIGINT signals
 exit_on_term(){
 	# Unfreeze processes
 	for frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
@@ -289,7 +289,7 @@ exit_on_term(){
 			fi
 		fi
 	done
-	# Kill cpulimit subprocesses
+	# Kill cpulimit background process
 	for cpulimit_subprocess_pid in "${cpulimit_subprocesses_pids_array[@]}"; do
 		if [[ -d "/proc/$cpulimit_subprocess_pid" ]]; then
 			if ! kill "$cpulimit_subprocess_pid" > /dev/null 2>&1; then
@@ -307,7 +307,7 @@ exit_on_term(){
 	done
 }
 
-# Remove CPU-limit for processes on exit
+# Remove CPU-limits and FPS-limits of processes on exit
 trap 'exit_on_term ; print_info "Daemon has been terminated successfully." ; exit 0' SIGTERM SIGINT
 
 # Prefixes for output
@@ -872,19 +872,19 @@ while read -r window_id; do
 					frozen_processes_pids_array+=("$previous_process_pid")
 					# Freeze process
 					freeze_process &
-					# Save PID of subprocess to interrupt it in case focus event appears earlier than delay ends
+					# Save PID of background command to interrupt it in case focus event appears earlier than delay ends
 					freeze_subrocess_pid["$previous_process_pid"]="$!"
 				fi
 			elif [[ -n "$previous_section_name" ]] && (( "${config_key_cpu_limit["$previous_section_name"]}" > 0 )); then # Check for existence of previous match and CPU-limit specified greater than 0
-				# Run cpulimit subprocess if CPU-limit has not been applied
+				# Run 'cpulimit' on background if CPU-limit has not been applied
 				if [[ -z "${is_cpu_limited_pid["$previous_process_pid"]}" ]]; then
 					# Mark process as CPU-limited
 					is_cpu_limited_pid["$previous_process_pid"]='1'
 					# Apply CPU-limit
 					cpulimit_run &
-					# Save PID of subprocess to array to interrupt it in case daemon exit
+					# Save PID of background process to array to interrupt it in case daemon exit
 					cpulimit_subprocesses_pids_array+=("$!")
-					# Save PID of subprocess to interrupt it on focus event
+					# Save PID of background process to interrupt it on focus event
 					cpulimit_subprocess_pid["$previous_process_pid"]="$!"
 				fi
 			elif [[ -n "$previous_section_name" && -n "${config_key_fps_limit["$previous_section_name"]}" ]]; then # Check for existence of previous match and FPS-limit
@@ -898,7 +898,7 @@ while read -r window_id; do
 					fps_limited_pid["$previous_section_name"]="$previous_process_pid"
 					# Set FPS-limit
 					fps_set &
-					# Save PID of subprocess to interrupt it on focus event
+					# Save PID of background process to interrupt it on focus event
 					fps_limit_subprocess_pid["$previous_process_pid"]="$!"
 				fi
 			fi
@@ -910,9 +910,9 @@ while read -r window_id; do
 	if [[ -n "$process_pid" ]]; then
 		# Unfreeze process if window is focused
 		if [[ -n "${is_frozen_pid["$process_pid"]}" ]]; then
-			# Do not terminate subprocess if it does not exist anymore
+			# Do not terminate background process if it does not exist anymore
 			if [[ -d "/proc/${freeze_subrocess_pid["$process_pid"]}" ]]; then
-				# Terminate subprocess
+				# Terminate background process
 				if ! kill "${freeze_subrocess_pid["$process_pid"]}" > /dev/null 2>&1; then
 					print_warn "Cannot stop 'cpulimit' subprocess with PID '${freeze_subrocess_pid["$process_pid"]}'!"
 				else
@@ -937,17 +937,17 @@ while read -r window_id; do
 			done
 			frozen_processes_pids_array=("${frozen_processes_pids_array_temp[@]}")
 			unset frozen_process_pid frozen_processes_pids_array_temp
-		elif [[ -n "${is_cpu_limited_pid["$process_pid"]}" ]]; then # Check for CPU-limit via 'cpulimit' subprocess
-			# Terminate 'cpulimit' subprocess
+		elif [[ -n "${is_cpu_limited_pid["$process_pid"]}" ]]; then # Check for CPU-limit via 'cpulimit' background process
+			# Terminate 'cpulimit' background process
 			if ! kill "${cpulimit_subprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
 				print_warn "Cannot stop 'cpulimit' subprocess with PID ${cpulimit_subprocess_pid["$process_pid"]}!"
 			else
 				print_info "Process '$process_name' with PID $process_pid has been CPU unlimited on focus event."
 			fi
 			is_cpu_limited_pid["$process_pid"]=''
-			# Remove PID of 'cpulimit' subprocess from array
+			# Remove PID of 'cpulimit' background process from array
 			for cpulimit_subprocess in "${cpulimit_subprocesses_pids_array[@]}"; do
-				# Skip interrupted subprocess since I want remove it from array
+				# Skip interrupted background process since I want remove it from array
 				if [[ "$cpulimit_subprocess" != "${cpulimit_subprocess_pid["$process_pid"]}" ]]; then
 					cpulimit_subprocesses_pids_array_temp+=("$cpulimit_subprocess")
 				fi
@@ -956,7 +956,7 @@ while read -r window_id; do
 			cpulimit_subprocesses_pids_array=("${cpulimit_subprocesses_pids_array_temp[@]}")
 			unset cpulimit_subprocess cpulimit_subprocesses_pids_array_temp
 		elif [[ -n "$section_name" && -n "${is_fps_limited_section["$section_name"]}" ]]; then
-			# Do not terminate FPS-limit subprocess if it does not exist anymore
+			# Do not terminate FPS-limit background process if it does not exist anymore
 			if [[ -d "/proc/${fps_limit_subprocess_pid["$process_pid"]}" ]]; then
 				if ! kill "${fps_limit_subprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
 					print_warn "Cannot stop FPS-limit subprocess with PID ${fps_limit_subprocess_pid["$process_pid"]}!"
@@ -988,7 +988,7 @@ while read -r window_id; do
 		unset_flux_variables
 		print_verbose "Running command on focus event '${config_key_focus["$section_name"]}' from section '$section_name'."
 	fi
-	# Remember info of process to next cycle to run commands on unfocus and apply CPU-limit, also for pass variables to command in 'unfocus' key
+	# Remember info about process for next cycle to run commands on unfocus event and apply CPU/FPS-limit, also for pass variables to command in 'unfocus' key
 	previous_window_id="$window_id"
 	previous_process_pid="$process_pid"
 	previous_process_name="$process_name"
