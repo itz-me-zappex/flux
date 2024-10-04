@@ -80,7 +80,7 @@ Dependencies for other distributions will be added soon.
 #### Manual installation
 Make sure you have installed dependencies described above before continue.
 ```bash
-$ fluxver='1.6.6'
+$ fluxver='1.6.7'
 $ mkdir flux && cd flux # create build directory
 $ wget https://github.com/itz-me-zappex/flux/archive/refs/tags/v${fluxver}.tar.gz # download archive with release
 $ tar -xvf v${fluxver}.tar.gz # extract it
@@ -90,7 +90,7 @@ $ sudo install -Dm 755 flux-${fluxver}/flux /usr/local/bin/flux # Install daemon
 #### Arch Linux (and based distributions)
 Make sure you have installed `base-devel` package before continue.
 ``` bash
-$ fluxver='1.6.6'
+$ fluxver='1.6.7'
 $ mkdir flux && cd flux # create build directory
 $ wget https://github.com/itz-me-zappex/flux/releases/download/v${fluxver}/PKGBUILD # download PKGBUILD
 $ makepkg -sric # build a package and install it
@@ -98,7 +98,7 @@ $ makepkg -sric # build a package and install it
 
 #### Debian/Ubuntu (and based distributions)
 ```bash
-$ fluxver='1.6.6'
+$ fluxver='1.6.7'
 $ mkdir flux && cd flux # create build directory
 $ wget https://github.com/itz-me-zappex/flux/releases/download/v${fluxver}/build-deb.sh # download build script
 $ chmod +x build-deb.sh # make it executable
