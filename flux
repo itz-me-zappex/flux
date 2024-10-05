@@ -43,35 +43,35 @@ x11_session_check(){
 
 # Extract window IDs from xprop events
 xprop_event_reader(){
-	local stacking_windows_id focused_window_id stacking_window_id
+	local local_stacking_windows_id local_focused_window_id local_stacking_window_id
 	# Print window IDs of open windows to apply limits immediately if '--hot' option was passed
 	if [[ -n "$hot" ]]; then
 		# Extract IDs of open windows
-		stacking_windows_id="$(xprop -root _NET_CLIENT_LIST_STACKING 2>/dev/null)"
-		if [[ "$stacking_windows_id" != '_NET_CLIENT_LIST_STACKING:  no such atom on any window.' ]]; then
-			stacking_windows_id="${stacking_windows_id/* \# /}"
-			stacking_windows_id="${stacking_windows_id//\,/}"
+		local_stacking_windows_id="$(xprop -root _NET_CLIENT_LIST_STACKING 2>/dev/null)"
+		if [[ "$local_stacking_windows_id" != '_NET_CLIENT_LIST_STACKING:  no such atom on any window.' ]]; then
+			local_stacking_windows_id="${local_stacking_windows_id/* \# /}"
+			local_stacking_windows_id="${local_stacking_windows_id//\,/}"
 		else
 			# Print event for safe exit if cannot obtain list of stacking windows
 			print_error "Unable to get list of stacking windows!"
 			echo 'exit'
 		fi
 		# Extract ID of focused window
-		focused_window_id="$(xprop -root _NET_ACTIVE_WINDOW 2>/dev/null)"
-		if [[ "$focused_window_id" != '_NET_ACTIVE_WINDOW:  no such atom on any window.' ]]; then
-			focused_window_id="${focused_window_id/* \# /}"
+		local_focused_window_id="$(xprop -root _NET_ACTIVE_WINDOW 2>/dev/null)"
+		if [[ "$local_focused_window_id" != '_NET_ACTIVE_WINDOW:  no such atom on any window.' ]]; then
+			local_focused_window_id="${local_focused_window_id/* \# /}"
 		else
 			# Print event for safe exit if cannot obtain ID of focused window
 			print_error "Unable to get ID of focused window!"
 			echo 'exit'
 		fi
 		# Print IDs of windows, but skip currently focused window
-		for stacking_window_id in $stacking_windows_id; do
-			if [[ "$stacking_window_id" != "$focused_window_id" ]]; then
-				echo "$stacking_window_id"
+		for local_stacking_window_id in $local_stacking_windows_id; do
+			if [[ "$local_stacking_window_id" != "$local_focused_window_id" ]]; then
+				echo "$local_stacking_window_id"
 			fi
 		done
-		unset stacking_windows_id focused_window_id stacking_window_id
+		unset local_stacking_windows_id local_focused_window_id local_stacking_window_id
 		# Print event for unset '--hot' option since it becomes useless from this moment
 		echo 'nohot'
 	fi
@@ -188,53 +188,53 @@ extract_process_info(){
 
 # Change FPS limit in specified MangoHud config
 mangohud_fps_set(){
-	local config_line config_content new_config_content config_path="$1" fps_limit="$2" fps_limit_is_changed
+	local local_config_line local_config_content local_new_config_content local_config="$1" fps_limit="$2" fps_limit_is_changed
 	# Check if config file exists before continue in case it has been removed
-	if [[ -f "$config_path" ]]; then
+	if [[ -f "$local_config" ]]; then
 		# Return an error if file is not readable
-		if ! config_content="$(<"$config_path")"; then
-			print_warn "Unable to read MangoHud config file '$config_path'!"
+		if ! local_config_content="$(<"$local_config")"; then
+			print_warn "Unable to read MangoHud config file '$local_config'!"
 			return 1
 		fi
 		# Replace 'fps_limit' value in config if exists
-		while read -r config_line || [[ -n "$config_line" ]]; do
+		while read -r local_config_line || [[ -n "$local_config_line" ]]; do
 			# Find 'fps_limit' line
-			if [[ "$config_line" == 'fps_limit='* ]]; then
+			if [[ "$local_config_line" == 'fps_limit='* ]]; then
 				# Set specified FPS limit
-				if [[ -n "$new_config_content" ]]; then
-					new_config_content="$new_config_content\nfps_limit=$fps_limit"
+				if [[ -n "$local_new_config_content" ]]; then
+					local_new_config_content="$local_new_config_content\nfps_limit=$fps_limit"
 				else
-					new_config_content="fps_limit=$fps_limit"
+					local_new_config_content="fps_limit=$fps_limit"
 				fi
 				fps_limit_is_changed='1'
 			else
-				if [[ -n "$new_config_content" ]]; then
-					new_config_content="$new_config_content\n$config_line"
+				if [[ -n "$local_new_config_content" ]]; then
+					local_new_config_content="$local_new_config_content\n$local_config_line"
 				else
-					new_config_content="$config_line"
+					local_new_config_content="$local_config_line"
 				fi
 			fi
-		done <<< "$config_content"
+		done <<< "$local_config_content"
 		# Add 'fps_limit' line to config if it does not exist, i.e. was not found and changed
 		if [[ -z "$fps_limit_is_changed" ]]; then
-			echo "fps_limit=$fps_limit" >> "$config_path"
+			echo "fps_limit=$fps_limit" >> "$local_config"
 		else
-			echo -e "$new_config_content" > "$config_path"
+			echo -e "$local_new_config_content" > "$local_config"
 		fi
 		# Return an error if something gone wrong
 		if (( $? > 0 )); then
-			print_warn "Unable to modify MangoHud config file '$config_path'!"
+			print_warn "Unable to modify MangoHud config file '$local_config'!"
 			return 1
 		fi
 	else
-		print_warn "MangoHud config file '$config_path' was not found!"
+		print_warn "MangoHud config file '$local_config' was not found!"
 		return 1
 	fi
 }
 
 # Apply CPU limit via 'cpulimit' tool on unfocus event, function required to run it on background to avoid stopping a whole code if delay specified
 background_cpulimit(){
-	local cpulimit_pid
+	local local_cpulimit_pid
 	# Wait for delay if specified
 	if [[ "${config_key_delay["$previous_section_name"]}" != '0' ]]; then
 		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be CPU limited after ${config_key_delay["$previous_section_name"]} second(s) on unfocus event."
@@ -244,9 +244,9 @@ background_cpulimit(){
 	# Apply CPU limit
 	cpulimit --lazy --limit="${config_key_cpu_limit["$previous_section_name"]}" --pid="$previous_process_pid" > /dev/null 2>&1 &
 	# Remember PID, set action to kill it on INT/TERM signals and wait until it done
-	cpulimit_pid="$!"
-	trap "kill $cpulimit_pid > /dev/null 2>&1" SIGINT SIGTERM
-	wait "$cpulimit_pid"
+	local_cpulimit_pid="$!"
+	trap "kill $local_cpulimit_pid > /dev/null 2>&1" SIGINT SIGTERM
+	wait "$local_cpulimit_pid"
 }
 
 # Freeze process on unfocus event, function required to run it on background to avoid stopping a whole code if delay specified
