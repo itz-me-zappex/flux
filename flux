@@ -37,7 +37,7 @@ xprop_event_reader(){
 	local stacking_windows_id focused_window_id stacking_window_id
 	# Exit with an error if xprop fails (like in case when it unable to open display)
 	if ! xprop -root > /dev/null 2>&1; then
-		print_error "Cannot start daemon because process 'xprop' required for reading X11 events exits with an error!"
+		print_error "Unable to start daemon because process 'xprop' required for reading X11 events exits with an error!"
 		exit 1
 	fi
 	# Print window IDs of open windows to apply limits immediately if '--hot' option was passed
@@ -49,7 +49,7 @@ xprop_event_reader(){
 			stacking_windows_id="${stacking_windows_id//\,/}"
 		else
 			# Print event for safe exit if cannot obtain list of stacking windows
-			print_error "An error occured trying get list of stacking windows!"
+			print_error "Unable to get list of stacking windows!"
 			echo 'exit'
 		fi
 		# Extract ID of focused window
@@ -58,7 +58,7 @@ xprop_event_reader(){
 			focused_window_id="${focused_window_id/* \# /}"
 		else
 			# Print event for safe exit if cannot obtain ID of focused window
-			print_error "An error occured trying get ID of focused window!"
+			print_error "Unable to get ID of focused window!"
 			echo 'exit'
 		fi
 		# Print IDs of windows, but skip currently focused window
@@ -83,7 +83,7 @@ xprop_event_reader(){
 		fi
 		# Print warning in case loop was restarted
 		if [[ -n "$first_loop" ]]; then
-			print_warn "Process 'xprop' required for reading X11 events restarted after termination by user!"
+			print_warn "Process 'xprop' required for reading X11 events has been restarted by daemon after termination!"
 		else
 			first_loop='1'
 		fi
@@ -91,7 +91,7 @@ xprop_event_reader(){
 		while read -r xprop_event; do
 			# Print event for safe exit in case X server dies
 			if [[ "$xprop_event" =~ 'X connection to :'[0-9]+' broken (explicit kill or server shutdown).' ]]; then
-				print_error "X server on display '$DISPLAY' has been terminated!"
+				print_error "X server on display $DISPLAY has been terminated!"
 				echo 'exit'
 				exit='1'
 			fi
@@ -166,7 +166,7 @@ extract_process_info(){
 			cache_process_executable["$process_pid"]="$process_executable"
 			cache_process_owner["$process_pid"]="$process_owner"
 			cache_process_command["$process_pid"]="$process_command"
-			# Save PID to array to make it easier to remove info from cache in case process does not exist
+			# Store PID to array to make it easier to remove info from cache in case process does not exist
 			cached_pids_array+=("$process_pid")
 		else
 			# Set values from cache
@@ -181,7 +181,7 @@ extract_process_info(){
 	fi
 }
 
-# Change FPS-limit in specified MangoHud config
+# Change FPS limit in specified MangoHud config
 mangohud_fps_set(){
 	local config_line config_content new_config_content config_path="$1" fps_limit="$2" fps_limit_is_changed
 	# Check if config file exists before continue in case it has been removed
@@ -195,7 +195,7 @@ mangohud_fps_set(){
 		while read -r config_line || [[ -n "$config_line" ]]; do
 			# Find 'fps_limit' line
 			if [[ "$config_line" == 'fps_limit='* ]]; then
-				# Set specified FPS-limit
+				# Set specified FPS limit
 				if [[ -n "$new_config_content" ]]; then
 					new_config_content="$new_config_content\nfps_limit=$fps_limit"
 				else
@@ -227,7 +227,7 @@ mangohud_fps_set(){
 	fi
 }
 
-# Apply CPU-limit via 'cpulimit' tool on unfocus event, function required to run it on background to avoid stopping a whole code if delay specified
+# Apply CPU limit via 'cpulimit' tool on unfocus event, function required to run it on background to avoid stopping a whole code if delay specified
 background_cpulimit(){
 	local cpulimit_pid
 	# Wait for delay if specified
@@ -236,7 +236,7 @@ background_cpulimit(){
 		sleep "${config_key_delay["$previous_section_name"]}"
 	fi
 	print_verbose "Process '$previous_process_name' with PID $previous_process_pid has been CPU limited to $(( ${config_key_cpu_limit["$previous_section_name"]} / cpu_threads ))% on unfocus event."
-	# Apply CPU-limit
+	# Apply CPU limit
 	cpulimit --lazy --limit="${config_key_cpu_limit["$previous_section_name"]}" --pid="$previous_process_pid" > /dev/null 2>&1 &
 	# Remember PID, set action to kill it on INT/TERM signals and wait until it done
 	cpulimit_pid="$!"
@@ -246,7 +246,6 @@ background_cpulimit(){
 
 # Freeze process on unfocus event, function required to run it on background to avoid stopping a whole code if delay specified
 background_freeze_process(){
-	trap 'exit 0' SIGINT SIGTERM
 	# Freeze process with delay if specified, otherwise freeze process immediately
 	if [[ "${config_key_delay["$previous_section_name"]}" != '0' ]]; then
 		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be frozen after ${config_key_delay["$previous_section_name"]} second(s) on unfocus event."
@@ -268,14 +267,29 @@ background_freeze_process(){
 background_mangohud_fps_set(){
 	# Wait in case delay is specified
 	if [[ "${config_key_delay["$previous_section_name"]}" != '0' ]]; then
-		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be FPS-limited after ${config_key_delay["$previous_section_name"]} second(s) on unfocus event."
+		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be FPS limited after ${config_key_delay["$previous_section_name"]} second(s) on unfocus event."
 		sleep "${config_key_delay["$previous_section_name"]}"
 	fi
-	# Apply FPS-limit if target still exists, otherwise throw warning
+	# Apply FPS limit if target still exists, otherwise throw warning
 	if [[ -d "/proc/$previous_process_pid" ]]; then
-		if mangohud_fps_set "${config_key_mangohud_config["$previous_section_name"]}" "${config_key_fps_limit["$previous_section_name"]}"; then
-			print_info "Process '$previous_process_name' with PID $previous_process_pid has been FPS-limited to ${config_key_fps_limit["$previous_section_name"]} FPS on unfocus event."
+		if mangohud_fps_set "${config_key_mangohud_config["$previous_section_name"]}" "${config_key_fps_unfocus["$previous_section_name"]}"; then
+			print_info "Process '$previous_process_name' with PID $previous_process_pid has been FPS limited to ${config_key_fps_unfocus["$previous_section_name"]} FPS on unfocus event."
 		fi
+	fi
+	# Wait for process termination to unset FPS limit
+	print_verbose "Waiting for termination of process '$previous_process_name' with PID $previous_process_pid to unset FPS limit..."
+	sleep 1 # Wait a bit in case process terminates immediately after unfocus to avoid waiting for 5 seconds
+	while true; do
+		if [[ -d "/proc/$previous_process_pid" ]]; then
+			# Yes, I know, there is no better way, 'wait' does not work for processes started outside of current shell
+			sleep 5
+		else
+			break
+		fi
+	done
+	# Unset FPS limit
+	if mangohud_fps_set "${config_key_mangohud_config["$previous_section_name"]}" "${config_key_fps_focus["$previous_section_name"]}"; then
+		print_info "Process '$previous_process_name' with PID $previous_process_pid has been FPS unlimited after termination."
 	fi
 }
 
@@ -283,7 +297,17 @@ background_mangohud_fps_set(){
 exit_on_term(){
 	# Unfreeze processes
 	for frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
-		if [[ -d "/proc/$frozen_process_pid" ]]; then
+		# Terminate background process if exists
+		if [[ -d "/proc/${freeze_bgprocess_pid["$frozen_process_pid"]}" ]]; then
+			if ! kill "${freeze_bgprocess_pid["$frozen_process_pid"]}" > /dev/null 2>&1; then
+				print_warn "Unable to cancel delayed for ${config_key_delay["${cache_section["$frozen_process_pid"]}"]} second(s) freezing of process '${cache_process_name["$frozen_process_pid"]}' with PID $frozen_process_pid!"
+			else
+				# Avoid printing this message if delay is not specified
+				if [[ "${config_key_delay["${cache_section["$frozen_process_pid"]}"]}" != '0' ]]; then
+					print_verbose "Delayed for ${config_key_delay["${cache_section["$frozen_process_pid"]}"]} second(s) freezing of process '${cache_process_name["$frozen_process_pid"]}' with PID $frozen_process_pid has been cancelled on daemon termination."
+				fi
+			fi
+		elif [[ -d "/proc/$frozen_process_pid" ]]; then # Unfreeze process
 			if ! kill -CONT "$frozen_process_pid" > /dev/null 2>&1; then
 				print_warn "Process '${cache_process_name["$frozen_process_pid"]}' with PID $frozen_process_pid cannot be unfrozen on daemon termination!"
 			else
@@ -292,24 +316,33 @@ exit_on_term(){
 		fi
 	done
 	# Kill cpulimit background process
-	for cpulimit_bgprocess_pid in "${cpulimit_bgprocesses_pids_array[@]}"; do
-		if [[ -d "/proc/$cpulimit_bgprocess_pid" ]]; then
-			if ! kill "$cpulimit_bgprocess_pid" > /dev/null 2>&1; then
-				print_warn "Process '${cache_process_name["${cpu_limited_pid["${cpulimit_bgprocess_pid}"]}"]}' with PID ${cpu_limited_pid["${cpulimit_bgprocess_pid}"]} cannot be CPU unlimited on daemon termination!"
+	for cpulimit_bgprocess_pid_var in "${cpulimit_bgprocesses_pids_array[@]}"; do
+		if [[ -d "/proc/$cpulimit_bgprocess_pid_var" ]]; then
+			if ! kill "$cpulimit_bgprocess_pid_var" > /dev/null 2>&1; then
+				print_warn "Process '${cache_process_name["${cpu_limited_pid["${cpulimit_bgprocess_pid_var}"]}"]}' with PID ${cpu_limited_pid["${cpulimit_bgprocess_pid_var}"]} cannot be CPU unlimited on daemon termination!"
 			else
-				print_verbose "Process '${cache_process_name["${cpu_limited_pid["${cpulimit_bgprocess_pid}"]}"]}' with PID ${cpu_limited_pid["${cpulimit_bgprocess_pid}"]} has been CPU-unlimited on daemon termination."
+				print_verbose "Process '${cache_process_name["${cpu_limited_pid["${cpulimit_bgprocess_pid_var}"]}"]}' with PID ${cpu_limited_pid["${cpulimit_bgprocess_pid_var}"]} has been CPU unlimited on daemon termination."
 			fi
 		fi
 	done
-	# Remove FPS-limits
+	# Remove FPS limits
 	for fps_limited_section in "${fps_limited_sections_array[@]}"; do
-		if mangohud_fps_set "${config_key_mangohud_config["$fps_limited_section"]}" "${config_key_fps_unlimit["$fps_limited_section"]}"; then
-			print_verbose "Process '${cache_process_name["${fps_limited_pid["$fps_limited_section"]}"]}' with PID ${fps_limited_pid["$fps_limited_section"]} has been FPS-unlimited on daemon termination."
+		# Terminate background process if exists
+		if [[ -d "/proc/${fps_limit_bgprocess_pid["${fps_limited_pid["$fps_limited_section"]}"]}" ]]; then
+			if ! kill "${fps_limit_bgprocess_pid["${fps_limited_pid["$fps_limited_section"]}"]}" > /dev/null 2>&1; then
+				print_warn "Unable to stop FPS limit background process with PID ${fps_limit_bgprocess_pid["${fps_limited_pid["$fps_limited_section"]}"]}!"
+			else
+				print_verbose "FPS limit background process related to process '${cache_process_name["${fps_limited_pid["$fps_limited_section"]}"]}' with PID ${fps_limited_pid["$fps_limited_section"]} has been terminated on daemon termination."
+			fi
+		fi
+		# Set FPS from 'fps-focus' key to remove limit
+		if mangohud_fps_set "${config_key_mangohud_config["$fps_limited_section"]}" "${config_key_fps_focus["$fps_limited_section"]}"; then
+			print_verbose "Process '${cache_process_name["${fps_limited_pid["$fps_limited_section"]}"]}' with PID ${fps_limited_pid["$fps_limited_section"]} has been FPS unlimited on daemon termination."
 		fi
 	done
 }
 
-# Remove CPU-limits and FPS-limits of processes on exit
+# Remove CPU limits and FPS limits of processes on exit
 trap 'exit_on_term ; print_info "Daemon has been terminated successfully." ; exit 0' SIGTERM SIGINT
 
 # Prefixes for output
@@ -352,7 +385,7 @@ while (( $# > 0 )); do
 	--focus | -f | --pick | -p )
 		# Exit with an error if xprop unable to open display, I don't really care, both xprop and xwininfo will fail in this case
 		if ! xprop -root > /dev/null 2>&1; then
-			print_error "Cannot obtain process info because process 'xprop' or 'xwininfo' required to obtain window ID exits with an error!"
+			print_error "Unable to obtain process info because process 'xprop' or 'xwininfo' required to obtain window ID exits with an error!"
 			exit 1
 		fi
 		# Select command depending by type of option
@@ -366,7 +399,7 @@ while (( $# > 0 )); do
 		--pick | -p )
 			# Get xwininfo output containing window ID
 			if ! window_id="$(xwininfo 2>/dev/null)"; then
-				print_error "Cannot grab cursor to pick a window!"
+				print_error "Unable to grab cursor to pick a window!"
 				exit 1
 			else
 				# Extract ID of focused window
@@ -396,7 +429,7 @@ unfocus =
 "
 			exit 0
 		else
-			print_error "Cannot create template for window with ID $window_id since it does not report its PID!"
+			print_error "Unable to create template for window with ID $window_id since it does not report its PID!"
 			exit 1
 		fi
 	;;
@@ -437,10 +470,11 @@ Options and values:
 		shift 1
 	;;
 	--version | -V )
-		echo "flux 1.6.9
+		echo "flux 1.6.10
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
-License: GPL-3.0
+License: GPL-3.0-only
 Repository: https://github.com/itz-me-zappex/flux
+Developer: https://github.com/itz-me-zappex
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 "
@@ -499,7 +533,7 @@ if [[ -z "$config" ]]; then
 	exit 1
 fi
 
-# Calculate maximum allowable CPU-limit and CPU threads
+# Calculate maximum allowable CPU limit and CPU threads
 cpu_threads='0'
 while read -r cpuinfo_line; do
 	if [[ "$cpuinfo_line" == 'processor'* ]]; then
@@ -520,8 +554,8 @@ config_key_focus \
 config_key_unfocus \
 config_key_command \
 config_key_mangohud_config \
-config_key_fps_limit \
-config_key_fps_unlimit
+config_key_fps_unfocus \
+config_key_fps_focus
 
 # INI parser
 while read -r config_line || [[ -n "$config_line" ]]; do
@@ -596,7 +630,7 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 			fi
 		;;
 		cpu-limit* )
-			# Exit with an error if CPU-limit is specified incorrectly
+			# Exit with an error if CPU limit is specified incorrectly
 			if [[ "$value" =~ ^[0-9]+(\%)?$ || "$value" =~ ^('-1'|'-1%')$ ]] && (( "${value/%\%/}" * cpu_threads <= max_cpu_limit )); then
 				if [[ "$value" =~ ^('-1'|'-1%')$ ]]; then
 					config_key_cpu_limit["$section"]="${value/%\%/}"
@@ -638,7 +672,13 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 		fps-unfocus* )
 			# Exit with an error if value is not integer
 			if [[ "$value" =~ ^[0-9]+$ ]]; then
-				config_key_fps_limit["$section"]="$value"
+				# Exit with an error if value equal to zero
+				if [[ "$value" != '0' ]]; then
+					config_key_fps_unfocus["$section"]="$value"
+				else
+					print_error "Value $value in key 'fps-unfocus' in section '$section' should be greater than zero!"
+					exit 1
+				fi
 			else
 				print_error "Value '$value' specified in key 'fps-unfocus' in section '$section' is not an integer!"
 				exit 1
@@ -646,14 +686,14 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 		;;
 		fps-focus* )
 			if [[ "$value" =~ ^[0-9]+$ ]]; then
-				config_key_fps_unlimit["$section"]="$value"
+				config_key_fps_focus["$section"]="$value"
 			else
 				print_error "Value '$value' specified in key 'fps-focus' in section '$section' is not an integer!"
 				exit 1
 			fi
 		esac
 	else
-		print_error "Cannot define type of line '$config_line'!"
+		print_error "Unable to define type of line '$config_line'!"
 		exit 1
 	fi
 done < "$config"
@@ -666,31 +706,31 @@ for section_from_array in "${sections_array[@]}"; do
 		print_error "At least one process identifier required in section '$section_from_array'!"
 		exit 1
 	fi
-	# Exit with an error if MangoHud FPS-limit is not specified along with config path (for the fuck should I know which config should be modified then?)
-	if [[ -n "${config_key_fps_limit["$section_from_array"]}" && -z "${config_key_mangohud_config["$section_from_array"]}" ]]; then
-		print_error "FPS-limit in key 'fps-unfocus' in section '$section_from_array' is specified without path to MangoHud config!"
+	# Exit with an error if MangoHud FPS limit is not specified along with config path (for the fuck should I know which config should be modified then?)
+	if [[ -n "${config_key_fps_unfocus["$section_from_array"]}" && -z "${config_key_mangohud_config["$section_from_array"]}" ]]; then
+		print_error "Value ${config_key_fps_unfocus["$section_from_array"]} in key 'fps-unfocus' in section '$section_from_array' is specified without path to MangoHud config!"
 		exit 1
 	fi
-	# Exit with an error if MangoHud FPS-limit is specified along with CPU-limit
-	if [[ -n "${config_key_fps_limit["$section_from_array"]}" && -n "${config_key_cpu_limit["$section_from_array"]}" && "${config_key_cpu_limit["$section_from_array"]}" != '-1' ]]; then
-		print_error "Do not use FPS-limit along with CPU-limit in section '$section_from_array'!"
+	# Exit with an error if MangoHud FPS limit is specified along with CPU limit
+	if [[ -n "${config_key_fps_unfocus["$section_from_array"]}" && -n "${config_key_cpu_limit["$section_from_array"]}" && "${config_key_cpu_limit["$section_from_array"]}" != '-1' ]]; then
+		print_error "Do not use FPS limit along with CPU limit in section '$section_from_array'!"
 		exit 1
 	fi
 	# Exit with an error if 'fps-focus' is specified without 'fps-unfocus'
-	if [[ -n "${config_key_fps_unlimit["$section_from_array"]}" && -z "${config_key_fps_limit["$section_from_array"]}" ]]; then
+	if [[ -n "${config_key_fps_focus["$section_from_array"]}" && -z "${config_key_fps_unfocus["$section_from_array"]}" ]]; then
 		print_error "Do not use 'fps-focus' key without 'fps-unfocus' key in section '$section_from_array'!"
 		exit 1
 	fi
 	# Exit with an error if 'mangohud-config' is specified without 'fps-unfocus'
-	if [[ -n "${config_key_mangohud_config["$section_from_array"]}" && -z "${config_key_fps_limit["$section_from_array"]}" ]]; then
+	if [[ -n "${config_key_mangohud_config["$section_from_array"]}" && -z "${config_key_fps_unfocus["$section_from_array"]}" ]]; then
 		print_error "Do not use 'mangohud-config' key without 'fps-unfocus' key in section '$section_from_array'!"
 		exit 1
 	fi
 	# Set 'fps-focus' to '0' (none) if it is not specified
-	if [[ -n "${config_key_fps_limit["$section_from_array"]}" && -z "${config_key_fps_unlimit["$section_from_array"]}" ]]; then
-		config_key_fps_unlimit["$section_from_array"]='0'
+	if [[ -n "${config_key_fps_unfocus["$section_from_array"]}" && -z "${config_key_fps_focus["$section_from_array"]}" ]]; then
+		config_key_fps_focus["$section_from_array"]='0'
 	fi
-	# Set CPU-limit to '-1' (none) if it is not specified
+	# Set CPU limit to '-1' (none) if it is not specified
 	if [[ -z "${config_key_cpu_limit["$section_from_array"]}" ]]; then
 		config_key_cpu_limit["$section_from_array"]='-1'
 	fi
@@ -787,7 +827,7 @@ while read -r window_id; do
 			cached_pids_array=("${cached_pids_array_temp[@]}")
 			unset cached_pid cached_pid_to_remove cached_pids_array_temp cached_pids_to_remove_array found
 		fi
-		print_info "Cache of process information has been cleaned up."
+		print_verbose "Cache which contains processes information has been cleaned up."
 	fi
 	# Run command on unfocus event for previous window if specified
 	if [[ -n "$previous_section_name" && -n "${config_key_unfocus["$previous_section_name"]}" && -z "$lazy" ]]; then
@@ -804,7 +844,7 @@ while read -r window_id; do
 	fi
 	# Extract process info
 	if ! extract_process_info; then
-		print_warn "Cannot obtain PID of window with ID $window_id! Getting process info skipped."
+		print_warn "Unable to obtain PID of window with ID $window_id! Getting process info skipped."
 	fi
 	# Do not find matching section if window does not report its PID
 	if [[ -n "$process_pid" ]]; then
@@ -856,59 +896,59 @@ while read -r window_id; do
 			section_name="${cache_section["$process_pid"]}"
 		fi
 		if [[ -n "$section_name" ]]; then
-			print_verbose "Process '$process_name' with PID $process_pid matches with section '$section_name'."
+			print_info "Process '$process_name' with PID $process_pid matches with section '$section_name'."
 		else
 			print_verbose "Process '$process_name' with PID $process_pid does not match with any section."
 		fi
 	fi
 	# Check if PID is not the same as previous one
 	if [[ "$process_pid" != "$previous_process_pid" ]]; then
-		# Avoid applying CPU-limit if owner does not have rights
+		# Avoid applying CPU limit if owner does not have rights
 		if [[ -n "$previous_process_owner" && "$previous_process_owner" == "$UID" || "$UID" == '0' && "${config_key_cpu_limit["$previous_section_name"]}" != '-1' ]]; then
-			# Check for existence of previous match and if CPU-limit is set to 0
+			# Check for existence of previous match and if CPU limit is set to 0
 			if [[ -n "$previous_section_name" && "${config_key_cpu_limit["$previous_section_name"]}" == '0' ]]; then
 				# Freeze process if it has not been frozen
 				if [[ -z "${is_frozen_pid["$previous_process_pid"]}" ]]; then
 					# Mark process as frozen
 					is_frozen_pid["$previous_process_pid"]='1'
-					# Save PID to array to unfreeze process in case daemon interruption
+					# Store PID to array to unfreeze process in case daemon interruption
 					frozen_processes_pids_array+=("$previous_process_pid")
 					# Freeze process
 					background_freeze_process &
 					# Associate PID of background process with PID of process to interrupt it in case focus event appears earlier than delay ends
 					freeze_bgprocess_pid["$previous_process_pid"]="$!"
 				fi
-			elif [[ -n "$previous_section_name" ]] && (( "${config_key_cpu_limit["$previous_section_name"]}" > 0 )); then # Check for existence of previous match and CPU-limit specified greater than 0
-				# Run 'cpulimit' on background if CPU-limit has not been applied
+			elif [[ -n "$previous_section_name" ]] && (( "${config_key_cpu_limit["$previous_section_name"]}" > 0 )); then # Check for existence of previous match and CPU limit specified greater than 0
+				# Run 'cpulimit' on background if CPU limit has not been applied
 				if [[ -z "${is_cpu_limited_pid["$previous_process_pid"]}" ]]; then
-					# Mark process as CPU-limited
+					# Mark process as CPU limited
 					is_cpu_limited_pid["$previous_process_pid"]='1'
-					# Apply CPU-limit
+					# Apply CPU limit
 					background_cpulimit &
-					# Save PID of background process to array to interrupt it in case daemon exit
+					# Store PID of background process to array to interrupt it in case daemon exit
 					cpulimit_bgprocesses_pids_array+=("$!")
 					# Associate PID of background process with PID of process to interrupt it on focus event
 					cpulimit_bgprocess_pid["$previous_process_pid"]="$!"
 					# Associate PID of process with PID of background process to print a proper process name in output on daemon termination
 					cpu_limited_pid["$!"]="$previous_process_pid"
 				fi
-			elif [[ -n "$previous_section_name" && -n "${config_key_fps_limit["$previous_section_name"]}" ]]; then # Check for existence of previous match and FPS-limit
-				# Apply FPS-limit if was not applied before
+			elif [[ -n "$previous_section_name" && -n "${config_key_fps_unfocus["$previous_section_name"]}" ]]; then # Check for existence of previous match and FPS limit
+				# Apply FPS limit if was not applied before
 				if [[ -z "${is_fps_limited_section["$previous_section_name"]}" ]]; then
-					# Mark process as FPS-limited
+					# Mark process as FPS limited
 					is_fps_limited_section["$previous_section_name"]='1'
-					# Save matching section name of process to array to unset FPS-limits on daemon exit
+					# Store matching section name of process to array to unset FPS limits on daemon exit
 					fps_limited_sections_array+=("$previous_section_name")
 					# Associate PID of process with section name to print it in case daemon exit
 					fps_limited_pid["$previous_section_name"]="$previous_process_pid"
-					# Set FPS-limit
+					# Set FPS limit
 					background_mangohud_fps_set &
 					# Associate PID of background process with PID of process to interrupt it on focus event
 					fps_limit_bgprocess_pid["$previous_process_pid"]="$!"
 				fi
 			fi
 		elif [[ -n "$previous_process_owner" ]]; then
-			print_warn "Cannot apply CPU-limit to process '$previous_process_name' with PID $previous_process_pid, UID of process - $previous_process_owner, UID of user - $UID!"
+			print_warn "Unable to apply CPU limit to process '$previous_process_name' with PID $previous_process_pid, UID of process - $previous_process_owner, UID of user - $UID!"
 		fi
 	fi
 	# Do not apply actions if window does not report its PID
@@ -919,20 +959,21 @@ while read -r window_id; do
 			if [[ -d "/proc/${freeze_bgprocess_pid["$process_pid"]}" ]]; then
 				# Terminate background process
 				if ! kill "${freeze_bgprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
-					print_warn "Cannot stop 'cpulimit' background process with PID '${freeze_bgprocess_pid["$process_pid"]}'!"
+					print_warn "Unable to cancel delayed for ${config_key_delay["$section_name"]} second(s) freezing of process '$process_name' with PID $process_pid!"
 				else
-					print_info "Delayed for ${config_key_delay["$section_name"]} second(s) freezing of process '$process_name' with PID $process_pid has been cancelled."
+					# Avoid printing this message if delay is not specified
+					if [[ "${config_key_delay["$section_name"]}" != '0' ]]; then
+						print_info "Delayed for ${config_key_delay["$section_name"]} second(s) freezing of process '$process_name' with PID $process_pid has been cancelled."
+					fi
+				fi
+			else
+				# Unfreeze process
+				if ! kill -CONT "$process_pid" > /dev/null 2>&1; then
+					print_warn "Unable to unfreeze process '$process_name' with PID $process_pid!"
+				else
+					print_info "Process '$process_name' with PID $process_pid has been unfrozen on focus event."
 				fi
 			fi
-			freeze_bgprocess_pid["$process_pid"]=''
-			# Unfreeze process
-			if ! kill -CONT "$process_pid" > /dev/null 2>&1; then
-				print_warn "Cannot unfreeze process '$process_name' with PID $process_pid!"
-			else
-				print_info "Process '$process_name' with PID $process_pid has been unfrozen on focus event."
-			fi
-			is_frozen_pid["$process_pid"]=''
-			fps_limited_pid["$section_name"]=''
 			# Remove PID from array
 			for frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
 				# Skip current PID since I want remove it from array
@@ -942,14 +983,15 @@ while read -r window_id; do
 			done
 			frozen_processes_pids_array=("${frozen_processes_pids_array_temp[@]}")
 			unset frozen_process_pid frozen_processes_pids_array_temp
-		elif [[ -n "${is_cpu_limited_pid["$process_pid"]}" ]]; then # Check for CPU-limit via 'cpulimit' background process
+			is_frozen_pid["$process_pid"]=''
+			freeze_bgprocess_pid["$process_pid"]=''
+		elif [[ -n "${is_cpu_limited_pid["$process_pid"]}" ]]; then # Check for CPU limit via 'cpulimit' background process
 			# Terminate 'cpulimit' background process
 			if ! kill "${cpulimit_bgprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
 				print_warn "Process '$process_name' with PID $process_pid cannot be CPU unlimited!"
 			else
 				print_info "Process '$process_name' with PID $process_pid has been CPU unlimited on focus event."
 			fi
-			is_cpu_limited_pid["$process_pid"]=''
 			# Remove PID of 'cpulimit' background process from array
 			for cpulimit_bgprocess in "${cpulimit_bgprocesses_pids_array[@]}"; do
 				# Skip interrupted background process since I want remove it from array
@@ -957,33 +999,39 @@ while read -r window_id; do
 					cpulimit_bgprocesses_pids_array_temp+=("$cpulimit_bgprocess")
 				fi
 			done
-			cpu_limited_pid["${cpulimit_bgprocess_pid["$process_pid"]}"]=''
-			cpulimit_bgprocess_pid["$process_pid"]=''
 			cpulimit_bgprocesses_pids_array=("${cpulimit_bgprocesses_pids_array_temp[@]}")
 			unset cpulimit_bgprocess cpulimit_bgprocesses_pids_array_temp
-		elif [[ -n "$section_name" && -n "${is_fps_limited_section["$section_name"]}" ]]; then
-			# Do not terminate FPS-limit background process if it does not exist anymore
-			if [[ -d "/proc/${fps_limit_bgprocess_pid["$process_pid"]}" ]]; then
+			is_cpu_limited_pid["$process_pid"]=''
+			cpu_limited_pid["${cpulimit_bgprocess_pid["$process_pid"]}"]=''
+			cpulimit_bgprocess_pid["$process_pid"]=''
+		elif [[ -n "$section_name" && -n "${is_fps_limited_section["$section_name"]}" && -n "${fps_limited_pid["$section_name"]}" ]]; then
+			# Terminate FPS limit background process if exists, checking variable for not being blank is required for wtf reason
+			# Otherwise 'kill' will exit with an error because of blank value
+			# And that is including checking for process existence in the same 'if' statement which returns 'true'
+			# I fucking love bash, burn in hell, bitches
+			if [[ -n "${fps_limit_bgprocess_pid["$process_pid"]}" && -d "/proc/${fps_limit_bgprocess_pid["$process_pid"]}" ]]; then
 				if ! kill "${fps_limit_bgprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
-					print_warn "Cannot stop FPS-limit background process with PID ${fps_limit_bgprocess_pid["$process_pid"]}!"
+					print_warn "Unable to stop FPS limit background process with PID ${fps_limit_bgprocess_pid["$process_pid"]}!"
 				else
-					print_info "Delayed for ${config_key_delay["$section_name"]} second(s) FPS-limiting of process '$process_name' with PID $process_pid has been cancelled."
+					print_verbose "FPS limit background process related to process '$process_name' with PID $process_pid has been terminated."
 				fi
 			fi
-			# Unset FPS-limit
-			if mangohud_fps_set "${config_key_mangohud_config["$section_name"]}" "${config_key_fps_unlimit["$section_name"]}"; then
-				print_info "Process '$process_name' with PID $process_pid has been FPS-unlimited on focus event."
+			# Unset FPS limit
+			if mangohud_fps_set "${config_key_mangohud_config["$section_name"]}" "${config_key_fps_focus["$section_name"]}"; then
+				print_info "Process '$process_name' with PID $process_pid has been FPS unlimited on focus event."
 			fi
-			is_fps_limited_section["$section_name"]=''
 			# Remove section from from array
 			for fps_limited_section in "${fps_limited_sections_array[@]}"; do
-				# Skip FPS-unlimited section since I want remove it from array
+				# Skip FPS unlimited section since I want remove it from array
 				if [[ "$fps_limited_section" != "$section_name" ]]; then
 					fps_limited_sections_array_temp+=("$fps_limited_section")
 				fi
 			done
 			fps_limited_sections_array=("${fps_limited_sections_array_temp[@]}")
 			unset fps_limited_section fps_limited_sections_array_temp
+			is_fps_limited_section["$section_name"]=''
+			fps_limit_bgprocess_pid["$process_pid"]=''
+			fps_limited_pid["$section_name"]=''
 		fi
 	fi
 	# Run command on focus event if exists
@@ -994,7 +1042,7 @@ while read -r window_id; do
 		unset_flux_variables
 		print_verbose "Running command on focus event '${config_key_focus["$section_name"]}' from section '$section_name'."
 	fi
-	# Remember info about process for next cycle to run commands on unfocus event and apply CPU/FPS-limit, also for pass variables to command in 'unfocus' key
+	# Remember info about process for next cycle to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'unfocus' key
 	previous_window_id="$window_id"
 	previous_process_pid="$process_pid"
 	previous_process_name="$process_name"
@@ -1010,4 +1058,52 @@ while read -r window_id; do
 	process_executable=''
 	process_owner=''
 	process_command=''
+	# Compare content and refresh PIDs if it has been changed
+	if [[ -n "$snapshot_frozen_processes_pids_array" && "$snapshot_frozen_processes_pids_array" != "${frozen_processes_pids_array[*]}" ]]; then
+		# Refresh frozen PIDs to avoid memory leak
+		for frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
+			# Store to array only existing PIDs, otherwise unset info about them
+			if [[ -d "/proc/$frozen_process_pid" ]]; then
+				frozen_processes_pids_array_temp+=("$frozen_process_pid")
+			else
+				is_frozen_pid["$frozen_process_pid"]=''
+				freeze_bgprocess_pid["$frozen_process_pid"]=''
+			fi
+		done
+		frozen_processes_pids_array=("${frozen_processes_pids_array_temp[@]}")
+		unset frozen_process_pid frozen_processes_pids_array_temp
+	fi
+	snapshot_frozen_processes_pids_array="${frozen_processes_pids_array[*]}"
+	# Compare content and refresh PIDs if it has been changed
+	if [[ -n "$snapshot_cpulimit_bgprocesses_pids_array" && "$snapshot_cpulimit_bgprocesses_pids_array" != "${cpulimit_bgprocesses_pids_array[*]}" ]]; then
+		# Refresh CPU limited PIDs to avoid memory leak
+		for cpulimit_bgprocess_pid_var in "${cpulimit_bgprocesses_pids_array[@]}"; do
+			if [[ -d "/proc/$cpulimit_bgprocess_pid_var" ]]; then
+				cpulimit_bgprocesses_pids_array_temp+=("$cpulimit_bgprocess_pid_var")
+			else
+				is_cpu_limited_pid["${cpu_limited_pid["$cpulimit_bgprocess_pid_var"]}"]=''
+				cpulimit_bgprocess_pid["${cpu_limited_pid["$cpulimit_bgprocess_pid_var"]}"]=''
+				cpu_limited_pid["$cpulimit_bgprocess_pid_var"]=''
+			fi
+		done
+		cpulimit_bgprocesses_pids_array=("${cpulimit_bgprocesses_pids_array_temp[@]}")
+		unset cpulimit_bgprocess_pid_var cpulimit_bgprocesses_pids_array_temp
+	fi
+	snapshot_cpulimit_bgprocesses_pids_array="${cpulimit_bgprocesses_pids_array[*]}"
+	# Compare content and refresh PIDs if it has been changed
+	if [[ -n "$snapshot_fps_limited_sections_array" && "$snapshot_fps_limited_sections_array" != "${fps_limited_sections_array[*]}" ]]; then
+		# Refresh FPS limited PIDs to avoid memory leak
+		for fps_limited_section in "${fps_limited_sections_array[@]}"; do
+			if [[ -d "/proc/${fps_limited_pid["$fps_limited_section"]}" ]]; then
+				fps_limited_sections_array_temp+=("$fps_limited_section")
+			else
+				is_fps_limited_section["$fps_limited_section"]=''
+				fps_limit_bgprocess_pid["${fps_limited_pid["$fps_limited_section"]}"]=''
+				fps_limited_pid["$fps_limited_section"]=''
+			fi
+		done
+		fps_limited_sections_array=("${fps_limited_sections_array_temp[@]}")
+		unset fps_limited_section fps_limited_sections_array_temp
+	fi
+	snapshot_fps_limited_sections_array="${fps_limited_sections_array[*]}"
 done < <(xprop_event_reader)
