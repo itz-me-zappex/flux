@@ -566,25 +566,25 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 		continue
 	fi
 	# Exit with an error if first line is not a section, otherwise remember section name
-	if [[ ! "$temp_config_line" =~ ^\[.*\]$ && -z "$section" ]]; then
+	if [[ ! "$temp_config_line" =~ ^\[.*\]$ && -z "$temp_section" ]]; then
 		print_error "Initial section is not found in config '$config'!"
 		exit 1
 	elif [[ "$temp_config_line" =~ ^\[.*\]$ ]]; then
 		# Exit with an error if section repeated
 		if [[ -n "${sections_array[*]}" ]]; then
-			for section_from_array in "${sections_array[@]}"; do
+			for temp_section_from_array in "${sections_array[@]}"; do
 				if [[ "[$section_from_array]" == "$temp_config_line" ]]; then
-					print_error "Section name '$section' is repeated!"
+					print_error "Section name '$temp_section' is repeated!"
 					exit 1
 				fi
 			done
-			unset section_from_array
+			unset temp_section_from_array
 		fi
 		# Remove square brackets from section name and add it to array
 		# Array required to check for repeating sections and find matching rule(s) for process in config
-		section="${temp_config_line/\[/}"
-		section="${section/%\]/}"
-		sections_array+=("$section")
+		temp_section="${temp_config_line/\[/}"
+		temp_section="${temp_section/%\]/}"
+		sections_array+=("$temp_section")
 		# Forward to next line
 		continue
 	fi
@@ -617,17 +617,17 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 		# Associate value with section
 		case "${temp_config_line,,}" in
 		name* )
-			config_key_name["$section"]="$temp_value"
+			config_key_name["$temp_section"]="$temp_value"
 		;;
 		executable* )
-			config_key_executable["$section"]="$temp_value"
+			config_key_executable["$temp_section"]="$temp_value"
 		;;
 		owner* )
 			# Exit with an error if UID is not numeric
 			if [[ "$temp_value" =~ ^[0-9]+$ ]]; then
-				config_key_owner["$section"]="$temp_value"
+				config_key_owner["$temp_section"]="$temp_value"
 			else
-				print_error "Value '$temp_value' in key 'owner' in section '$section' is not UID!"
+				print_error "Value '$temp_value' in key 'owner' in section '$temp_section' is not UID!"
 				exit 1
 			fi
 		;;
@@ -635,39 +635,39 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 			# Exit with an error if CPU limit is specified incorrectly
 			if [[ "$temp_value" =~ ^[0-9]+(\%)?$ || "$temp_value" =~ ^('-1'|'-1%')$ ]] && (( "${temp_value/%\%/}" * cpu_threads <= max_cpu_limit )); then
 				if [[ "$temp_value" =~ ^('-1'|'-1%')$ ]]; then
-					config_key_cpu_limit["$section"]="${temp_value/%\%/}"
+					config_key_cpu_limit["$temp_section"]="${temp_value/%\%/}"
 				else
-					config_key_cpu_limit["$section"]="$(( "${temp_value/%\%/}" * cpu_threads ))"
+					config_key_cpu_limit["$temp_section"]="$(( "${temp_value/%\%/}" * cpu_threads ))"
 				fi
 			else
-				print_error "Value '$temp_value' in key 'cpulimit' in section '$section' is invalid! Allowed values are 0-100%."
+				print_error "Value '$temp_value' in key 'cpulimit' in section '$temp_section' is invalid! Allowed values are 0-100%."
 				exit 1
 			fi
 		;;
 		delay* )
 			# Exit with an error if value is neither an integer nor a float (that is what regexp means)
 			if [[ "$temp_value" =~ ^[0-9]+((\.|\,)[0-9]+)?$ ]]; then
-				config_key_delay["$section"]="$temp_value"
+				config_key_delay["$temp_section"]="$temp_value"
 			else
-				print_error "Value '$temp_value' in key 'delay' in section '$section' is neither integer nor float!"
+				print_error "Value '$temp_value' in key 'delay' in section '$temp_section' is neither integer nor float!"
 				exit 1
 			fi
 		;;
 		focus* )
-			config_key_focus["$section"]="$temp_value"
+			config_key_focus["$temp_section"]="$temp_value"
 		;;
 		unfocus* )
-			config_key_unfocus["$section"]="$temp_value"
+			config_key_unfocus["$temp_section"]="$temp_value"
 		;;
 		command* )
-			config_key_command["$section"]="$temp_value"
+			config_key_command["$temp_section"]="$temp_value"
 		;;
 		mangohud-config* )
 			# Exit with an error if specified MangoHud config file does not exist
 			if [[ -f "$temp_value" ]]; then
-				config_key_mangohud_config["$section"]="$temp_value"
+				config_key_mangohud_config["$temp_section"]="$temp_value"
 			else
-				print_error "Config file '$temp_value' specified in key 'mangohud-config' in section '$section' does not exist!"
+				print_error "Config file '$temp_value' specified in key 'mangohud-config' in section '$temp_section' does not exist!"
 				exit 1
 			fi
 		;;
@@ -676,21 +676,21 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 			if [[ "$temp_value" =~ ^[0-9]+$ ]]; then
 				# Exit with an error if value equal to zero
 				if [[ "$temp_value" != '0' ]]; then
-					config_key_fps_unfocus["$section"]="$temp_value"
+					config_key_fps_unfocus["$temp_section"]="$temp_value"
 				else
-					print_error "Value $temp_value in key 'fps-unfocus' in section '$section' should be greater than zero!"
+					print_error "Value $temp_value in key 'fps-unfocus' in section '$temp_section' should be greater than zero!"
 					exit 1
 				fi
 			else
-				print_error "Value '$temp_value' specified in key 'fps-unfocus' in section '$section' is not an integer!"
+				print_error "Value '$temp_value' specified in key 'fps-unfocus' in section '$temp_section' is not an integer!"
 				exit 1
 			fi
 		;;
 		fps-focus* )
 			if [[ "$temp_value" =~ ^[0-9]+$ ]]; then
-				config_key_fps_focus["$section"]="$temp_value"
+				config_key_fps_focus["$temp_section"]="$temp_value"
 			else
-				print_error "Value '$temp_value' specified in key 'fps-focus' in section '$section' is not an integer!"
+				print_error "Value '$temp_value' specified in key 'fps-focus' in section '$temp_section' is not an integer!"
 				exit 1
 			fi
 		esac
@@ -699,7 +699,7 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 		exit 1
 	fi
 done < "$config"
-unset temp_config_line temp_value section
+unset temp_config_line temp_value temp_section
 
 # Check values in sections
 for section_from_array in "${sections_array[@]}"; do
