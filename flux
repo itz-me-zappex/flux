@@ -187,7 +187,7 @@ extract_process_info(){
 
 # Change FPS limit in specified MangoHud config
 mangohud_fps_set(){
-	local local_config_line local_config_content local_new_config_content local_config="$1" fps_limit="$2" fps_limit_is_changed
+	local local_config_line local_config_content local_new_config_content local_config="$1" local_fps_to_set="$2" local_fps_limit_is_changed
 	# Check if config file exists before continue in case it has been removed
 	if [[ -f "$local_config" ]]; then
 		# Return an error if file is not readable
@@ -201,11 +201,11 @@ mangohud_fps_set(){
 			if [[ "$local_config_line" == 'fps_limit='* ]]; then
 				# Set specified FPS limit
 				if [[ -n "$local_new_config_content" ]]; then
-					local_new_config_content="$local_new_config_content\nfps_limit=$fps_limit"
+					local_new_config_content="$local_new_config_content\nfps_limit=$local_fps_to_set"
 				else
-					local_new_config_content="fps_limit=$fps_limit"
+					local_new_config_content="fps_limit=$local_fps_to_set"
 				fi
-				fps_limit_is_changed='1'
+				local_fps_limit_is_changed='1'
 			else
 				if [[ -n "$local_new_config_content" ]]; then
 					local_new_config_content="$local_new_config_content\n$local_config_line"
@@ -215,8 +215,8 @@ mangohud_fps_set(){
 			fi
 		done <<< "$local_config_content"
 		# Add 'fps_limit' line to config if it does not exist, i.e. was not found and changed
-		if [[ -z "$fps_limit_is_changed" ]]; then
-			echo "fps_limit=$fps_limit" >> "$local_config"
+		if [[ -z "$local_fps_limit_is_changed" ]]; then
+			echo "fps_limit=$local_fps_to_set" >> "$local_config"
 		else
 			echo -e "$local_new_config_content" > "$local_config"
 		fi
