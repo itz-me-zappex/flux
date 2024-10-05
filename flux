@@ -560,20 +560,20 @@ config_key_fps_unfocus \
 config_key_fps_focus
 
 # INI parser
-while read -r config_line || [[ -n "$config_line" ]]; do
+while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 	# Skip commented or blank line
-	if [[ "$config_line" =~ ^(\;|\#) || -z "$config_line" ]]; then
+	if [[ "$temp_config_line" =~ ^(\;|\#) || -z "$temp_config_line" ]]; then
 		continue
 	fi
 	# Exit with an error if first line is not a section, otherwise remember section name
-	if [[ ! "$config_line" =~ ^\[.*\]$ && -z "$section" ]]; then
+	if [[ ! "$temp_config_line" =~ ^\[.*\]$ && -z "$section" ]]; then
 		print_error "Initial section is not found in config '$config'!"
 		exit 1
-	elif [[ "$config_line" =~ ^\[.*\]$ ]]; then
+	elif [[ "$temp_config_line" =~ ^\[.*\]$ ]]; then
 		# Exit with an error if section repeated
 		if [[ -n "${sections_array[*]}" ]]; then
 			for section_from_array in "${sections_array[@]}"; do
-				if [[ "[$section_from_array]" == "$config_line" ]]; then
+				if [[ "[$section_from_array]" == "$temp_config_line" ]]; then
 					print_error "Section name '$section' is repeated!"
 					exit 1
 				fi
@@ -582,19 +582,19 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 		fi
 		# Remove square brackets from section name and add it to array
 		# Array required to check for repeating sections and find matching rule(s) for process in config
-		section="${config_line/\[/}"
+		section="${temp_config_line/\[/}"
 		section="${section/%\]/}"
 		sections_array+=("$section")
 		# Forward to next line
 		continue
 	fi
 	# Exit with an error if type of line cannot be defined
-	if [[ "${config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|focus|unfocus|command|mangohud-config|fps-unfocus|fps-focus)(\ )?=(\ )?.* ]]; then
+	if [[ "${temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|focus|unfocus|command|mangohud-config|fps-unfocus|fps-focus)(\ )?=(\ )?.* ]]; then
 		# Extract value from key by removing key and equal symbol
-		if [[ "$config_line" == *'= '* ]]; then
-			value="${config_line/*= /}" # <-
-		elif [[ "$config_line" == *'='* ]]; then
-			value="${config_line/*=/}" # <-
+		if [[ "$temp_config_line" == *'= '* ]]; then
+			value="${temp_config_line/*= /}" # <-
+		elif [[ "$temp_config_line" == *'='* ]]; then
+			value="${temp_config_line/*=/}" # <-
 		fi
 		# Remove comments from value
 		if [[ "$value" =~ \ (\#|\;) && ! "$value" =~ ^(\".*\"|\'.*\')$ ]]; then
@@ -615,7 +615,7 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 			fi
 		fi
 		# Associate value with section
-		case "${config_line,,}" in
+		case "${temp_config_line,,}" in
 		name* )
 			config_key_name["$section"]="$value"
 		;;
@@ -695,11 +695,11 @@ while read -r config_line || [[ -n "$config_line" ]]; do
 			fi
 		esac
 	else
-		print_error "Unable to define type of line '$config_line'!"
+		print_error "Unable to define type of line '$temp_config_line'!"
 		exit 1
 	fi
 done < "$config"
-unset config_line value section
+unset temp_config_line value section
 
 # Check values in sections
 for section_from_array in "${sections_array[@]}"; do
