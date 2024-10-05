@@ -903,7 +903,7 @@ while read -r window_id; do
 						temp_command_match='1'
 					fi
 					# Mark as matching if all identifiers containing non-zero value
-					if [[ -n "$temp_name_match" && -n "$temp_executable_matchtemp_" && -n "$temp_owner_match" && -n "$temp_command_match" ]]; then
+					if [[ -n "$temp_name_match" && -n "$temp_executable_match" && -n "$temp_owner_match" && -n "$temp_command_match" ]]; then
 						section_name="$temp_section"
 						cache_section["$process_pid"]="$temp_section"
 						break
