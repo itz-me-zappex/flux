@@ -32,14 +32,18 @@ option_repeat_check(){
 	fi
 }
 
+# Required to exit with an error if that is not a X11 session
+x11_session_check(){
+	# Exit with an error if that is not a X11 session
+	if [[ ! "$DISPLAY" =~ ^\:[0-9]+(\.[0-9]+)?$ || "$XDG_SESSION_TYPE" != 'x11' ]]; then
+		print_error "Flux is not meant to use it with anything but X11!"
+		exit 1
+	fi
+}
+
 # Extract window IDs from xprop events
 xprop_event_reader(){
 	local stacking_windows_id focused_window_id stacking_window_id
-	# Exit with an error if xprop fails (like in case when it unable to open display)
-	if ! xprop -root > /dev/null 2>&1; then
-		print_error "Unable to start daemon because process 'xprop' required for reading X11 events exits with an error!"
-		exit 1
-	fi
 	# Print window IDs of open windows to apply limits immediately if '--hot' option was passed
 	if [[ -n "$hot" ]]; then
 		# Extract IDs of open windows
@@ -131,9 +135,11 @@ unset_flux_variables(){
 extract_process_info(){
 	# Extract PID of process
 	if ! process_pid="$(xprop -id "$window_id" _NET_WM_PID 2>/dev/null)"; then
-		process_pid='_NET_WM_PID:  not found.'
+		process_pid=''
+	elif [[ "$process_pid" == '_NET_WM_PID:  not found.' ]]; then
+		process_pid=''
 	fi
-	if [[ "$process_pid" != '_NET_WM_PID:  not found.' ]]; then
+	if [[ -n "$process_pid" ]]; then
 		process_pid="${process_pid/* = /}"
 		# Check if info about process exists in cache
 		if [[ -z "${cache_process_name["$process_pid"]}" ]]; then
@@ -176,7 +182,6 @@ extract_process_info(){
 			process_command="${cache_process_command["$process_pid"]}"
 		fi
 	else
-		process_pid=''
 		return 1
 	fi
 }
@@ -383,11 +388,8 @@ while (( $# > 0 )); do
 		esac
 	;;
 	--focus | -f | --pick | -p )
-		# Exit with an error if xprop unable to open display, I don't really care, both xprop and xwininfo will fail in this case
-		if ! xprop -root > /dev/null 2>&1; then
-			print_error "Unable to obtain process info because process 'xprop' or 'xwininfo' required to obtain window ID exits with an error!"
-			exit 1
-		fi
+		# Exit with an error if that is not a X11 session
+		x11_session_check
 		# Select command depending by type of option
 		case "$1" in
 		--focus | -f )
@@ -763,10 +765,7 @@ cache_section \
 cache_mismatch
 
 # Exit with an error if that is not a X11 session
-if [[ "$XDG_SESSION_TYPE" != 'x11' ]]; then
-	print_error "Flux is not meant to use it with anything but X11!"
-	exit 1
-fi
+x11_session_check
 
 # Read IDs of windows and apply actions
 while read -r window_id; do
