@@ -819,7 +819,6 @@ while read -r window_id; do
 		cached_pids_array=("${cached_pids_array_temp[@]}")
 		unset cached_pid cached_pid_to_remove cached_pids_array_temp cached_pids_to_remove_array found
 	fi
-	print_verbose "Cache which contains processes information has been cleaned up."
 	# Refresh frozen PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID won't repeat
 	for frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
 		# Store to array only existing PIDs, otherwise unset info about them
