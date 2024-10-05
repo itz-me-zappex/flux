@@ -1,7 +1,8 @@
 ## flux
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 
-### Navigation
+---
+
 - [Dependencies](#dependencies)
   - [Arch Linux and dereatives](#arch-linux-and-dereatives)
   - [Debian and dereatives](#debian-and-dereatives)
@@ -11,9 +12,8 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
   - [Gentoo and dereatives](#gentoo-and-dereatives)
 - [Installation](#installation)
   - [Manual installation](#manual-installation)
-  - [Arch Linux (and based distributions)](#arch-linux-and-based-distributions)
-  - [Debian/Ubuntu (and based distributions)](#debianubuntu-and-based-distributions)
-  - [Other distributions](#other-distributions)
+  - [Arch Linux and dereatives](#arch-linux-and-dereatives-1)
+  - [Debian and dereatives](#debian-and-dereatives-1)
 - [Usage](#usage)
   - [Autostart](#autostart)
 - [Configuration](#configuration)
@@ -42,8 +42,11 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
   - [Gamescope which allows limit FPS on unfocus exists, Wayland becomes more popular. Are you not late by any chance?](#gamescope-which-allows-limit-fps-on-unfocus-exists-wayland-becomes-more-popular-are-you-not-late-by-any-chance)
   - [What about Wayland support?](#what-about-wayland-support)
   - [Why did you write it on Bash?](#why-did-you-write-it-on-bash)
- 
+
 ### Dependencies
+
+---
+
 #### Arch Linux and dereatives
 
   Required: `bash util-linux cpulimit coreutils xorg-xprop xorg-xwininfo`
@@ -83,8 +86,11 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
 Dependencies for other distributions will be added soon.
 
 ### Installation
+
+---
+
 #### Manual installation
-Make sure you have installed dependencies described above before continue.
+You can use this method if there is no package build script for your distro. Make sure you have installed dependencies as described above before continue.
 ```bash
 fluxver='1.6.11' # set latest version as I update it here every release
 ```
@@ -101,7 +107,7 @@ tar -xvf v${fluxver}.tar.gz # extract it
 sudo install -Dm 755 flux-${fluxver}/flux /usr/local/bin/flux # install daemon to `/usr/local/bin`
 ```
 
-#### Arch Linux (and based distributions)
+#### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
 ``` bash
 fluxver='1.6.11' # set latest version as I update it here every release
@@ -116,7 +122,7 @@ wget https://github.com/itz-me-zappex/flux/releases/download/v${fluxver}/PKGBUIL
 makepkg -sric # build a package and install it
 ```
 
-#### Debian/Ubuntu (and based distributions)
+#### Debian and dereatives
 ```bash
 fluxver='1.6.11' # set latest version as I update it here every release
 ```
@@ -136,10 +142,10 @@ chmod +x build-deb.sh # make it executable
 sudo dpkg -i flux-v${fluxver}.deb ; sudo apt install -f # install a package
 ```
 
-#### Other distributions
-Use [manual method](#manual-installation), or if you can, help me create packages for other distributions.
-
 ### Usage
+
+---
+
 ```
 Usage: flux [option] <value>
 Options and values:
@@ -159,6 +165,9 @@ Options and values:
 Just add command to autostart using your DE settings or WM config. Running daemon as root also possible, but that feature almost useless.
 
 ### Configuration
+
+---
+
 A simple INI is used for configuration.
 Available keys and description:
 | Key               | Description |
@@ -256,6 +265,9 @@ delay = 1
 ```
 
 ### Variables
+
+---
+
 Flux does not support environment variables, but passes them to commands in `focus` and `unfocus` keys.
 
 | Variable | Description |
@@ -270,6 +282,9 @@ Flux does not support environment variables, but passes them to commands in `foc
 Daemon passes absolutely same values for both `focus` and `unfocus` keys.
 
 ### Tips and tricks
+
+---
+
 ##### Keybinding to obtain template from focused window for config
 - All you need is install `xclip` tool and bind this command: `$ flux --focus | xclip -selection clipboard`.
 Now you can easily grab templates from windows to use them in config by pasting content using `Ctrl+v`.
@@ -286,6 +301,9 @@ Now you can easily grab templates from windows to use them in config by pasting 
 - CPU limit equal to zero recommended for single player games or online games in offline mode, this method freezes game completely to make it just hang in RAM without using any CPU or GPU resources.
 
 ### Possible questions
+
+---
+
 #### How does daemon work?
 - Daemon reads X11 events related to window focus, then it gets PID of process using window ID and uses it to collect info about process (process name, its executable path, command which is used and UID) to compare it with identifiers in config, when it finds window which matches with identifier(s) specified in specific section in config, it runs command from `focus` key (if specified), when you switching to another window - applies FPS or CPU limit (if specified) and runs command from `unfocus` key (if specified). When window does not match with any section in config, nothing happens. To reduce CPU usage and speed up daemon a caching algorithm was implemented which stores info about windows into associative arrays, that allows to just collect info about process once and then use cache to get process info immediately after obtaining its PID when window appears focused again.
 
