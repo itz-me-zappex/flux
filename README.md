@@ -80,7 +80,7 @@ Dependencies for other distributions will be added soon.
 #### Manual installation
 Make sure you have installed dependencies described above before continue.
 ```bash
-$ fluxver='1.6.9'
+$ fluxver='1.6.10'
 $ mkdir flux && cd flux # create build directory
 $ wget https://github.com/itz-me-zappex/flux/archive/refs/tags/v${fluxver}.tar.gz # download archive with release
 $ tar -xvf v${fluxver}.tar.gz # extract it
@@ -90,7 +90,7 @@ $ sudo install -Dm 755 flux-${fluxver}/flux /usr/local/bin/flux # Install daemon
 #### Arch Linux (and based distributions)
 Make sure you have installed `base-devel` package before continue.
 ``` bash
-$ fluxver='1.6.9'
+$ fluxver='1.6.10'
 $ mkdir flux && cd flux # create build directory
 $ wget https://github.com/itz-me-zappex/flux/releases/download/v${fluxver}/PKGBUILD # download PKGBUILD
 $ makepkg -sric # build a package and install it
@@ -98,7 +98,7 @@ $ makepkg -sric # build a package and install it
 
 #### Debian/Ubuntu (and based distributions)
 ```bash
-$ fluxver='1.6.9'
+$ fluxver='1.6.10'
 $ mkdir flux && cd flux # create build directory
 $ wget https://github.com/itz-me-zappex/flux/releases/download/v${fluxver}/build-deb.sh # download build script
 $ chmod +x build-deb.sh # make it executable
@@ -136,12 +136,12 @@ Available keys and description:
 | `name` | Name of process, gets from `/proc/<PID>/comm`, required if neither `executable` nor `command` is specified. |
 | `executable` | Path to binary of process, gets by reading `/proc/<PID>/exe` symlink, required if neither `name` nor `command` is specified. |
 | `owner` | User ID of process, gets from `/proc/<PID>/status`. |
-| `cpu-limit` | CPU-limit between `0%` and `100%`, defaults to `-1%` which means no CPU-limit, `%` symbol is optional. |
-| `delay` | Delay before applying CPU-limit, preferable to avoid freezing app on exit when windows closes but process still exists if `cpu-limit` equal to `0%`, defaults to `0`. |
+| `cpu-limit` | CPU limit between `0%` and `100%`, defaults to `-1%` which means no CPU limit, `%` symbol is optional. |
+| `delay` | Delay before applying CPU limit, preferable to avoid freezing app on exit when windows closes but process still exists if `cpu-limit` equal to `0%`, defaults to `0`. |
 | `focus` | Command to execute on focus event, command runs via bash and will not be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
 | `unfocus` | Command to execute on unfocus event, command runs via bash and will not be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
 | `command` | Command of process, gets from `/proc/<PID>/cmdline`, required if neither `name` nor `executable` is specified. |
-| `mangohud-config` | Path to MangoHud config, required if you want change FPS-limits and requires `fps-unfocus`. |
+| `mangohud-config` | Path to MangoHud config, required if you want change FPS limits and requires `fps-unfocus`. |
 | `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`. |
 | `fps-focus` | FPS to set on focus, requires `fps-unfocus`, defaults to `0` (i.e. full unlimit). |
 
@@ -179,7 +179,7 @@ delay = 1
 focus = killall picom
 unfocus = picom
 
-; Example using FPS-limit as that is online game and I use MangoHud
+; Example using FPS limit as that is online game and I use MangoHud
 [Forza Horizon 4]
 name = ForzaHorizon4.e
 executable = /run/media/zappex/WD-BLUE/Games/Steam/steamapps/common/Proton 9.0 (Beta)/files/bin/wine64-preloader
@@ -191,7 +191,7 @@ fps-focus = 60 ; I have 60 FPS lock, so I want restore it on focus event
 focus = killall picom
 unfocus = picom
 
-; Example using CPU-limit to show this example, as game has connection to network, I do not want to freeze it completely in cases like downloading music or saving data on background
+; Example using CPU limit to show this example, as game has connection to network, I do not want to freeze it completely in cases like downloading music or saving data on background
 [Geometry Dash]
 name = GeometryDash.ex
 executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wine64-preloader
@@ -211,14 +211,14 @@ name = witcher3.exe
 cpu-limit = 0%
 delay = 1
 
-; Example using FPS-limit as that is online game and I use MangoHud
+; Example using FPS limit as that is online game and I use MangoHud
 [Forza Horizon 4]
 name = ForzaHorizon4.e
 mangohud-config = /home/zappex/.config/MangoHud/wine-ForzaHorizon4.conf
 fps-unfocus = 5 ; FPS to set on unfocus event
 fps-focus = 60 ; I have 60 FPS lock, so I want restore it on focus event
 
-; Example using CPU-limit to show this example, as game has connection to network, I do not want to freeze it completely in cases like downloading music or saving data on background
+; Example using CPU limit to show this example, as game has connection to network, I do not want to freeze it completely in cases like downloading music or saving data on background
 [Geometry Dash]
 name = GeometryDash.ex
 cpu-limit = 2%
@@ -251,13 +251,13 @@ Now you can easily grab templates from windows to use them in config by pasting 
 - Geeks only, casual users should not care about that. To do that, run daemon using command like `$ chrt --batch 0 flux --hot --lazy`. `SCHED_BATCH` scheduling policy is designed to improve performance of non-interactive tasks like daemons, timers, scripts etc..
 
 ##### Types of limits and which you should use
-- FPS-limits recommended for online and multiplayer games and if you do not mind to use MangoHud, this method reduces resource consumption when game unfocused/minimized.
-- CPU-limits greater than zero recommended for online and multiplayer games in case you do not use MangoHud, but you should be ready to stuttery audio since `cpulimit` tool interrupts process with `SIGSTOP` and `SIGCONT` signals.
-- CPU-limit equal to zero recommended for single player games or online games in offline mode, this method freezes game completely to make it just hang in RAM without using any CPU or GPU resources.
+- FPS limits recommended for online and multiplayer games and if you do not mind to use MangoHud, this method reduces resource consumption when game unfocused/minimized.
+- CPU limits greater than zero recommended for online and multiplayer games in case you do not use MangoHud, but you should be ready to stuttery audio since `cpulimit` tool interrupts process with `SIGSTOP` and `SIGCONT` signals.
+- CPU limit equal to zero recommended for single player games or online games in offline mode, this method freezes game completely to make it just hang in RAM without using any CPU or GPU resources.
 
 ### Possible questions
 ##### How does daemon work?
-- Daemon reads X11 events related to window focus, then it gets PID of process using window ID and uses it to collect info about process (process name, its executable path, command which is used and UID) to compare it with identifiers in config, when it finds window which matches with identifier(s) specified in specific section in config, it runs command from `focus` key (if specified), when you switching to another window - applies FPS or CPU-limit (if specified) and runs command from `unfocus` key (if specified). When window does not match with any section in config, nothing happens. To reduce CPU usage and speed up daemon a caching algorithm was implemented which stores info about windows into associative arrays, that allows to just collect info about process once and then use cache to get process info immediately after obtaining its PID when window appears focused again.
+- Daemon reads X11 events related to window focus, then it gets PID of process using window ID and uses it to collect info about process (process name, its executable path, command which is used and UID) to compare it with identifiers in config, when it finds window which matches with identifier(s) specified in specific section in config, it runs command from `focus` key (if specified), when you switching to another window - applies FPS or CPU limit (if specified) and runs command from `unfocus` key (if specified). When window does not match with any section in config, nothing happens. To reduce CPU usage and speed up daemon a caching algorithm was implemented which stores info about windows into associative arrays, that allows to just collect info about process once and then use cache to get process info immediately after obtaining its PID when window appears focused again.
 
 ##### Does that daemon reduce performance?
 - Long story short, impact on neither performance nor battery life should be noticeable. It uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time, but it just chills out when you playing game or working in single window.
@@ -283,11 +283,11 @@ Now you can easily grab templates from windows to use them in config by pasting 
 ##### Bugs?
 - Nothing is perfect in this world. Almost all bugs I encountered during development have been fixed or will be fixed soon. If you find a bug, open an issue. Known issues that cannot be fixed are:
   - Inability to interact with "glxgears" and "vkcube" windows, as they do not report their PIDs.
-  - Freezing online games (setting `cpu-limit` to `0%`) causes disconnects from matches, so use less aggressive CPU-limit to allow game to send/receive packets.
-  - Stuttery audio in game if CPU-limit is very aggressive, since `cpulimit` tool interrupts process, that should be expected.
+  - Freezing online games (setting `cpu-limit` to `0%`) causes disconnects from matches, so use less aggressive CPU limit to allow game to send/receive packets.
+  - Stuttery audio in game if CPU limit is very aggressive, since `cpulimit` tool interrupts process, that should be expected.
 
 ##### Why is code so complicated?
-- Long story short, try removing at least one line of code (that does not affect output, of course) and see what happens. That sounds easy - just apply a CPU-limit to a window when unfocused and remove it when focused, but that is a bit more complicated. Just check how much logic is used for that "easy" task. Also I used built-in stuff in bash like shell parameter expansions instead of `sed`, loops for reading text line-by-line with regexp in `if` statements instead of `grep` etc. to make code faster, calling external binaries consumes much more time and CPU resources than built-in options.
+- Long story short, try removing at least one line of code (that does not affect output, of course) and see what happens. That sounds easy - just apply a CPU limit to a window when unfocused and remove it when focused, but that is a bit more complicated. Just check how much logic is used for that "easy" task. Also I used built-in stuff in bash like shell parameter expansions instead of `sed`, loops for reading text line-by-line with regexp in `if` statements instead of `grep` etc. to make code faster, calling external binaries consumes much more time and CPU resources than built-in options.
 
 ##### Gamescope which allows limit FPS on unfocus exists, Wayland becomes more popular. Are you not late by any chance?
 - Well, not everyone is ready to switch to Wayland, there are a lot of reasons exists. Gamescope does not work well on my Nvidia desktop and Intel laptop, and I can bet it does not work well for others either. Also, there are a lot of old Nvidia GPUs that do not support Wayland at all because of old drivers, what makes Gamescope completely useless for owners of these GPUs.
