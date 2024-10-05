@@ -811,48 +811,48 @@ while read -r window_id; do
 			done
 			# Add PID to temporary array if it does not match
 			if [[ -z "$temp_found" ]]; then
-				cached_pids_array_temp+=("$temp_cached_pid")
+				temp_cached_pids_array+=("$temp_cached_pid")
 			fi
 		done
-		cached_pids_array=("${cached_pids_array_temp[@]}")
-		unset temp_cached_pid temp_cached_pid_to_remove cached_pids_array_temp temp_cached_pids_to_remove_array temp_found
+		cached_pids_array=("${temp_cached_pids_array[@]}")
+		unset temp_cached_pid temp_cached_pid_to_remove temp_cached_pids_array temp_cached_pids_to_remove_array temp_found
 	fi
 	# Refresh frozen PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID won't repeat
 	for temp_frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
 		# Store to array only existing PIDs, otherwise unset info about them
 		if [[ -d "/proc/$temp_frozen_process_pid" ]]; then
-			frozen_processes_pids_array_temp+=("$temp_frozen_process_pid")
+			temp_frozen_processes_pids_array+=("$temp_frozen_process_pid")
 		else
 			is_frozen_pid["$temp_frozen_process_pid"]=''
 			freeze_bgprocess_pid["$temp_frozen_process_pid"]=''
 		fi
 	done
-	frozen_processes_pids_array=("${frozen_processes_pids_array_temp[@]}")
-	unset temp_frozen_process_pid frozen_processes_pids_array_temp
+	frozen_processes_pids_array=("${temp_frozen_processes_pids_array[@]}")
+	unset temp_frozen_process_pid temp_frozen_processes_pids_array
 	# Refresh CPU limited PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID won't repeat
 	for temp_cpulimit_bgprocess in "${cpulimit_bgprocesses_pids_array[@]}"; do
 		if [[ -d "/proc/$temp_cpulimit_bgprocess" ]]; then
-			cpulimit_bgprocesses_pids_array_temp+=("$temp_cpulimit_bgprocess")
+			temp_cpulimit_bgprocesses_pids_array+=("$temp_cpulimit_bgprocess")
 		else
 			is_cpu_limited_pid["${cpu_limited_pid["$temp_cpulimit_bgprocess"]}"]=''
 			cpulimit_bgprocess_pid["${cpu_limited_pid["$temp_cpulimit_bgprocess"]}"]=''
 			cpu_limited_pid["$temp_cpulimit_bgprocess"]=''
 		fi
 	done
-	cpulimit_bgprocesses_pids_array=("${cpulimit_bgprocesses_pids_array_temp[@]}")
-	unset temp_cpulimit_bgprocess cpulimit_bgprocesses_pids_array_temp
+	cpulimit_bgprocesses_pids_array=("${temp_cpulimit_bgprocesses_pids_array[@]}")
+	unset temp_cpulimit_bgprocess temp_cpulimit_bgprocesses_pids_array
 	# Refresh FPS limited PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID won't repeat
 	for temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
 		if [[ -d "/proc/${fps_limited_pid["$temp_fps_limited_section"]}" ]]; then
-			fps_limited_sections_array_temp+=("$temp_fps_limited_section")
+			temp_fps_limited_sections_array+=("$temp_fps_limited_section")
 		else
 			is_fps_limited_section["$temp_fps_limited_section"]=''
 			fps_limit_bgprocess_pid["${fps_limited_pid["$temp_fps_limited_section"]}"]=''
 			fps_limited_pid["$temp_fps_limited_section"]=''
 		fi
 	done
-	fps_limited_sections_array=("${fps_limited_sections_array_temp[@]}")
-	unset temp_fps_limited_section fps_limited_sections_array_temp
+	fps_limited_sections_array=("${temp_fps_limited_sections_array[@]}")
+	unset temp_fps_limited_section temp_fps_limited_sections_array
 	# Run command on unfocus event for previous window if specified
 	if [[ -n "$previous_section_name" && -n "${config_key_unfocus["$previous_section_name"]}" && -z "$lazy" ]]; then
 		# Required to avoid running unfocus command when new event appears after previous matching one when '--hot' option is used along with '--lazy'
@@ -1005,11 +1005,11 @@ while read -r window_id; do
 			for temp_frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
 				# Skip current PID since I want remove it from array
 				if [[ "$temp_frozen_process_pid" != "$process_pid" ]]; then
-					frozen_processes_pids_array_temp+=("$temp_frozen_process_pid")
+					temp_frozen_processes_pids_array+=("$temp_frozen_process_pid")
 				fi
 			done
-			frozen_processes_pids_array=("${frozen_processes_pids_array_temp[@]}")
-			unset temp_frozen_process_pid frozen_processes_pids_array_temp
+			frozen_processes_pids_array=("${temp_frozen_processes_pids_array[@]}")
+			unset temp_frozen_process_pid temp_frozen_processes_pids_array
 			is_frozen_pid["$process_pid"]=''
 			freeze_bgprocess_pid["$process_pid"]=''
 		elif [[ -n "${is_cpu_limited_pid["$process_pid"]}" ]]; then # Check for CPU limit via 'cpulimit' background process
@@ -1023,11 +1023,11 @@ while read -r window_id; do
 			for temp_cpulimit_bgprocess_pid in "${cpulimit_bgprocesses_pids_array[@]}"; do
 				# Skip interrupted background process since I want remove it from array
 				if [[ "$temp_cpulimit_bgprocess_pid" != "${cpulimit_bgprocess_pid["$process_pid"]}" ]]; then
-					cpulimit_bgprocesses_pids_array_temp+=("$temp_cpulimit_bgprocess_pid")
+					temp_cpulimit_bgprocesses_pids_array+=("$temp_cpulimit_bgprocess_pid")
 				fi
 			done
-			cpulimit_bgprocesses_pids_array=("${cpulimit_bgprocesses_pids_array_temp[@]}")
-			unset temp_cpulimit_bgprocess_pid cpulimit_bgprocesses_pids_array_temp
+			cpulimit_bgprocesses_pids_array=("${temp_cpulimit_bgprocesses_pids_array[@]}")
+			unset temp_cpulimit_bgprocess_pid temp_cpulimit_bgprocesses_pids_array
 			is_cpu_limited_pid["$process_pid"]=''
 			cpu_limited_pid["${cpulimit_bgprocess_pid["$process_pid"]}"]=''
 			cpulimit_bgprocess_pid["$process_pid"]=''
@@ -1050,11 +1050,11 @@ while read -r window_id; do
 			for temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
 				# Skip FPS unlimited section since I want remove it from array
 				if [[ "$temp_fps_limited_section" != "$section_name" ]]; then
-					fps_limited_sections_array_temp+=("$temp_fps_limited_section")
+					temp_fps_limited_sections_array+=("$temp_fps_limited_section")
 				fi
 			done
-			fps_limited_sections_array=("${fps_limited_sections_array_temp[@]}")
-			unset temp_fps_limited_section fps_limited_sections_array_temp
+			fps_limited_sections_array=("${temp_fps_limited_sections_array[@]}")
+			unset temp_fps_limited_section temp_fps_limited_sections_array
 			is_fps_limited_section["$section_name"]=''
 			fps_limit_bgprocess_pid["$process_pid"]=''
 			fps_limited_pid["$section_name"]=''
