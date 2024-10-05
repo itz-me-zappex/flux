@@ -702,46 +702,46 @@ done < "$config"
 unset temp_config_line temp_value temp_section
 
 # Check values in sections
-for section_from_array in "${sections_array[@]}"; do
+for temp_section_from_array in "${sections_array[@]}"; do
 	# Exit with an error if neither identifier 'name' nor 'executable' nor 'command' is specified
-	if [[ -z "${config_key_name["$section_from_array"]}" && -z "${config_key_executable["$section_from_array"]}" && -z "${config_key_command["$section_from_array"]}" ]]; then
-		print_error "At least one process identifier required in section '$section_from_array'!"
+	if [[ -z "${config_key_name["$temp_section_from_array"]}" && -z "${config_key_executable["$temp_section_from_array"]}" && -z "${config_key_command["$temp_section_from_array"]}" ]]; then
+		print_error "At least one process identifier required in section '$temp_section_from_array'!"
 		exit 1
 	fi
 	# Exit with an error if MangoHud FPS limit is not specified along with config path
-	if [[ -n "${config_key_fps_unfocus["$section_from_array"]}" && -z "${config_key_mangohud_config["$section_from_array"]}" ]]; then
-		print_error "Value ${config_key_fps_unfocus["$section_from_array"]} in key 'fps-unfocus' in section '$section_from_array' is specified without path to MangoHud config!"
+	if [[ -n "${config_key_fps_unfocus["$temp_section_from_array"]}" && -z "${config_key_mangohud_config["$temp_section_from_array"]}" ]]; then
+		print_error "Value ${config_key_fps_unfocus["$temp_section_from_array"]} in key 'fps-unfocus' in section '$temp_section_from_array' is specified without path to MangoHud config!"
 		exit 1
 	fi
 	# Exit with an error if MangoHud FPS limit is specified along with CPU limit
-	if [[ -n "${config_key_fps_unfocus["$section_from_array"]}" && -n "${config_key_cpu_limit["$section_from_array"]}" && "${config_key_cpu_limit["$section_from_array"]}" != '-1' ]]; then
-		print_error "Do not use FPS limit along with CPU limit in section '$section_from_array'!"
+	if [[ -n "${config_key_fps_unfocus["$temp_section_from_array"]}" && -n "${config_key_cpu_limit["$temp_section_from_array"]}" && "${config_key_cpu_limit["$temp_section_from_array"]}" != '-1' ]]; then
+		print_error "Do not use FPS limit along with CPU limit in section '$temp_section_from_array'!"
 		exit 1
 	fi
 	# Exit with an error if 'fps-focus' is specified without 'fps-unfocus'
-	if [[ -n "${config_key_fps_focus["$section_from_array"]}" && -z "${config_key_fps_unfocus["$section_from_array"]}" ]]; then
-		print_error "Do not use 'fps-focus' key without 'fps-unfocus' key in section '$section_from_array'!"
+	if [[ -n "${config_key_fps_focus["$temp_section_from_array"]}" && -z "${config_key_fps_unfocus["$temp_section_from_array"]}" ]]; then
+		print_error "Do not use 'fps-focus' key without 'fps-unfocus' key in section '$temp_section_from_array'!"
 		exit 1
 	fi
 	# Exit with an error if 'mangohud-config' is specified without 'fps-unfocus'
-	if [[ -n "${config_key_mangohud_config["$section_from_array"]}" && -z "${config_key_fps_unfocus["$section_from_array"]}" ]]; then
-		print_error "Do not use 'mangohud-config' key without 'fps-unfocus' key in section '$section_from_array'!"
+	if [[ -n "${config_key_mangohud_config["$temp_section_from_array"]}" && -z "${config_key_fps_unfocus["$temp_section_from_array"]}" ]]; then
+		print_error "Do not use 'mangohud-config' key without 'fps-unfocus' key in section '$temp_section_from_array'!"
 		exit 1
 	fi
 	# Set 'fps-focus' to '0' (none) if it is not specified
-	if [[ -n "${config_key_fps_unfocus["$section_from_array"]}" && -z "${config_key_fps_focus["$section_from_array"]}" ]]; then
-		config_key_fps_focus["$section_from_array"]='0'
+	if [[ -n "${config_key_fps_unfocus["$temp_section_from_array"]}" && -z "${config_key_fps_focus["$temp_section_from_array"]}" ]]; then
+		config_key_fps_focus["$temp_section_from_array"]='0'
 	fi
 	# Set CPU limit to '-1' (none) if it is not specified
-	if [[ -z "${config_key_cpu_limit["$section_from_array"]}" ]]; then
-		config_key_cpu_limit["$section_from_array"]='-1'
+	if [[ -z "${config_key_cpu_limit["$temp_section_from_array"]}" ]]; then
+		config_key_cpu_limit["$temp_section_from_array"]='-1'
 	fi
 	# Set 'delay' to '0' if it is not specified
-	if [[ -z "${config_key_delay["$section_from_array"]}" ]]; then
-		config_key_delay["$section_from_array"]='0'
+	if [[ -z "${config_key_delay["$temp_section_from_array"]}" ]]; then
+		config_key_delay["$temp_section_from_array"]='0'
 	fi
 done
-unset section_from_array
+unset temp_section_from_array
 
 # Declare associative arrays to store info about applied actions
 declare -A \
