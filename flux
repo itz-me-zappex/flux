@@ -300,48 +300,48 @@ background_mangohud_fps_set(){
 # Actions on SIGTERM and SIGINT signals
 actions_on_sigterm(){
 	# Unfreeze processes
-	for frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
+	for temp_frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
 		# Terminate background process if exists
-		if [[ -d "/proc/${freeze_bgprocess_pid["$frozen_process_pid"]}" ]]; then
-			if ! kill "${freeze_bgprocess_pid["$frozen_process_pid"]}" > /dev/null 2>&1; then
-				print_warn "Unable to cancel delayed for ${config_key_delay["${cache_section["$frozen_process_pid"]}"]} second(s) freezing of process '${cache_process_name["$frozen_process_pid"]}' with PID $frozen_process_pid!"
+		if [[ -d "/proc/${freeze_bgprocess_pid["$temp_frozen_process_pid"]}" ]]; then
+			if ! kill "${freeze_bgprocess_pid["$temp_frozen_process_pid"]}" > /dev/null 2>&1; then
+				print_warn "Unable to cancel delayed for ${config_key_delay["${cache_section["$temp_frozen_process_pid"]}"]} second(s) freezing of process '${cache_process_name["$temp_frozen_process_pid"]}' with PID $temp_frozen_process_pid!"
 			else
 				# Avoid printing this message if delay is not specified
-				if [[ "${config_key_delay["${cache_section["$frozen_process_pid"]}"]}" != '0' ]]; then
-					print_verbose "Delayed for ${config_key_delay["${cache_section["$frozen_process_pid"]}"]} second(s) freezing of process '${cache_process_name["$frozen_process_pid"]}' with PID $frozen_process_pid has been cancelled on daemon termination."
+				if [[ "${config_key_delay["${cache_section["$temp_frozen_process_pid"]}"]}" != '0' ]]; then
+					print_verbose "Delayed for ${config_key_delay["${cache_section["$temp_frozen_process_pid"]}"]} second(s) freezing of process '${cache_process_name["$temp_frozen_process_pid"]}' with PID $temp_frozen_process_pid has been cancelled on daemon termination."
 				fi
 			fi
-		elif [[ -d "/proc/$frozen_process_pid" ]]; then # Unfreeze process
-			if ! kill -CONT "$frozen_process_pid" > /dev/null 2>&1; then
-				print_warn "Process '${cache_process_name["$frozen_process_pid"]}' with PID $frozen_process_pid cannot be unfrozen on daemon termination!"
+		elif [[ -d "/proc/$temp_frozen_process_pid" ]]; then # Unfreeze process
+			if ! kill -CONT "$temp_frozen_process_pid" > /dev/null 2>&1; then
+				print_warn "Process '${cache_process_name["$temp_frozen_process_pid"]}' with PID $temp_frozen_process_pid cannot be unfrozen on daemon termination!"
 			else
-				print_verbose "Process '${cache_process_name["$frozen_process_pid"]}' with PID $frozen_process_pid has been unfrozen on daemon termination."
+				print_verbose "Process '${cache_process_name["$temp_frozen_process_pid"]}' with PID $temp_frozen_process_pid has been unfrozen on daemon termination."
 			fi
 		fi
 	done
 	# Kill cpulimit background process
-	for cpulimit_bgprocess_pid_var in "${cpulimit_bgprocesses_pids_array[@]}"; do
-		if [[ -d "/proc/$cpulimit_bgprocess_pid_var" ]]; then
-			if ! kill "$cpulimit_bgprocess_pid_var" > /dev/null 2>&1; then
-				print_warn "Process '${cache_process_name["${cpu_limited_pid["${cpulimit_bgprocess_pid_var}"]}"]}' with PID ${cpu_limited_pid["${cpulimit_bgprocess_pid_var}"]} cannot be CPU unlimited on daemon termination!"
+	for temp_cpulimit_bgprocess_pid in "${cpulimit_bgprocesses_pids_array[@]}"; do
+		if [[ -d "/proc/$temp_cpulimit_bgprocess_pid" ]]; then
+			if ! kill "$temp_cpulimit_bgprocess_pid" > /dev/null 2>&1; then
+				print_warn "Process '${cache_process_name["${cpu_limited_pid["${temp_cpulimit_bgprocess_pid}"]}"]}' with PID ${cpu_limited_pid["${temp_cpulimit_bgprocess_pid}"]} cannot be CPU unlimited on daemon termination!"
 			else
-				print_verbose "Process '${cache_process_name["${cpu_limited_pid["${cpulimit_bgprocess_pid_var}"]}"]}' with PID ${cpu_limited_pid["${cpulimit_bgprocess_pid_var}"]} has been CPU unlimited on daemon termination."
+				print_verbose "Process '${cache_process_name["${cpu_limited_pid["${temp_cpulimit_bgprocess_pid}"]}"]}' with PID ${cpu_limited_pid["${temp_cpulimit_bgprocess_pid}"]} has been CPU unlimited on daemon termination."
 			fi
 		fi
 	done
 	# Remove FPS limits
-	for fps_limited_section in "${fps_limited_sections_array[@]}"; do
+	for temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
 		# Terminate background process if exists
-		if [[ -d "/proc/${fps_limit_bgprocess_pid["${fps_limited_pid["$fps_limited_section"]}"]}" ]]; then
-			if ! kill "${fps_limit_bgprocess_pid["${fps_limited_pid["$fps_limited_section"]}"]}" > /dev/null 2>&1; then
-				print_warn "Unable to stop FPS limit background process with PID ${fps_limit_bgprocess_pid["${fps_limited_pid["$fps_limited_section"]}"]}!"
+		if [[ -d "/proc/${fps_limit_bgprocess_pid["${fps_limited_pid["$temp_fps_limited_section"]}"]}" ]]; then
+			if ! kill "${fps_limit_bgprocess_pid["${fps_limited_pid["$temp_fps_limited_section"]}"]}" > /dev/null 2>&1; then
+				print_warn "Unable to stop FPS limit background process with PID ${fps_limit_bgprocess_pid["${fps_limited_pid["$temp_fps_limited_section"]}"]}!"
 			else
-				print_verbose "FPS limit background process related to process '${cache_process_name["${fps_limited_pid["$fps_limited_section"]}"]}' with PID ${fps_limited_pid["$fps_limited_section"]} has been terminated on daemon termination."
+				print_verbose "FPS limit background process related to process '${cache_process_name["${fps_limited_pid["$temp_fps_limited_section"]}"]}' with PID ${fps_limited_pid["$temp_fps_limited_section"]} has been terminated on daemon termination."
 			fi
 		fi
 		# Set FPS from 'fps-focus' key to remove limit
-		if mangohud_fps_set "${config_key_mangohud_config["$fps_limited_section"]}" "${config_key_fps_focus["$fps_limited_section"]}"; then
-			print_verbose "Process '${cache_process_name["${fps_limited_pid["$fps_limited_section"]}"]}' with PID ${fps_limited_pid["$fps_limited_section"]} has been FPS unlimited on daemon termination."
+		if mangohud_fps_set "${config_key_mangohud_config["$temp_fps_limited_section"]}" "${config_key_fps_focus["$temp_fps_limited_section"]}"; then
+			print_verbose "Process '${cache_process_name["${fps_limited_pid["$temp_fps_limited_section"]}"]}' with PID ${fps_limited_pid["$temp_fps_limited_section"]} has been FPS unlimited on daemon termination."
 		fi
 	done
 }
@@ -1020,14 +1020,14 @@ while read -r window_id; do
 				print_info "Process '$process_name' with PID $process_pid has been CPU unlimited on focus event."
 			fi
 			# Remove PID of 'cpulimit' background process from array
-			for temp_cpulimit_bgprocess in "${cpulimit_bgprocesses_pids_array[@]}"; do
+			for temp_cpulimit_bgprocess_pid in "${cpulimit_bgprocesses_pids_array[@]}"; do
 				# Skip interrupted background process since I want remove it from array
-				if [[ "$temp_cpulimit_bgprocess" != "${cpulimit_bgprocess_pid["$process_pid"]}" ]]; then
-					cpulimit_bgprocesses_pids_array_temp+=("$temp_cpulimit_bgprocess")
+				if [[ "$temp_cpulimit_bgprocess_pid" != "${cpulimit_bgprocess_pid["$process_pid"]}" ]]; then
+					cpulimit_bgprocesses_pids_array_temp+=("$temp_cpulimit_bgprocess_pid")
 				fi
 			done
 			cpulimit_bgprocesses_pids_array=("${cpulimit_bgprocesses_pids_array_temp[@]}")
-			unset temp_cpulimit_bgprocess cpulimit_bgprocesses_pids_array_temp
+			unset temp_cpulimit_bgprocess_pid cpulimit_bgprocesses_pids_array_temp
 			is_cpu_limited_pid["$process_pid"]=''
 			cpu_limited_pid["${cpulimit_bgprocess_pid["$process_pid"]}"]=''
 			cpulimit_bgprocess_pid["$process_pid"]=''
