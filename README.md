@@ -105,6 +105,7 @@ $ sudo install -Dm 755 flux-${fluxver}/flux /usr/local/bin/flux # Install daemon
 Make sure you have installed `base-devel` package before continue.
 ``` bash
 $ fluxver='1.6.11'
+```
 ```bash
 $ mkdir flux && cd flux # create and change build directory
 ```
