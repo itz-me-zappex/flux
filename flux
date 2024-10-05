@@ -97,7 +97,7 @@ xprop_event_reader(){
 			fi
 			# Extract ID from line
 			window_id="${xprop_event/* \# /}"
-			# Skip cycle if window ID is exactly the same as previous one, workaround required for some buggy WMs
+			# Skip event if window ID is exactly the same as previous one, workaround required for some buggy WMs
 			if [[ "$window_id" == "$previous_window_id" ]]; then
 				continue
 			else
@@ -294,7 +294,7 @@ background_mangohud_fps_set(){
 }
 
 # Actions on SIGTERM and SIGINT signals
-exit_on_term(){
+actions_on_sigterm(){
 	# Unfreeze processes
 	for frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
 		# Terminate background process if exists
@@ -343,7 +343,7 @@ exit_on_term(){
 }
 
 # Remove CPU limits and FPS limits of processes on exit
-trap 'exit_on_term ; print_info "Daemon has been terminated successfully." ; exit 0' SIGTERM SIGINT
+trap 'actions_on_sigterm ; print_info "Daemon has been terminated successfully." ; exit 0' SIGTERM SIGINT
 
 # Prefixes for output
 error_prefix="[x]"
@@ -470,11 +470,12 @@ Options and values:
 		shift 1
 	;;
 	--version | -V )
-		echo "flux 1.6.10
+		author_github_link='https://github.com/itz-me-zappex'
+		echo "flux 1.6.11
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
-Repository: https://github.com/itz-me-zappex/flux
-Developer: https://github.com/itz-me-zappex
+Author: $author_github_link
+Repository: ${author_github_link}/flux
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 "
@@ -706,7 +707,7 @@ for section_from_array in "${sections_array[@]}"; do
 		print_error "At least one process identifier required in section '$section_from_array'!"
 		exit 1
 	fi
-	# Exit with an error if MangoHud FPS limit is not specified along with config path (for the fuck should I know which config should be modified then?)
+	# Exit with an error if MangoHud FPS limit is not specified along with config path
 	if [[ -n "${config_key_fps_unfocus["$section_from_array"]}" && -z "${config_key_mangohud_config["$section_from_array"]}" ]]; then
 		print_error "Value ${config_key_fps_unfocus["$section_from_array"]} in key 'fps-unfocus' in section '$section_from_array' is specified without path to MangoHud config!"
 		exit 1
@@ -767,14 +768,11 @@ if [[ "$XDG_SESSION_TYPE" != 'x11' ]]; then
 	exit 1
 fi
 
-# Set cycle counter to zero, required to clean up cache per N cycles
-cycle_counter='0'
-
 # Read IDs of windows and apply actions
 while read -r window_id; do
 	# Exit with an error in case 'exit' event appears
 	if [[ "$window_id" == 'exit' ]]; then
-		exit_on_term
+		actions_on_sigterm
 		print_error "Daemon has been terminated unexpectedly!"
 		exit 1
 	elif [[ "$window_id" == 'nolazy' ]]; then # Unset '--lazy' option if event was passed, otherwise focus and unfocus commands will not work
@@ -785,50 +783,79 @@ while read -r window_id; do
 		unset hot
 		continue
 	fi
-	# Increase count of cycles
-	if [[ -z "$hot" ]]; then
-		(( cycle_counter++ ))
-	fi
-	# Clean cache which stores info about processes every 1000th cycle to avoid memory leak
-	if (( cycle_counter != 0 && cycle_counter % 1000 == 0 )); then
-		# Read PIDs from array
+	# Clean up cache to remove terminated PIDs which will not appear anymore
+	for cached_pid in "${cached_pids_array[@]}"; do
+		# Remove info about process if it does not exist anymore
+		if [[ ! -d "/proc/$cached_pid" ]]; then
+			print_verbose "Cache of process '${cache_process_name["$cached_pid"]}' with PID $cached_pid has been removed."
+			cache_process_name["$cached_pid"]=''
+			cache_process_executable["$cached_pid"]=''
+			cache_process_owner["$cached_pid"]=''
+			cache_process_command["$cached_pid"]=''
+			cache_section["$cached_pid"]=''
+			cache_mismatch["$cached_pid"]=''
+			cached_pids_to_remove_array+=("$cached_pid")
+		fi
+	done
+	# Remove terminated PIDs from array as their info has been removed above
+	if [[ -n "${cached_pids_to_remove_array[*]}" ]]; then 
+		# Read array with PIDs
 		for cached_pid in "${cached_pids_array[@]}"; do
-			# Remove info about process if it does not exist anymore
-			if [[ ! -d "/proc/$cached_pid" ]]; then
-				print_verbose "Cache of process '${cache_process_name["$cached_pid"]}' with PID $cached_pid has been removed."
-				cache_process_name["$cached_pid"]=''
-				cache_process_executable["$cached_pid"]=''
-				cache_process_owner["$cached_pid"]=''
-				cache_process_command["$cached_pid"]=''
-				cache_section["$cached_pid"]=''
-				cache_mismatch["$cached_pid"]=''
-				cached_pids_to_remove_array+=("$cached_pid")
-			fi
-		done
-		# Remove terminated PIDs from array
-		if [[ -n "${cached_pids_to_remove_array[*]}" ]]; then 
-			# Read array with PIDs
-			for cached_pid in "${cached_pids_array[@]}"; do
-				# Unset flag which responds for matching of PID I want remove from main array to avoid false positive
-				unset found
-				# Read array with PIDs I want remove
-				for cached_pid_to_remove in "${cached_pids_to_remove_array[@]}"; do
-					# Mark PID as found if it matches
-					if [[ "$cached_pid" == "$cached_pid_to_remove" ]]; then
-						found='1'
-						break
-					fi
-				done
-				# Add PID to temporary array if it does not match
-				if [[ -z "$found" ]]; then
-					cached_pids_array_temp+=("$cached_pid")
+			# Unset flag which responds for matching of PID I want remove from main array to avoid false positive
+			unset found
+			# Read array with PIDs I want remove
+			for cached_pid_to_remove in "${cached_pids_to_remove_array[@]}"; do
+				# Mark PID as found if it matches
+				if [[ "$cached_pid" == "$cached_pid_to_remove" ]]; then
+					found='1'
+					break
 				fi
 			done
-			cached_pids_array=("${cached_pids_array_temp[@]}")
-			unset cached_pid cached_pid_to_remove cached_pids_array_temp cached_pids_to_remove_array found
-		fi
-		print_verbose "Cache which contains processes information has been cleaned up."
+			# Add PID to temporary array if it does not match
+			if [[ -z "$found" ]]; then
+				cached_pids_array_temp+=("$cached_pid")
+			fi
+		done
+		cached_pids_array=("${cached_pids_array_temp[@]}")
+		unset cached_pid cached_pid_to_remove cached_pids_array_temp cached_pids_to_remove_array found
 	fi
+	print_verbose "Cache which contains processes information has been cleaned up."
+	# Refresh frozen PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID won't repeat
+	for frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
+		# Store to array only existing PIDs, otherwise unset info about them
+		if [[ -d "/proc/$frozen_process_pid" ]]; then
+			frozen_processes_pids_array_temp+=("$frozen_process_pid")
+		else
+			is_frozen_pid["$frozen_process_pid"]=''
+			freeze_bgprocess_pid["$frozen_process_pid"]=''
+		fi
+	done
+	frozen_processes_pids_array=("${frozen_processes_pids_array_temp[@]}")
+	unset frozen_process_pid frozen_processes_pids_array_temp
+	# Refresh CPU limited PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID won't repeat
+	for cpulimit_bgprocess_pid_var in "${cpulimit_bgprocesses_pids_array[@]}"; do
+		if [[ -d "/proc/$cpulimit_bgprocess_pid_var" ]]; then
+			cpulimit_bgprocesses_pids_array_temp+=("$cpulimit_bgprocess_pid_var")
+		else
+			is_cpu_limited_pid["${cpu_limited_pid["$cpulimit_bgprocess_pid_var"]}"]=''
+			cpulimit_bgprocess_pid["${cpu_limited_pid["$cpulimit_bgprocess_pid_var"]}"]=''
+			cpu_limited_pid["$cpulimit_bgprocess_pid_var"]=''
+		fi
+	done
+	cpulimit_bgprocesses_pids_array=("${cpulimit_bgprocesses_pids_array_temp[@]}")
+	unset cpulimit_bgprocess_pid_var cpulimit_bgprocesses_pids_array_temp
+	# Refresh FPS limited PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID won't repeat
+	for fps_limited_section in "${fps_limited_sections_array[@]}"; do
+		if [[ -d "/proc/${fps_limited_pid["$fps_limited_section"]}" ]]; then
+			fps_limited_sections_array_temp+=("$fps_limited_section")
+		else
+			is_fps_limited_section["$fps_limited_section"]=''
+			fps_limit_bgprocess_pid["${fps_limited_pid["$fps_limited_section"]}"]=''
+			fps_limited_pid["$fps_limited_section"]=''
+		fi
+	done
+	fps_limited_sections_array=("${fps_limited_sections_array_temp[@]}")
+	unset fps_limited_section fps_limited_sections_array_temp
 	# Run command on unfocus event for previous window if specified
 	if [[ -n "$previous_section_name" && -n "${config_key_unfocus["$previous_section_name"]}" && -z "$lazy" ]]; then
 		# Required to avoid running unfocus command when new event appears after previous matching one when '--hot' option is used along with '--lazy'
@@ -948,7 +975,10 @@ while read -r window_id; do
 				fi
 			fi
 		elif [[ -n "$previous_process_owner" ]]; then
-			print_warn "Unable to apply CPU limit to process '$previous_process_name' with PID $previous_process_pid, UID of process - $previous_process_owner, UID of user - $UID!"
+			# I know that FPS limiting does not require root rights as it just should change 'fps_limit' value in MangoHud config
+			# But who will run a game as root?
+			# That is dumb and I'm not looking for spend time on this
+			print_warn "Unable to apply CPU or FPS limit to process '$previous_process_name' with PID $previous_process_pid, UID of process - $previous_process_owner, UID of user - $UID!"
 		fi
 	fi
 	# Do not apply actions if window does not report its PID
@@ -1005,10 +1035,9 @@ while read -r window_id; do
 			cpu_limited_pid["${cpulimit_bgprocess_pid["$process_pid"]}"]=''
 			cpulimit_bgprocess_pid["$process_pid"]=''
 		elif [[ -n "$section_name" && -n "${is_fps_limited_section["$section_name"]}" && -n "${fps_limited_pid["$section_name"]}" ]]; then
-			# Terminate FPS limit background process if exists, checking variable for not being blank is required for wtf reason
+			# Terminate FPS limit background process if exists, checking variable for not being blank is required for unknown reason
 			# Otherwise 'kill' will exit with an error because of blank value
 			# And that is including checking for process existence in the same 'if' statement which returns 'true'
-			# I fucking love bash, burn in hell, bitches
 			if [[ -n "${fps_limit_bgprocess_pid["$process_pid"]}" && -d "/proc/${fps_limit_bgprocess_pid["$process_pid"]}" ]]; then
 				if ! kill "${fps_limit_bgprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
 					print_warn "Unable to stop FPS limit background process with PID ${fps_limit_bgprocess_pid["$process_pid"]}!"
@@ -1042,7 +1071,7 @@ while read -r window_id; do
 		unset_flux_variables
 		print_verbose "Running command on focus event '${config_key_focus["$section_name"]}' from section '$section_name'."
 	fi
-	# Remember info about process for next cycle to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'unfocus' key
+	# Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'unfocus' key
 	previous_window_id="$window_id"
 	previous_process_pid="$process_pid"
 	previous_process_name="$process_name"
@@ -1050,7 +1079,7 @@ while read -r window_id; do
 	previous_process_owner="$process_owner"
 	previous_section_name="$section_name"
 	previous_process_command="$process_command"
-	# Unset to avoid false positive on next cycle
+	# Unset to avoid false positive on next event
 	unset section_name
 	# Unset info about process to avoid using it in some rare cases (idk why that happens, noticed that only once after a few hours of using daemon)
 	process_pid=''
@@ -1058,52 +1087,4 @@ while read -r window_id; do
 	process_executable=''
 	process_owner=''
 	process_command=''
-	# Compare content and refresh PIDs if it has been changed
-	if [[ -n "$snapshot_frozen_processes_pids_array" && "$snapshot_frozen_processes_pids_array" != "${frozen_processes_pids_array[*]}" ]]; then
-		# Refresh frozen PIDs to avoid memory leak
-		for frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
-			# Store to array only existing PIDs, otherwise unset info about them
-			if [[ -d "/proc/$frozen_process_pid" ]]; then
-				frozen_processes_pids_array_temp+=("$frozen_process_pid")
-			else
-				is_frozen_pid["$frozen_process_pid"]=''
-				freeze_bgprocess_pid["$frozen_process_pid"]=''
-			fi
-		done
-		frozen_processes_pids_array=("${frozen_processes_pids_array_temp[@]}")
-		unset frozen_process_pid frozen_processes_pids_array_temp
-	fi
-	snapshot_frozen_processes_pids_array="${frozen_processes_pids_array[*]}"
-	# Compare content and refresh PIDs if it has been changed
-	if [[ -n "$snapshot_cpulimit_bgprocesses_pids_array" && "$snapshot_cpulimit_bgprocesses_pids_array" != "${cpulimit_bgprocesses_pids_array[*]}" ]]; then
-		# Refresh CPU limited PIDs to avoid memory leak
-		for cpulimit_bgprocess_pid_var in "${cpulimit_bgprocesses_pids_array[@]}"; do
-			if [[ -d "/proc/$cpulimit_bgprocess_pid_var" ]]; then
-				cpulimit_bgprocesses_pids_array_temp+=("$cpulimit_bgprocess_pid_var")
-			else
-				is_cpu_limited_pid["${cpu_limited_pid["$cpulimit_bgprocess_pid_var"]}"]=''
-				cpulimit_bgprocess_pid["${cpu_limited_pid["$cpulimit_bgprocess_pid_var"]}"]=''
-				cpu_limited_pid["$cpulimit_bgprocess_pid_var"]=''
-			fi
-		done
-		cpulimit_bgprocesses_pids_array=("${cpulimit_bgprocesses_pids_array_temp[@]}")
-		unset cpulimit_bgprocess_pid_var cpulimit_bgprocesses_pids_array_temp
-	fi
-	snapshot_cpulimit_bgprocesses_pids_array="${cpulimit_bgprocesses_pids_array[*]}"
-	# Compare content and refresh PIDs if it has been changed
-	if [[ -n "$snapshot_fps_limited_sections_array" && "$snapshot_fps_limited_sections_array" != "${fps_limited_sections_array[*]}" ]]; then
-		# Refresh FPS limited PIDs to avoid memory leak
-		for fps_limited_section in "${fps_limited_sections_array[@]}"; do
-			if [[ -d "/proc/${fps_limited_pid["$fps_limited_section"]}" ]]; then
-				fps_limited_sections_array_temp+=("$fps_limited_section")
-			else
-				is_fps_limited_section["$fps_limited_section"]=''
-				fps_limit_bgprocess_pid["${fps_limited_pid["$fps_limited_section"]}"]=''
-				fps_limited_pid["$fps_limited_section"]=''
-			fi
-		done
-		fps_limited_sections_array=("${fps_limited_sections_array_temp[@]}")
-		unset fps_limited_section fps_limited_sections_array_temp
-	fi
-	snapshot_fps_limited_sections_array="${fps_limited_sections_array[*]}"
 done < <(xprop_event_reader)
