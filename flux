@@ -133,6 +133,7 @@ unset_flux_variables(){
 
 # Extract process info
 extract_process_info(){
+	local local_status_line local_column_count local_status_column
 	# Extract PID of process
 	if ! process_pid="$(xprop -id "$window_id" _NET_WM_PID 2>/dev/null)"; then
 		process_pid=''
@@ -148,20 +149,18 @@ extract_process_info(){
 			# Extract executable path of process
 			process_executable="$(readlink "/proc/$process_pid/exe")"
 			# Extract UID of process
-			while read -r status_line; do
-				if [[ "$status_line" == 'Uid:'* ]]; then
-					column_count='0'
-					for status_column in $status_line; do
-						if (( column_count == 3 )); then
-							process_owner="$status_column"
+			while read -r local_status_line; do
+				if [[ "$local_status_line" == 'Uid:'* ]]; then
+					local_column_count='0'
+					for local_status_column in $local_status_line; do
+						if (( local_column_count == 3 )); then
+							process_owner="$local_status_column"
 						else
-							(( column_count++ ))
+							(( local_column_count++ ))
 						fi
 					done
-					unset status_column column_count
 				fi
 			done < "/proc/$process_pid/status"
-			unset status_line
 			# I did not get how to do that using built-in bash options
 			# Extract command of process and replace '\0' (used as separator between options) with spaces
 			process_command="$(tr '\0' ' ' < "/proc/$process_pid/cmdline")"
