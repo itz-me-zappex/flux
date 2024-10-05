@@ -572,13 +572,13 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 	elif [[ "$temp_config_line" =~ ^\[.*\]$ ]]; then
 		# Exit with an error if section repeated
 		if [[ -n "${sections_array[*]}" ]]; then
-			for temp_section_from_array in "${sections_array[@]}"; do
-				if [[ "[$section_from_array]" == "$temp_config_line" ]]; then
+			for temp_section in "${sections_array[@]}"; do
+				if [[ "[$temp_section]" == "$temp_config_line" ]]; then
 					print_error "Section name '$temp_section' is repeated!"
 					exit 1
 				fi
 			done
-			unset temp_section_from_array
+			unset temp_section
 		fi
 		# Remove square brackets from section name and add it to array
 		# Array required to check for repeating sections and find matching rule(s) for process in config
@@ -702,46 +702,46 @@ done < "$config"
 unset temp_config_line temp_value temp_section
 
 # Check values in sections
-for temp_section_from_array in "${sections_array[@]}"; do
+for temp_section in "${sections_array[@]}"; do
 	# Exit with an error if neither identifier 'name' nor 'executable' nor 'command' is specified
-	if [[ -z "${config_key_name["$temp_section_from_array"]}" && -z "${config_key_executable["$temp_section_from_array"]}" && -z "${config_key_command["$temp_section_from_array"]}" ]]; then
-		print_error "At least one process identifier required in section '$temp_section_from_array'!"
+	if [[ -z "${config_key_name["$temp_section"]}" && -z "${config_key_executable["$temp_section"]}" && -z "${config_key_command["$temp_section"]}" ]]; then
+		print_error "At least one process identifier required in section '$temp_section'!"
 		exit 1
 	fi
 	# Exit with an error if MangoHud FPS limit is not specified along with config path
-	if [[ -n "${config_key_fps_unfocus["$temp_section_from_array"]}" && -z "${config_key_mangohud_config["$temp_section_from_array"]}" ]]; then
-		print_error "Value ${config_key_fps_unfocus["$temp_section_from_array"]} in key 'fps-unfocus' in section '$temp_section_from_array' is specified without path to MangoHud config!"
+	if [[ -n "${config_key_fps_unfocus["$temp_section"]}" && -z "${config_key_mangohud_config["$temp_section"]}" ]]; then
+		print_error "Value ${config_key_fps_unfocus["$temp_section"]} in key 'fps-unfocus' in section '$temp_section' is specified without path to MangoHud config!"
 		exit 1
 	fi
 	# Exit with an error if MangoHud FPS limit is specified along with CPU limit
-	if [[ -n "${config_key_fps_unfocus["$temp_section_from_array"]}" && -n "${config_key_cpu_limit["$temp_section_from_array"]}" && "${config_key_cpu_limit["$temp_section_from_array"]}" != '-1' ]]; then
-		print_error "Do not use FPS limit along with CPU limit in section '$temp_section_from_array'!"
+	if [[ -n "${config_key_fps_unfocus["$temp_section"]}" && -n "${config_key_cpu_limit["$temp_section"]}" && "${config_key_cpu_limit["$temp_section"]}" != '-1' ]]; then
+		print_error "Do not use FPS limit along with CPU limit in section '$temp_section'!"
 		exit 1
 	fi
 	# Exit with an error if 'fps-focus' is specified without 'fps-unfocus'
-	if [[ -n "${config_key_fps_focus["$temp_section_from_array"]}" && -z "${config_key_fps_unfocus["$temp_section_from_array"]}" ]]; then
-		print_error "Do not use 'fps-focus' key without 'fps-unfocus' key in section '$temp_section_from_array'!"
+	if [[ -n "${config_key_fps_focus["$temp_section"]}" && -z "${config_key_fps_unfocus["$temp_section"]}" ]]; then
+		print_error "Do not use 'fps-focus' key without 'fps-unfocus' key in section '$temp_section'!"
 		exit 1
 	fi
 	# Exit with an error if 'mangohud-config' is specified without 'fps-unfocus'
-	if [[ -n "${config_key_mangohud_config["$temp_section_from_array"]}" && -z "${config_key_fps_unfocus["$temp_section_from_array"]}" ]]; then
-		print_error "Do not use 'mangohud-config' key without 'fps-unfocus' key in section '$temp_section_from_array'!"
+	if [[ -n "${config_key_mangohud_config["$temp_section"]}" && -z "${config_key_fps_unfocus["$temp_section"]}" ]]; then
+		print_error "Do not use 'mangohud-config' key without 'fps-unfocus' key in section '$temp_section'!"
 		exit 1
 	fi
 	# Set 'fps-focus' to '0' (none) if it is not specified
-	if [[ -n "${config_key_fps_unfocus["$temp_section_from_array"]}" && -z "${config_key_fps_focus["$temp_section_from_array"]}" ]]; then
-		config_key_fps_focus["$temp_section_from_array"]='0'
+	if [[ -n "${config_key_fps_unfocus["$temp_section"]}" && -z "${config_key_fps_focus["$temp_section"]}" ]]; then
+		config_key_fps_focus["$temp_section"]='0'
 	fi
 	# Set CPU limit to '-1' (none) if it is not specified
-	if [[ -z "${config_key_cpu_limit["$temp_section_from_array"]}" ]]; then
-		config_key_cpu_limit["$temp_section_from_array"]='-1'
+	if [[ -z "${config_key_cpu_limit["$temp_section"]}" ]]; then
+		config_key_cpu_limit["$temp_section"]='-1'
 	fi
 	# Set 'delay' to '0' if it is not specified
-	if [[ -z "${config_key_delay["$temp_section_from_array"]}" ]]; then
-		config_key_delay["$temp_section_from_array"]='0'
+	if [[ -z "${config_key_delay["$temp_section"]}" ]]; then
+		config_key_delay["$temp_section"]='0'
 	fi
 done
-unset temp_section_from_array
+unset temp_section
 
 # Declare associative arrays to store info about applied actions
 declare -A \
@@ -782,77 +782,77 @@ while read -r window_id; do
 		continue
 	fi
 	# Clean up cache to remove terminated PIDs which will not appear anymore
-	for cached_pid in "${cached_pids_array[@]}"; do
+	for temp_cached_pid in "${cached_pids_array[@]}"; do
 		# Remove info about process if it does not exist anymore
-		if [[ ! -d "/proc/$cached_pid" ]]; then
-			print_verbose "Cache of process '${cache_process_name["$cached_pid"]}' with PID $cached_pid has been removed."
-			cache_process_name["$cached_pid"]=''
-			cache_process_executable["$cached_pid"]=''
-			cache_process_owner["$cached_pid"]=''
-			cache_process_command["$cached_pid"]=''
-			cache_section["$cached_pid"]=''
-			cache_mismatch["$cached_pid"]=''
-			cached_pids_to_remove_array+=("$cached_pid")
+		if [[ ! -d "/proc/$temp_cached_pid" ]]; then
+			print_verbose "Cache of process '${cache_process_name["$temp_cached_pid"]}' with PID $temp_cached_pid has been removed."
+			cache_process_name["$temp_cached_pid"]=''
+			cache_process_executable["$temp_cached_pid"]=''
+			cache_process_owner["$temp_cached_pid"]=''
+			cache_process_command["$temp_cached_pid"]=''
+			cache_section["$temp_cached_pid"]=''
+			cache_mismatch["$temp_cached_pid"]=''
+			temp_cached_pids_to_remove_array+=("$temp_cached_pid")
 		fi
 	done
 	# Remove terminated PIDs from array as their info has been removed above
-	if [[ -n "${cached_pids_to_remove_array[*]}" ]]; then 
+	if [[ -n "${temp_cached_pids_to_remove_array[*]}" ]]; then 
 		# Read array with PIDs
-		for cached_pid in "${cached_pids_array[@]}"; do
+		for temp_cached_pid in "${cached_pids_array[@]}"; do
 			# Unset flag which responds for matching of PID I want remove from main array to avoid false positive
-			unset found
+			unset temp_found
 			# Read array with PIDs I want remove
-			for cached_pid_to_remove in "${cached_pids_to_remove_array[@]}"; do
+			for temp_cached_pid_to_remove in "${temp_cached_pids_to_remove_array[@]}"; do
 				# Mark PID as found if it matches
-				if [[ "$cached_pid" == "$cached_pid_to_remove" ]]; then
-					found='1'
+				if [[ "$temp_cached_pid" == "$temp_cached_pid_to_remove" ]]; then
+					temp_found='1'
 					break
 				fi
 			done
 			# Add PID to temporary array if it does not match
-			if [[ -z "$found" ]]; then
-				cached_pids_array_temp+=("$cached_pid")
+			if [[ -z "$temp_found" ]]; then
+				cached_pids_array_temp+=("$temp_cached_pid")
 			fi
 		done
 		cached_pids_array=("${cached_pids_array_temp[@]}")
-		unset cached_pid cached_pid_to_remove cached_pids_array_temp cached_pids_to_remove_array found
+		unset temp_cached_pid temp_cached_pid_to_remove cached_pids_array_temp temp_cached_pids_to_remove_array temp_found
 	fi
 	# Refresh frozen PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID won't repeat
-	for frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
+	for temp_frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
 		# Store to array only existing PIDs, otherwise unset info about them
-		if [[ -d "/proc/$frozen_process_pid" ]]; then
-			frozen_processes_pids_array_temp+=("$frozen_process_pid")
+		if [[ -d "/proc/$temp_frozen_process_pid" ]]; then
+			frozen_processes_pids_array_temp+=("$temp_frozen_process_pid")
 		else
-			is_frozen_pid["$frozen_process_pid"]=''
-			freeze_bgprocess_pid["$frozen_process_pid"]=''
+			is_frozen_pid["$temp_frozen_process_pid"]=''
+			freeze_bgprocess_pid["$temp_frozen_process_pid"]=''
 		fi
 	done
 	frozen_processes_pids_array=("${frozen_processes_pids_array_temp[@]}")
-	unset frozen_process_pid frozen_processes_pids_array_temp
+	unset temp_frozen_process_pid frozen_processes_pids_array_temp
 	# Refresh CPU limited PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID won't repeat
-	for cpulimit_bgprocess_pid_var in "${cpulimit_bgprocesses_pids_array[@]}"; do
-		if [[ -d "/proc/$cpulimit_bgprocess_pid_var" ]]; then
-			cpulimit_bgprocesses_pids_array_temp+=("$cpulimit_bgprocess_pid_var")
+	for temp_cpulimit_bgprocess in "${cpulimit_bgprocesses_pids_array[@]}"; do
+		if [[ -d "/proc/$temp_cpulimit_bgprocess" ]]; then
+			cpulimit_bgprocesses_pids_array_temp+=("$temp_cpulimit_bgprocess")
 		else
-			is_cpu_limited_pid["${cpu_limited_pid["$cpulimit_bgprocess_pid_var"]}"]=''
-			cpulimit_bgprocess_pid["${cpu_limited_pid["$cpulimit_bgprocess_pid_var"]}"]=''
-			cpu_limited_pid["$cpulimit_bgprocess_pid_var"]=''
+			is_cpu_limited_pid["${cpu_limited_pid["$temp_cpulimit_bgprocess"]}"]=''
+			cpulimit_bgprocess_pid["${cpu_limited_pid["$temp_cpulimit_bgprocess"]}"]=''
+			cpu_limited_pid["$temp_cpulimit_bgprocess"]=''
 		fi
 	done
 	cpulimit_bgprocesses_pids_array=("${cpulimit_bgprocesses_pids_array_temp[@]}")
-	unset cpulimit_bgprocess_pid_var cpulimit_bgprocesses_pids_array_temp
+	unset temp_cpulimit_bgprocess cpulimit_bgprocesses_pids_array_temp
 	# Refresh FPS limited PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID won't repeat
-	for fps_limited_section in "${fps_limited_sections_array[@]}"; do
-		if [[ -d "/proc/${fps_limited_pid["$fps_limited_section"]}" ]]; then
-			fps_limited_sections_array_temp+=("$fps_limited_section")
+	for temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
+		if [[ -d "/proc/${fps_limited_pid["$temp_fps_limited_section"]}" ]]; then
+			fps_limited_sections_array_temp+=("$temp_fps_limited_section")
 		else
-			is_fps_limited_section["$fps_limited_section"]=''
-			fps_limit_bgprocess_pid["${fps_limited_pid["$fps_limited_section"]}"]=''
-			fps_limited_pid["$fps_limited_section"]=''
+			is_fps_limited_section["$temp_fps_limited_section"]=''
+			fps_limit_bgprocess_pid["${fps_limited_pid["$temp_fps_limited_section"]}"]=''
+			fps_limited_pid["$temp_fps_limited_section"]=''
 		fi
 	done
 	fps_limited_sections_array=("${fps_limited_sections_array_temp[@]}")
-	unset fps_limited_section fps_limited_sections_array_temp
+	unset temp_fps_limited_section fps_limited_sections_array_temp
 	# Run command on unfocus event for previous window if specified
 	if [[ -n "$previous_section_name" && -n "${config_key_unfocus["$previous_section_name"]}" && -z "$lazy" ]]; then
 		# Required to avoid running unfocus command when new event appears after previous matching one when '--hot' option is used along with '--lazy'
@@ -877,40 +877,40 @@ while read -r window_id; do
 			# Avoid searching for matching section if it was not found previously
 			if [[ -z "${cache_mismatch["$process_pid"]}" ]]; then
 				# Attempt to find a matching section in config
-				for section_from_array in "${sections_array[@]}"; do
+				for temp_section in "${sections_array[@]}"; do
 					# Compare process name with specified in section
-					if [[ -n "${config_key_name["$section_from_array"]}" && "${config_key_name["$section_from_array"]}" != "$process_name" ]]; then
+					if [[ -n "${config_key_name["$temp_section"]}" && "${config_key_name["$temp_section"]}" != "$process_name" ]]; then
 						continue
 					else
-						name_match='1'
+						temp_name_match='1'
 					fi
 					# Compare process executable path with specified in section
-					if [[ -n "${config_key_executable["$section_from_array"]}" && "${config_key_executable["$section_from_array"]}" != "$process_executable" ]]; then
+					if [[ -n "${config_key_executable["$temp_section"]}" && "${config_key_executable["$temp_section"]}" != "$process_executable" ]]; then
 						continue
 					else
-						executable_match='1'
+						temp_executable_match='1'
 					fi
 					# Compare UID of process with specified in section
-					if [[ -n "${config_key_owner["$section_from_array"]}" && "${config_key_owner["$section_from_array"]}" != "$process_owner" ]]; then
+					if [[ -n "${config_key_owner["$temp_section"]}" && "${config_key_owner["$temp_section"]}" != "$process_owner" ]]; then
 						continue
 					else
-						owner_match='1'
+						temp_owner_match='1'
 					fi
 					# Compare process command with specified in section
-					if [[ -n "${config_key_command["$section_from_array"]}" && "${config_key_command["$section_from_array"]}" != "$process_command" ]]; then
+					if [[ -n "${config_key_command["$temp_section"]}" && "${config_key_command["$temp_section"]}" != "$process_command" ]]; then
 						continue
 					else
-						command_match='1'
+						temp_command_match='1'
 					fi
 					# Mark as matching if all identifiers containing non-zero value
-					if [[ -n "$name_match" && -n "$executable_match" && -n "$owner_match" && -n "$command_match" ]]; then
-						section_name="$section_from_array"
-						cache_section["$process_pid"]="$section_from_array"
+					if [[ -n "$temp_name_match" && -n "$temp_executable_matchtemp_" && -n "$temp_owner_match" && -n "$temp_command_match" ]]; then
+						section_name="$temp_section"
+						cache_section["$process_pid"]="$temp_section"
 						break
 					fi
-					unset name_match executable_match owner_match command_match
+					unset temp_name_match temp_executable_match temp_owner_match temp_command_match
 				done
-				unset section_from_array name_match executable_match owner_match command_match
+				unset temp_section temp_name_match temp_executable_match temp_owner_match temp_command_match
 				# Mark process as mismatched if matching section was not found
 				if [[ -z "$section_name" ]]; then
 					cache_mismatch["$process_pid"]='1'
@@ -1002,14 +1002,14 @@ while read -r window_id; do
 				fi
 			fi
 			# Remove PID from array
-			for frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
+			for temp_frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
 				# Skip current PID since I want remove it from array
-				if [[ "$frozen_process_pid" != "$process_pid" ]]; then
-					frozen_processes_pids_array_temp+=("$frozen_process_pid")
+				if [[ "$temp_frozen_process_pid" != "$process_pid" ]]; then
+					frozen_processes_pids_array_temp+=("$temp_frozen_process_pid")
 				fi
 			done
 			frozen_processes_pids_array=("${frozen_processes_pids_array_temp[@]}")
-			unset frozen_process_pid frozen_processes_pids_array_temp
+			unset temp_frozen_process_pid frozen_processes_pids_array_temp
 			is_frozen_pid["$process_pid"]=''
 			freeze_bgprocess_pid["$process_pid"]=''
 		elif [[ -n "${is_cpu_limited_pid["$process_pid"]}" ]]; then # Check for CPU limit via 'cpulimit' background process
@@ -1020,14 +1020,14 @@ while read -r window_id; do
 				print_info "Process '$process_name' with PID $process_pid has been CPU unlimited on focus event."
 			fi
 			# Remove PID of 'cpulimit' background process from array
-			for cpulimit_bgprocess in "${cpulimit_bgprocesses_pids_array[@]}"; do
+			for temp_cpulimit_bgprocess in "${cpulimit_bgprocesses_pids_array[@]}"; do
 				# Skip interrupted background process since I want remove it from array
-				if [[ "$cpulimit_bgprocess" != "${cpulimit_bgprocess_pid["$process_pid"]}" ]]; then
-					cpulimit_bgprocesses_pids_array_temp+=("$cpulimit_bgprocess")
+				if [[ "$temp_cpulimit_bgprocess" != "${cpulimit_bgprocess_pid["$process_pid"]}" ]]; then
+					cpulimit_bgprocesses_pids_array_temp+=("$temp_cpulimit_bgprocess")
 				fi
 			done
 			cpulimit_bgprocesses_pids_array=("${cpulimit_bgprocesses_pids_array_temp[@]}")
-			unset cpulimit_bgprocess cpulimit_bgprocesses_pids_array_temp
+			unset temp_cpulimit_bgprocess cpulimit_bgprocesses_pids_array_temp
 			is_cpu_limited_pid["$process_pid"]=''
 			cpu_limited_pid["${cpulimit_bgprocess_pid["$process_pid"]}"]=''
 			cpulimit_bgprocess_pid["$process_pid"]=''
@@ -1047,14 +1047,14 @@ while read -r window_id; do
 				print_info "Process '$process_name' with PID $process_pid has been FPS unlimited on focus event."
 			fi
 			# Remove section from from array
-			for fps_limited_section in "${fps_limited_sections_array[@]}"; do
+			for temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
 				# Skip FPS unlimited section since I want remove it from array
-				if [[ "$fps_limited_section" != "$section_name" ]]; then
-					fps_limited_sections_array_temp+=("$fps_limited_section")
+				if [[ "$temp_fps_limited_section" != "$section_name" ]]; then
+					fps_limited_sections_array_temp+=("$temp_fps_limited_section")
 				fi
 			done
 			fps_limited_sections_array=("${fps_limited_sections_array_temp[@]}")
-			unset fps_limited_section fps_limited_sections_array_temp
+			unset temp_fps_limited_section fps_limited_sections_array_temp
 			is_fps_limited_section["$section_name"]=''
 			fps_limit_bgprocess_pid["$process_pid"]=''
 			fps_limited_pid["$section_name"]=''
