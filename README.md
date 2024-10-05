@@ -86,54 +86,54 @@ Dependencies for other distributions will be added soon.
 #### Manual installation
 Make sure you have installed dependencies described above before continue.
 ```bash
-$ fluxver='1.6.11'
+fluxver='1.6.11'
 ```
 ```bash
-$ mkdir flux && cd flux # create and change build directory
+mkdir flux && cd flux # create and change build directory
 ```
 ```bash
-$ wget https://github.com/itz-me-zappex/flux/archive/refs/tags/v${fluxver}.tar.gz # download archive with release
+wget https://github.com/itz-me-zappex/flux/archive/refs/tags/v${fluxver}.tar.gz # download archive with release
 ```
 ```bash
-$ tar -xvf v${fluxver}.tar.gz # extract it
+tar -xvf v${fluxver}.tar.gz # extract it
 ```
 ```bash
-$ sudo install -Dm 755 flux-${fluxver}/flux /usr/local/bin/flux # Install daemon to `/usr/local/bin`
+sudo install -Dm 755 flux-${fluxver}/flux /usr/local/bin/flux # Install daemon to `/usr/local/bin`
 ```
 
 #### Arch Linux (and based distributions)
 Make sure you have installed `base-devel` package before continue.
 ``` bash
-$ fluxver='1.6.11'
+fluxver='1.6.11'
 ```
 ```bash
-$ mkdir flux && cd flux # create and change build directory
+mkdir flux && cd flux # create and change build directory
 ```
 ```bash
-$ wget https://github.com/itz-me-zappex/flux/releases/download/v${fluxver}/PKGBUILD # download PKGBUILD
+wget https://github.com/itz-me-zappex/flux/releases/download/v${fluxver}/PKGBUILD # download PKGBUILD
 ```
 ```bash
-$ makepkg -sric # build a package and install it
+makepkg -sric # build a package and install it
 ```
 
 #### Debian/Ubuntu (and based distributions)
 ```bash
-$ fluxver='1.6.11'
+fluxver='1.6.11'
 ```
 ```bash
-$ mkdir flux && cd flux # create and change build directory
+mkdir flux && cd flux # create and change build directory
 ```
 ```bash
-$ wget https://github.com/itz-me-zappex/flux/releases/download/v${fluxver}/build-deb.sh # download build script
+wget https://github.com/itz-me-zappex/flux/releases/download/v${fluxver}/build-deb.sh # download build script
 ```
 ```bash
-$ chmod +x build-deb.sh # make it executable
+chmod +x build-deb.sh # make it executable
 ```
 ```bash
-$ ./build-deb.sh # build a package
+./build-deb.sh # build a package
 ```
 ```bash
-$ sudo dpkg -i flux-v${fluxver}.deb ; sudo apt install -f # install a package
+sudo dpkg -i flux-v${fluxver}.deb ; sudo apt install -f # install a package
 ```
 
 #### Other distributions
