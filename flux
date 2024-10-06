@@ -50,7 +50,7 @@ x11_session_check(){
 
 # Extract window IDs from xprop events
 xprop_event_reader(){
-	local local_stacking_windows_id local_focused_window_id local_stacking_window_id
+	local local_stacking_windows_id local_focused_window_id local_stacking_window_id local_first_loop local_exit
 	# Print window IDs of open windows to apply limits immediately if '--hot' option was passed
 	if [[ -n "$hot" ]]; then
 		# Extract IDs of open windows
@@ -89,14 +89,14 @@ xprop_event_reader(){
 	# Restart event reading if 'xprop' process has been terminated
 	while true; do
 		# Break loop if exit variable appears not blank
-		if [[ -n "$exit" ]]; then
+		if [[ -n "$local_exit" ]]; then
 			break
 		fi
 		# Print warning in case loop was restarted
-		if [[ -n "$first_loop" ]]; then
+		if [[ -n "$local_first_loop" ]]; then
 			print_warn "Process 'xprop' required for reading X11 events has been restarted by daemon after termination!"
 		else
-			first_loop='1'
+			local_first_loop='1'
 		fi
 		# Read events from xprop and print IDs of windows
 		while read -r xprop_event; do
@@ -104,7 +104,8 @@ xprop_event_reader(){
 			if [[ "$xprop_event" =~ 'X connection to :'[0-9]+' broken (explicit kill or server shutdown).' ]]; then
 				print_error "X server on display $DISPLAY has been terminated!"
 				echo 'exit'
-				exit='1'
+				local_exit='1'
+				break
 			fi
 			# Extract ID from line
 			window_id="${xprop_event/* \# /}"
