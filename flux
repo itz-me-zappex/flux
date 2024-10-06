@@ -85,7 +85,9 @@ xprop_event_reader(){
 				echo "$local_stacking_window_id"
 			fi
 		done
-		unset local_stacking_windows_id local_focused_window_id local_stacking_window_id
+		unset local_stacking_windows_id \
+		local_focused_window_id \
+		local_stacking_window_id
 		# Print event for unset '--hot' option since it becomes useless from this moment
 		echo 'nohot'
 	fi
@@ -133,17 +135,22 @@ xprop_event_reader(){
 
 # Export variables for focus and unfocus commands
 export_flux_variables(){
-	export FLUX_WINDOW_ID="$1"
-	export FLUX_PROCESS_PID="$2"
-	export FLUX_PROCESS_NAME="$3"
-	export FLUX_PROCESS_EXECUTABLE="$4"
-	export FLUX_PROCESS_OWNER="$5"
-	export FLUX_PROCESS_COMMAND="$6"
+	export FLUX_WINDOW_ID="$1" \
+	FLUX_PROCESS_PID="$2" \
+	FLUX_PROCESS_NAME="$3" \
+	FLUX_PROCESS_EXECUTABLE="$4" \
+	FLUX_PROCESS_OWNER="$5" \
+	FLUX_PROCESS_COMMAND="$6"
 }
 
 # Unset exported variables because those become useless after running command
 unset_flux_variables(){
-	unset FLUX_WINDOW_ID FLUX_PROCESS_PID FLUX_PROCESS_NAME FLUX_PROCESS_EXECUTABLE FLUX_PROCESS_OWNER FLUX_PROCESS_COMMAND
+	unset FLUX_WINDOW_ID \
+	FLUX_PROCESS_PID \
+	FLUX_PROCESS_NAME \
+	FLUX_PROCESS_EXECUTABLE \
+	FLUX_PROCESS_OWNER \
+	FLUX_PROCESS_COMMAND
 }
 
 # Extract process info
@@ -700,7 +707,9 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 		exit 1
 	fi
 done < "$config"
-unset temp_config_line temp_value temp_section
+unset temp_config_line \
+temp_value \
+temp_section
 
 # Check values in sections
 for temp_section in "${sections_array[@]}"; do
@@ -816,7 +825,11 @@ while read -r window_id; do
 			fi
 		done
 		cached_pids_array=("${temp_cached_pids_array[@]}")
-		unset temp_cached_pid temp_cached_pid_to_remove temp_cached_pids_array temp_cached_pids_to_remove_array temp_found
+		unset temp_cached_pid \
+		temp_cached_pid_to_remove \
+		temp_cached_pids_array \
+		temp_cached_pids_to_remove_array \
+		temp_found
 	fi
 	# Refresh frozen PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID won't repeat
 	for temp_frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
@@ -829,7 +842,8 @@ while read -r window_id; do
 		fi
 	done
 	frozen_processes_pids_array=("${temp_frozen_processes_pids_array[@]}")
-	unset temp_frozen_process_pid temp_frozen_processes_pids_array
+	unset temp_frozen_process_pid \
+	temp_frozen_processes_pids_array
 	# Refresh CPU limited PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID won't repeat
 	for temp_cpulimit_bgprocess in "${cpulimit_bgprocesses_pids_array[@]}"; do
 		if [[ -d "/proc/$temp_cpulimit_bgprocess" ]]; then
@@ -841,7 +855,8 @@ while read -r window_id; do
 		fi
 	done
 	cpulimit_bgprocesses_pids_array=("${temp_cpulimit_bgprocesses_pids_array[@]}")
-	unset temp_cpulimit_bgprocess temp_cpulimit_bgprocesses_pids_array
+	unset temp_cpulimit_bgprocess \
+	temp_cpulimit_bgprocesses_pids_array
 	# Refresh FPS limited PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID won't repeat
 	for temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
 		if [[ -d "/proc/${fps_limited_pid["$temp_fps_limited_section"]}" ]]; then
@@ -853,7 +868,8 @@ while read -r window_id; do
 		fi
 	done
 	fps_limited_sections_array=("${temp_fps_limited_sections_array[@]}")
-	unset temp_fps_limited_section temp_fps_limited_sections_array
+	unset temp_fps_limited_section \
+	temp_fps_limited_sections_array
 	# Run command on unfocus event for previous window if specified
 	if [[ -n "$previous_section_name" && -n "${config_key_unfocus["$previous_section_name"]}" && -z "$lazy" ]]; then
 		# Required to avoid running unfocus command when new event appears after previous matching one when '--hot' option is used along with '--lazy'
@@ -909,9 +925,16 @@ while read -r window_id; do
 						cache_section["$process_pid"]="$temp_section"
 						break
 					fi
-					unset temp_name_match temp_executable_match temp_owner_match temp_command_match
+					unset temp_name_match \
+					temp_executable_match \
+					temp_owner_match \
+					temp_command_match
 				done
-				unset temp_section temp_name_match temp_executable_match temp_owner_match temp_command_match
+				unset temp_section \
+				temp_name_match \
+				temp_executable_match \
+				temp_owner_match \
+				temp_command_match
 				# Mark process as mismatched if matching section was not found
 				if [[ -z "$section_name" ]]; then
 					cache_mismatch["$process_pid"]='1'
@@ -1010,7 +1033,8 @@ while read -r window_id; do
 				fi
 			done
 			frozen_processes_pids_array=("${temp_frozen_processes_pids_array[@]}")
-			unset temp_frozen_process_pid temp_frozen_processes_pids_array
+			unset temp_frozen_process_pid \
+			temp_frozen_processes_pids_array
 			is_frozen_pid["$process_pid"]=''
 			freeze_bgprocess_pid["$process_pid"]=''
 		elif [[ -n "${is_cpu_limited_pid["$process_pid"]}" ]]; then # Check for CPU limit via 'cpulimit' background process
@@ -1028,7 +1052,8 @@ while read -r window_id; do
 				fi
 			done
 			cpulimit_bgprocesses_pids_array=("${temp_cpulimit_bgprocesses_pids_array[@]}")
-			unset temp_cpulimit_bgprocess_pid temp_cpulimit_bgprocesses_pids_array
+			unset temp_cpulimit_bgprocess_pid \
+			temp_cpulimit_bgprocesses_pids_array
 			is_cpu_limited_pid["$process_pid"]=''
 			cpu_limited_pid["${cpulimit_bgprocess_pid["$process_pid"]}"]=''
 			cpulimit_bgprocess_pid["$process_pid"]=''
@@ -1055,7 +1080,8 @@ while read -r window_id; do
 				fi
 			done
 			fps_limited_sections_array=("${temp_fps_limited_sections_array[@]}")
-			unset temp_fps_limited_section temp_fps_limited_sections_array
+			unset temp_fps_limited_section \
+			temp_fps_limited_sections_array
 			is_fps_limited_section["$section_name"]=''
 			fps_limit_bgprocess_pid["$process_pid"]=''
 			fps_limited_pid["$section_name"]=''
@@ -1075,14 +1101,15 @@ while read -r window_id; do
 	previous_process_name="$process_name"
 	previous_process_executable="$process_executable"
 	previous_process_owner="$process_owner"
-	previous_section_name="$section_name"
 	previous_process_command="$process_command"
+	previous_section_name="$section_name"
+	# Unset info about process to avoid using it in some rare cases (idk why that happens, noticed that only once after a few hours of using daemon)
+	unset window_id \
+	process_pid \
+	process_name \
+	process_executable \
+	process_owner \
+	process_command
 	# Unset to avoid false positive on next event
 	unset section_name
-	# Unset info about process to avoid using it in some rare cases (idk why that happens, noticed that only once after a few hours of using daemon)
-	process_pid=''
-	process_name=''
-	process_executable=''
-	process_owner=''
-	process_command=''
 done < <(xprop_event_reader)
