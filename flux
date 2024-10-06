@@ -802,6 +802,7 @@ while read -r window_id; do
 			temp_cached_pids_to_remove_array+=("$temp_cached_pid")
 		fi
 	done
+	unset temp_cached_pid
 	# Remove terminated PIDs from array as their info has been removed above
 	if [[ -n "${temp_cached_pids_to_remove_array[*]}" ]]; then 
 		# Read array with PIDs
