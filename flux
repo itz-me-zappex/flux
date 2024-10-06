@@ -88,7 +88,7 @@ xprop_event_reader(){
 		unset local_stacking_windows_id \
 		local_focused_window_id \
 		local_stacking_window_id
-		# Print event for unset '--hot' option since it becomes useless from this moment
+		# Print event for unset '--hot' option as it becomes useless from this moment
 		echo 'nohot'
 	fi
 	# Print event for unset '--lazy' option before reading events, otherwise focus and unfocus commands will not work
@@ -188,7 +188,7 @@ extract_process_info(){
 			# I did not get how to do that using built-in bash options
 			# Extract command of process and replace '\0' (used as separator between options) with spaces
 			process_command="$(tr '\0' ' ' < "/proc/$process_pid/cmdline")"
-			# Remove last space since '\0' is a last symbol too
+			# Remove last space as '\0' is a last symbol too
 			process_command="${process_command/%\ /}"
 			# Add all variables to cache
 			cache_process_name["$process_pid"]="$process_name"
@@ -438,7 +438,7 @@ unfocus =
 "
 			exit 0
 		else
-			print_error "Unable to create template for window with ID $window_id since it does not report its PID!"
+			print_error "Unable to create template for window with ID $window_id as it does not report its PID!"
 			exit 1
 		fi
 	;;
@@ -787,7 +787,7 @@ while read -r window_id; do
 		unset lazy
 		lazy_is_unset='1'
 		continue
-	elif [[ "$window_id" == 'nohot' ]]; then # Unset '--hot' since it becomes useless from this moment
+	elif [[ "$window_id" == 'nohot' ]]; then # Unset '--hot' as it becomes useless from this moment
 		unset hot
 		continue
 	fi
@@ -1027,7 +1027,7 @@ while read -r window_id; do
 			fi
 			# Remove PID from array
 			for temp_frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
-				# Skip current PID since I want remove it from array
+				# Skip current PID as I want remove it from array
 				if [[ "$temp_frozen_process_pid" != "$process_pid" ]]; then
 					temp_frozen_processes_pids_array+=("$temp_frozen_process_pid")
 				fi
@@ -1046,7 +1046,7 @@ while read -r window_id; do
 			fi
 			# Remove PID of 'cpulimit' background process from array
 			for temp_cpulimit_bgprocess_pid in "${cpulimit_bgprocesses_pids_array[@]}"; do
-				# Skip interrupted background process since I want remove it from array
+				# Skip interrupted background process as I want remove it from array
 				if [[ "$temp_cpulimit_bgprocess_pid" != "${cpulimit_bgprocess_pid["$process_pid"]}" ]]; then
 					temp_cpulimit_bgprocesses_pids_array+=("$temp_cpulimit_bgprocess_pid")
 				fi
@@ -1074,7 +1074,7 @@ while read -r window_id; do
 			fi
 			# Remove section from from array
 			for temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
-				# Skip FPS unlimited section since I want remove it from array
+				# Skip FPS unlimited section as I want remove it from array
 				if [[ "$temp_fps_limited_section" != "$section_name" ]]; then
 					temp_fps_limited_sections_array+=("$temp_fps_limited_section")
 				fi
