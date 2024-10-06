@@ -148,7 +148,9 @@ unset_flux_variables(){
 
 # Extract process info
 extract_process_info(){
-	local local_status_line local_column_count local_status_column
+	local local_status_line \
+	local_column_count \
+	local_status_column
 	# Extract PID of process
 	if ! process_pid="$(xprop -id "$window_id" _NET_WM_PID 2>/dev/null)"; then
 		process_pid=''
@@ -202,7 +204,12 @@ extract_process_info(){
 
 # Change FPS limit in specified MangoHud config
 mangohud_fps_set(){
-	local local_config_line local_config_content local_new_config_content local_config="$1" local_fps_to_set="$2" local_fps_limit_is_changed
+	local local_config_line \
+	local_config_content \
+	local_new_config_content \
+	local_config="$1" \
+	local_fps_to_set="$2" \
+	local_fps_limit_is_changed
 	# Check if config file exists before continue in case it has been removed
 	if [[ -f "$local_config" ]]; then
 		# Return an error if file is not readable
