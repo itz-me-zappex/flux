@@ -331,8 +331,8 @@ actions_on_sigterm(){
 	# Unfreeze processes
 	for temp_frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
 		# Terminate background process if exists
-		if [[ -d "/proc/${freeze_bgprocess_pid["$temp_frozen_process_pid"]}" ]]; then
-			kill "${freeze_bgprocess_pid["$temp_frozen_process_pid"]}" > /dev/null 2>&1
+		if [[ -d "/proc/${freeze_bgprocess_pid_map["$temp_frozen_process_pid"]}" ]]; then
+			kill "${freeze_bgprocess_pid_map["$temp_frozen_process_pid"]}" > /dev/null 2>&1
 		elif [[ -d "/proc/$temp_frozen_process_pid" ]]; then # Unfreeze process
 			kill -CONT "$temp_frozen_process_pid" > /dev/null 2>&1
 		fi
@@ -346,8 +346,8 @@ actions_on_sigterm(){
 	# Remove FPS limits
 	for temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
 		# Terminate background process if exists
-		if [[ -d "/proc/${fps_limit_bgprocess_pid["${fps_limited_pid["$temp_fps_limited_section"]}"]}" ]]; then
-			kill "${fps_limit_bgprocess_pid["${fps_limited_pid["$temp_fps_limited_section"]}"]}" > /dev/null 2>&1
+		if [[ -d "/proc/${fps_limit_bgprocess_pid_map["${fps_limited_pid_map["$temp_fps_limited_section"]}"]}" ]]; then
+			kill "${fps_limit_bgprocess_pid_map["${fps_limited_pid_map["$temp_fps_limited_section"]}"]}" > /dev/null 2>&1
 		fi
 		# Set FPS from 'fps-focus' key to remove limit
 		mangohud_fps_set "${config_key_mangohud_config_map["$temp_fps_limited_section"]}" "${config_key_fps_focus_map["$temp_fps_limited_section"]}" > /dev/null 2>&1
@@ -554,8 +554,7 @@ max_cpu_limit="$(( cpu_threads * 100 ))"
 unset temp_cpuinfo_line
 
 # Create associative arrays to store values from config
-declare -A \
-config_key_name_map \
+declare -A config_key_name_map \
 config_key_executable_map \
 config_key_owner_map \
 config_key_cpu_limit_map \
@@ -754,19 +753,17 @@ done
 unset temp_section
 
 # Declare associative arrays to store info about applied actions
-declare -A \
-is_frozen_pid \
-freeze_bgprocess_pid \
-is_cpu_limited_pid \
-cpulimit_bgprocess_pid \
-cpu_limited_pid \
-is_fps_limited_section \
-fps_limit_bgprocess_pid \
-fps_limited_pid
+declare -A is_frozen_pid_map \
+freeze_bgprocess_pid_map \
+is_cpu_limited_pid_map \
+cpulimit_bgprocess_pid_map \
+cpu_limited_pid_map \
+is_fps_limited_section_map \
+fps_limit_bgprocess_pid_map \
+fps_limited_pid_map
 
 # Declare associative arrays to store info about windows to avoid obtaining it every time to speed up code and reduce CPU-usage
-declare -A \
-cache_process_name_map \
+declare -A cache_process_name_map \
 cache_process_executable_map \
 cache_process_owner_map \
 cache_process_command_map \
@@ -837,8 +834,8 @@ while read -r window_id; do
 		if [[ -d "/proc/$temp_frozen_process_pid" ]]; then
 			temp_frozen_processes_pids_array+=("$temp_frozen_process_pid")
 		else
-			is_frozen_pid["$temp_frozen_process_pid"]=''
-			freeze_bgprocess_pid["$temp_frozen_process_pid"]=''
+			is_frozen_pid_map["$temp_frozen_process_pid"]=''
+			freeze_bgprocess_pid_map["$temp_frozen_process_pid"]=''
 		fi
 	done
 	frozen_processes_pids_array=("${temp_frozen_processes_pids_array[@]}")
@@ -849,9 +846,9 @@ while read -r window_id; do
 		if [[ -d "/proc/$temp_cpulimit_bgprocess" ]]; then
 			temp_cpulimit_bgprocesses_pids_array+=("$temp_cpulimit_bgprocess")
 		else
-			is_cpu_limited_pid["${cpu_limited_pid["$temp_cpulimit_bgprocess"]}"]=''
-			cpulimit_bgprocess_pid["${cpu_limited_pid["$temp_cpulimit_bgprocess"]}"]=''
-			cpu_limited_pid["$temp_cpulimit_bgprocess"]=''
+			is_cpu_limited_pid_map["${cpu_limited_pid_map["$temp_cpulimit_bgprocess"]}"]=''
+			cpulimit_bgprocess_pid_map["${cpu_limited_pid_map["$temp_cpulimit_bgprocess"]}"]=''
+			cpu_limited_pid_map["$temp_cpulimit_bgprocess"]=''
 		fi
 	done
 	cpulimit_bgprocesses_pids_array=("${temp_cpulimit_bgprocesses_pids_array[@]}")
@@ -859,12 +856,12 @@ while read -r window_id; do
 	temp_cpulimit_bgprocesses_pids_array
 	# Refresh FPS limited PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID won't repeat
 	for temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
-		if [[ -d "/proc/${fps_limited_pid["$temp_fps_limited_section"]}" ]]; then
+		if [[ -d "/proc/${fps_limited_pid_map["$temp_fps_limited_section"]}" ]]; then
 			temp_fps_limited_sections_array+=("$temp_fps_limited_section")
 		else
-			is_fps_limited_section["$temp_fps_limited_section"]=''
-			fps_limit_bgprocess_pid["${fps_limited_pid["$temp_fps_limited_section"]}"]=''
-			fps_limited_pid["$temp_fps_limited_section"]=''
+			is_fps_limited_section_map["$temp_fps_limited_section"]=''
+			fps_limit_bgprocess_pid_map["${fps_limited_pid_map["$temp_fps_limited_section"]}"]=''
+			fps_limited_pid_map["$temp_fps_limited_section"]=''
 		fi
 	done
 	fps_limited_sections_array=("${temp_fps_limited_sections_array[@]}")
@@ -956,43 +953,43 @@ while read -r window_id; do
 			# Check for existence of previous match and if CPU limit is set to 0
 			if [[ -n "$previous_section_name" && "${config_key_cpu_limit_map["$previous_section_name"]}" == '0' ]]; then
 				# Freeze process if it has not been frozen
-				if [[ -z "${is_frozen_pid["$previous_process_pid"]}" ]]; then
+				if [[ -z "${is_frozen_pid_map["$previous_process_pid"]}" ]]; then
 					# Mark process as frozen
-					is_frozen_pid["$previous_process_pid"]='1'
+					is_frozen_pid_map["$previous_process_pid"]='1'
 					# Store PID to array to unfreeze process in case daemon interruption
 					frozen_processes_pids_array+=("$previous_process_pid")
 					# Freeze process
 					background_freeze_process &
 					# Associate PID of background process with PID of process to interrupt it in case focus event appears earlier than delay ends
-					freeze_bgprocess_pid["$previous_process_pid"]="$!"
+					freeze_bgprocess_pid_map["$previous_process_pid"]="$!"
 				fi
 			elif [[ -n "$previous_section_name" ]] && (( "${config_key_cpu_limit_map["$previous_section_name"]}" > 0 )); then # Check for existence of previous match and CPU limit specified greater than 0
 				# Run 'cpulimit' on background if CPU limit has not been applied
-				if [[ -z "${is_cpu_limited_pid["$previous_process_pid"]}" ]]; then
+				if [[ -z "${is_cpu_limited_pid_map["$previous_process_pid"]}" ]]; then
 					# Mark process as CPU limited
-					is_cpu_limited_pid["$previous_process_pid"]='1'
+					is_cpu_limited_pid_map["$previous_process_pid"]='1'
 					# Apply CPU limit
 					background_cpulimit &
 					# Store PID of background process to array to interrupt it in case daemon exit
 					cpulimit_bgprocesses_pids_array+=("$!")
 					# Associate PID of background process with PID of process to interrupt it on focus event
-					cpulimit_bgprocess_pid["$previous_process_pid"]="$!"
+					cpulimit_bgprocess_pid_map["$previous_process_pid"]="$!"
 					# Associate PID of process with PID of background process to print a proper process name in output on daemon termination
-					cpu_limited_pid["$!"]="$previous_process_pid"
+					cpu_limited_pid_map["$!"]="$previous_process_pid"
 				fi
 			elif [[ -n "$previous_section_name" && -n "${config_key_fps_unfocus_map["$previous_section_name"]}" ]]; then # Check for existence of previous match and FPS limit
 				# Apply FPS limit if was not applied before
-				if [[ -z "${is_fps_limited_section["$previous_section_name"]}" ]]; then
+				if [[ -z "${is_fps_limited_section_map["$previous_section_name"]}" ]]; then
 					# Mark process as FPS limited
-					is_fps_limited_section["$previous_section_name"]='1'
+					is_fps_limited_section_map["$previous_section_name"]='1'
 					# Store matching section name of process to array to unset FPS limits on daemon exit
 					fps_limited_sections_array+=("$previous_section_name")
 					# Associate PID of process with section name to print it in case daemon exit
-					fps_limited_pid["$previous_section_name"]="$previous_process_pid"
+					fps_limited_pid_map["$previous_section_name"]="$previous_process_pid"
 					# Set FPS limit
 					background_mangohud_fps_set &
 					# Associate PID of background process with PID of process to interrupt it on focus event
-					fps_limit_bgprocess_pid["$previous_process_pid"]="$!"
+					fps_limit_bgprocess_pid_map["$previous_process_pid"]="$!"
 				fi
 			fi
 		elif [[ -n "$previous_process_owner" ]]; then
@@ -1005,11 +1002,11 @@ while read -r window_id; do
 	# Do not apply actions if window does not report its PID
 	if [[ -n "$process_pid" ]]; then
 		# Unfreeze process if window is focused
-		if [[ -n "${is_frozen_pid["$process_pid"]}" ]]; then
+		if [[ -n "${is_frozen_pid_map["$process_pid"]}" ]]; then
 			# Do not terminate background process if it does not exist anymore
-			if [[ -d "/proc/${freeze_bgprocess_pid["$process_pid"]}" ]]; then
+			if [[ -d "/proc/${freeze_bgprocess_pid_map["$process_pid"]}" ]]; then
 				# Terminate background process
-				if ! kill "${freeze_bgprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
+				if ! kill "${freeze_bgprocess_pid_map["$process_pid"]}" > /dev/null 2>&1; then
 					print_warn "Unable to cancel delayed for ${config_key_delay_map["$section_name"]} second(s) freezing of process '$process_name' with PID $process_pid!"
 				else
 					# Avoid printing this message if delay is not specified
@@ -1035,11 +1032,11 @@ while read -r window_id; do
 			frozen_processes_pids_array=("${temp_frozen_processes_pids_array[@]}")
 			unset temp_frozen_process_pid \
 			temp_frozen_processes_pids_array
-			is_frozen_pid["$process_pid"]=''
-			freeze_bgprocess_pid["$process_pid"]=''
-		elif [[ -n "${is_cpu_limited_pid["$process_pid"]}" ]]; then # Check for CPU limit via 'cpulimit' background process
+			is_frozen_pid_map["$process_pid"]=''
+			freeze_bgprocess_pid_map["$process_pid"]=''
+		elif [[ -n "${is_cpu_limited_pid_map["$process_pid"]}" ]]; then # Check for CPU limit via 'cpulimit' background process
 			# Terminate 'cpulimit' background process
-			if ! kill "${cpulimit_bgprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
+			if ! kill "${cpulimit_bgprocess_pid_map["$process_pid"]}" > /dev/null 2>&1; then
 				print_warn "Process '$process_name' with PID $process_pid cannot be CPU unlimited!"
 			else
 				print_info "Process '$process_name' with PID $process_pid has been CPU unlimited on focus event."
@@ -1047,23 +1044,23 @@ while read -r window_id; do
 			# Remove PID of 'cpulimit' background process from array
 			for temp_cpulimit_bgprocess_pid in "${cpulimit_bgprocesses_pids_array[@]}"; do
 				# Skip interrupted background process as I want remove it from array
-				if [[ "$temp_cpulimit_bgprocess_pid" != "${cpulimit_bgprocess_pid["$process_pid"]}" ]]; then
+				if [[ "$temp_cpulimit_bgprocess_pid" != "${cpulimit_bgprocess_pid_map["$process_pid"]}" ]]; then
 					temp_cpulimit_bgprocesses_pids_array+=("$temp_cpulimit_bgprocess_pid")
 				fi
 			done
 			cpulimit_bgprocesses_pids_array=("${temp_cpulimit_bgprocesses_pids_array[@]}")
 			unset temp_cpulimit_bgprocess_pid \
 			temp_cpulimit_bgprocesses_pids_array
-			is_cpu_limited_pid["$process_pid"]=''
-			cpu_limited_pid["${cpulimit_bgprocess_pid["$process_pid"]}"]=''
-			cpulimit_bgprocess_pid["$process_pid"]=''
-		elif [[ -n "$section_name" && -n "${is_fps_limited_section["$section_name"]}" && -n "${fps_limited_pid["$section_name"]}" ]]; then
+			is_cpu_limited_pid_map["$process_pid"]=''
+			cpu_limited_pid_map["${cpulimit_bgprocess_pid_map["$process_pid"]}"]=''
+			cpulimit_bgprocess_pid_map["$process_pid"]=''
+		elif [[ -n "$section_name" && -n "${is_fps_limited_section_map["$section_name"]}" && -n "${fps_limited_pid_map["$section_name"]}" ]]; then
 			# Terminate FPS limit background process if exists, checking variable for not being blank is required for unknown reason
 			# Otherwise 'kill' will exit with an error because of blank value
 			# And that is including checking for process existence in the same 'if' statement which returns 'true'
-			if [[ -n "${fps_limit_bgprocess_pid["$process_pid"]}" && -d "/proc/${fps_limit_bgprocess_pid["$process_pid"]}" ]]; then
-				if ! kill "${fps_limit_bgprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
-					print_warn "Unable to stop FPS limit background process with PID ${fps_limit_bgprocess_pid["$process_pid"]}!"
+			if [[ -n "${fps_limit_bgprocess_pid_map["$process_pid"]}" && -d "/proc/${fps_limit_bgprocess_pid_map["$process_pid"]}" ]]; then
+				if ! kill "${fps_limit_bgprocess_pid_map["$process_pid"]}" > /dev/null 2>&1; then
+					print_warn "Unable to stop FPS limit background process with PID ${fps_limit_bgprocess_pid_map["$process_pid"]}!"
 				else
 					print_verbose "FPS limit background process related to process '$process_name' with PID $process_pid has been terminated."
 				fi
@@ -1082,9 +1079,9 @@ while read -r window_id; do
 			fps_limited_sections_array=("${temp_fps_limited_sections_array[@]}")
 			unset temp_fps_limited_section \
 			temp_fps_limited_sections_array
-			is_fps_limited_section["$section_name"]=''
-			fps_limit_bgprocess_pid["$process_pid"]=''
-			fps_limited_pid["$section_name"]=''
+			is_fps_limited_section_map["$section_name"]=''
+			fps_limit_bgprocess_pid_map["$process_pid"]=''
+			fps_limited_pid_map["$section_name"]=''
 		fi
 	fi
 	# Run command on focus event if exists
