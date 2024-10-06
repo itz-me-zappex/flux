@@ -178,7 +178,7 @@ Available keys and description:
   - `~/.config/flux.ini`
 
 ### Limitations
-Since INI is not standartized, I should mention all supported features here.
+As INI is not standartized, I should mention all supported features here.
 - Supported:
   - Spaces in section names.
   - Single and double quoted strings.
@@ -278,7 +278,7 @@ Now you can easily grab templates from windows to use them in config by pasting 
 
 ### Types of limits and which you should use
 - FPS limits recommended for online and multiplayer games and if you do not mind to use MangoHud, this method reduces resource consumption when game unfocused/minimized.
-- CPU limits greater than zero recommended for online and multiplayer games in case you do not use MangoHud, but you should be ready to stuttery audio since `cpulimit` tool interrupts process with `SIGSTOP` and `SIGCONT` signals.
+- CPU limits greater than zero recommended for online and multiplayer games in case you do not use MangoHud, but you should be ready to stuttery audio as `cpulimit` tool interrupts process with `SIGSTOP` and `SIGCONT` signals.
 - CPU limit equal to zero recommended for single player games or online games in offline mode, this method freezes game completely to make it just hang in RAM without using any CPU or GPU resources.
 
 ## Possible questions
@@ -304,13 +304,13 @@ Now you can easily grab templates from windows to use them in config by pasting 
 - Nowadays, anti-cheats are pure garbage, developed by freaks without balls, and you can get banned even for a wrong click. But that is should not be bannable except you are farmer and using sandboxing. Do not write me if you got a ban in game.
 
 ### Why was that daemon developed?
-- Main task is to reduce CPU usage of games that have been minimized. Almost every engine fails to recognize that game is unfocused and continues to consume a lot of CPU and GPU resources, what can make system slow for other tasks like browsing stuff, transcoding video etc. or even unresponsive at all. Imagine users with weak laptop who upgraded their RAM to maximum and suffer from a weak processor, now they can simply play a game and then minimize it if needed without carrying about CPU usage or battery level since process just will hang in RAM. There are a lot of situations and usecases for it.
+- Main task is to reduce CPU usage of games that have been minimized. Almost every engine fails to recognize that game is unfocused and continues to consume a lot of CPU and GPU resources, what can make system slow for other tasks like browsing stuff, transcoding video etc. or even unresponsive at all. Imagine users with weak laptop who upgraded their RAM to maximum and suffer from a weak processor, now they can simply play a game and then minimize it if needed without carrying about CPU usage or battery level as process just will hang in RAM. There are a lot of situations and usecases for it.
 
 ### Bugs?
 - Nothing is perfect in this world. Almost all bugs I encountered during development have been fixed or will be fixed soon. If you find a bug, open an issue. Known issues that cannot be fixed are:
   - Inability to interact with "glxgears" and "vkcube" windows, as they do not report their PIDs.
   - Freezing online games (setting `cpu-limit` to `0%`) causes disconnects from matches, so use less aggressive CPU limit to allow game to send/receive packets.
-  - Stuttery audio in game if CPU limit is very aggressive, since `cpulimit` tool interrupts process, that should be expected.
+  - Stuttery audio in game if CPU limit is very aggressive, as `cpulimit` tool interrupts process, that should be expected.
 
 ### Why is code so complicated?
 - Long story short, try removing at least one line of code (that does not affect output, of course) and see what happens. That sounds easy - just apply a CPU limit to a window when unfocused and remove it when focused, but that is a bit more complicated. Just check how much logic is used for that "easy" task. Also I used built-in stuff in bash like shell parameter expansions instead of `sed`, loops for reading text line-by-line with regexp in `if` statements instead of `grep` etc. to make code faster, calling external binaries consumes much more time and CPU resources than built-in options.
