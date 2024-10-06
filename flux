@@ -520,13 +520,13 @@ if [[ -z "$config" ]]; then
 		XDG_CONFIG_HOME="$HOME/.config"
 	fi
 	# Find a config
-	for config_path in '/etc/flux.ini' "$XDG_CONFIG_HOME/flux.ini" "$HOME/.config/flux.ini"; do
-		if [[ -f "$config_path" ]]; then
-			config="$config_path"
+	for temp_config in '/etc/flux.ini' "$XDG_CONFIG_HOME/flux.ini" "$HOME/.config/flux.ini"; do
+		if [[ -f "$temp_config" ]]; then
+			config="$temp_config"
 			break
 		fi
 	done
-	unset config_path
+	unset temp_config
 fi
 
 # Exit with an error if config file is not found
@@ -537,13 +537,13 @@ fi
 
 # Calculate maximum allowable CPU limit and CPU threads
 cpu_threads='0'
-while read -r cpuinfo_line; do
-	if [[ "$cpuinfo_line" == 'processor'* ]]; then
+while read -r temp_cpuinfo_line; do
+	if [[ "$temp_cpuinfo_line" == 'processor'* ]]; then
 		(( cpu_threads++ ))
 	fi
 done < '/proc/cpuinfo'
 max_cpu_limit="$(( cpu_threads * 100 ))"
-unset cpuinfo_line
+unset temp_cpuinfo_line
 
 # Create associative arrays to store values from config
 declare -A \
