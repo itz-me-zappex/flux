@@ -264,13 +264,13 @@ mangohud_fps_set(){
 background_cpulimit(){
 	local local_cpulimit_pid
 	# Wait for delay if specified
-	if [[ "${config_key_delay["$previous_section_name"]}" != '0' ]]; then
-		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be CPU limited after ${config_key_delay["$previous_section_name"]} second(s) on unfocus event."
-		sleep "${config_key_delay["$previous_section_name"]}"
+	if [[ "${config_key_delay_map["$previous_section_name"]}" != '0' ]]; then
+		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be CPU limited after ${config_key_delay_map["$previous_section_name"]} second(s) on unfocus event."
+		sleep "${config_key_delay_map["$previous_section_name"]}"
 	fi
-	print_verbose "Process '$previous_process_name' with PID $previous_process_pid has been CPU limited to $(( ${config_key_cpu_limit["$previous_section_name"]} / cpu_threads ))% on unfocus event."
+	print_verbose "Process '$previous_process_name' with PID $previous_process_pid has been CPU limited to $(( ${config_key_cpu_limit_map["$previous_section_name"]} / cpu_threads ))% on unfocus event."
 	# Apply CPU limit
-	cpulimit --lazy --limit="${config_key_cpu_limit["$previous_section_name"]}" --pid="$previous_process_pid" > /dev/null 2>&1 &
+	cpulimit --lazy --limit="${config_key_cpu_limit_map["$previous_section_name"]}" --pid="$previous_process_pid" > /dev/null 2>&1 &
 	# Remember PID, set action to kill it on INT/TERM signals and wait until it done
 	local_cpulimit_pid="$!"
 	trap "kill $local_cpulimit_pid > /dev/null 2>&1" SIGINT SIGTERM
@@ -280,9 +280,9 @@ background_cpulimit(){
 # Freeze process on unfocus event, function required to run it on background to avoid stopping a whole code if delay specified
 background_freeze_process(){
 	# Freeze process with delay if specified, otherwise freeze process immediately
-	if [[ "${config_key_delay["$previous_section_name"]}" != '0' ]]; then
-		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be frozen after ${config_key_delay["$previous_section_name"]} second(s) on unfocus event."
-		sleep "${config_key_delay["$previous_section_name"]}"
+	if [[ "${config_key_delay_map["$previous_section_name"]}" != '0' ]]; then
+		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be frozen after ${config_key_delay_map["$previous_section_name"]} second(s) on unfocus event."
+		sleep "${config_key_delay_map["$previous_section_name"]}"
 	fi
 	# Freeze process if it still exists, otherwise throw warning
 	if [[ -d "/proc/$previous_process_pid" ]]; then
@@ -299,14 +299,14 @@ background_freeze_process(){
 # Set specified FPS on unfocus, function required to run it on background to avoid stopping a whole code if delay specified
 background_mangohud_fps_set(){
 	# Wait in case delay is specified
-	if [[ "${config_key_delay["$previous_section_name"]}" != '0' ]]; then
-		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be FPS limited after ${config_key_delay["$previous_section_name"]} second(s) on unfocus event."
-		sleep "${config_key_delay["$previous_section_name"]}"
+	if [[ "${config_key_delay_map["$previous_section_name"]}" != '0' ]]; then
+		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be FPS limited after ${config_key_delay_map["$previous_section_name"]} second(s) on unfocus event."
+		sleep "${config_key_delay_map["$previous_section_name"]}"
 	fi
 	# Apply FPS limit if target still exists, otherwise throw warning
 	if [[ -d "/proc/$previous_process_pid" ]]; then
-		if mangohud_fps_set "${config_key_mangohud_config["$previous_section_name"]}" "${config_key_fps_unfocus["$previous_section_name"]}"; then
-			print_info "Process '$previous_process_name' with PID $previous_process_pid has been FPS limited to ${config_key_fps_unfocus["$previous_section_name"]} FPS on unfocus event."
+		if mangohud_fps_set "${config_key_mangohud_config_map["$previous_section_name"]}" "${config_key_fps_unfocus_map["$previous_section_name"]}"; then
+			print_info "Process '$previous_process_name' with PID $previous_process_pid has been FPS limited to ${config_key_fps_unfocus_map["$previous_section_name"]} FPS on unfocus event."
 		fi
 	fi
 	# Wait for process termination to unset FPS limit
@@ -321,7 +321,7 @@ background_mangohud_fps_set(){
 		fi
 	done
 	# Unset FPS limit
-	if mangohud_fps_set "${config_key_mangohud_config["$previous_section_name"]}" "${config_key_fps_focus["$previous_section_name"]}"; then
+	if mangohud_fps_set "${config_key_mangohud_config_map["$previous_section_name"]}" "${config_key_fps_focus_map["$previous_section_name"]}"; then
 		print_info "Process '$previous_process_name' with PID $previous_process_pid has been FPS unlimited after termination."
 	fi
 }
@@ -350,7 +350,7 @@ actions_on_sigterm(){
 			kill "${fps_limit_bgprocess_pid["${fps_limited_pid["$temp_fps_limited_section"]}"]}" > /dev/null 2>&1
 		fi
 		# Set FPS from 'fps-focus' key to remove limit
-		mangohud_fps_set "${config_key_mangohud_config["$temp_fps_limited_section"]}" "${config_key_fps_focus["$temp_fps_limited_section"]}" > /dev/null 2>&1
+		mangohud_fps_set "${config_key_mangohud_config_map["$temp_fps_limited_section"]}" "${config_key_fps_focus_map["$temp_fps_limited_section"]}" > /dev/null 2>&1
 	done
 }
 
@@ -555,17 +555,17 @@ unset temp_cpuinfo_line
 
 # Create associative arrays to store values from config
 declare -A \
-config_key_name \
-config_key_executable \
-config_key_owner \
-config_key_cpu_limit \
-config_key_delay \
-config_key_focus \
-config_key_unfocus \
-config_key_command \
-config_key_mangohud_config \
-config_key_fps_unfocus \
-config_key_fps_focus
+config_key_name_map \
+config_key_executable_map \
+config_key_owner_map \
+config_key_cpu_limit_map \
+config_key_delay_map \
+config_key_focus_map \
+config_key_unfocus_map \
+config_key_command_map \
+config_key_mangohud_config_map \
+config_key_fps_unfocus_map \
+config_key_fps_focus_map
 
 # INI parser
 while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
@@ -625,15 +625,15 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 		# Associate value with section
 		case "${temp_config_line,,}" in
 		name* )
-			config_key_name["$temp_section"]="$temp_value"
+			config_key_name_map["$temp_section"]="$temp_value"
 		;;
 		executable* )
-			config_key_executable["$temp_section"]="$temp_value"
+			config_key_executable_map["$temp_section"]="$temp_value"
 		;;
 		owner* )
 			# Exit with an error if UID is not numeric
 			if [[ "$temp_value" =~ ^[0-9]+$ ]]; then
-				config_key_owner["$temp_section"]="$temp_value"
+				config_key_owner_map["$temp_section"]="$temp_value"
 			else
 				print_error "Value '$temp_value' in key 'owner' in section '$temp_section' is not UID!"
 				exit 1
@@ -643,9 +643,9 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 			# Exit with an error if CPU limit is specified incorrectly
 			if [[ "$temp_value" =~ ^[0-9]+(\%)?$ || "$temp_value" =~ ^('-1'|'-1%')$ ]] && (( "${temp_value/%\%/}" * cpu_threads <= max_cpu_limit )); then
 				if [[ "$temp_value" =~ ^('-1'|'-1%')$ ]]; then
-					config_key_cpu_limit["$temp_section"]="${temp_value/%\%/}"
+					config_key_cpu_limit_map["$temp_section"]="${temp_value/%\%/}"
 				else
-					config_key_cpu_limit["$temp_section"]="$(( "${temp_value/%\%/}" * cpu_threads ))"
+					config_key_cpu_limit_map["$temp_section"]="$(( "${temp_value/%\%/}" * cpu_threads ))"
 				fi
 			else
 				print_error "Value '$temp_value' in key 'cpulimit' in section '$temp_section' is invalid! Allowed values are 0-100%."
@@ -655,25 +655,25 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 		delay* )
 			# Exit with an error if value is neither an integer nor a float (that is what regexp means)
 			if [[ "$temp_value" =~ ^[0-9]+((\.|\,)[0-9]+)?$ ]]; then
-				config_key_delay["$temp_section"]="$temp_value"
+				config_key_delay_map["$temp_section"]="$temp_value"
 			else
 				print_error "Value '$temp_value' in key 'delay' in section '$temp_section' is neither integer nor float!"
 				exit 1
 			fi
 		;;
 		focus* )
-			config_key_focus["$temp_section"]="$temp_value"
+			config_key_focus_map["$temp_section"]="$temp_value"
 		;;
 		unfocus* )
-			config_key_unfocus["$temp_section"]="$temp_value"
+			config_key_unfocus_map["$temp_section"]="$temp_value"
 		;;
 		command* )
-			config_key_command["$temp_section"]="$temp_value"
+			config_key_command_map["$temp_section"]="$temp_value"
 		;;
 		mangohud-config* )
 			# Exit with an error if specified MangoHud config file does not exist
 			if [[ -f "$temp_value" ]]; then
-				config_key_mangohud_config["$temp_section"]="$temp_value"
+				config_key_mangohud_config_map["$temp_section"]="$temp_value"
 			else
 				print_error "Config file '$temp_value' specified in key 'mangohud-config' in section '$temp_section' does not exist!"
 				exit 1
@@ -684,7 +684,7 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 			if [[ "$temp_value" =~ ^[0-9]+$ ]]; then
 				# Exit with an error if value equal to zero
 				if [[ "$temp_value" != '0' ]]; then
-					config_key_fps_unfocus["$temp_section"]="$temp_value"
+					config_key_fps_unfocus_map["$temp_section"]="$temp_value"
 				else
 					print_error "Value $temp_value in key 'fps-unfocus' in section '$temp_section' should be greater than zero!"
 					exit 1
@@ -696,7 +696,7 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 		;;
 		fps-focus* )
 			if [[ "$temp_value" =~ ^[0-9]+$ ]]; then
-				config_key_fps_focus["$temp_section"]="$temp_value"
+				config_key_fps_focus_map["$temp_section"]="$temp_value"
 			else
 				print_error "Value '$temp_value' specified in key 'fps-focus' in section '$temp_section' is not an integer!"
 				exit 1
@@ -714,41 +714,41 @@ temp_section
 # Check values in sections
 for temp_section in "${sections_array[@]}"; do
 	# Exit with an error if neither identifier 'name' nor 'executable' nor 'command' is specified
-	if [[ -z "${config_key_name["$temp_section"]}" && -z "${config_key_executable["$temp_section"]}" && -z "${config_key_command["$temp_section"]}" ]]; then
+	if [[ -z "${config_key_name_map["$temp_section"]}" && -z "${config_key_executable_map["$temp_section"]}" && -z "${config_key_command_map["$temp_section"]}" ]]; then
 		print_error "At least one process identifier required in section '$temp_section'!"
 		exit 1
 	fi
 	# Exit with an error if MangoHud FPS limit is not specified along with config path
-	if [[ -n "${config_key_fps_unfocus["$temp_section"]}" && -z "${config_key_mangohud_config["$temp_section"]}" ]]; then
-		print_error "Value ${config_key_fps_unfocus["$temp_section"]} in key 'fps-unfocus' in section '$temp_section' is specified without path to MangoHud config!"
+	if [[ -n "${config_key_fps_unfocus_map["$temp_section"]}" && -z "${config_key_mangohud_config_map["$temp_section"]}" ]]; then
+		print_error "Value ${config_key_fps_unfocus_map["$temp_section"]} in key 'fps-unfocus' in section '$temp_section' is specified without path to MangoHud config!"
 		exit 1
 	fi
 	# Exit with an error if MangoHud FPS limit is specified along with CPU limit
-	if [[ -n "${config_key_fps_unfocus["$temp_section"]}" && -n "${config_key_cpu_limit["$temp_section"]}" && "${config_key_cpu_limit["$temp_section"]}" != '-1' ]]; then
+	if [[ -n "${config_key_fps_unfocus_map["$temp_section"]}" && -n "${config_key_cpu_limit_map["$temp_section"]}" && "${config_key_cpu_limit_map["$temp_section"]}" != '-1' ]]; then
 		print_error "Do not use FPS limit along with CPU limit in section '$temp_section'!"
 		exit 1
 	fi
 	# Exit with an error if 'fps-focus' is specified without 'fps-unfocus'
-	if [[ -n "${config_key_fps_focus["$temp_section"]}" && -z "${config_key_fps_unfocus["$temp_section"]}" ]]; then
+	if [[ -n "${config_key_fps_focus_map["$temp_section"]}" && -z "${config_key_fps_unfocus_map["$temp_section"]}" ]]; then
 		print_error "Do not use 'fps-focus' key without 'fps-unfocus' key in section '$temp_section'!"
 		exit 1
 	fi
 	# Exit with an error if 'mangohud-config' is specified without 'fps-unfocus'
-	if [[ -n "${config_key_mangohud_config["$temp_section"]}" && -z "${config_key_fps_unfocus["$temp_section"]}" ]]; then
+	if [[ -n "${config_key_mangohud_config_map["$temp_section"]}" && -z "${config_key_fps_unfocus_map["$temp_section"]}" ]]; then
 		print_error "Do not use 'mangohud-config' key without 'fps-unfocus' key in section '$temp_section'!"
 		exit 1
 	fi
 	# Set 'fps-focus' to '0' (none) if it is not specified
-	if [[ -n "${config_key_fps_unfocus["$temp_section"]}" && -z "${config_key_fps_focus["$temp_section"]}" ]]; then
-		config_key_fps_focus["$temp_section"]='0'
+	if [[ -n "${config_key_fps_unfocus_map["$temp_section"]}" && -z "${config_key_fps_focus_map["$temp_section"]}" ]]; then
+		config_key_fps_focus_map["$temp_section"]='0'
 	fi
 	# Set CPU limit to '-1' (none) if it is not specified
-	if [[ -z "${config_key_cpu_limit["$temp_section"]}" ]]; then
-		config_key_cpu_limit["$temp_section"]='-1'
+	if [[ -z "${config_key_cpu_limit_map["$temp_section"]}" ]]; then
+		config_key_cpu_limit_map["$temp_section"]='-1'
 	fi
 	# Set 'delay' to '0' if it is not specified
-	if [[ -z "${config_key_delay["$temp_section"]}" ]]; then
-		config_key_delay["$temp_section"]='0'
+	if [[ -z "${config_key_delay_map["$temp_section"]}" ]]; then
+		config_key_delay_map["$temp_section"]='0'
 	fi
 done
 unset temp_section
@@ -871,13 +871,13 @@ while read -r window_id; do
 	unset temp_fps_limited_section \
 	temp_fps_limited_sections_array
 	# Run command on unfocus event for previous window if specified
-	if [[ -n "$previous_section_name" && -n "${config_key_unfocus["$previous_section_name"]}" && -z "$lazy" ]]; then
+	if [[ -n "$previous_section_name" && -n "${config_key_unfocus_map["$previous_section_name"]}" && -z "$lazy" ]]; then
 		# Required to avoid running unfocus command when new event appears after previous matching one when '--hot' option is used along with '--lazy'
 		if [[ -z "$lazy_is_unset" ]]; then
-			print_verbose "Running command on unfocus event '${config_key_unfocus["$previous_section_name"]}' from section '$previous_section_name'."
+			print_verbose "Running command on unfocus event '${config_key_unfocus_map["$previous_section_name"]}' from section '$previous_section_name'."
 			# Variables passthrough to interact with them using custom commands in 'unfocus' key
 			export_flux_variables "$previous_window_id" "$previous_process_pid" "$previous_process_name" "$previous_process_executable" "$previous_process_owner" "$previous_process_command"
-			nohup setsid bash -c "${config_key_unfocus["$previous_section_name"]}" > /dev/null 2>&1 &
+			nohup setsid bash -c "${config_key_unfocus_map["$previous_section_name"]}" > /dev/null 2>&1 &
 			unset_flux_variables
 		else
 			unset lazy_is_unset
@@ -896,25 +896,25 @@ while read -r window_id; do
 				# Attempt to find a matching section in config
 				for temp_section in "${sections_array[@]}"; do
 					# Compare process name with specified in section
-					if [[ -n "${config_key_name["$temp_section"]}" && "${config_key_name["$temp_section"]}" != "$process_name" ]]; then
+					if [[ -n "${config_key_name_map["$temp_section"]}" && "${config_key_name_map["$temp_section"]}" != "$process_name" ]]; then
 						continue
 					else
 						temp_name_match='1'
 					fi
 					# Compare process executable path with specified in section
-					if [[ -n "${config_key_executable["$temp_section"]}" && "${config_key_executable["$temp_section"]}" != "$process_executable" ]]; then
+					if [[ -n "${config_key_executable_map["$temp_section"]}" && "${config_key_executable_map["$temp_section"]}" != "$process_executable" ]]; then
 						continue
 					else
 						temp_executable_match='1'
 					fi
 					# Compare UID of process with specified in section
-					if [[ -n "${config_key_owner["$temp_section"]}" && "${config_key_owner["$temp_section"]}" != "$process_owner" ]]; then
+					if [[ -n "${config_key_owner_map["$temp_section"]}" && "${config_key_owner_map["$temp_section"]}" != "$process_owner" ]]; then
 						continue
 					else
 						temp_owner_match='1'
 					fi
 					# Compare process command with specified in section
-					if [[ -n "${config_key_command["$temp_section"]}" && "${config_key_command["$temp_section"]}" != "$process_command" ]]; then
+					if [[ -n "${config_key_command_map["$temp_section"]}" && "${config_key_command_map["$temp_section"]}" != "$process_command" ]]; then
 						continue
 					else
 						temp_command_match='1'
@@ -952,9 +952,9 @@ while read -r window_id; do
 	# Check if PID is not the same as previous one
 	if [[ "$process_pid" != "$previous_process_pid" ]]; then
 		# Avoid applying CPU limit if owner does not have rights
-		if [[ -n "$previous_process_owner" && "$previous_process_owner" == "$UID" || "$UID" == '0' && "${config_key_cpu_limit["$previous_section_name"]}" != '-1' ]]; then
+		if [[ -n "$previous_process_owner" && "$previous_process_owner" == "$UID" || "$UID" == '0' && "${config_key_cpu_limit_map["$previous_section_name"]}" != '-1' ]]; then
 			# Check for existence of previous match and if CPU limit is set to 0
-			if [[ -n "$previous_section_name" && "${config_key_cpu_limit["$previous_section_name"]}" == '0' ]]; then
+			if [[ -n "$previous_section_name" && "${config_key_cpu_limit_map["$previous_section_name"]}" == '0' ]]; then
 				# Freeze process if it has not been frozen
 				if [[ -z "${is_frozen_pid["$previous_process_pid"]}" ]]; then
 					# Mark process as frozen
@@ -966,7 +966,7 @@ while read -r window_id; do
 					# Associate PID of background process with PID of process to interrupt it in case focus event appears earlier than delay ends
 					freeze_bgprocess_pid["$previous_process_pid"]="$!"
 				fi
-			elif [[ -n "$previous_section_name" ]] && (( "${config_key_cpu_limit["$previous_section_name"]}" > 0 )); then # Check for existence of previous match and CPU limit specified greater than 0
+			elif [[ -n "$previous_section_name" ]] && (( "${config_key_cpu_limit_map["$previous_section_name"]}" > 0 )); then # Check for existence of previous match and CPU limit specified greater than 0
 				# Run 'cpulimit' on background if CPU limit has not been applied
 				if [[ -z "${is_cpu_limited_pid["$previous_process_pid"]}" ]]; then
 					# Mark process as CPU limited
@@ -980,7 +980,7 @@ while read -r window_id; do
 					# Associate PID of process with PID of background process to print a proper process name in output on daemon termination
 					cpu_limited_pid["$!"]="$previous_process_pid"
 				fi
-			elif [[ -n "$previous_section_name" && -n "${config_key_fps_unfocus["$previous_section_name"]}" ]]; then # Check for existence of previous match and FPS limit
+			elif [[ -n "$previous_section_name" && -n "${config_key_fps_unfocus_map["$previous_section_name"]}" ]]; then # Check for existence of previous match and FPS limit
 				# Apply FPS limit if was not applied before
 				if [[ -z "${is_fps_limited_section["$previous_section_name"]}" ]]; then
 					# Mark process as FPS limited
@@ -1010,11 +1010,11 @@ while read -r window_id; do
 			if [[ -d "/proc/${freeze_bgprocess_pid["$process_pid"]}" ]]; then
 				# Terminate background process
 				if ! kill "${freeze_bgprocess_pid["$process_pid"]}" > /dev/null 2>&1; then
-					print_warn "Unable to cancel delayed for ${config_key_delay["$section_name"]} second(s) freezing of process '$process_name' with PID $process_pid!"
+					print_warn "Unable to cancel delayed for ${config_key_delay_map["$section_name"]} second(s) freezing of process '$process_name' with PID $process_pid!"
 				else
 					# Avoid printing this message if delay is not specified
-					if [[ "${config_key_delay["$section_name"]}" != '0' ]]; then
-						print_info "Delayed for ${config_key_delay["$section_name"]} second(s) freezing of process '$process_name' with PID $process_pid has been cancelled."
+					if [[ "${config_key_delay_map["$section_name"]}" != '0' ]]; then
+						print_info "Delayed for ${config_key_delay_map["$section_name"]} second(s) freezing of process '$process_name' with PID $process_pid has been cancelled."
 					fi
 				fi
 			else
@@ -1069,7 +1069,7 @@ while read -r window_id; do
 				fi
 			fi
 			# Unset FPS limit
-			if mangohud_fps_set "${config_key_mangohud_config["$section_name"]}" "${config_key_fps_focus["$section_name"]}"; then
+			if mangohud_fps_set "${config_key_mangohud_config_map["$section_name"]}" "${config_key_fps_focus_map["$section_name"]}"; then
 				print_info "Process '$process_name' with PID $process_pid has been FPS unlimited on focus event."
 			fi
 			# Remove section from from array
@@ -1088,12 +1088,12 @@ while read -r window_id; do
 		fi
 	fi
 	# Run command on focus event if exists
-	if [[ -n "$section_name" && -n "${config_key_focus["$section_name"]}" && -z "$lazy" ]]; then
+	if [[ -n "$section_name" && -n "${config_key_focus_map["$section_name"]}" && -z "$lazy" ]]; then
 		# Variables passthrough to interact with them using custom commands in 'focus' key
 		export_flux_variables "$window_id" "$process_pid" "$process_name" "$process_executable" "$process_owner" "$process_command"
-		nohup setsid bash -c "${config_key_focus["$section_name"]}" > /dev/null 2>&1 &
+		nohup setsid bash -c "${config_key_focus_map["$section_name"]}" > /dev/null 2>&1 &
 		unset_flux_variables
-		print_verbose "Running command on focus event '${config_key_focus["$section_name"]}' from section '$section_name'."
+		print_verbose "Running command on focus event '${config_key_focus_map["$section_name"]}' from section '$section_name'."
 	fi
 	# Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'unfocus' key
 	previous_window_id="$window_id"
