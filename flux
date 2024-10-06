@@ -975,7 +975,7 @@ while read -r window_id; do
 					cpulimit_bgprocesses_pids_array+=("$!")
 					# Associate PID of background process with PID of process to interrupt it on focus event
 					cpulimit_bgprocess_pid_map["$previous_process_pid"]="$!"
-					# Associate PID of process with PID of background process to print a proper process name in output on daemon termination
+					# Associate PID of process with PID of background process, required to refresh array with CPU limited PIDs
 					cpu_limited_pid_map["$!"]="$previous_process_pid"
 				fi
 			elif [[ -n "$previous_section_name" && -n "${config_key_fps_unfocus_map["$previous_section_name"]}" ]]; then # Check for existence of previous match and FPS limit
@@ -985,7 +985,7 @@ while read -r window_id; do
 					is_fps_limited_section_map["$previous_section_name"]='1'
 					# Store matching section name of process to array to unset FPS limits on daemon exit
 					fps_limited_sections_array+=("$previous_section_name")
-					# Associate PID of process with section name to print it in case daemon exit
+					# Associate PID of process with section name to avoid false positive when checking is FPS limited process or not in case another process matches with exactly the same section
 					fps_limited_pid_map["$previous_section_name"]="$previous_process_pid"
 					# Set FPS limit
 					background_mangohud_fps_set &
