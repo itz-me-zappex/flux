@@ -50,7 +50,14 @@ x11_session_check(){
 
 # Extract window IDs from xprop events
 xprop_event_reader(){
-	local local_stacking_windows_id local_focused_window_id local_stacking_window_id local_first_loop local_exit
+	local local_stacking_windows_id \
+	local_focused_window_id \
+	local_stacking_window_id \
+	local_first_loop \
+	local_exit \
+	local_window_id \
+	local_previous_window_id \
+	local_xprop_event
 	# Print window IDs of open windows to apply limits immediately if '--hot' option was passed
 	if [[ -n "$hot" ]]; then
 		# Extract IDs of open windows
@@ -99,25 +106,25 @@ xprop_event_reader(){
 			local_first_loop='1'
 		fi
 		# Read events from xprop and print IDs of windows
-		while read -r xprop_event; do
+		while read -r local_xprop_event; do
 			# Print event for safe exit in case X server dies
-			if [[ "$xprop_event" =~ 'X connection to :'[0-9]+' broken (explicit kill or server shutdown).' ]]; then
+			if [[ "$local_xprop_event" =~ 'X connection to :'[0-9]+' broken (explicit kill or server shutdown).' ]]; then
 				print_error "X server on display $DISPLAY has been terminated!"
 				echo 'exit'
 				local_exit='1'
 				break
 			fi
 			# Extract ID from line
-			window_id="${xprop_event/* \# /}"
+			local_window_id="${local_xprop_event/* \# /}"
 			# Skip event if window ID is exactly the same as previous one, workaround required for some buggy WMs
-			if [[ "$window_id" == "$previous_window_id" ]]; then
+			if [[ "$local_window_id" == "$local_previous_window_id" ]]; then
 				continue
 			else
 				# Do not print bad events, workaround required for some buggy WMs
-				if [[ "$window_id" =~ ^0x[0-9a-fA-F]{7}$ ]]; then
-					echo "$window_id"
+				if [[ "$local_window_id" =~ ^0x[0-9a-fA-F]{7}$ ]]; then
+					echo "$local_window_id"
 					# Remember ID to compare it with new one, if ID is exactly the same, then event will be skipped
-					previous_window_id="$window_id"
+					local_previous_window_id="$local_window_id"
 				fi
 			fi
 		done < <(xprop -root -spy _NET_ACTIVE_WINDOW 2>&1)
