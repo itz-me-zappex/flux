@@ -34,15 +34,15 @@ option_repeat_check(){
 
 # Required to exit with an error if that is not a X11 session
 x11_session_check(){
-	local exit
+	local local_exit
 	# Set 'exit' variable if something is wrong with X11 session
 	if [[ ! "$DISPLAY" =~ ^\:[0-9]+(\.[0-9]+)?$ || "$XDG_SESSION_TYPE" != 'x11' ]]; then
-		exit='1'
+		local_exit='1'
 	elif ! xprop -root > /dev/null 2>&1; then
-		exit='1'
+		local_exit='1'
 	fi
 	# Exit with an error if something is wrong with X11 session
-	if [[ -n "$exit" ]]; then
+	if [[ -n "$local_exit" ]]; then
 		print_error "Flux is not meant to use it with anything but X11! Make sure everything is fine with your current X11 session."
 		exit 1
 	fi
