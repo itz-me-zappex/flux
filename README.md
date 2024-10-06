@@ -1,8 +1,7 @@
 ## flux
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 
----
-
+## Navigation
 - [Dependencies](#dependencies)
   - [Arch Linux and dereatives](#arch-linux-and-dereatives)
   - [Debian and dereatives](#debian-and-dereatives)
@@ -43,41 +42,38 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
   - [What about Wayland support?](#what-about-wayland-support)
   - [Why did you write it on Bash?](#why-did-you-write-it-on-bash)
 
-### Dependencies
-
----
-
-#### Arch Linux and dereatives
+## Dependencies
+### Arch Linux and dereatives
 
   Required: `bash util-linux cpulimit coreutils xorg-xprop xorg-xwininfo`
   
   Optional: `mangohud lib32-mangohud`
 
-#### Debian and dereatives
+### Debian and dereatives
   
   Required: `bash cpulimit coreutils x11-utils`
 
   Optional: `mangohud mangohud:i386`
 
-#### Void Linux and dereatives
+### Void Linux and dereatives
 
   Required: `bash util-linux cpulimit coreutils xprop xwininfo`
 
   Optional: `MangoHud MangoHud-32bit`
 
-#### Fedora and dereatives
+### Fedora and dereatives
 
   Required: `bash util-linux cpulimit coreutils xprop xwininfo`
 
   Optional: `mangohud mangohud.i686`
 
-#### OpenSUSE Tumbleweed and dereatives
+### OpenSUSE Tumbleweed and dereatives
 
   Required: `bash util-linux cpulimit coreutils xprop xwininfo`
 
   Optional: [`MangoHud mangohud-32bit`](https://software.opensuse.org/search?baseproject=openSUSE%3AFactory&q=mangohud)
 
-#### Gentoo and dereatives
+### Gentoo and dereatives
 
   Required: `app-shells/bash sys-apps/util-linux app-admin/cpulimit sys-apps/coreutils x11-apps/xprop x11-apps/xwininfo`
 
@@ -85,11 +81,8 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
 
 Dependencies for other distributions will be added soon.
 
-### Installation
-
----
-
-#### Manual installation
+## Installation
+### Manual installation
 You can use this method if there is no package build script for your distro. Make sure you have installed dependencies as described above before continue.
 ```bash
 fluxver='1.6.13' # set latest version as I update it here every release
@@ -107,7 +100,7 @@ tar -xvf v${fluxver}.tar.gz # extract it
 sudo install -Dm 755 flux-${fluxver}/flux /usr/local/bin/flux # install daemon to `/usr/local/bin`
 ```
 
-#### Arch Linux and dereatives
+### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
 ``` bash
 fluxver='1.6.13' # set latest version as I update it here every release
@@ -122,7 +115,7 @@ wget https://github.com/itz-me-zappex/flux/releases/download/v${fluxver}/PKGBUIL
 makepkg -sric # build a package and install it
 ```
 
-#### Debian and dereatives
+### Debian and dereatives
 ```bash
 fluxver='1.6.13' # set latest version as I update it here every release
 ```
@@ -142,10 +135,7 @@ chmod +x build-deb.sh # make it executable
 sudo dpkg -i flux-v${fluxver}.deb ; sudo apt install -f # install a package
 ```
 
-### Usage
-
----
-
+## Usage
 ```
 Usage: flux [option] <value>
 Options and values:
@@ -161,13 +151,10 @@ Options and values:
     -V, --version                        Display release information
 ```
 
-#### Autostart
+### Autostart
 Just add command to autostart using your DE settings or WM config. Running daemon as root also possible, but that feature almost useless.
 
-### Configuration
-
----
-
+## Configuration
 A simple INI is used for configuration.
 Available keys and description:
 | Key               | Description |
@@ -184,13 +171,13 @@ Available keys and description:
 | `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`. |
 | `fps-focus` | FPS to set on focus, requires `fps-unfocus`, defaults to `0` (i.e. full unlimit). |
 
-#### Config path
+### Config path
 - Daemon searches for following configuration files by priority:
   - `/etc/flux.ini`
   - `$XDG_CONFIG_HOME/flux.ini`
   - `~/.config/flux.ini`
 
-#### Limitations
+### Limitations
 Since INI is not standartized, I should mention all supported features here.
 - Supported:
   - Spaces in section names.
@@ -204,8 +191,8 @@ Since INI is not standartized, I should mention all supported features here.
   - Line continuation using `\` symbol.
   - Anything else what unmentioned above.
 
-#### Configuration example
-##### Long examples
+### Configuration example
+#### Long examples
 ```ini
 ; Example using freezing with delay as that is single player game
 [The Witcher 3: Wild Hunt]
@@ -242,7 +229,7 @@ focus = killall picom
 unfocus = picom
 ```
 
-##### Short examples
+#### Short examples
 ```ini
 ; Example using freezing with delay as that is single player game
 [The Witcher 3: Wild Hunt]
@@ -264,10 +251,7 @@ cpu-limit = 2%
 delay = 1
 ```
 
-### Variables
-
----
-
+## Variables
 Flux does not support environment variables, but passes them to commands in `focus` and `unfocus` keys.
 
 | Variable | Description |
@@ -281,67 +265,61 @@ Flux does not support environment variables, but passes them to commands in `foc
 
 Daemon passes absolutely same values for both `focus` and `unfocus` keys.
 
-### Tips and tricks
-
----
-
-##### Keybinding to obtain template from focused window for config
+## Tips and tricks
+### Keybinding to obtain template from focused window for config
 - All you need is install `xclip` tool and bind this command: `$ flux --focus | xclip -selection clipboard`.
 Now you can easily grab templates from windows to use them in config by pasting content using `Ctrl+v`.
 
-##### Apply changes in config file
+### Apply changes in config file
 - Create shortcut for `$ killall flux ; flux --hot --lazy` command which restarts daemon and use it when you done config file editing.
 
-##### Improve performance of daemon
+### Improve performance of daemon
 - Geeks only, casual users should not care about that. To do that, run daemon using command like `$ chrt --batch 0 flux --hot --lazy`. `SCHED_BATCH` scheduling policy is designed to improve performance of non-interactive tasks like daemons, timers, scripts etc..
 
-##### Types of limits and which you should use
+### Types of limits and which you should use
 - FPS limits recommended for online and multiplayer games and if you do not mind to use MangoHud, this method reduces resource consumption when game unfocused/minimized.
 - CPU limits greater than zero recommended for online and multiplayer games in case you do not use MangoHud, but you should be ready to stuttery audio since `cpulimit` tool interrupts process with `SIGSTOP` and `SIGCONT` signals.
 - CPU limit equal to zero recommended for single player games or online games in offline mode, this method freezes game completely to make it just hang in RAM without using any CPU or GPU resources.
 
-### Possible questions
-
----
-
-#### How does daemon work?
+## Possible questions
+### How does daemon work?
 - Daemon reads X11 events related to window focus, then it gets PID of process using window ID and uses it to collect info about process (process name, its executable path, command which is used and UID) to compare it with identifiers in config, when it finds window which matches with identifier(s) specified in specific section in config, it runs command from `focus` key (if specified), when you switching to another window - applies FPS or CPU limit (if specified) and runs command from `unfocus` key (if specified). When window does not match with any section in config, nothing happens. To reduce CPU usage and speed up daemon a caching algorithm was implemented which stores info about windows into associative arrays, that allows to just collect info about process once and then use cache to get process info immediately after obtaining its PID when window appears focused again.
 
-#### Does that daemon reduce performance?
+### Does that daemon reduce performance?
 - Long story short, impact on neither performance nor battery life should be noticeable. It uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time, but it just chills out when you playing game or working in single window.
 
-#### Is it safe?
+### Is it safe?
 - Yes, read above. Neither I nor daemon has access to your data.
 
-#### Should I trust you and this utility?
+### Should I trust you and this utility?
 - You can read entire code. If you are uncomfortable, feel free to avoid using it.
 
-#### With which DE/WM/GPU daemon works correctly?
+### With which DE/WM/GPU daemon works correctly?
 - Daemon compatible with all X11 window managers and desktop environments and does not depend on neither GPU nor driver version as it relies on X11 event system.
 
-#### Is not running commands on focus and unfocus makes system vulnerable?
+### Is not running commands on focus and unfocus makes system vulnerable?
 - Just put config file to `/etc/flux.ini` and make it read-only, also do something like that with scripts you interacting with from config file.
 
-#### Can I get banned in a game because of this daemon?
+### Can I get banned in a game because of this daemon?
 - Nowadays, anti-cheats are pure garbage, developed by freaks without balls, and you can get banned even for a wrong click. But that is should not be bannable except you are farmer and using sandboxing. Do not write me if you got a ban in game.
 
-#### Why was that daemon developed?
+### Why was that daemon developed?
 - Main task is to reduce CPU usage of games that have been minimized. Almost every engine fails to recognize that game is unfocused and continues to consume a lot of CPU and GPU resources, what can make system slow for other tasks like browsing stuff, transcoding video etc. or even unresponsive at all. Imagine users with weak laptop who upgraded their RAM to maximum and suffer from a weak processor, now they can simply play a game and then minimize it if needed without carrying about CPU usage or battery level since process just will hang in RAM. There are a lot of situations and usecases for it.
 
-#### Bugs?
+### Bugs?
 - Nothing is perfect in this world. Almost all bugs I encountered during development have been fixed or will be fixed soon. If you find a bug, open an issue. Known issues that cannot be fixed are:
   - Inability to interact with "glxgears" and "vkcube" windows, as they do not report their PIDs.
   - Freezing online games (setting `cpu-limit` to `0%`) causes disconnects from matches, so use less aggressive CPU limit to allow game to send/receive packets.
   - Stuttery audio in game if CPU limit is very aggressive, since `cpulimit` tool interrupts process, that should be expected.
 
-#### Why is code so complicated?
+### Why is code so complicated?
 - Long story short, try removing at least one line of code (that does not affect output, of course) and see what happens. That sounds easy - just apply a CPU limit to a window when unfocused and remove it when focused, but that is a bit more complicated. Just check how much logic is used for that "easy" task. Also I used built-in stuff in bash like shell parameter expansions instead of `sed`, loops for reading text line-by-line with regexp in `if` statements instead of `grep` etc. to make code faster, calling external binaries consumes much more time and CPU resources than built-in options.
 
-#### Gamescope which allows limit FPS on unfocus exists, Wayland becomes more popular. Are you not late by any chance?
+### Gamescope which allows limit FPS on unfocus exists, Wayland becomes more popular. Are you not late by any chance?
 - Well, not everyone is ready to switch to Wayland, there are a lot of reasons exists. Gamescope does not work well on my Nvidia desktop and Intel laptop, and I can bet it does not work well for others either. Also, there are a lot of old Nvidia GPUs that do not support Wayland at all because of old drivers, what makes Gamescope completely useless for owners of these GPUs.
 
-#### What about Wayland support?
+### What about Wayland support?
 - That is impossible, there is no any unified way to read window focus events and extract PIDs from windows on Wayland.
 
-#### Why did you write it on Bash?
+### Why did you write it on Bash?
 - That is (scripting) language I know pretty good, despite a fact that Bash as all interpretators works slower than compilable languages, it still fits my needs almost perfectly.
