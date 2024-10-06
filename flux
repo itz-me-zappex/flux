@@ -343,7 +343,7 @@ actions_on_sigterm(){
 			kill "${fps_limit_bgprocess_pid["${fps_limited_pid["$temp_fps_limited_section"]}"]}" > /dev/null 2>&1
 		fi
 		# Set FPS from 'fps-focus' key to remove limit
-		mangohud_fps_set "${config_key_mangohud_config["$temp_fps_limited_section"]}" "${config_key_fps_focus["$temp_fps_limited_section"]}"
+		mangohud_fps_set "${config_key_mangohud_config["$temp_fps_limited_section"]}" "${config_key_fps_focus["$temp_fps_limited_section"]}" > /dev/null 2>&1
 	done
 }
 
