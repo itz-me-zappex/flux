@@ -167,7 +167,7 @@ extract_process_info(){
 	if [[ -n "$process_pid" ]]; then
 		process_pid="${process_pid/* = /}"
 		# Check if info about process exists in cache
-		if [[ -z "${cache_process_name["$process_pid"]}" ]]; then
+		if [[ -z "${cache_process_name_map["$process_pid"]}" ]]; then
 			# Extract name of process
 			process_name="$(<"/proc/$process_pid/comm")"
 			# Extract executable path of process
@@ -191,18 +191,18 @@ extract_process_info(){
 			# Remove last space as '\0' is a last symbol too
 			process_command="${process_command/%\ /}"
 			# Add all variables to cache
-			cache_process_name["$process_pid"]="$process_name"
-			cache_process_executable["$process_pid"]="$process_executable"
-			cache_process_owner["$process_pid"]="$process_owner"
-			cache_process_command["$process_pid"]="$process_command"
+			cache_process_name_map["$process_pid"]="$process_name"
+			cache_process_executable_map["$process_pid"]="$process_executable"
+			cache_process_owner_map["$process_pid"]="$process_owner"
+			cache_process_command_map["$process_pid"]="$process_command"
 			# Store PID to array to make it easier to remove info from cache in case process does not exist
 			cached_pids_array+=("$process_pid")
 		else
 			# Set values from cache
-			process_name="${cache_process_name["$process_pid"]}"
-			process_executable="${cache_process_executable["$process_pid"]}"
-			process_owner="${cache_process_owner["$process_pid"]}"
-			process_command="${cache_process_command["$process_pid"]}"
+			process_name="${cache_process_name_map["$process_pid"]}"
+			process_executable="${cache_process_executable_map["$process_pid"]}"
+			process_owner="${cache_process_owner_map["$process_pid"]}"
+			process_command="${cache_process_command_map["$process_pid"]}"
 		fi
 	else
 		return 1
@@ -766,12 +766,12 @@ fps_limited_pid
 
 # Declare associative arrays to store info about windows to avoid obtaining it every time to speed up code and reduce CPU-usage
 declare -A \
-cache_process_name \
-cache_process_executable \
-cache_process_owner \
-cache_process_command \
-cache_section \
-cache_mismatch
+cache_process_name_map \
+cache_process_executable_map \
+cache_process_owner_map \
+cache_process_command_map \
+cache_section_map \
+cache_mismatch_map
 
 # Exit with an error if that is not a X11 session
 x11_session_check
@@ -795,13 +795,13 @@ while read -r window_id; do
 	for temp_cached_pid in "${cached_pids_array[@]}"; do
 		# Remove info about process if it does not exist anymore
 		if [[ ! -d "/proc/$temp_cached_pid" ]]; then
-			print_verbose "Cache of process '${cache_process_name["$temp_cached_pid"]}' with PID $temp_cached_pid has been removed."
-			cache_process_name["$temp_cached_pid"]=''
-			cache_process_executable["$temp_cached_pid"]=''
-			cache_process_owner["$temp_cached_pid"]=''
-			cache_process_command["$temp_cached_pid"]=''
-			cache_section["$temp_cached_pid"]=''
-			cache_mismatch["$temp_cached_pid"]=''
+			print_verbose "Cache of process '${cache_process_name_map["$temp_cached_pid"]}' with PID $temp_cached_pid has been removed."
+			cache_process_name_map["$temp_cached_pid"]=''
+			cache_process_executable_map["$temp_cached_pid"]=''
+			cache_process_owner_map["$temp_cached_pid"]=''
+			cache_process_command_map["$temp_cached_pid"]=''
+			cache_section_map["$temp_cached_pid"]=''
+			cache_mismatch_map["$temp_cached_pid"]=''
 			temp_cached_pids_to_remove_array+=("$temp_cached_pid")
 		fi
 	done
@@ -890,9 +890,9 @@ while read -r window_id; do
 	# Do not find matching section if window does not report its PID
 	if [[ -n "$process_pid" ]]; then
 		# Find matching section if was not found previously and store it to cache
-		if [[ -z "${cache_section["$process_pid"]}" ]]; then
+		if [[ -z "${cache_section_map["$process_pid"]}" ]]; then
 			# Avoid searching for matching section if it was not found previously
-			if [[ -z "${cache_mismatch["$process_pid"]}" ]]; then
+			if [[ -z "${cache_mismatch_map["$process_pid"]}" ]]; then
 				# Attempt to find a matching section in config
 				for temp_section in "${sections_array[@]}"; do
 					# Compare process name with specified in section
@@ -922,7 +922,7 @@ while read -r window_id; do
 					# Mark as matching if all identifiers containing non-zero value
 					if [[ -n "$temp_name_match" && -n "$temp_executable_match" && -n "$temp_owner_match" && -n "$temp_command_match" ]]; then
 						section_name="$temp_section"
-						cache_section["$process_pid"]="$temp_section"
+						cache_section_map["$process_pid"]="$temp_section"
 						break
 					fi
 					unset temp_name_match \
@@ -937,11 +937,11 @@ while read -r window_id; do
 				temp_command_match
 				# Mark process as mismatched if matching section was not found
 				if [[ -z "$section_name" ]]; then
-					cache_mismatch["$process_pid"]='1'
+					cache_mismatch_map["$process_pid"]='1'
 				fi
 			fi
 		else # Obtain matching section from cache
-			section_name="${cache_section["$process_pid"]}"
+			section_name="${cache_section_map["$process_pid"]}"
 		fi
 		if [[ -n "$section_name" ]]; then
 			print_info "Process '$process_name' with PID $process_pid matches with section '$section_name'."
