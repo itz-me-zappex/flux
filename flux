@@ -133,7 +133,7 @@ xprop_event_reader(){
 	done
 }
 
-# Export variables for focus and unfocus commands
+# Required to export variables for focus and unfocus commands
 export_flux_variables(){
 	export FLUX_WINDOW_ID="$1" \
 	FLUX_PROCESS_PID="$2" \
@@ -143,7 +143,7 @@ export_flux_variables(){
 	FLUX_PROCESS_COMMAND="$6"
 }
 
-# Unset exported variables because those become useless after running command
+# Required to unset exported variables because those become useless after running command
 unset_flux_variables(){
 	unset FLUX_WINDOW_ID \
 	FLUX_PROCESS_PID \
@@ -209,7 +209,7 @@ extract_process_info(){
 	fi
 }
 
-# Change FPS limit in specified MangoHud config
+# Required to change FPS limit in specified MangoHud config
 mangohud_fps_set(){
 	local local_config_line \
 	local_config_content \
@@ -260,7 +260,7 @@ mangohud_fps_set(){
 	fi
 }
 
-# Apply CPU limit via 'cpulimit' tool on unfocus event, function required to run it on background to avoid stopping a whole code if delay specified
+# Apply CPU limit via 'cpulimit' tool on unfocus event, required to run it on background to avoid stopping a whole code if delay specified
 background_cpulimit(){
 	local local_cpulimit_pid
 	# Wait for delay if specified
@@ -277,7 +277,7 @@ background_cpulimit(){
 	wait "$local_cpulimit_pid"
 }
 
-# Freeze process on unfocus event, function required to run it on background to avoid stopping a whole code if delay specified
+# Freeze process on unfocus event, required to run it on background to avoid stopping a whole code if delay specified
 background_freeze_process(){
 	# Freeze process with delay if specified, otherwise freeze process immediately
 	if [[ "${config_key_delay_map["$previous_section_name"]}" != '0' ]]; then
@@ -296,7 +296,7 @@ background_freeze_process(){
 	fi
 }
 
-# Set specified FPS on unfocus, function required to run it on background to avoid stopping a whole code if delay specified
+# Set specified FPS on unfocus, required to run it on background to avoid stopping a whole code if delay specified
 background_mangohud_fps_set(){
 	# Wait in case delay is specified
 	if [[ "${config_key_delay_map["$previous_section_name"]}" != '0' ]]; then
