@@ -520,6 +520,7 @@ if [[ -n "$config_is_passed" && -z "$config" ]]; then
 	print_error "Option '--config' is specified without path to config file!$advice_on_option_error"
 	exit 1
 fi
+unset config_is_passed
 
 # Automatically set a path to config file if it is not specified
 if [[ -z "$config" ]]; then
