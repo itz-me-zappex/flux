@@ -407,18 +407,19 @@ while (( $# > 0 )); do
 		;;
 		--pick | -p )
 			# Get xwininfo output containing window ID
-			if ! window_id="$(xwininfo 2>/dev/null)"; then
+			if ! xwininfo_output="$(xwininfo 2>/dev/null)"; then
 				print_error "Unable to grab cursor to pick a window!"
 				exit 1
 			else
 				# Extract ID of focused window
-				while read -r window_id_line; do
-					if [[ "$window_id_line" == 'xwininfo: Window id: '* ]]; then
-						window_id="${window_id_line/*: /}"
+				while read -r temp_xwininfo_output_line; do
+					if [[ "$temp_xwininfo_output_line" == 'xwininfo: Window id: '* ]]; then
+						window_id="${temp_xwininfo_output_line/*: /}"
 						window_id="${window_id/ */}"
 						break
 					fi
-				done <<< "$window_id"
+				done <<< "$xwininfo_output"
+				unset temp_xwininfo_output_line
 			fi
 		esac
 		# Extract process info
