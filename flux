@@ -24,7 +24,7 @@ print_info(){
 	fi
 }
 
-# Required to xit with an error if option repeated
+# Required to exit with an error if option repeated
 option_repeat_check(){
 	if [[ -n "${!1}" ]]; then
 		print_error "Option '$2' is repeated!$advice_on_option_error"
@@ -58,9 +58,9 @@ xprop_event_reader(){
 	local_window_id \
 	local_previous_window_id \
 	local_xprop_event
-	# Print window IDs of open windows to apply limits immediately if '--hot' option was passed
+	# Print windows ID of opened windows to apply limits immediately if '--hot' option was passed
 	if [[ -n "$hot" ]]; then
-		# Extract IDs of open windows
+		# Extract IDs of opened windows
 		local_stacking_windows_id="$(xprop -root _NET_CLIENT_LIST_STACKING 2>/dev/null)"
 		if [[ "$local_stacking_windows_id" != '_NET_CLIENT_LIST_STACKING:  no such atom on any window.' ]]; then
 			local_stacking_windows_id="${local_stacking_windows_id/* \# /}"
@@ -91,7 +91,7 @@ xprop_event_reader(){
 		# Print event for unset '--hot' option as it becomes useless from this moment
 		echo 'nohot'
 	fi
-	# Print event for unset '--lazy' option before reading events, otherwise focus and unfocus commands will not work
+	# Print event for unset '--lazy' option before read events, otherwise focus and unfocus commands will not work
 	if [[ -n "$lazy" ]]; then
 		echo 'nolazy'
 	fi
@@ -101,7 +101,7 @@ xprop_event_reader(){
 		if [[ -n "$local_exit" ]]; then
 			break
 		fi
-		# Print warning in case loop was restarted
+		# Print warning in case loop has been restarted
 		if [[ -n "$local_first_loop" ]]; then
 			print_warn "Process 'xprop' required for reading X11 events has been restarted by daemon after termination!"
 		else
@@ -869,12 +869,12 @@ while read -r window_id; do
 	fps_limited_sections_array=("${temp_fps_limited_sections_array[@]}")
 	unset temp_fps_limited_section \
 	temp_fps_limited_sections_array
-	# Run command on unfocus event for previous window if specified
+	# Run command on unfocus event for previous window if specified in 'unfocus' key in config file
 	if [[ -n "$previous_section" && -n "${config_key_unfocus_map["$previous_section"]}" && -z "$lazy" ]]; then
 		# Required to avoid running unfocus command when new event appears after previous matching one when '--hot' option is used along with '--lazy'
 		if [[ -z "$lazy_is_unset" ]]; then
 			print_verbose "Running command on unfocus event '${config_key_unfocus_map["$previous_section"]}' from section '$previous_section'."
-			# Variables passthrough to interact with them using custom commands in 'unfocus' key
+			# Pass variables to interact with them using custom commands in 'unfocus' key
 			export_flux_variables "$previous_window_id" "$previous_process_pid" "$previous_process_name" "$previous_process_executable" "$previous_process_owner" "$previous_process_command"
 			nohup setsid bash -c "${config_key_unfocus_map["$previous_section"]}" > /dev/null 2>&1 &
 			unset_flux_variables
@@ -1086,9 +1086,9 @@ while read -r window_id; do
 			fps_limited_pid_map["$section"]=''
 		fi
 	fi
-	# Run command on focus event if exists
+	# Run command on focus event if specified in 'focus' key in config file
 	if [[ -n "$section" && -n "${config_key_focus_map["$section"]}" && -z "$lazy" ]]; then
-		# Variables passthrough to interact with them using custom commands in 'focus' key
+		# Pass variables to interact with them using custom commands in 'focus' key
 		export_flux_variables "$window_id" "$process_pid" "$process_name" "$process_executable" "$process_owner" "$process_command"
 		nohup setsid bash -c "${config_key_focus_map["$section"]}" > /dev/null 2>&1 &
 		unset_flux_variables
