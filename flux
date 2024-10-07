@@ -710,7 +710,7 @@ unset temp_config_line \
 temp_value \
 temp_section
 
-# Check values in sections and exit with an error if something is wrong
+# Check values in sections and exit with an error if something is wrong or set default values in some keys if is not specified
 for temp_section in "${sections_array[@]}"; do
 	# Exit with an error if neither identifier 'name' nor 'executable' nor 'command' is specified
 	if [[ -z "${config_key_name_map["$temp_section"]}" && -z "${config_key_executable_map["$temp_section"]}" && -z "${config_key_command_map["$temp_section"]}" ]]; then
@@ -737,7 +737,7 @@ for temp_section in "${sections_array[@]}"; do
 		print_error "Do not use 'mangohud-config' key without 'fps-unfocus' key in section '$temp_section'!"
 		exit 1
 	fi
-	# Set 'fps-focus' to '0' (none) if it is not specified
+	# Set 'fps-focus' to '0' (full FPS unlock) if it is not specified
 	if [[ -n "${config_key_fps_unfocus_map["$temp_section"]}" && -z "${config_key_fps_focus_map["$temp_section"]}" ]]; then
 		config_key_fps_focus_map["$temp_section"]='0'
 	fi
@@ -780,15 +780,15 @@ while read -r window_id; do
 		actions_on_sigterm
 		print_error "Daemon has been terminated unexpectedly!"
 		exit 1
-	elif [[ "$window_id" == 'nolazy' ]]; then # Unset '--lazy' option if event was passed, otherwise focus and unfocus commands will not work
+	elif [[ "$window_id" == 'nolazy' ]]; then # Unset '--lazy' option if responding event appears, otherwise focus and unfocus commands will not work
 		unset lazy
 		lazy_is_unset='1'
 		continue
-	elif [[ "$window_id" == 'nohot' ]]; then # Unset '--hot' as it becomes useless from this moment
+	elif [[ "$window_id" == 'nohot' ]]; then # Unset '--hot' if responding event appears, as it becomes useless from this moment
 		unset hot
 		continue
 	fi
-	# Clean up cache to remove terminated PIDs which will not appear anymore
+	# Clean up cache to remove info about terminated PIDs which will not appear anymore
 	for temp_cached_pid in "${cached_pids_array[@]}"; do
 		# Remove info about process if it does not exist anymore
 		if [[ ! -d "/proc/$temp_cached_pid" ]]; then
@@ -829,7 +829,7 @@ while read -r window_id; do
 		temp_cached_pids_to_remove_array \
 		temp_found
 	fi
-	# Refresh frozen PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID won't repeat
+	# Refresh frozen PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID will not appear again
 	for temp_frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
 		# Store to array only existing PIDs, otherwise unset info about them
 		if [[ -d "/proc/$temp_frozen_process_pid" ]]; then
@@ -842,7 +842,7 @@ while read -r window_id; do
 	frozen_processes_pids_array=("${temp_frozen_processes_pids_array[@]}")
 	unset temp_frozen_process_pid \
 	temp_frozen_processes_pids_array
-	# Refresh CPU limited PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID won't repeat
+	# Refresh CPU limited PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID will not appear again
 	for temp_cpulimit_bgprocess in "${cpulimit_bgprocesses_pids_array[@]}"; do
 		if [[ -d "/proc/$temp_cpulimit_bgprocess" ]]; then
 			temp_cpulimit_bgprocesses_pids_array+=("$temp_cpulimit_bgprocess")
@@ -855,7 +855,7 @@ while read -r window_id; do
 	cpulimit_bgprocesses_pids_array=("${temp_cpulimit_bgprocesses_pids_array[@]}")
 	unset temp_cpulimit_bgprocess \
 	temp_cpulimit_bgprocesses_pids_array
-	# Refresh FPS limited PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID won't repeat
+	# Refresh FPS limited PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID will not appear again
 	for temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
 		if [[ -d "/proc/${fps_limited_pid_map["$temp_fps_limited_section"]}" ]]; then
 			temp_fps_limited_sections_array+=("$temp_fps_limited_section")
