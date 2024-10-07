@@ -376,8 +376,8 @@ while (( $# > 0 )); do
 		# Define option type (short, long or long+value) and remember specified path
 		case "$1" in
 		--config | -c )
-			# Remember config path only if path was specified, otherwise shift option
-			if [[ -n "$2" && -f "$2" ]]; then
+			# Remember config path only if that is not an another option
+			if [[ -n "$2" && ! "$2" =~ ^(--.*|-.*)$ ]]; then
 				config="$2"
 				shift 2
 			else
@@ -387,10 +387,6 @@ while (( $# > 0 )); do
 		* )
 			# Shell parameter expansion, remove '--config=' from string
 			config="${1/--config=/}"
-			# Unset config path if file does not exist
-			if [[ ! -f "$config" ]]; then
-				unset config
-			fi
 			shift 1
 		esac
 	;;
@@ -542,6 +538,9 @@ fi
 # Exit with an error if config file is not found
 if [[ -z "$config" ]]; then
 	print_error "Config file is not found!$advice_on_option_error"
+	exit 1
+elif [[ ! -f "$config" ]]; then
+	print_error "Config file '$config' does not exist!"
 	exit 1
 fi
 
