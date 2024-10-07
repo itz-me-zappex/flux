@@ -24,7 +24,7 @@ print_info(){
 	fi
 }
 
-# Exit with an error if option repeated
+# Required to xit with an error if option repeated
 option_repeat_check(){
 	if [[ -n "${!1}" ]]; then
 		print_error "Option '$2' is repeated!$advice_on_option_error"
@@ -48,7 +48,7 @@ x11_session_check(){
 	fi
 }
 
-# Extract window IDs from xprop events
+# Required to extract window IDs from xprop events and make '--hot' option work
 xprop_event_reader(){
 	local local_stacking_windows_id \
 	local_focused_window_id \
@@ -153,7 +153,7 @@ unset_flux_variables(){
 	FLUX_PROCESS_COMMAND
 }
 
-# Extract process info
+# Required to obtain process info using window ID
 extract_process_info(){
 	local local_status_line \
 	local_column_count \
@@ -326,7 +326,7 @@ background_mangohud_fps_set(){
 	fi
 }
 
-# Actions on SIGTERM and SIGINT signals
+# Required to unset limits on SIGTERM and SIGINT signals
 actions_on_sigterm(){
 	# Unfreeze processes
 	for temp_frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
@@ -354,7 +354,7 @@ actions_on_sigterm(){
 	done
 }
 
-# Remove CPU limits and FPS limits of processes on exit
+# Remove CPU and FPS limits of processes on exit
 trap 'actions_on_sigterm ; print_info "Daemon has been terminated successfully." ; exit 0' SIGTERM SIGINT
 
 # Prefixes for output
@@ -366,7 +366,7 @@ warn_prefix="[!]"
 # Additional text for errors related to option parsing
 advice_on_option_error="\n$info_prefix Try 'flux --help' for more information."
 
-# Read options
+# Option parsing
 while (( $# > 0 )); do
 	case "$1" in
 	--config | -c | --config=* )
@@ -566,7 +566,7 @@ config_key_mangohud_config_map \
 config_key_fps_unfocus_map \
 config_key_fps_focus_map
 
-# INI parser
+# Parse INI config
 while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 	# Skip commented or blank line
 	if [[ "$temp_config_line" =~ ^(\;|\#) || -z "$temp_config_line" ]]; then
@@ -710,7 +710,7 @@ unset temp_config_line \
 temp_value \
 temp_section
 
-# Check values in sections
+# Check values in sections and exit with an error if something is wrong
 for temp_section in "${sections_array[@]}"; do
 	# Exit with an error if neither identifier 'name' nor 'executable' nor 'command' is specified
 	if [[ -z "${config_key_name_map["$temp_section"]}" && -z "${config_key_executable_map["$temp_section"]}" && -z "${config_key_command_map["$temp_section"]}" ]]; then
@@ -752,7 +752,7 @@ for temp_section in "${sections_array[@]}"; do
 done
 unset temp_section
 
-# Declare associative arrays to store info about applied actions
+# Declare associative arrays to store info about applied limits
 declare -A is_frozen_pid_map \
 freeze_bgprocess_pid_map \
 is_cpu_limited_pid_map \
