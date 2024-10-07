@@ -793,7 +793,7 @@ while read -r window_id; do
 	for temp_cached_pid in "${cached_pids_array[@]}"; do
 		# Remove info about process if it does not exist anymore
 		if [[ ! -d "/proc/$temp_cached_pid" ]]; then
-			print_verbose "Cache of process '${cache_process_name_map["$temp_cached_pid"]}' with PID $temp_cached_pid has been removed."
+			print_verbose "Cache with info about process '${cache_process_name_map["$temp_cached_pid"]}' with PID $temp_cached_pid has been removed as it has been terminated implicitly."
 			cache_process_name_map["$temp_cached_pid"]=''
 			cache_process_executable_map["$temp_cached_pid"]=''
 			cache_process_owner_map["$temp_cached_pid"]=''
