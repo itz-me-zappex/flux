@@ -52,19 +52,21 @@ x11_session_check(){
 xprop_event_reader(){
 	local local_stacking_windows_id \
 	local_focused_window_id \
-	local_stacking_window_id \
-	local_first_loop \
+	temp_stacking_window_id \
 	local_exit \
 	local_window_id \
 	local_previous_window_id \
-	local_xprop_event
+	temp_xprop_event \
+	local_client_list_stacking_count \
+	temp_client_list_stacking_column \
+	local_previous_client_list_stacking_count
 	# Print windows ID of opened windows to apply limits immediately if '--hot' option was passed
 	if [[ -n "$hot" ]]; then
 		# Extract IDs of opened windows
 		local_stacking_windows_id="$(xprop -root _NET_CLIENT_LIST_STACKING 2>/dev/null)"
 		if [[ "$local_stacking_windows_id" != '_NET_CLIENT_LIST_STACKING:  no such atom on any window.' ]]; then
-			local_stacking_windows_id="${local_stacking_windows_id/* \# /}"
-			local_stacking_windows_id="${local_stacking_windows_id//\,/}"
+			local_stacking_windows_id="${local_stacking_windows_id/* \# /}" # Remove everything before including '#'
+			local_stacking_windows_id="${local_stacking_windows_id//\,/}" # Remove commas
 		else
 			# Print event for safe exit if cannot obtain list of stacking windows
 			print_error "Unable to get list of stacking windows!"
@@ -73,21 +75,21 @@ xprop_event_reader(){
 		# Extract ID of focused window
 		local_focused_window_id="$(xprop -root _NET_ACTIVE_WINDOW 2>/dev/null)"
 		if [[ "$local_focused_window_id" != '_NET_ACTIVE_WINDOW:  no such atom on any window.' ]]; then
-			local_focused_window_id="${local_focused_window_id/* \# /}"
+			local_focused_window_id="${local_focused_window_id/* \# /}" # Remove everything before including '#'
 		else
 			# Print event for safe exit if cannot obtain ID of focused window
 			print_error "Unable to get ID of focused window!"
 			echo 'exit'
 		fi
 		# Print IDs of windows, but skip currently focused window
-		for local_stacking_window_id in $local_stacking_windows_id; do
-			if [[ "$local_stacking_window_id" != "$local_focused_window_id" ]]; then
-				echo "$local_stacking_window_id"
+		for temp_stacking_window_id in $local_stacking_windows_id; do
+			if [[ "$temp_stacking_window_id" != "$local_focused_window_id" ]]; then
+				echo "$temp_stacking_window_id"
 			fi
 		done
 		unset local_stacking_windows_id \
 		local_focused_window_id \
-		local_stacking_window_id
+		temp_stacking_window_id
 		# Print event for unset '--hot' option as it becomes useless from this moment
 		echo 'nohot'
 	fi
@@ -96,21 +98,41 @@ xprop_event_reader(){
 		echo 'nolazy'
 	fi
 	# Read events from xprop and print IDs of windows
-	while read -r local_xprop_event; do
-		# Extract ID from line
-		local_window_id="${local_xprop_event/* \# /}"
-		# Skip event if window ID is exactly the same as previous one, workaround required for some buggy WMs
-		if [[ "$local_window_id" == "$local_previous_window_id" ]]; then
-			continue
-		else
-			# Do not print bad events, workaround required for some buggy WMs
-			if [[ "$local_window_id" =~ ^0x[0-9a-fA-F]{7}$ ]]; then
-				echo "$local_window_id"
-				# Remember ID to compare it with new one, if ID is exactly the same, then event will be skipped
-				local_previous_window_id="$local_window_id"
+	while read -r temp_xprop_event; do
+		if [[ "$temp_xprop_event" == '_NET_ACTIVE_WINDOW(WINDOW):'* ]]; then # Get window ID
+			# Extract ID from line
+			local_window_id="${temp_xprop_event/* \# /}"
+			# Skip event if window ID is exactly the same as previous one, workaround required for some buggy WMs
+			if [[ "$local_window_id" == "$local_previous_window_id" ]]; then
+				continue
+			else
+				# Do not print bad events, workaround required for some buggy WMs
+				if [[ "$local_window_id" =~ ^0x[0-9a-fA-F]{7}$ ]]; then
+					echo "$local_window_id"
+					# Remember ID to compare it with new one, if ID is exactly the same, then event will be skipped
+					local_previous_window_id="$local_window_id"
+				fi
 			fi
+		elif [[ "$temp_xprop_event" != "$local_previous_client_list_stacking" && "$temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* ]]; then # Get count of columns in output with list of stacking windows
+			# Count columns in event
+			local_client_list_stacking_count='0'
+			for temp_client_list_stacking_column in $temp_xprop_event; do
+				(( local_client_list_stacking_count++ ))
+			done
+			unset temp_client_list_stacking_column
+			# Compare count of columns and if previous event contains more columns (windows IDs), then print event to refresh PIDs in arrays and cache
+			if [[ -n "$local_previous_client_list_stacking_count" ]] && (( local_previous_client_list_stacking_count > local_client_list_stacking_count )); then
+				# Wait a bit for termination of processes as that does not happen immediately, otherwise terminated PIDs will be recognized as not terminated on refresh of cache and arrays
+				sleep 0.1
+				echo 'refresh'
+			fi
+			# Required to compare columns count in previous and current events
+			local_previous_client_list_stacking_count="$local_client_list_stacking_count"
+			# Required to skip exactly the same event, happens when window opens from taskbar on Cinnamon DE for example
+			local_previous_client_list_stacking="$temp_xprop_event"
 		fi
-	done < <(xprop -root -spy _NET_ACTIVE_WINDOW 2>&1)
+	done < <(xprop -root -spy _NET_ACTIVE_WINDOW _NET_CLIENT_LIST_STACKING 2>&1)
+	unset temp_xprop_event
 	# Print event for safe exit if 'xprop' has been terminated
 	print_error "Process 'xprop' required to read X11 events has been terminated!"
 	echo 'exit'
@@ -138,7 +160,7 @@ unset_flux_variables(){
 
 # Required to obtain process info using window ID
 extract_process_info(){
-	local local_status_line \
+	local temp_status_line \
 	local_column_count \
 	local_status_column
 	# Extract PID of process
@@ -156,10 +178,10 @@ extract_process_info(){
 			# Extract executable path of process
 			process_executable="$(readlink "/proc/$process_pid/exe")"
 			# Extract UID of process
-			while read -r local_status_line; do
-				if [[ "$local_status_line" == 'Uid:'* ]]; then
+			while read -r temp_status_line; do
+				if [[ "$temp_status_line" == 'Uid:'* ]]; then
 					local_column_count='0'
-					for local_status_column in $local_status_line; do
+					for local_status_column in $temp_status_line; do
 						if (( local_column_count == 3 )); then
 							process_owner="$local_status_column"
 						else
@@ -168,6 +190,7 @@ extract_process_info(){
 					done
 				fi
 			done < "/proc/$process_pid/status"
+			unset temp_status_line
 			# I did not get how to do that using built-in bash options
 			# Extract command of process and replace '\0' (used as separator between options) with spaces
 			process_command="$(tr '\0' ' ' < "/proc/$process_pid/cmdline")"
@@ -194,7 +217,7 @@ extract_process_info(){
 
 # Required to change FPS limit in specified MangoHud config
 mangohud_fps_set(){
-	local local_config_line \
+	local temp_config_line \
 	local_config_content \
 	local_new_config_content \
 	local_config="$1" \
@@ -208,9 +231,9 @@ mangohud_fps_set(){
 			return 1
 		fi
 		# Replace 'fps_limit' value in config if exists
-		while read -r local_config_line || [[ -n "$local_config_line" ]]; do
+		while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 			# Find 'fps_limit' line
-			if [[ "$local_config_line" =~ ^fps_limit*=* ]]; then
+			if [[ "$temp_config_line" =~ ^fps_limit*=* ]]; then
 				# Set specified FPS limit
 				if [[ -n "$local_new_config_content" ]]; then
 					local_new_config_content="$local_new_config_content\nfps_limit=$local_fps_to_set"
@@ -220,9 +243,9 @@ mangohud_fps_set(){
 				local_fps_limit_is_changed='1'
 			else
 				if [[ -n "$local_new_config_content" ]]; then
-					local_new_config_content="$local_new_config_content\n$local_config_line"
+					local_new_config_content="$local_new_config_content\n$temp_config_line"
 				else
-					local_new_config_content="$local_config_line"
+					local_new_config_content="$temp_config_line"
 				fi
 			fi
 		done <<< "$local_config_content"
@@ -302,6 +325,9 @@ background_mangohud_fps_set(){
 
 # Required to unset limits on SIGTERM and SIGINT signals
 actions_on_sigterm(){
+	local temp_frozen_process_pid \
+	temp_cpulimit_bgprocess_pid \
+	temp_fps_limited_section
 	# Unfreeze processes
 	for temp_frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
 		# Terminate background process if exists
@@ -311,12 +337,14 @@ actions_on_sigterm(){
 			kill -CONT "$temp_frozen_process_pid" > /dev/null 2>&1
 		fi
 	done
+	unset temp_frozen_process_pid
 	# Kill 'cpulimit' background process
 	for temp_cpulimit_bgprocess_pid in "${cpulimit_bgprocesses_pids_array[@]}"; do
 		if [[ -d "/proc/$temp_cpulimit_bgprocess_pid" ]]; then
 			kill "$temp_cpulimit_bgprocess_pid" > /dev/null 2>&1
 		fi
 	done
+	unset temp_cpulimit_bgprocess_pid
 	# Remove FPS limits
 	for temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
 		# Terminate background process if exists
@@ -326,11 +354,12 @@ actions_on_sigterm(){
 		# Set FPS from 'fps-focus' key to remove limit
 		mangohud_fps_set "${config_key_mangohud_config_map["$temp_fps_limited_section"]}" "${config_key_fps_focus_map["$temp_fps_limited_section"]}" > /dev/null 2>&1
 	done
+	unset temp_fps_limited_section
 	# Remove lock file which prevents multiple daemon instance from running
 	if [[ -f "$lock_file" ]]; then
 		rm "$lock_file"
 	fi
-	# Wait a bit to avoid messages after termination
+	# Wait a bit to avoid delayed messages after termination
 	sleep 0.1
 }
 
@@ -454,7 +483,7 @@ Options and values:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.6.15
+		echo "flux 1.6.16
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
@@ -754,7 +783,7 @@ x11_session_check
 # Check for another instance and exit with an error if it exists
 lock_file='/tmp/flux-lock'
 if [[ -f "$lock_file" ]]; then
-	print_error "Multiple instances are not allowed, make sure that daemon is not running before start, or if you are really sure, then remove '$lock_file' file."
+	print_error "Multiple instances are not allowed, make sure that daemon is not running before start, if you are really sure, then remove '$lock_file' file."
 	exit 1
 else
 	touch "$lock_file"
@@ -777,87 +806,90 @@ while read -r window_id; do
 	elif [[ "$window_id" == 'nohot' ]]; then # Unset '--hot' if responding event appears, as it becomes useless from this moment
 		unset hot
 		continue
-	fi
-	# Clean up cache to remove info about terminated PIDs which will not appear anymore
-	for temp_cached_pid in "${cached_pids_array[@]}"; do
-		# Remove info about process if it does not exist anymore
-		if [[ ! -d "/proc/$temp_cached_pid" ]]; then
-			print_verbose "Cache with info about process '${cache_process_name_map["$temp_cached_pid"]}' with PID $temp_cached_pid has been removed as it has been terminated implicitly."
-			cache_process_name_map["$temp_cached_pid"]=''
-			cache_process_executable_map["$temp_cached_pid"]=''
-			cache_process_owner_map["$temp_cached_pid"]=''
-			cache_process_command_map["$temp_cached_pid"]=''
-			cache_section_map["$temp_cached_pid"]=''
-			cache_mismatch_map["$temp_cached_pid"]=''
-			temp_cached_pids_to_remove_array+=("$temp_cached_pid")
-		fi
-	done
-	unset temp_cached_pid
-	# Remove terminated PIDs from array as their info has been removed above
-	if [[ -n "${temp_cached_pids_to_remove_array[*]}" ]]; then 
-		# Read array with PIDs
+	elif [[ "$window_id" == 'refresh' ]]; then # Refresh PIDs and cache if responding event appears
+		# Clean up cache to remove info about terminated PIDs which will not appear anymore
 		for temp_cached_pid in "${cached_pids_array[@]}"; do
-			# Unset flag which responds for matching of PID I want remove from main array to avoid false positive
-			unset temp_found
-			# Read array with PIDs I want remove
-			for temp_cached_pid_to_remove in "${temp_cached_pids_to_remove_array[@]}"; do
-				# Mark PID as found if it matches
-				if [[ "$temp_cached_pid" == "$temp_cached_pid_to_remove" ]]; then
-					temp_found='1'
-					break
-				fi
-			done
-			# Add PID to temporary array if it does not match
-			if [[ -z "$temp_found" ]]; then
-				temp_cached_pids_array+=("$temp_cached_pid")
+			# Remove info about process if it does not exist anymore
+			if [[ ! -d "/proc/$temp_cached_pid" ]]; then
+				print_verbose "Cache of process info '${cache_process_name_map["$temp_cached_pid"]}' with PID $temp_cached_pid has been removed as it has been terminated."
+				cache_process_name_map["$temp_cached_pid"]=''
+				cache_process_executable_map["$temp_cached_pid"]=''
+				cache_process_owner_map["$temp_cached_pid"]=''
+				cache_process_command_map["$temp_cached_pid"]=''
+				cache_section_map["$temp_cached_pid"]=''
+				cache_mismatch_map["$temp_cached_pid"]=''
+				temp_cached_pids_to_remove_array+=("$temp_cached_pid")
 			fi
 		done
-		cached_pids_array=("${temp_cached_pids_array[@]}")
-		unset temp_cached_pid \
-		temp_cached_pid_to_remove \
-		temp_cached_pids_array \
-		temp_cached_pids_to_remove_array \
-		temp_found
+		unset temp_cached_pid
+		# Remove terminated PIDs from array as their info has been removed above
+		if [[ -n "${temp_cached_pids_to_remove_array[*]}" ]]; then 
+			# Read array with PIDs
+			for temp_cached_pid in "${cached_pids_array[@]}"; do
+				# Unset flag which responds for matching of PID I want remove from main array to avoid false positive
+				unset temp_found
+				# Read array with PIDs I want remove
+				for temp_cached_pid_to_remove in "${temp_cached_pids_to_remove_array[@]}"; do
+					# Mark PID as found if it matches
+					if [[ "$temp_cached_pid" == "$temp_cached_pid_to_remove" ]]; then
+						temp_found='1'
+						break
+					fi
+				done
+				# Add PID to temporary array if it does not match
+				if [[ -z "$temp_found" ]]; then
+					temp_cached_pids_array+=("$temp_cached_pid")
+				fi
+			done
+			cached_pids_array=("${temp_cached_pids_array[@]}")
+			unset temp_cached_pid \
+			temp_cached_pid_to_remove \
+			temp_cached_pids_array \
+			temp_cached_pids_to_remove_array \
+			temp_found
+		fi
+		# Refresh frozen PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID will not appear again
+		for temp_frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
+			# Store to array only existing PIDs, otherwise unset info about them
+			if [[ -d "/proc/$temp_frozen_process_pid" ]]; then
+				temp_frozen_processes_pids_array+=("$temp_frozen_process_pid")
+			else
+				is_frozen_pid_map["$temp_frozen_process_pid"]=''
+				freeze_bgprocess_pid_map["$temp_frozen_process_pid"]=''
+			fi
+		done
+		frozen_processes_pids_array=("${temp_frozen_processes_pids_array[@]}")
+		unset temp_frozen_process_pid \
+		temp_frozen_processes_pids_array
+		# Refresh CPU limited PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID will not appear again
+		for temp_cpulimit_bgprocess in "${cpulimit_bgprocesses_pids_array[@]}"; do
+			if [[ -d "/proc/$temp_cpulimit_bgprocess" ]]; then
+				temp_cpulimit_bgprocesses_pids_array+=("$temp_cpulimit_bgprocess")
+			else
+				is_cpu_limited_pid_map["${cpu_limited_pid_map["$temp_cpulimit_bgprocess"]}"]=''
+				cpulimit_bgprocess_pid_map["${cpu_limited_pid_map["$temp_cpulimit_bgprocess"]}"]=''
+				cpu_limited_pid_map["$temp_cpulimit_bgprocess"]=''
+			fi
+		done
+		cpulimit_bgprocesses_pids_array=("${temp_cpulimit_bgprocesses_pids_array[@]}")
+		unset temp_cpulimit_bgprocess \
+		temp_cpulimit_bgprocesses_pids_array
+		# Refresh FPS limited PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID will not appear again
+		for temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
+			if [[ -d "/proc/${fps_limited_pid_map["$temp_fps_limited_section"]}" ]]; then
+				temp_fps_limited_sections_array+=("$temp_fps_limited_section")
+			else
+				is_fps_limited_section_map["$temp_fps_limited_section"]=''
+				fps_limit_bgprocess_pid_map["$temp_fps_limited_section"]=''
+				fps_limited_pid_map["$temp_fps_limited_section"]=''
+			fi
+		done
+		fps_limited_sections_array=("${temp_fps_limited_sections_array[@]}")
+		unset temp_fps_limited_section \
+		temp_fps_limited_sections_array
+		# Skip cycle after refresh
+		continue
 	fi
-	# Refresh frozen PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID will not appear again
-	for temp_frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
-		# Store to array only existing PIDs, otherwise unset info about them
-		if [[ -d "/proc/$temp_frozen_process_pid" ]]; then
-			temp_frozen_processes_pids_array+=("$temp_frozen_process_pid")
-		else
-			is_frozen_pid_map["$temp_frozen_process_pid"]=''
-			freeze_bgprocess_pid_map["$temp_frozen_process_pid"]=''
-		fi
-	done
-	frozen_processes_pids_array=("${temp_frozen_processes_pids_array[@]}")
-	unset temp_frozen_process_pid \
-	temp_frozen_processes_pids_array
-	# Refresh CPU limited PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID will not appear again
-	for temp_cpulimit_bgprocess in "${cpulimit_bgprocesses_pids_array[@]}"; do
-		if [[ -d "/proc/$temp_cpulimit_bgprocess" ]]; then
-			temp_cpulimit_bgprocesses_pids_array+=("$temp_cpulimit_bgprocess")
-		else
-			is_cpu_limited_pid_map["${cpu_limited_pid_map["$temp_cpulimit_bgprocess"]}"]=''
-			cpulimit_bgprocess_pid_map["${cpu_limited_pid_map["$temp_cpulimit_bgprocess"]}"]=''
-			cpu_limited_pid_map["$temp_cpulimit_bgprocess"]=''
-		fi
-	done
-	cpulimit_bgprocesses_pids_array=("${temp_cpulimit_bgprocesses_pids_array[@]}")
-	unset temp_cpulimit_bgprocess \
-	temp_cpulimit_bgprocesses_pids_array
-	# Refresh FPS limited PIDs to remove processes which have been terminated implicitly, i.e. limits should not be removed as this PID will not appear again
-	for temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
-		if [[ -d "/proc/${fps_limited_pid_map["$temp_fps_limited_section"]}" ]]; then
-			temp_fps_limited_sections_array+=("$temp_fps_limited_section")
-		else
-			is_fps_limited_section_map["$temp_fps_limited_section"]=''
-			fps_limit_bgprocess_pid_map["$temp_fps_limited_section"]=''
-			fps_limited_pid_map["$temp_fps_limited_section"]=''
-		fi
-	done
-	fps_limited_sections_array=("${temp_fps_limited_sections_array[@]}")
-	unset temp_fps_limited_section \
-	temp_fps_limited_sections_array
 	# Run command on unfocus event for previous window if specified in 'unfocus' key in config file
 	if [[ -n "$previous_section" && -n "${config_key_unfocus_map["$previous_section"]}" && -z "$lazy" ]]; then
 		# Required to avoid running unfocus command when new event appears after previous matching one when '--hot' option is used along with '--lazy'
