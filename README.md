@@ -40,7 +40,7 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
   - [Why is code so complicated?](#why-is-code-so-complicated)
   - [Gamescope which allows limit FPS on unfocus exists, Wayland becomes more popular. Are you not late by any chance?](#gamescope-which-allows-limit-fps-on-unfocus-exists-wayland-becomes-more-popular-are-you-not-late-by-any-chance)
   - [What about Wayland support?](#what-about-wayland-support)
-  - [Why did you write it on Bash?](#why-did-you-write-it-on-bash)
+  - [Why did you write it in Bash?](#why-did-you-write-it-in-bash)
 
 ## Dependencies
 ### Arch Linux and dereatives
@@ -321,5 +321,5 @@ Now you can easily grab templates from windows to use them in config by pasting 
 ### What about Wayland support?
 - That is impossible, there is no any unified way to read window focus events and extract PIDs from windows on Wayland.
 
-### Why did you write it on Bash?
+### Why did you write it in Bash?
 - That is (scripting) language I know pretty good, despite a fact that Bash as all interpretators works slower than compilable languages, it still fits my needs almost perfectly.
