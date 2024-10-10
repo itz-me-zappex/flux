@@ -40,7 +40,7 @@ A daemon for X11 designed to automatically limit CPU usage of unfocused windows 
   - [Why is code so complicated?](#why-is-code-so-complicated)
   - [Gamescope which allows limit FPS on unfocus exists, Wayland becomes more popular. Are you not late by any chance?](#gamescope-which-allows-limit-fps-on-unfocus-exists-wayland-becomes-more-popular-are-you-not-late-by-any-chance)
   - [What about Wayland support?](#what-about-wayland-support)
-  - [Why did you write it in Bash?](#why-did-you-write-it-in-bash)
+  - [Why did you write it on Bash?](#why-did-you-write-it-on-bash)
 
 ## Dependencies
 ### Arch Linux and dereatives
@@ -85,7 +85,7 @@ Dependencies for other distributions will be added soon.
 ### Manual installation
 You can use this method if there is no package build script for your distro. Make sure you have installed dependencies as described above before continue.
 ```bash
-fluxver='1.6.15' # set latest version as I update it here every release
+fluxver='1.6.16' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -103,7 +103,7 @@ sudo install -Dm 755 flux-${fluxver}/flux /usr/local/bin/flux # install daemon t
 ### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
 ``` bash
-fluxver='1.6.15' # set latest version as I update it here every release
+fluxver='1.6.16' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -117,7 +117,7 @@ makepkg -sric # build a package and install it
 
 ### Debian and dereatives
 ```bash
-fluxver='1.6.15' # set latest version as I update it here every release
+fluxver='1.6.16' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -321,5 +321,5 @@ Now you can easily grab templates from windows to use them in config by pasting 
 ### What about Wayland support?
 - That is impossible, there is no any unified way to read window focus events and extract PIDs from windows on Wayland.
 
-### Why did you write it in Bash?
+### Why did you write it on Bash?
 - That is (scripting) language I know pretty good, despite a fact that Bash as all interpretators works slower than compilable languages, it still fits my needs almost perfectly.
