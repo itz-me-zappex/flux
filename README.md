@@ -85,7 +85,7 @@ Dependencies for other distributions will be added soon.
 ### Manual installation
 You can use this method if there is no package build script for your distro. Make sure you have installed dependencies as described above before continue.
 ```bash
-fluxver='1.6.16' # set latest version as I update it here every release
+fluxver='1.6.17' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -103,7 +103,7 @@ sudo install -Dm 755 flux-${fluxver}/flux /usr/local/bin/flux # install daemon t
 ### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
 ``` bash
-fluxver='1.6.16' # set latest version as I update it here every release
+fluxver='1.6.17' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -117,7 +117,7 @@ makepkg -sric # build a package and install it
 
 ### Debian and dereatives
 ```bash
-fluxver='1.6.16' # set latest version as I update it here every release
+fluxver='1.6.17' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -167,7 +167,7 @@ Available keys and description:
 | `focus` | Command to execute on focus event, command runs via bash and will not be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
 | `unfocus` | Command to execute on unfocus event, command runs via bash and will not be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
 | `command` | Command of process, gets from `/proc/<PID>/cmdline`, required if neither `name` nor `executable` is specified. |
-| `mangohud-config` | Path to MangoHud config, required if you want change FPS limits and requires `fps-unfocus`. |
+| `mangohud-config` | Path to MangoHud config, required if you want change FPS limits and requires `fps-unfocus`. DO NOT USE THE SAME CONFIG FOR MULTIPLE SECTIONS! |
 | `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`. |
 | `fps-focus` | FPS to set on focus, requires `fps-unfocus`, defaults to `0` (i.e. full unlimit). |
 
