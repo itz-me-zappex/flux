@@ -59,7 +59,8 @@ xprop_event_reader(){
 	temp_xprop_event \
 	local_client_list_stacking_count \
 	temp_client_list_stacking_column \
-	local_previous_client_list_stacking_count
+	local_previous_client_list_stacking_count \
+	local_sleep_pid
 	# Print windows IDs of opened windows to apply limits immediately if '--hot' option was passed
 	if [[ -n "$hot" ]]; then
 		# Extract IDs of opened windows
@@ -123,9 +124,14 @@ xprop_event_reader(){
 			unset temp_client_list_stacking_column
 			# Compare count of columns and if previous event contains more columns (windows IDs), then print event to refresh PIDs in arrays and cache
 			if [[ -n "$local_previous_client_list_stacking_count" ]] && (( local_previous_client_list_stacking_count > local_client_list_stacking_count )); then
+				# Check for delayed event existence and terminate it to run new one
+				if [[ -d "/proc/$local_sleep_pid" ]]; then
+					kill "$local_sleep_pid" > /dev/null 2>&1
+				fi
 				# Wait a bit for termination of processes as that does not happen immediately, otherwise terminated PIDs will be recognized as not terminated on refresh of cache and arrays
-				sleep 0.1
-				echo 'refresh'
+				(sleep 2 ; echo 'refresh') &
+				# Remember PID of subprocess to avoid multiple instances
+				local_sleep_pid="$!"
 			fi
 			# Required to compare columns count in previous and current events
 			local_previous_client_list_stacking_count="$local_client_list_stacking_count"
@@ -484,7 +490,7 @@ Options and values:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.6.17
+		echo "flux 1.6.18
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
