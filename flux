@@ -109,7 +109,7 @@ xprop_event_reader(){
 				continue
 			else
 				# Do not print bad events, workaround required for some buggy WMs
-				if [[ "$local_window_id" =~ ^0x[0-9a-fA-F]{7}$ ]]; then
+				if [[ "$local_window_id" != '0x0' ]]; then
 					echo "$local_window_id"
 					# Remember ID to compare it with new one, if ID is exactly the same, then event will be skipped
 					local_previous_window_id="$local_window_id"
@@ -125,7 +125,7 @@ xprop_event_reader(){
 			# Compare count of columns and if previous event contains more columns (windows IDs), then print event to refresh PIDs in arrays and cache
 			if [[ -n "$local_previous_client_list_stacking_count" ]] && (( local_previous_client_list_stacking_count > local_client_list_stacking_count )); then
 				# Check for delayed event existence and terminate it to run new one
-				if [[ -d "/proc/$local_sleep_pid" ]]; then
+				if [[ -n "$local_sleep_pid" && -d "/proc/$local_sleep_pid" ]]; then
 					kill "$local_sleep_pid" > /dev/null 2>&1
 				fi
 				# Wait a bit for termination of processes as that does not happen immediately, otherwise terminated PIDs will be recognized as not terminated on refresh of cache and arrays
@@ -490,7 +490,7 @@ Options and values:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.6.18
+		echo "flux 1.6.19
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
