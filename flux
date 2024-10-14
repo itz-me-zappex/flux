@@ -108,12 +108,9 @@ xprop_event_reader(){
 			if [[ "$local_window_id" == "$local_previous_window_id" ]]; then
 				continue
 			else
-				# Do not print bad events, workaround required for some buggy WMs
-				if [[ "$local_window_id" != '0x0' ]]; then
-					echo "$local_window_id"
-					# Remember ID to compare it with new one, if ID is exactly the same, then event will be skipped
-					local_previous_window_id="$local_window_id"
-				fi
+				echo "$local_window_id"
+				# Remember ID to compare it with new one, if ID is exactly the same, then event will be skipped
+				local_previous_window_id="$local_window_id"
 			fi
 		elif [[ "$temp_xprop_event" != "$local_previous_client_list_stacking" && "$temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* ]]; then # Get count of columns in output with list of stacking windows and skip event if it repeats
 			# Count columns in event
@@ -490,7 +487,7 @@ Options and values:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.6.19
+		echo "flux 1.6.20
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
@@ -935,9 +932,13 @@ while read -r window_id; do
 			unset lazy_is_unset
 		fi
 	fi
-	# Extract process info
-	if ! extract_process_info; then
-		print_warn "Unable to obtain PID of window with ID $window_id! Getting process info skipped."
+	# Extract process info using window ID if ID is not '0x0'
+	if [[ "$window_id" != '0x0' ]]; then
+		if ! extract_process_info; then
+			print_warn "Unable to obtain PID of window with ID $window_id, getting process info skipped!"
+		fi
+	else
+		print_warn "Bad event '0x0' appeared, getting process info skipped!"
 	fi
 	# Do not find matching section if window does not report its PID
 	if [[ -n "$process_pid" ]]; then
