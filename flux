@@ -487,7 +487,7 @@ Options and values:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.6.20
+		echo "flux 1.6.21
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
@@ -1132,8 +1132,8 @@ while read -r window_id; do
 			fi
 			# Forget that process(es) matching with current section have been FPS limited previously
 			for temp_fps_limited_pid in "${!fps_limited_section_map[@]}"; do
-				if [[ "${fps_limited_pid_map["$temp_fps_limited_pid"]}" == "$section" ]]; then
-					fps_limited_pid_map["$temp_fps_limited_pid"]=''
+				if [[ "${fps_limited_section_map["$temp_fps_limited_pid"]}" == "$section" ]]; then
+					fps_limited_section_map["$temp_fps_limited_pid"]=''
 				fi
 			done
 			unset temp_fps_limited_pid
