@@ -487,7 +487,7 @@ Options and values:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.6.21
+		echo "flux 1.6.22
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
@@ -1113,7 +1113,7 @@ while read -r window_id; do
 			cpulimit_bgprocess_pid_map["$process_pid"]=''
 		elif [[ -n "$section" && -n "${is_fps_limited_section_map["$section"]}" ]]; then # Check for FPS limit existence and unset it
 			# Terminate delayed FPS limit background process if exists
-			if [[ -d "${fps_limit_bgprocess_pid_map["$section"]}" ]]; then
+			if [[ -d "/proc/${fps_limit_bgprocess_pid_map["$section"]}" ]]; then
 				if ! kill "${fps_limit_bgprocess_pid_map["$section"]}" > /dev/null 2>&1; then
 					# Avoid printing this message if delay is not specified
 					if [[ "${config_key_delay_map["$section"]}" != '0' ]]; then
