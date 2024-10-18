@@ -163,12 +163,12 @@ Available keys and description:
 | `executable` | Path to binary of process, gets by reading `/proc/<PID>/exe` symlink, required if neither `name` nor `command` is specified. |
 | `owner` | User ID of process, gets from `/proc/<PID>/status`. |
 | `cpu-limit` | CPU limit between `0%` and `100%`, defaults to `-1%` which means no CPU limit, `%` symbol is optional. |
-| `delay` | Delay before applying CPU limit, preferable to avoid freezing app on exit when windows closes but process still exists if `cpu-limit` equal to `0%`, defaults to `0`. |
-| `focus` | Command to execute on focus event, command runs via bash and will not be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
-| `unfocus` | Command to execute on unfocus event, command runs via bash and will not be killed on daemon exit, output is hidden for avoid mess in output of daemon. |
+| `delay` | Delay in seconds before applying CPU/FPS limit. Optional, defaults to `0`, supports values with floating point. |
+| `focus` | Command to execute on focus event, command runs via bash and will not be killed on daemon exit, output is hidden to avoid mess in output of daemon. |
+| `unfocus` | Command to execute on unfocus event, command runs via bash and will not be killed on daemon exit, output is hidden to avoid mess in output of daemon. |
 | `command` | Command of process, gets from `/proc/<PID>/cmdline`, required if neither `name` nor `executable` is specified. |
 | `mangohud-config` | Path to MangoHud config, required if you want change FPS limits and requires `fps-unfocus`. DO NOT USE THE SAME CONFIG FOR MULTIPLE SECTIONS! |
-| `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`. |
+| `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`, cannot be equal to `0` as that means no limit. |
 | `fps-focus` | FPS to set on focus, requires `fps-unfocus`, defaults to `0` (i.e. full unlimit). |
 
 ### Config path
@@ -194,14 +194,13 @@ As INI is not standartized, I should mention all supported features here.
 ### Configuration example
 #### Long examples
 ```ini
-; Example using freezing with delay as that is single player game
+; Example using freezing as that is single player game
 [The Witcher 3: Wild Hunt]
 name = witcher3.exe
 executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wine64-preloader
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\The Witcher 3\bin\x64\witcher3.exe 
 owner = 1000
 cpu-limit = 0%
-delay = 1
 focus = killall picom
 unfocus = picom
 
@@ -224,7 +223,6 @@ executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bi
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\Geometry Dash\GeometryDash.exe 
 owner = 1000
 cpu-limit = 2%
-delay = 1
 focus = killall picom
 unfocus = picom
 ```
@@ -235,7 +233,6 @@ unfocus = picom
 [The Witcher 3: Wild Hunt]
 name = witcher3.exe
 cpu-limit = 0%
-delay = 1
 
 ; Example using FPS limit as that is online game and I use MangoHud
 [Forza Horizon 4]
@@ -248,7 +245,6 @@ fps-focus = 60 ; I have 60 FPS lock, so I want restore it on focus event
 [Geometry Dash]
 name = GeometryDash.ex
 cpu-limit = 2%
-delay = 1
 ```
 
 ## Variables
