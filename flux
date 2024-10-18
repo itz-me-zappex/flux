@@ -187,6 +187,7 @@ extract_process_info(){
 		process_executable="${cache_process_executable_map["$window_id"]}"
 		process_owner="${cache_process_owner_map["$window_id"]}"
 		process_command="${cache_process_command_map["$window_id"]}"
+		print_verbose "Cache has been used to obtain info about process '$process_name' with PID $process_pid."
 	elif [[ -z "${cache_event_type_map["$window_id"]}" ]]; then # Extract process info if it is not cached
 		# Extract PID of process
 		if ! process_pid="$(xprop -id "$window_id" _NET_WM_PID 2>/dev/null)"; then
@@ -227,6 +228,7 @@ extract_process_info(){
 			cache_process_executable_map["$window_id"]="$process_executable"
 			cache_process_owner_map["$window_id"]="$process_owner"
 			cache_process_command_map["$window_id"]="$process_command"
+			print_verbose "Obtained info about process '$process_name' with PID $process_pid has been cached."
 		else # In case that is bad event
 			process_pid=''
 			return 1
@@ -539,21 +541,33 @@ while (( $# > 0 )); do
 		esac
 	;;
 	--focus | -f | --pick | -p )
-		# Exit with an error if that is not a X11 session
+		# Check for X11 session
 		if ! x11_session_check; then
-			# Exit with an error if X11 session is invalid
-			print_error "Unable to get window info, invalid X11 session."
-			exit 1
-		else
-			# Select command depending by type of option
-			case "$1" in
-			--focus | -f )
+			# Fail if something wrong with X server
+			temp_fail='1'
+		fi
+		# Select command depending by type of option
+		case "$1" in
+		--focus | -f )
+			# Check for failure related to X server check
+			if [[ -n "$temp_fail" ]]; then
+				# Exit with an error if something wrong with X server
+				print_error "Unable to get info about focused window, invalid X11 session."
+				exit 1
+			else
 				# Get output of xprop containing window ID
 				window_id="$(xprop -root _NET_ACTIVE_WINDOW 2>/dev/null)"
 				# Extract ID of focused window
 				window_id="${window_id/*\# /}"
-			;;
-			--pick | -p )
+			fi
+		;;
+		--pick | -p )
+			# Check for failure related to X server check
+			if [[ -n "$temp_fail" ]]; then
+				# Exit with an error if something wrong with X server
+				print_error "Unable to call window picker, invalid X11 session."
+				exit 1
+			else
 				# Get xwininfo output containing window ID
 				if ! xwininfo_output="$(xwininfo 2>/dev/null)"; then
 					print_error "Unable to grab cursor to pick a window!"
@@ -569,19 +583,19 @@ while (( $# > 0 )); do
 					done <<< "$xwininfo_output"
 					unset temp_xwininfo_output_line
 				fi
-			esac
-			# Extract process info and print it in a way to easy use it in config
-			if extract_process_info; then
-				echo "name = '"$process_name"'
+			fi
+		esac
+		# Extract process info and print it in a way to easy use it in config
+		if extract_process_info; then
+			echo "name = '"$process_name"'
 executable = '"$process_executable"'
 command = '"$process_command"'
 owner = "$process_owner"
 "
-				exit 0
-			else
-				print_error "Unable to create template for window with ID $window_id as it does not report its PID!"
-				exit 1
-			fi
+			exit 0
+		else
+			print_error "Unable to create template for window with ID $window_id as it does not report its PID!"
+			exit 1
 		fi
 	;;
 	--help | -h | --usage | -u )
@@ -622,7 +636,7 @@ Options and values:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.7
+		echo "flux 1.7.1
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
@@ -942,8 +956,9 @@ else
 		print_error "Multiple instances are not allowed, make sure that daemon is not running before start, if you are really sure, then remove '$lock_file' file."
 		exit 1
 	else
-		touch "$lock_file"
+		echo > "$lock_file"
 	fi
+	unset lock_file
 	# Remove CPU and FPS limits of processes on exit
 	trap 'actions_on_sigterm ; print_info "Daemon has been terminated successfully." ; exit 0' SIGTERM SIGINT
 	# Read IDs of windows and apply actions
