@@ -487,7 +487,7 @@ Options and values:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.6.22
+		echo "flux 1.6.23
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
@@ -919,18 +919,18 @@ while read -r window_id; do
 		# Skip cycle after refresh
 		continue
 	fi
-	# Run command on unfocus event for previous window if specified in 'unfocus' key in config file
-	if [[ -n "$previous_section" && -n "${config_key_unfocus_map["$previous_section"]}" && -z "$lazy" ]]; then
-		# Required to avoid running unfocus command when new event appears after previous matching one when '--hot' option is used along with '--lazy'
-		if [[ -z "$lazy_is_unset" ]]; then
-			print_verbose "Running command on unfocus event '${config_key_unfocus_map["$previous_section"]}' from section '$previous_section'."
-			# Pass variables to interact with them using custom commands in 'unfocus' key
-			export_flux_variables "$previous_window_id" "$previous_process_pid" "$previous_process_name" "$previous_process_executable" "$previous_process_owner" "$previous_process_command"
-			nohup setsid bash -c "${config_key_unfocus_map["$previous_section"]}" > /dev/null 2>&1 &
-			unset_flux_variables
-		else
-			unset lazy_is_unset
-		fi
+	# Check for previous section match, existence of command in 'unfocus' key, status of '--lazy' and signal about unsetting '--lazy'
+	if [[ -n "$previous_section" && -n "${config_key_unfocus_map["$previous_section"]}" && -z "$lazy" && -z "$lazy_is_unset" ]]; then
+		print_verbose "Running command on unfocus event '${config_key_unfocus_map["$previous_section"]}' from section '$previous_section'."
+		# Pass variables to interact with them using custom commands in 'unfocus' key
+		export_flux_variables "$previous_window_id" "$previous_process_pid" "$previous_process_name" "$previous_process_executable" "$previous_process_owner" "$previous_process_command"
+		# Execute command from 'unfocus' key
+		nohup setsid bash -c "${config_key_unfocus_map["$previous_section"]}" > /dev/null 2>&1 &
+		# Unset exported variables
+		unset_flux_variables
+	elif [[ -n "$lazy_is_unset" ]]; then # Check for existence of variable which signals about unsetting of '--lazy' option
+		# Unset variable which signals about unsetting of '--lazy' option, required to make 'unfocus' commands work after hot run (using '--hot')
+		unset lazy_is_unset
 	fi
 	# Extract process info using window ID if ID is not '0x0'
 	if [[ "$window_id" != '0x0' ]]; then
