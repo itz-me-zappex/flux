@@ -636,7 +636,7 @@ Options and values:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.7.1
+		echo "flux 1.7.2
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
@@ -958,7 +958,6 @@ else
 	else
 		echo > "$lock_file"
 	fi
-	unset lock_file
 	# Remove CPU and FPS limits of processes on exit
 	trap 'actions_on_sigterm ; print_info "Daemon has been terminated successfully." ; exit 0' SIGTERM SIGINT
 	# Read IDs of windows and apply actions
