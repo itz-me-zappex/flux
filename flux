@@ -184,8 +184,8 @@ cache_get_process_info(){
 	process_command="${cache_process_command_map["$passed_window_id"]}"
 }
 
-# Required to obtain process info using window ID
-extract_process_info(){
+# Required to get process info using window ID
+get_process_info(){
 	local temp_status_line \
 	local_column_count \
 	local_status_column \
@@ -220,7 +220,6 @@ extract_process_info(){
 				# Get process info using cache of parent window
 				passed_window_id="$local_matching_window_id" cache_get_process_info
 				print_verbose "Cache of parent window with ID $local_matching_window_id has been used to obtain info about window with ID $window_id and process '$process_name' with PID $process_pid."
-				unset local_matching_window_id
 			else
 				# Extract name of process
 				process_name="$(<"/proc/$process_pid/comm")"
@@ -617,8 +616,8 @@ while (( $# > 0 )); do
 				fi
 			fi
 		esac
-		# Extract process info and print it in a way to easy use it in config
-		if extract_process_info; then
+		# Get process info and print it in a way to easy use it in config
+		if get_process_info; then
 			echo "name = '"$process_name"'
 executable = '"$process_executable"'
 command = '"$process_command"'
@@ -1104,9 +1103,9 @@ else
 				# Unset variable which signals about unsetting of '--lazy' option, required to make 'unfocus' commands work after hot run (using '--hot')
 				unset lazy_is_unset
 			fi
-			# Extract process info using window ID if ID is not '0x0'
+			# Get process info using window ID if ID is not '0x0'
 			if [[ "$window_id" != '0x0' ]]; then
-				if ! extract_process_info; then
+				if ! get_process_info; then
 					print_warn "Unable to obtain PID of window with ID $window_id, getting process info skipped!"
 				fi
 			else
