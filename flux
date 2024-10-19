@@ -175,19 +175,26 @@ exec_on_event(){
 	print_verbose "Command '$passed_event_command' from section '$passed_section' has been executed on $passed_event event."
 }
 
+# Required to get process info from cache
+cache_get_process_info(){
+	process_pid="${cache_process_pid_map["$passed_window_id"]}"
+	process_name="${cache_process_name_map["$passed_window_id"]}"
+	process_executable="${cache_process_executable_map["$passed_window_id"]}"
+	process_owner="${cache_process_owner_map["$passed_window_id"]}"
+	process_command="${cache_process_command_map["$passed_window_id"]}"
+}
+
 # Required to obtain process info using window ID
 extract_process_info(){
 	local temp_status_line \
 	local_column_count \
-	local_status_column
+	local_status_column \
+	local_matching_window_id
 	# Check for existence of window info in cache and use it if exists
 	if [[ "${cache_event_type_map["$window_id"]}" == 'good' ]]; then
-		process_pid="${cache_process_pid_map["$window_id"]}"
-		process_name="${cache_process_name_map["$window_id"]}"
-		process_executable="${cache_process_executable_map["$window_id"]}"
-		process_owner="${cache_process_owner_map["$window_id"]}"
-		process_command="${cache_process_command_map["$window_id"]}"
-		print_verbose "Cache has been used to obtain info about process '$process_name' with PID $process_pid."
+		# Get process info from cache
+		passed_window_id="$window_id" cache_get_process_info
+		print_verbose "Cache has been used to obtain info about window with ID $window_id and process '$process_name' with PID $process_pid."
 	elif [[ -z "${cache_event_type_map["$window_id"]}" ]]; then # Extract process info if it is not cached
 		# Attempt to obtain output with PID
 		if ! process_pid="$(xprop -id "$window_id" _NET_WM_PID 2>/dev/null)" || [[ "$process_pid" == '_NET_WM_PID:  not found.' ]]; then
@@ -197,31 +204,49 @@ extract_process_info(){
 			# Extract PID from output
 			process_pid="${process_pid/*= /}" # Remove everything before including '= '
 		fi
-		# Extract info of process if that is not bad event
+		# Extract info about process if that is not bad event
 		if [[ "${cache_event_type_map["$window_id"]}" != 'bad' ]]; then
-			# Extract name of process
-			process_name="$(<"/proc/$process_pid/comm")"
-			# Extract executable path of process
-			process_executable="$(readlink "/proc/$process_pid/exe")"
-			# Extract UID of process
-			while read -r temp_status_line; do
-				if [[ "$temp_status_line" == 'Uid:'* ]]; then
-					local_column_count='0'
-					for local_status_column in $temp_status_line; do
-						if (( local_column_count == 3 )); then
-							process_owner="$local_status_column"
-						else
-							(( local_column_count++ ))
-						fi
-					done
+			# Attempt to find cache with info about the same process
+			for temp_cached_window_id in "${!cache_process_pid_map[@]}"; do
+				# Compare parent PID with PID of process
+				if [[ "${cache_process_pid_map[$temp_cached_window_id]}" == "$process_pid" ]]; then
+					# Remember window ID of matching process
+					local_matching_window_id="$temp_cached_window_id"
+					break
 				fi
-			done < "/proc/$process_pid/status"
-			unset temp_status_line
-			# I did not get how to do that using built-in bash options
-			# Extract command of process and replace '\0' (used as separator between options) with spaces
-			process_command="$(tr '\0' ' ' < "/proc/$process_pid/cmdline")"
-			# Remove last space because '\0' (which is replaced with space) is last symbol too
-			process_command="${process_command/%\ /}"
+			done
+			# Check for match of cached PID info to define a way how to obtain process info
+			if [[ -n "$local_matching_window_id" ]]; then
+				# Get process info using cache of parent window
+				passed_window_id="$local_matching_window_id" cache_get_process_info
+				print_verbose "Cache of parent window with ID $local_matching_window_id has been used to obtain info about window with ID $window_id and process '$process_name' with PID $process_pid."
+				unset local_matching_window_id
+			else
+				# Extract name of process
+				process_name="$(<"/proc/$process_pid/comm")"
+				# Extract executable path of process
+				process_executable="$(readlink "/proc/$process_pid/exe")"
+				# Extract UID of process
+				while read -r temp_status_line; do
+					if [[ "$temp_status_line" == 'Uid:'* ]]; then
+						local_column_count='0'
+						for local_status_column in $temp_status_line; do
+							if (( local_column_count == 3 )); then
+								process_owner="$local_status_column"
+							else
+								(( local_column_count++ ))
+							fi
+						done
+					fi
+				done < "/proc/$process_pid/status"
+				unset temp_status_line
+				# I did not get how to do that using built-in bash options
+				# Extract command of process and replace '\0' (used as separator between options) with spaces
+				process_command="$(tr '\0' ' ' < "/proc/$process_pid/cmdline")"
+				# Remove last space because '\0' (which is replaced with space) is last symbol too
+				process_command="${process_command/%\ /}"
+				print_verbose "Obtained from '/proc/$process_pid' info about window with ID $window_id and process '$process_name' with PID $process_pid has been cached."
+			fi
 			# Store info about window and process to cache
 			cache_event_type_map["$window_id"]='good'
 			cache_process_pid_map["$window_id"]="$process_pid"
@@ -229,7 +254,6 @@ extract_process_info(){
 			cache_process_executable_map["$window_id"]="$process_executable"
 			cache_process_owner_map["$window_id"]="$process_owner"
 			cache_process_command_map["$window_id"]="$process_command"
-			print_verbose "Obtained info about process '$process_name' with PID $process_pid has been cached."
 		else
 			return 1
 		fi
@@ -1042,7 +1066,7 @@ else
 					continue
 				elif [[ "${cache_event_type_map["$temp_terminated_window_id"]}" == 'good' ]]; then
 					# Unset data in cache related to terminated window
-					print_verbose "Cached info of process '${cache_process_name_map["$temp_terminated_window_id"]}' with PID ${cache_process_pid_map["$temp_terminated_window_id"]} has been removed as it has been terminated."
+					print_verbose "Cached info about window with ID $temp_terminated_window_id and process '${cache_process_name_map["$temp_terminated_window_id"]}' with PID ${cache_process_pid_map["$temp_terminated_window_id"]} has been removed as it has been terminated."
 					cache_mismatch_map["${cache_process_pid_map["$temp_terminated_window_id"]}"]=''
 					cache_section_map["${cache_process_pid_map["$temp_terminated_window_id"]}"]=''
 					cache_event_type_map["$temp_terminated_window_id"]=''
