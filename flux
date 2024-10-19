@@ -189,15 +189,16 @@ extract_process_info(){
 		process_command="${cache_process_command_map["$window_id"]}"
 		print_verbose "Cache has been used to obtain info about process '$process_name' with PID $process_pid."
 	elif [[ -z "${cache_event_type_map["$window_id"]}" ]]; then # Extract process info if it is not cached
-		# Extract PID of process
-		if ! process_pid="$(xprop -id "$window_id" _NET_WM_PID 2>/dev/null)"; then
+		# Attempt to obtain output with PID
+		if ! process_pid="$(xprop -id "$window_id" _NET_WM_PID 2>/dev/null)" || [[ "$process_pid" == '_NET_WM_PID:  not found.' ]]; then
 			cache_event_type_map["$window_id"]='bad'
-		elif [[ "$process_pid" == '_NET_WM_PID:  not found.' ]]; then
-			cache_event_type_map["$window_id"]='bad'
+			process_pid=''
+		else
+			# Extract PID from output
+			process_pid="${process_pid/*= /}" # Remove everything before including '= '
 		fi
 		# Extract info of process if that is not bad event
 		if [[ "${cache_event_type_map["$window_id"]}" != 'bad' ]]; then
-			process_pid="${process_pid/* = /}"
 			# Extract name of process
 			process_name="$(<"/proc/$process_pid/comm")"
 			# Extract executable path of process
@@ -229,11 +230,10 @@ extract_process_info(){
 			cache_process_owner_map["$window_id"]="$process_owner"
 			cache_process_command_map["$window_id"]="$process_command"
 			print_verbose "Obtained info about process '$process_name' with PID $process_pid has been cached."
-		else # In case that is bad event
-			process_pid=''
+		else
 			return 1
 		fi
-	else # In case that is bad event
+	else
 		return 1
 	fi
 }
@@ -259,23 +259,31 @@ mangohud_fps_set(){
 			if [[ "$temp_config_line" =~ ^fps_limit*=* ]]; then
 				# Set specified FPS limit
 				if [[ -n "$local_new_config_content" ]]; then
+					# Add 'fps_limit=<fps-limit>' to processed text if part of it has been processed
 					local_new_config_content="$local_new_config_content\nfps_limit=$local_fps_to_set"
 				else
+					# Add 'fps_limit=<fps-limit>' as first line in case no text has been processed
 					local_new_config_content="fps_limit=$local_fps_to_set"
 				fi
+				# Set mark which signals about successful setting of FPS limit
 				local_fps_limit_is_changed='1'
 			else
+				# Check for existence of processed text in config
 				if [[ -n "$local_new_config_content" ]]; then
+					# Add line to processed text from config if part of it has been processed
 					local_new_config_content="$local_new_config_content\n$temp_config_line"
 				else
+					# Add first line in case no text has been processed
 					local_new_config_content="$temp_config_line"
 				fi
 			fi
 		done <<< "$local_config_content"
-		# Add 'fps_limit' line to config if it does not exist, i.e. was not found and changed
+		# Check whether FPS limit has been set or not
 		if [[ -z "$local_fps_limit_is_changed" ]]; then
+			# Pass key with FPS limit if line does not exist in config
 			echo "fps_limit=$local_fps_to_set" >> "$local_config"
 		else
+			# Pass config content if FPS has been already changed
 			echo -e "$local_new_config_content" > "$local_config"
 		fi
 		# Return an error if something gone wrong
