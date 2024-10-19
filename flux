@@ -636,7 +636,7 @@ Options and values:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.7.2
+		echo "flux 1.7.3
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
@@ -984,7 +984,7 @@ else
 				if [[ "${cache_event_type_map["$temp_terminated_window_id"]}" == 'bad' ]]; then
 					# Skip window ID if that is bad event, otherwise bash will fail
 					continue
-				else
+				elif [[ "${cache_event_type_map["$temp_terminated_window_id"]}" == 'good' ]]; then
 					# Obtain PID of terminated process using cache, required to check and unset FPS limit
 					temp_terminated_process_pid="${cache_process_pid_map["$temp_terminated_window_id"]}"
 					# Do not do anything if window is not frozen
@@ -1032,7 +1032,7 @@ else
 					print_verbose "Cached info about bad window with ID $temp_terminated_window_id has been removed as it has been terminated."
 					cache_event_type_map["$temp_terminated_window_id"]=''
 					continue
-				else
+				elif [[ "${cache_event_type_map["$temp_terminated_window_id"]}" == 'good' ]]; then
 					# Unset data in cache related to terminated window
 					print_verbose "Cached info of process '${cache_process_name_map["$temp_terminated_window_id"]}' with PID ${cache_process_pid_map["$temp_terminated_window_id"]} has been removed as it has been terminated."
 					cache_mismatch_map["${cache_process_pid_map["$temp_terminated_window_id"]}"]=''
