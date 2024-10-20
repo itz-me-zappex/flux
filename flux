@@ -322,24 +322,35 @@ mangohud_fps_set(){
 
 # Apply CPU limit via 'cpulimit' tool on unfocus event, required to run it on background to avoid stopping a whole code if delay specified
 background_cpulimit(){
-	local local_cpulimit_pid local_sleep_pid
+	local local_cpulimit_pid \
+	local_sleep_pid
 	# Wait for delay if specified
 	if [[ "${config_key_delay_map["$previous_section"]}" != '0' ]]; then
 		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be CPU limited after ${config_key_delay_map["$previous_section"]} second(s) on unfocus event."
 		sleep "${config_key_delay_map["$previous_section"]}" &
 		# Remember PID of 'sleep' sent into background, required to print message about cancelling CPU limit and terminate 'sleep' process on SIGINT/SIGTERM signal
 		local_sleep_pid="$!"
-		trap 'print_info "Delayed for ${config_key_delay_map["$previous_section"]} second(s) CPU limiting of process '"'$previous_process_name'"' with PID $previous_process_pid has been cancelled." ; kill "$local_sleep_pid" > /dev/null 2>&1' SIGINT SIGTERM
+		# Terminate 'sleep' process quietly on daemon termination
+		trap 'kill "$local_sleep_pid" > /dev/null 2>&1' SIGINT SIGTERM
+		# Terminate 'sleep' process on focus event and print relevant message (SIGUSR1)
+		trap 'print_info "Delayed for ${config_key_delay_map["$previous_section"]} second(s) CPU limiting of process '"'$previous_process_name'"' with PID $previous_process_pid has been cancelled on focus event." ; kill "$local_sleep_pid" > /dev/null 2>&1 ; return 0' SIGUSR1
+		# Terminate 'sleep' process on termination of target process and print relevant message (SIGUSR2)
+		trap 'print_info "Delayed for ${config_key_delay_map["$previous_section"]} second(s) CPU limiting of process '"'$previous_process_name'"' with PID $previous_process_pid has been cancelled due to termination of process." ; kill "$local_sleep_pid" > /dev/null 2>&1 ; return 0' SIGUSR2
 		wait "$local_sleep_pid"
 	fi
 	# Apply CPU limit if process still exists, otherwise throw warning
 	if check_pid_existence "$previous_process_pid"; then
-		print_verbose "Process '$previous_process_name' with PID $previous_process_pid has been CPU limited to $(( ${config_key_cpu_limit_map["$previous_section"]} / cpu_threads ))% on unfocus event."
+		print_info "Process '$previous_process_name' with PID $previous_process_pid has been CPU limited to $(( ${config_key_cpu_limit_map["$previous_section"]} / cpu_threads ))% on unfocus event."
 		# Apply CPU limit
 		cpulimit --lazy --limit="${config_key_cpu_limit_map["$previous_section"]}" --pid="$previous_process_pid" > /dev/null 2>&1 &
 		# Remember PID of 'cpulimit' sent into background, required to print message about CPU unlimiting and terminate 'cpulimit' process on SIGINT/SIGTERM signal
 		local_cpulimit_pid="$!"
-		trap 'print_info "Process '"'$previous_process_name'"' with PID $previous_process_pid has been CPU unlimited on focus event." ; kill "$local_cpulimit_pid" > /dev/null 2>&1' SIGINT SIGTERM
+		# Terminate 'cpulimit' process quietly on daemon termination
+		trap 'kill "$local_cpulimit_pid" > /dev/null 2>&1' SIGINT SIGTERM
+		# Terminate 'cpulimit' process on focus event and print relevant message (SIGUSR1)
+		trap 'print_info "Process '"'$previous_process_name'"' with PID $previous_process_pid has been CPU unlimited on focus event." ; kill "$local_cpulimit_pid" > /dev/null 2>&1 ; return 0' SIGUSR1
+		# Terminate 'cpulimit' process on termination of target process and print relevant message (SIGUSR2)
+		trap 'print_info "Process '"'$previous_process_name'"' with PID $previous_process_pid has been CPU unlimited due to termination of process." ; kill "$local_cpulimit_pid" > /dev/null 2>&1 ; return 0' SIGUSR2
 		wait "$local_cpulimit_pid"
 	else
 		print_warn "Process '$previous_process_name' with PID $previous_process_pid has been terminated before applying CPU limit!"
@@ -436,7 +447,7 @@ unset_cpu_limit(){
 	local temp_cpulimit_bgprocess_pid \
 	temp_cpulimit_bgprocesses_pids_array
 	# Check CPU limit background process for existence
-	if ! kill "${cpulimit_bgprocess_pid_map["$passed_process_pid"]}" > /dev/null 2>&1; then
+	if ! kill "$passed_signal" "${cpulimit_bgprocess_pid_map["$passed_process_pid"]}" > /dev/null 2>&1; then
 		# Terminate background process
 		print_warn "Process '$passed_process_name' with PID $passed_process_pid cannot be CPU unlimited!"
 	fi
@@ -537,6 +548,10 @@ actions_on_sigterm(){
 	# Wait a bit to avoid delayed messages after termination
 	sleep 0.1
 }
+
+# Ignore user signals as they used in 'background_cpulimit' function to avoid next output ('X' - path to 'flux', 'Y' - line, 'Z' - PID of 'background_cpulimit'):
+# 'X: line Y: Z User defined signal 2   background_cpulimit'
+trap '' SIGUSR1 SIGUSR2
 
 # Prefixes for output
 error_prefix="[x]"
@@ -667,7 +682,7 @@ Options and values:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.7.4
+		echo "flux 1.7.5
 A daemon for X11 designed to automatically limit CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
@@ -1030,6 +1045,7 @@ else
 						# Unset CPU limit
 						passed_process_pid="${cache_process_pid_map["$temp_terminated_window_id"]}" \
 						passed_process_name="${cache_process_name_map["$temp_terminated_window_id"]}" \
+						passed_signal='-SIGUSR2' \
 						unset_cpu_limit
 					elif [[ -n "${cache_section_map["$temp_terminated_process_pid"]}" && -n "${is_fps_limited_section_map["${cache_section_map["$temp_terminated_process_pid"]}"]}" ]]; then # Do not do anything if window is not FPS limited
 						# Check if one of existing windows matches with same section, if yes, then FPS limit will not be removed
@@ -1240,6 +1256,7 @@ else
 					# Unset CPU limit
 					passed_process_pid="$process_pid" \
 					passed_process_name="$process_name" \
+					passed_signal='-SIGUSR1' \
 					unset_cpu_limit
 				elif [[ -n "$section" && -n "${is_fps_limited_section_map["$section"]}" ]]; then # Check for FPS limit existence
 					# Unset FPS limit
