@@ -336,7 +336,7 @@ background_cpulimit(){
 		# Terminate 'sleep' process on focus event and print relevant message (SIGUSR1)
 		trap 'print_info "Delayed for ${config_key_delay_map["$previous_section"]} second(s) CPU limiting of process '"'$previous_process_name'"' with PID $previous_process_pid has been cancelled on focus event." ; kill "$local_sleep_pid" > /dev/null 2>&1 ; return 0' SIGUSR1
 		# Terminate 'sleep' process on termination of target process and print relevant message (SIGUSR2)
-		trap 'print_info "Delayed for ${config_key_delay_map["$previous_section"]} second(s) CPU limiting of process '"'$previous_process_name'"' with PID $previous_process_pid has been cancelled due to termination of process." ; kill "$local_sleep_pid" > /dev/null 2>&1 ; return 0' SIGUSR2
+		trap 'print_info "Delayed for ${config_key_delay_map["$previous_section"]} second(s) CPU limiting of process '"'$previous_process_name'"' with PID $previous_process_pid has been cancelled due to window termination." ; kill "$local_sleep_pid" > /dev/null 2>&1 ; return 0' SIGUSR2
 		wait "$local_sleep_pid"
 	fi
 	# Apply CPU limit if process still exists, otherwise throw warning
@@ -351,7 +351,7 @@ background_cpulimit(){
 		# Terminate 'cpulimit' process on focus event and print relevant message (SIGUSR1)
 		trap 'print_info "Process '"'$previous_process_name'"' with PID $previous_process_pid has been CPU unlimited on focus event." ; kill "$local_cpulimit_pid" > /dev/null 2>&1 ; return 0' SIGUSR1
 		# Terminate 'cpulimit' process on termination of target process and print relevant message (SIGUSR2)
-		trap 'print_info "Process '"'$previous_process_name'"' with PID $previous_process_pid has been CPU unlimited due to termination of process." ; kill "$local_cpulimit_pid" > /dev/null 2>&1 ; return 0' SIGUSR2
+		trap 'print_info "Process '"'$previous_process_name'"' with PID $previous_process_pid has been CPU unlimited due to window termination." ; kill "$local_cpulimit_pid" > /dev/null 2>&1 ; return 0' SIGUSR2
 		wait "$local_cpulimit_pid"
 	else
 		print_warn "Process '$previous_process_name' with PID $previous_process_pid has been terminated before applying CPU limit!"
@@ -491,7 +491,7 @@ unset_fps_limit(){
 	fi
 	# Set FPS from 'fps-focus' key
 	if mangohud_fps_set "${config_key_mangohud_config_map["$passed_section"]}" "${config_key_fps_focus_map["$passed_section"]}"; then
-		print_info "Section '$passed_section' has been FPS unlimited on $passed_end_of_msg."
+		print_info "Section '$passed_section' has been FPS unlimited $passed_end_of_msg."
 	fi
 	# Forget that process(es) matching with current section have been FPS limited previously
 	for local_temp_fps_limited_pid in "${!fps_limited_section_map[@]}"; do
@@ -1038,7 +1038,7 @@ else
 						passed_process_pid="${cache_process_pid_map["$temp_terminated_window_id"]}" \
 						passed_section="${cache_section_map["$once_terminated_process_pid"]}" \
 						passed_process_name="${cache_process_name_map["$temp_terminated_window_id"]}" \
-						passed_end_of_msg='due to process termination' \
+						passed_end_of_msg='due to window termination' \
 						unfreeze_process
 					elif [[ -n "${is_cpu_limited_pid_map["${cache_process_pid_map["$temp_terminated_window_id"]}"]}" ]]; then # Do not do anything if window is not CPU limited
 						# Unset CPU limit
@@ -1063,7 +1063,7 @@ else
 						if [[ -z "$once_found" ]]; then
 							# Unset FPS limit
 							passed_section="${cache_section_map["$once_terminated_process_pid"]}" \
-							passed_end_of_msg='due to termination of matching process(es)' \
+							passed_end_of_msg='due to matching window(s) termination' \
 							unset_fps_limit
 						fi
 						unset once_found
