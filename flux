@@ -644,11 +644,11 @@ owner = "$process_owner"
 		echo "Usage: flux [option] <value>
 Options and values:
     -c, --config     <path-to-config>    Specify path to config file
-    -f, --focused                        Display template for config from focused window
+    -f, --focused                        Display info about focused window in usable for config file way
     -h, --help                           Display this help
     -H, --hot                            Apply actions to already unfocused windows before handling events
     -l, --lazy                           Avoid focus and unfocus commands on hot
-    -p, --pick                           Display template for config by picking window
+    -p, --pick                           Display info about picked window in usable for config file way
     -q, --quiet                          Display errors and warnings only
     -u, --usage                          Same as '--help'
     -v, --verbose                        Detailed output
