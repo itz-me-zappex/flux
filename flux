@@ -2,25 +2,25 @@
 
 # Print error (redirect to stderr)
 print_error(){
-	echo -e "(x) $*" >&2
+	echo -e "[e] $*" >&2
 }
 
 # Print warning (redirect to stderr)
 print_warn(){
-	echo -e "(!) $*" >&2
+	echo -e "[w] $*" >&2
 }
 
 # Print in verbose mode
 print_verbose(){
 	if [[ -n "$verbose" ]]; then
-		echo -e "(v) $*"
+		echo -e "[v] $*"
 	fi
 }
 
 # Do not print in quiet mode
 print_info(){
 	if [[ -z "$quiet" ]]; then
-		echo -e "(i) $*"
+		echo -e "[i] $*"
 	fi
 }
 
