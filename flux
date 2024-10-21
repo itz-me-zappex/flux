@@ -325,7 +325,7 @@ mangohud_fps_set(){
 background_cpulimit(){
 	local local_cpulimit_pid \
 	local_sleep_pid
-	# Wait for delay if specified
+	# Wait for N seconds if delay is specified
 	if [[ "${config_key_delay_map["$previous_section"]}" != '0' ]]; then
 		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be CPU limited after ${config_key_delay_map["$previous_section"]} second(s) on unfocus event."
 		sleep "${config_key_delay_map["$previous_section"]}" &
@@ -360,13 +360,14 @@ background_cpulimit(){
 
 # Freeze process on unfocus event, required to run it on background to avoid stopping a whole code if delay specified
 background_freeze_process(){
-	# Freeze process with delay if specified, otherwise freeze process immediately
+	# Wait for N seconds if delay is specified
 	if [[ "${config_key_delay_map["$previous_section"]}" != '0' ]]; then
 		print_verbose "Process '$previous_process_name' with PID $previous_process_pid will be frozen after ${config_key_delay_map["$previous_section"]} second(s) on unfocus event."
 		sleep "${config_key_delay_map["$previous_section"]}"
 	fi
-	# Freeze process if it still exists, otherwise throw warning
+	# Check for process existence before freezing
 	if check_pid_existence "$previous_process_pid"; then
+		# Attempt to send 'SIGSTOP' signal to freeze process completely
 		if ! kill -STOP "$previous_process_pid" > /dev/null 2>&1; then
 			print_warn "Process '$previous_process_name' with PID $previous_process_pid cannot be frozen on unfocus event!"
 		else
@@ -379,13 +380,14 @@ background_freeze_process(){
 
 # Set specified FPS on unfocus, required to run it on background to avoid stopping a whole code if delay specified
 background_mangohud_fps_set(){
-	# Wait in case delay is specified
+	# Wait for N seconds if delay is specified
 	if [[ "${config_key_delay_map["$previous_section"]}" != '0' ]]; then
 		print_verbose "Section '$previous_section' will be FPS limited after ${config_key_delay_map["$previous_section"]} second(s) on unfocus event."
 		sleep "${config_key_delay_map["$previous_section"]}"
 	fi
-	# Apply FPS limit if target process still exists, otherwise throw warning
+	# Check for process existence before set FPS limit
 	if check_pid_existence "$previous_process_pid"; then
+		# Attempt to change 'fps_limit' in specified MangoHud config file
 		if mangohud_fps_set "${config_key_mangohud_config_map["$previous_section"]}" "${config_key_fps_unfocus_map["$previous_section"]}"; then
 			print_info "Section '$previous_section' has been FPS limited to ${config_key_fps_unfocus_map["$previous_section"]} FPS on unfocus event."
 		fi
@@ -396,7 +398,9 @@ background_mangohud_fps_set(){
 
 # Requred to check for process existence
 check_pid_existence(){
-	if [[ -d "/proc/$1" ]]; then
+	local local_pid="$1"
+	# Check for process existence by checking PID directory in '/proc'
+	if [[ -d "/proc/$local_pid" ]]; then
 		return 0
 	else
 		return 1
@@ -409,7 +413,7 @@ unfreeze_process(){
 	local_once_frozen_processes_pids_array
 	# Check for existence of freeze background process
 	if check_pid_existence "${freeze_bgprocess_pid_map["$passed_process_pid"]}"; then
-		# Terminate background process
+		# Attempt to terminate background process
 		if ! kill "${freeze_bgprocess_pid_map["$passed_process_pid"]}" > /dev/null 2>&1; then
 			# Avoid printing this message if delay is not specified
 			if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
@@ -422,7 +426,7 @@ unfreeze_process(){
 			fi
 		fi
 	else
-		# Unfreeze process
+		# Attempt to unfreeze target process
 		if ! kill -CONT "$passed_process_pid" > /dev/null 2>&1; then
 			print_warn "Unable to unfreeze process '$passed_process_name' with PID $passed_process_pid!"
 		else
@@ -447,9 +451,8 @@ unfreeze_process(){
 unset_cpu_limit(){
 	local local_temp_cpulimit_bgprocess_pid \
 	local_once_cpulimit_bgprocesses_pids_array
-	# Check CPU limit background process for existence
+	# Attempt to terminate CPU limit background process
 	if ! kill "$passed_signal" "${cpulimit_bgprocess_pid_map["$passed_process_pid"]}" > /dev/null 2>&1; then
-		# Terminate background process
 		print_warn "Process '$passed_process_name' with PID $passed_process_pid cannot be CPU unlimited!"
 	fi
 	# Remove PID of 'cpulimit' background process from array
@@ -517,10 +520,12 @@ actions_on_sigterm(){
 	local_temp_fps_limited_section
 	# Unfreeze processes
 	for local_temp_frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
-		# Terminate background process if exists
+		# Check for existence of either delayed freezing background process or target process
 		if check_pid_existence "${freeze_bgprocess_pid_map["$local_temp_frozen_process_pid"]}"; then
+			# Terminate background process if exists
 			kill "${freeze_bgprocess_pid_map["$local_temp_frozen_process_pid"]}" > /dev/null 2>&1
-		elif check_pid_existence "$local_temp_frozen_process_pid"; then # Unfreeze process
+		elif check_pid_existence "$local_temp_frozen_process_pid"; then
+			# Unfreeze process if exists
 			kill -CONT "$local_temp_frozen_process_pid" > /dev/null 2>&1
 		fi
 	done
@@ -1116,6 +1121,7 @@ else
 			fi
 			# Get process info using window ID if ID is not '0x0'
 			if [[ "$window_id" != '0x0' ]]; then
+				# Attempt to obtain info about process using window ID
 				if ! get_process_info; then
 					print_warn "Unable to obtain PID of window with ID $window_id, getting process info skipped!"
 				fi
