@@ -549,10 +549,6 @@ actions_on_sigterm(){
 	sleep 0.1
 }
 
-# Ignore user signals as they used in 'background_cpulimit' function to avoid next output ('X' - path to 'flux', 'Y' - line, 'Z' - PID of 'background_cpulimit'):
-# 'X: line Y: Z User defined signal 2   background_cpulimit'
-trap '' SIGUSR1 SIGUSR2
-
 # Prefixes for output
 error_prefix="[x]"
 info_prefix="[i]"
@@ -1006,6 +1002,9 @@ else
 	fi
 	# Remove CPU and FPS limits of processes on exit
 	trap 'actions_on_sigterm ; print_info "Daemon has been terminated successfully." ; exit 0' SIGTERM SIGINT
+	# Ignore user signals as they used in 'background_cpulimit' function to avoid next output ('X' - path to 'flux', 'Y' - line, 'Z' - PID of 'background_cpulimit'):
+	# X: line Y: Z User defined signal 2   background_cpulimit
+	trap '' SIGUSR1 SIGUSR2
 	# Read IDs of windows and apply actions
 	while read -r event; do
 		# Exit with an error in case 'exit' event appears
