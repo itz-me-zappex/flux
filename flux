@@ -75,7 +75,7 @@ xprop_event_reader(){
 			local_stacking_windows_id="${local_stacking_windows_id//\,/}" # Remove commas
 		else
 			# Print event for safe exit if cannot obtain list of stacking windows
-			print_error "Unable to get list of stacking windows!"
+			print_warn "Unable to get list of stacking windows!"
 			echo 'exit'
 		fi
 		# Extract ID of focused window
@@ -84,7 +84,7 @@ xprop_event_reader(){
 			local_focused_window_id="${local_focused_window_id/* \# /}" # Remove everything before including '#'
 		else
 			# Print event for safe exit if cannot obtain ID of focused window
-			print_error "Unable to get ID of focused window!"
+			print_warn "Unable to get ID of focused window!"
 			echo 'exit'
 		fi
 		# Print IDs of windows, but skip currently focused window as it should appear as first event when 'xprop' starts
@@ -151,7 +151,7 @@ xprop_event_reader(){
 	done < <(xprop -root -spy _NET_ACTIVE_WINDOW _NET_CLIENT_LIST_STACKING 2>&1)
 	unset local_temp_xprop_event
 	# Print event for safe exit if 'xprop' has been terminated
-	print_error "Process 'xprop' required to read X11 events has been terminated!"
+	print_warn "Process 'xprop' required to read X11 events has been terminated!"
 	echo 'exit'
 }
 
