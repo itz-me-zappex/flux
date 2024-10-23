@@ -547,12 +547,12 @@ actions_on_sigterm(){
 		mangohud_fps_set "${config_key_mangohud_config_map["$local_temp_fps_limited_section"]}" "${config_key_fps_focus_map["$local_temp_fps_limited_section"]}" > /dev/null 2>&1
 	done
 	unset local_temp_fps_limited_section
-	# Remove lock file which prevents multiple daemon instance from running
-	if [[ -f "$lock_file" ]]; then
-		rm "$lock_file"
-	fi
 	# Wait a bit to avoid delayed messages after termination
 	sleep 0.1
+	# Remove lock file which prevents multiple daemon instance from running
+	if [[ -f "$lock_file" ]] && ! rm "$lock_file" > /dev/null 2>&1; then
+		print_warn "Unable to remove lock file '$lock_file' which prevents from running multiple instances!"
+	fi
 }
 
 # Additional text for errors related to option parsing
@@ -994,11 +994,14 @@ if ! x11_session_check; then
 else
 	# Check for another instance and exit with an error if it exists
 	lock_file='/tmp/flux-lock'
-	if [[ -f "$lock_file" ]]; then
+	if [[ -f "$lock_file" ]] && check_pid_existence "$(<"$lock_file")"; then
 		print_error "Multiple instances are not allowed, make sure that daemon is not running before start, if you are really sure, then remove '$lock_file' file."
 		exit 1
 	else
-		echo > "$lock_file"
+		if ! echo "$$" > "$lock_file"; then
+			print_error "Unable to create lock file '$lock_file' to prevent multiple instances!"
+			exit 1
+		fi
 	fi
 	# Remove CPU and FPS limits of processes on exit
 	trap 'actions_on_sigterm ; print_info "Daemon has been terminated successfully." ; exit 0' SIGTERM SIGINT
