@@ -137,9 +137,9 @@ sudo dpkg -i flux-v${fluxver}.deb ; sudo apt install -f # install a package
 
 ## Usage
 ```
-Usage: flux [option] 
+Usage: flux [option] <value>
 Options and values:
-    -c, --config         Specify path to config file
+    -c, --config     <path-to-config>    Specify path to config file
     -f, --focused                        Display info about focused window in usable for config file way
     -h, --help                           Display this help
     -H, --hot                            Apply actions to already unfocused windows before handling events
@@ -192,6 +192,8 @@ As INI is not standartized, I should mention all supported features here.
   - Anything else what unmentioned above.
 
 ### Configuration example
+Tip: Use `--focus` or `--pick` option to obtain info about process in usable for configuration way from focused window or by picking it respectively.
+
 #### Long examples
 ```ini
 ; Example using freezing as that is single player game
@@ -216,7 +218,7 @@ fps-focus = 60 ; I have 60 FPS lock, so I want restore it on focus event
 focus = killall picom
 unfocus = picom
 
-; Example using CPU limit to show this example, as game has connection to network, I do not want to freeze it completely in cases like downloading music or saving data on background
+; Example using CPU limit as game does not consume GPU resources if minimized but still uses CPU and requires network connection to download levels and music
 [Geometry Dash]
 name = GeometryDash.ex
 executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wine64-preloader
@@ -229,7 +231,7 @@ unfocus = picom
 
 #### Short examples
 ```ini
-; Example using freezing with delay as that is single player game
+; Example using freezing as that is single player game
 [The Witcher 3: Wild Hunt]
 name = witcher3.exe
 cpu-limit = 0%
@@ -241,7 +243,7 @@ mangohud-config = /home/zappex/.config/MangoHud/wine-ForzaHorizon4.conf
 fps-unfocus = 5 ; FPS to set on unfocus event
 fps-focus = 60 ; I have 60 FPS lock, so I want restore it on focus event
 
-; Example using CPU limit to show this example, as game has connection to network, I do not want to freeze it completely in cases like downloading music or saving data on background
+; Example using CPU limit as game does not consume GPU resources if minimized but still uses CPU and requires network connection to download levels and music
 [Geometry Dash]
 name = GeometryDash.ex
 cpu-limit = 2%
@@ -259,7 +261,7 @@ Flux does not support environment variables, but passes them to commands in `foc
 | `FLUX_PROCESS_OWNER` | UID of process |
 | `FLUX_PROCESS_COMMAND` | Command of process |
 
-Daemon passes absolutely same values for both `focus` and `unfocus` keys.
+Daemon passes absolutely same values for both `focus` and `unfocus` commands.
 
 ## Tips and tricks
 ### Keybinding to obtain template from focused window for config
