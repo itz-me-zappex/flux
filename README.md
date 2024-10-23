@@ -40,7 +40,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
   - [Why is code so complicated?](#why-is-code-so-complicated)
   - [Gamescope which allows limit FPS on unfocus exists, Wayland becomes more popular. Are you not late by any chance?](#gamescope-which-allows-limit-fps-on-unfocus-exists-wayland-becomes-more-popular-are-you-not-late-by-any-chance)
   - [What about Wayland support?](#what-about-wayland-support)
-  - [Why did you write it on Bash?](#why-did-you-write-it-on-bash)
+  - [Why did you write it in Bash?](#why-did-you-write-it-in-bash)
 
 ## Dependencies
 ### Arch Linux and dereatives
@@ -179,13 +179,13 @@ Available keys and description:
 
 ### Limitations
 As INI is not standartized, I should mention all supported features here.
-- Supported:
+- Supported
   - Spaces in section names.
   - Single and double quoted strings.
   - Commented lines and inline comments using `;` and/or `#` symbols.
   - Сase insensitive name of keys.
   - Insensetivity to spaces before and after `=` symbol.
-- Unsupported:
+- Unsupported
   - Regular expressions.
   - Inline comment on lines with section name.
   - Line continuation using `\` symbol.
@@ -319,5 +319,5 @@ Now you can easily grab templates from windows to use them in config by pasting 
 ### What about Wayland support?
 - That is impossible, there is no any unified way to read window focus events and extract PIDs from windows on Wayland.
 
-### Why did you write it on Bash?
+### Why did you write it in Bash?
 - That is (scripting) language I know pretty good, despite a fact that Bash as all interpretators works slower than compilable languages, it still fits my needs almost perfectly.
