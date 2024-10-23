@@ -176,7 +176,7 @@ exec_on_event(){
 	print_verbose "Command '$passed_event_command' from section '$passed_section' has been executed on $passed_event event."
 }
 
-# Required to get process info from cache
+# Required to get process info from cache in 'get_process_info' function
 cache_get_process_info(){
 	process_pid="${cache_process_pid_map["$passed_window_id"]}"
 	process_name="${cache_process_name_map["$passed_window_id"]}"
@@ -549,9 +549,9 @@ actions_on_sigterm(){
 	unset local_temp_fps_limited_section
 	# Wait a bit to avoid delayed messages after termination
 	sleep 0.1
-	# Remove lock file which prevents multiple daemon instance from running
+	# Remove lock file which prevents multiple instances of daemon from running
 	if [[ -f "$lock_file" ]] && ! rm "$lock_file" > /dev/null 2>&1; then
-		print_warn "Unable to remove lock file '$lock_file' which prevents from running multiple instances!"
+		print_warn "Unable to remove lock file '$lock_file' which prevents multiple instances from running!"
 	fi
 }
 
@@ -992,14 +992,15 @@ if ! x11_session_check; then
 	print_error "Unable to start daemon, invalid X11 session."
 	exit 1
 else
-	# Check for another instance and exit with an error if it exists
+	# Check for lock file and existence of daemon instance
 	lock_file='/tmp/flux-lock'
 	if [[ -f "$lock_file" ]] && check_pid_existence "$(<"$lock_file")"; then
 		print_error "Multiple instances are not allowed, make sure that daemon is not running before start, if you are really sure, then remove '$lock_file' file."
 		exit 1
 	else
+		# Store PID to lock file to check its existence on next launch (if lock file exists, e.g. after crash or SIGKILL)
 		if ! echo "$$" > "$lock_file"; then
-			print_error "Unable to create lock file '$lock_file' to prevent multiple instances!"
+			print_error "Unable to create lock file '$lock_file' required to prevent multiple instances!"
 			exit 1
 		fi
 	fi
