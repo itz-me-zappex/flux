@@ -1,23 +1,23 @@
 #!/usr/bin/bash
 
-# Print error (redirect to stderr)
+# Required to print errors (redirect to stderr)
 print_error(){
 	echo -e "[e] $*" >&2
 }
 
-# Print warning (redirect to stderr)
+# Required to print warnings (redirect to stderr)
 print_warn(){
 	echo -e "[w] $*" >&2
 }
 
-# Print in verbose mode
+# Required to print messages in verbose mode
 print_verbose(){
 	if [[ -n "$verbose" ]]; then
 		echo -e "[v] $*"
 	fi
 }
 
-# Do not print in quiet mode
+# Required to print messages if quiet mode is not specified
 print_info(){
 	if [[ -z "$quiet" ]]; then
 		echo -e "[i] $*"
@@ -34,19 +34,12 @@ option_repeat_check(){
 
 # Required to exit with an error if that is not a X11 session
 x11_session_check(){
-	local local_once_fail
-	# Check for $XDG_SESSION_TYPE and $DISPLAY environment variables
+	# Fail if $DISPLAY does not match with `:[number]` and `:[number].[number]`
+	# Or if $XDG_SESSION_TYPE is not equal to 'x11' (e.g. 'tty', 'wayland' etc.)
 	if [[ ! "$DISPLAY" =~ ^\:[0-9]+(\.[0-9]+)?$ || "$XDG_SESSION_TYPE" != 'x11' ]]; then
-		# Fail if $DISPLAY does not match with `:<number>` and `:<number>.<number>`
-		# Or if $XDG_SESSION_TYPE is not equal to 'x11' (e.g. 'tty', 'wayland' etc.)
-		local_once_fail='1'
+		return 1
 	elif ! xprop -root > /dev/null 2>&1; then
 		# Fail if something is wrong with X11 session
-		local_once_fail='1'
-	fi
-	# Check for error
-	if [[ -n "$local_once_fail" ]]; then
-		# Return bad exit code
 		return 1
 	fi
 }
@@ -192,7 +185,7 @@ get_process_info(){
 	local_status_column \
 	local_matching_window_id \
 	local_temp_cached_window_id
-	# Check for existence of window info in cache and use it if exists
+	# Use cache of window info if exists
 	if [[ "${cache_event_type_map["$window_id"]}" == 'good' ]]; then
 		# Get process info from cache
 		passed_window_id="$window_id" cache_get_process_info
@@ -269,49 +262,53 @@ mangohud_fps_set(){
 	local_new_config_content \
 	local_config="$1" \
 	local_fps_to_set="$2" \
-	local_fps_limit_is_changed
+	local_fps_limit_is_changed \
+	local_temp_column \
+	local_temp_line_buffer \
+	local_once_ignore_numbers
 	# Check if config file exists before continue in case it has been removed
 	if [[ -f "$local_config" ]]; then
-		# Return an error if file is not readable
-		if ! local_config_content="$(<"$local_config")"; then
+		# Attempt to read MangoHud config file
+		if check_rw "$local_config"; then
+			local_config_content="$(<"$local_config")"
+		else
 			print_warn "Unable to read MangoHud config file '$local_config'!"
 			return 1
 		fi
 		# Replace 'fps_limit' value in config if exists
 		while read -r local_temp_config_line || [[ -n "$local_temp_config_line" ]]; do
-			# Find 'fps_limit' line
-			if [[ "$local_temp_config_line" =~ ^fps_limit*=* ]]; then
-				# Set specified FPS limit
-				if [[ -n "$local_new_config_content" ]]; then
-					# Add 'fps_limit=<fps-limit>' to processed text if part of it has been processed
-					local_new_config_content="$local_new_config_content\nfps_limit=$local_fps_to_set"
-				else
-					# Add 'fps_limit=<fps-limit>' as first line in case no text has been processed
-					local_new_config_content="fps_limit=$local_fps_to_set"
-				fi
+			# Find 'fps_limit' line, regexp means 'fps_limit[space(s)?]=[space(s)?][integer][anything else]'
+			if [[ "$local_temp_config_line" =~ ^fps_limit[[:space:]]*=[[:space:]]*[0-9]+* ]]; then
+				# Find and replace FPS limit value in line by splitting it to columns, shell parameter expansion replaces spaces with regexp to make it easier to restore them after changing value
+				for local_temp_column in ${local_temp_config_line//' '/' [[:space:]] '}; do
+					# Define type of column, regexp means any integer
+					if [[ "$local_temp_column" =~ ^[0-9]+$ && -z "$local_once_ignore_numbers" ]]; then
+						local_temp_line_buffer+="$local_fps_to_set"
+						local_once_ignore_numbers='1'
+					else
+						local_temp_line_buffer+="$local_temp_column"
+					fi
+				done
+				# Set specified FPS limit, shell parameter expansion replaces regexp with regular spaces
+				local_new_config_content+="${local_temp_line_buffer//'[[:space:]]'/' '}\n"
 				# Set mark which signals about successful setting of FPS limit
 				local_fps_limit_is_changed='1'
 			else
-				# Check for existence of processed text in config
-				if [[ -n "$local_new_config_content" ]]; then
-					# Add line to processed text from config if part of it has been processed
-					local_new_config_content="$local_new_config_content\n$local_temp_config_line"
-				else
-					# Add first line in case no text has been processed
-					local_new_config_content="$local_temp_config_line"
-				fi
+				# Add line to processed text
+				local_new_config_content+="$local_temp_config_line\n"
 			fi
 		done <<< "$local_config_content"
-		# Check whether FPS limit has been set or not
-		if [[ -z "$local_fps_limit_is_changed" ]]; then
-			# Pass key with FPS limit if line does not exist in config
-			echo "fps_limit=$local_fps_to_set" >> "$local_config"
+		# Pass key with FPS limit if line does not exist in config
+		if check_rw "$local_config"; then
+			# Check whether FPS limit has been set or not
+			if [[ -z "$local_fps_limit_is_changed" ]]; then
+				# Pass key with FPS limit if line does not exist in config
+				echo "fps_limit = $local_fps_to_set" >> "$local_config"
+			else
+				# Pass config content if FPS has been already changed
+				echo -e "$local_new_config_content" > "$local_config"
+			fi
 		else
-			# Pass config content if FPS has been already changed
-			echo -e "$local_new_config_content" > "$local_config"
-		fi
-		# Return an error if something gone wrong
-		if (( $? > 0 )); then
 			print_warn "Unable to modify MangoHud config file '$local_config'!"
 			return 1
 		fi
@@ -401,6 +398,28 @@ check_pid_existence(){
 	local local_pid="$1"
 	# Check for process existence by checking PID directory in '/proc'
 	if [[ -d "/proc/$local_pid" ]]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+# Required to check read-write access on file
+check_rw(){
+	local local_file="$1"
+	# Check for read-write access
+	if [[ -r "$local_file" && -w "$local_file" ]]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+# Required to check read-only access on file
+check_ro(){
+	local local_file="$1"
+	# Check for read-only access
+	if [[ -r "$local_file" ]]; then
 		return 0
 	else
 		return 1
@@ -556,19 +575,19 @@ actions_on_sigterm(){
 }
 
 # Additional text for errors related to option parsing
-advice_on_option_error="\n$info_prefix Try 'flux --help' for more information."
+advice_on_option_error="\n[i] Try 'flux --help' for more information."
 
 # Option parsing
 while (( $# > 0 )); do
 	case "$1" in
 	--config | -c | --config=* )
-		# Remember that option was passed in case if path was not specified
+		# Remember that option is passed in case path is not specified
 		option_repeat_check config_is_passed --config
 		config_is_passed='1'
 		# Define option type (short, long or long+value) and remember specified path
 		case "$1" in
 		--config | -c )
-			# Remember config path only if that is not an another option
+			# Remember config path only if that is not an another option, regexp means long or short option
 			if [[ -n "$2" && ! "$2" =~ ^(--.*|-.*)$ ]]; then
 				config="$2"
 				shift 2
@@ -604,9 +623,8 @@ while (( $# > 0 )); do
 			fi
 		;;
 		--pick | -p )
-			# Check for failure related to X server check
+			# Exit with an error if something wrong with X server
 			if [[ -n "$once_fail" ]]; then
-				# Exit with an error if something wrong with X server
 				print_error "Unable to call window picker, invalid X11 session."
 				exit 1
 			else
@@ -643,16 +661,16 @@ owner = "$process_owner"
 	--help | -h | --usage | -u )
 		echo "Usage: flux [option] <value>
 Options and values:
-    -c, --config     <path-to-config>    Specify path to config file
-    -f, --focused                        Display info about focused window in usable for config file way
-    -h, --help                           Display this help
-    -H, --hot                            Apply actions to already unfocused windows before handling events
-    -l, --lazy                           Avoid focus and unfocus commands on hot
-    -p, --pick                           Display info about picked window in usable for config file way
-    -q, --quiet                          Display errors and warnings only
-    -u, --usage                          Same as '--help'
-    -v, --verbose                        Detailed output
-    -V, --version                        Display release information
+    -c, --config     /path/to/config    Specify path to config file
+    -f, --focused                       Display info about focused window in usable for config file way
+    -h, --help                          Display this help
+    -H, --hot                           Apply actions to already unfocused windows before handling events
+    -l, --lazy                          Avoid focus and unfocus commands on hot
+    -p, --pick                          Display info about picked window in usable for config file way
+    -q, --quiet                         Display errors and warnings only
+    -u, --usage                         Same as '--help'
+    -v, --verbose                       Detailed output
+    -V, --version                       Display release information
 "
 		exit 0
 	;;
@@ -678,7 +696,7 @@ Options and values:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.7.7
+		echo "flux 1.7.8
 A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
@@ -692,19 +710,15 @@ There is NO WARRANTY, to the extent permitted by law.
 		# First regexp means 2+ symbols after hyphen (combined short options)
 		# Second regexp avoids long options
 		if [[ "$1" =~ ^-.{2,}$ && ! "$1" =~ ^--.* ]]; then
-			# Split combined option and add result to array
-			for (( i = 0; i < ${#1} ; i++ )); do
-				# Skip double hyphen which appears because of splitting option and adding another one
-				# Required to pass '--' to 'set' command explicitly
-				if [[ "-${1:i:1}" != '--' ]]; then
-					options+=("-${1:i:1}")
-				fi
+			# Split combined option and add result to array, also skip first symbol as that is hypen
+			for (( i = 1; i < ${#1} ; i++ )); do
+				once_options_array+=("-${1:i:1}")
 			done
 			# Forget current option
 			shift 1
 			# Set options obtained after splitting
-			set -- "${options[@]}" "$@"
-			unset options i
+			set -- "${once_options_array[@]}" "$@"
+			unset once_options_array i
 		else
 			print_error "Unknown option '$1'!$advice_on_option_error"
 			exit 1
@@ -720,7 +734,7 @@ fi
 
 # Exit with an error if '--lazy' option is specified without '--hot'
 if [[ -n "$lazy" && -z "$hot" ]]; then
-	print_error "Do not use '--lazy' option without '--hot'!"
+	print_error "Do not use '--lazy' option without '--hot'!$advice_on_option_error"
 	exit 1
 fi
 
@@ -738,7 +752,7 @@ if [[ -z "$config" ]]; then
 		XDG_CONFIG_HOME="$HOME/.config"
 	fi
 	# Find a config
-	for temp_config in '/etc/flux.ini' "$XDG_CONFIG_HOME/flux.ini" "$HOME/.config/flux.ini"; do
+	for temp_config in "$XDG_CONFIG_HOME/flux.ini" "$HOME/.config/flux.ini" '/etc/flux.ini'; do
 		if [[ -f "$temp_config" ]]; then
 			config="$temp_config"
 			break
@@ -751,8 +765,11 @@ fi
 if [[ -z "$config" ]]; then
 	print_error "Config file is not found!$advice_on_option_error"
 	exit 1
-elif [[ ! -f "$config" ]]; then
+elif [[ ! -f "$config" ]]; then # Exit with an error if config file does not exist
 	print_error "Config file '$config' does not exist!"
+	exit 1
+elif ! check_ro "$config"; then # Exit with an error if config file is not readable
+	print_error "Config file '$config' is not accessible for reading!"
 	exit 1
 fi
 
@@ -781,16 +798,15 @@ config_key_fps_focus_map
 
 # Parse INI config
 while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
-	# Check for comments and content on current line
+	# Skip cycle if line is commented or blank, regexp means comments which beginning from ';' or '#' symbols
 	if [[ "$temp_config_line" =~ ^(\;|\#) || -z "$temp_config_line" ]]; then
-		# Skip if line is commented or blank
 		continue
 	else
-		# Exit with an error if first line is not a section, otherwise remember section name
+		# Exit with an error if first line is not a section, otherwise remember section name, regexp means any symbols in square brackes
 		if [[ ! "$temp_config_line" =~ ^\[.*\]$ && -z "$once_section" ]]; then
 			print_error "Initial section is not found in config '$config'!"
 			exit 1
-		elif [[ "$temp_config_line" =~ ^\[.*\]$ ]]; then
+		elif [[ "$temp_config_line" =~ ^\[.*\]$ ]]; then # Regexp means any symbols in square brackes
 			# Exit with an error if section repeated
 			if [[ -n "${sections_array[*]}" ]]; then
 				for temp_section in "${sections_array[@]}"; do
@@ -809,30 +825,31 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 			# Forward to next line
 			continue
 		fi
-		# Exit with an error if type of line cannot be defined
-		if [[ "${temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|focus|unfocus|command|mangohud-config|fps-unfocus|fps-focus)(\ )?=(\ )?.* ]]; then
-			# Extract value from key by removing key name and equal symbol
-			if [[ "$temp_config_line" == *'= '* ]]; then
-				once_config_value="${temp_config_line/*= /}" # <-
-			elif [[ "$temp_config_line" == *'='* ]]; then
-				once_config_value="${temp_config_line/*=/}" # <-
-			fi
-			# Remove comments from value
+		# Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
+		if [[ "${temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|focus|unfocus|command|mangohud-config|fps-unfocus|fps-focus)[[:space:]]*=[[:space:]]** ]]; then
+			# Remove key name and equal symbol
+			once_config_value="${temp_config_line/*=/}"
+			# Remove comments from value, 1st regexp means comments after '#' or ';' symbols, 2nd - single or double quoted strings
 			if [[ "$once_config_value" =~ \ (\#|\;) && ! "$once_config_value" =~ ^(\".*\"|\'.*\')$ ]]; then
+				# Regexp means comment after '#' symbol
 				if [[ "$once_config_value" =~ \# ]]; then
 					once_config_value="${once_config_value/ \#*/}"
 				else
 					once_config_value="${once_config_value/ \;*/}"
 				fi
 			fi
-			# Remove single/double quotes
+			# Remove all spaces before and after string, internal shell parameter expansion required to get spaces supposed to be removed
+			once_config_value="${once_config_value#"${once_config_value%%[![:space:]]*}"}" # Remove spaces in beginning for string
+			once_config_value="${once_config_value%"${once_config_value##*[![:space:]]}"}" # Remove spaces in end of string
+			# Remove single or double quotes from strings, that is what regexp means
 			if [[ "$once_config_value" =~ ^(\".*\"|\'.*\')$ ]]; then
+				# Regexp means double quoted string
 				if [[ "$once_config_value" =~ ^\".*\"$ ]]; then
-					once_config_value="${once_config_value/\"/}"
-					once_config_value="${once_config_value/%\"/}"
+					once_config_value="${once_config_value/\"/}" # Remove first double quote
+					once_config_value="${once_config_value/%\"/}" # And last one
 				else
-					once_config_value="${once_config_value/\'/}"
-					once_config_value="${once_config_value/%\'/}"
+					once_config_value="${once_config_value/\'/}" # Remove first single quote
+					once_config_value="${once_config_value/%\'/}" # And last one
 				fi
 			fi
 			# Associate value with section
@@ -844,7 +861,7 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 				config_key_executable_map["$once_section"]="$once_config_value"
 			;;
 			owner* )
-				# Exit with an error if UID is not numeric
+				# Exit with an error if UID is not numeric, regexp means any number
 				if [[ "$once_config_value" =~ ^[0-9]+$ ]]; then
 					config_key_owner_map["$once_section"]="$once_config_value"
 				else
@@ -853,8 +870,9 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 				fi
 			;;
 			cpu-limit* )
-				# Exit with an error if CPU limit is specified incorrectly
+				# Exit with an error if CPU limit is specified incorrectly, 1st regexp - any number with optional '%' symbol, 2nd - '-1' or '-1%'
 				if [[ "$once_config_value" =~ ^[0-9]+(\%)?$ || "$once_config_value" =~ ^('-1'|'-1%')$ ]] && (( "${once_config_value/%\%/}" * cpu_threads <= max_cpu_limit )); then
+					# Regexp means '-1' or '-1%'
 					if [[ "$once_config_value" =~ ^('-1'|'-1%')$ ]]; then
 						config_key_cpu_limit_map["$once_section"]="${once_config_value/%\%/}"
 					else
@@ -893,7 +911,7 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 				fi
 			;;
 			fps-unfocus* )
-				# Exit with an error if value is not integer
+				# Exit with an error if value is not integer, that is what regexp means
 				if [[ "$once_config_value" =~ ^[0-9]+$ ]]; then
 					# Exit with an error if value equal to zero
 					if [[ "$once_config_value" != '0' ]]; then
@@ -908,6 +926,7 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 				fi
 			;;
 			fps-focus* )
+				# Exit with an error if value is not integer, that is what regexp means
 				if [[ "$once_config_value" =~ ^[0-9]+$ ]]; then
 					config_key_fps_focus_map["$once_section"]="$once_config_value"
 				else
@@ -992,7 +1011,7 @@ if ! x11_session_check; then
 	print_error "Unable to start daemon, invalid X11 session."
 	exit 1
 else
-	# Check for lock file and existence of daemon instance
+	# Exit with an error if daemon already running
 	lock_file='/tmp/flux-lock'
 	if [[ -f "$lock_file" ]] && check_pid_existence "$(<"$lock_file")"; then
 		print_error "Multiple instances are not allowed, make sure that daemon is not running before start, if you are really sure, then remove '$lock_file' file."
@@ -1029,11 +1048,10 @@ else
 			once_existing_windows_ids="${event/*' existing: '/}" # Remove everything including type name of list with windows IDs
 			# Unset info about freezing and CPU limits of terminated windows
 			for temp_terminated_window_id in $once_terminated_windows_ids; do
-				# Check for event type
-				if [[ "${cache_event_type_map["$temp_terminated_window_id"]}" == 'bad' ]]; then
-					# Skip window ID if that is bad event, otherwise bash will fail
+				# Skip window ID if that is bad event or info about it does not exist in cache
+				if [[ -z "${cache_event_type_map["$temp_terminated_window_id"]}" || "${cache_event_type_map["$temp_terminated_window_id"]}" == 'bad' ]]; then
 					continue
-				elif [[ "${cache_event_type_map["$temp_terminated_window_id"]}" == 'good' ]]; then
+				else
 					# Obtain PID of terminated process using cache, required to check and unset FPS limit
 					once_terminated_process_pid="${cache_process_pid_map["$temp_terminated_window_id"]}"
 					# Do not do anything if window is not frozen
@@ -1051,7 +1069,7 @@ else
 						passed_signal='-SIGUSR2' \
 						unset_cpu_limit
 					elif [[ -n "${cache_section_map["$once_terminated_process_pid"]}" && -n "${is_fps_limited_section_map["${cache_section_map["$once_terminated_process_pid"]}"]}" ]]; then # Do not do anything if window is not FPS limited
-						# Check if one of existing windows matches with same section, if yes, then FPS limit will not be removed
+						# Do not remove FPS limit if one of existing windows matches with the same section
 						for temp_existing_window_id in $once_existing_windows_ids; do
 							# Obtain PID of terminated process using cache
 							once_existing_process_pid="${cache_process_pid_map["$temp_existing_window_id"]}"
@@ -1063,9 +1081,8 @@ else
 						done
 						unset once_existing_process_pid \
 						once_existing_windows_ids
-						# Check for abscence of existing windows which matching with section
+						# Unset FPS limit if there is no any matching windows except target
 						if [[ -z "$once_found" ]]; then
-							# Unset FPS limit
 							passed_section="${cache_section_map["$once_terminated_process_pid"]}" \
 							passed_end_of_msg='due to matching window(s) termination' \
 							unset_fps_limit
@@ -1101,9 +1118,8 @@ else
 		else # Set window ID variable if event does not match with statements above
 			window_id="$event"
 		fi
-		# Check for window ID existence
+		# Skip event if event does not contain window ID
 		if [[ -z "$window_id" ]]; then
-			# Skip event if it does not contain window ID
 			continue
 		else
 			# Check for previous section match, existence of command in 'unfocus' key, status of '--lazy' and signal about unsetting '--lazy'
@@ -1189,20 +1205,20 @@ else
 					# Obtain matching section from cache
 					section="${cache_section_map["$process_pid"]}"
 				fi
-				# Check for match and print message about that
+				# Print message about section match
 				if [[ -n "$section" ]]; then
 					print_info "Process '$process_name' with PID $process_pid matches with section '$section'."
 				else
 					print_verbose "Process '$process_name' with PID $process_pid does not match with any section."
 				fi
 			fi
-			# Check if PID is not the same as previous one
+			# Do not apply limit if previous and current PIDs are exactly the same
 			if [[ "$process_pid" != "$previous_process_pid" ]]; then
 				# Avoid applying limit if owner has insufficient rights to do that
 				if [[ -n "$previous_process_owner" && "$previous_process_owner" == "$UID" || "$UID" == '0' && "${config_key_cpu_limit_map["$previous_section"]}" != '-1' ]]; then
-					# Check for existence of previous match and if CPU limit is set to 0
+					# To be frozen if previous window matches with section and 'cpu-limit' key specified to zero
 					if [[ -n "$previous_section" && "${config_key_cpu_limit_map["$previous_section"]}" == '0' ]]; then
-						# Check whether process is frozen
+						# Freeze process if it is not already frozen
 						if [[ -z "${is_frozen_pid_map["$previous_process_pid"]}" ]]; then
 							# Freeze process
 							background_freeze_process &
@@ -1213,8 +1229,8 @@ else
 							# Store PID to array to unfreeze process in case daemon interruption
 							frozen_processes_pids_array+=("$previous_process_pid")
 						fi
-					elif [[ -n "$previous_section" ]] && (( "${config_key_cpu_limit_map["$previous_section"]}" > 0 )); then # Check for existence of previous match and CPU limit specified greater than 0
-						# Check for CPU limit existence
+					elif [[ -n "$previous_section" ]] && (( "${config_key_cpu_limit_map["$previous_section"]}" > 0 )); then # To be CPU limited if previous window matches with section and 'cpu-limit' greater than zero
+						# Apply CPU limit if it is not already applied
 						if [[ -z "${is_cpu_limited_pid_map["$previous_process_pid"]}" ]]; then
 							# Apply CPU limit
 							background_cpulimit &
@@ -1225,7 +1241,7 @@ else
 							# Mark process as CPU limited
 							is_cpu_limited_pid_map["$previous_process_pid"]='1'
 						fi
-					elif [[ -n "$previous_section" && -n "${config_key_fps_unfocus_map["$previous_section"]}" ]]; then # Check for existence of previous match and FPS limit specified in config
+					elif [[ -n "$previous_section" && -n "${config_key_fps_unfocus_map["$previous_section"]}" ]]; then # To be FPS limited if previous window matches with section and 'fps-limit' is specified
 						# Associate section with PID of process, required to unset FPS limit for all matching windows on focus event or if they have been terminated
 						fps_limited_section_map["$previous_process_pid"]="$previous_section"
 						# Do not apply FPS limit if current window matches with exactly the same section as previous one
@@ -1243,34 +1259,33 @@ else
 				elif [[ -n "$previous_process_owner" ]]; then
 					# I know that FPS limiting does not require root rights as it just should change 'fps_limit' value in MangoHud config
 					# But who will run a game as root?
-					# That is dumb and I'm not looking for spend time on this
+					# That is dumb and I am not looking for spend time on this
 					print_warn "Unable to apply any kind of limit to process '$previous_process_name' with PID $previous_process_pid due to insufficient rights (process - $previous_process_owner, user - $UID)!"
 				fi
 			fi
 			# Do not apply actions if window does not report its PID
 			if [[ -n "$process_pid" ]]; then
-				# Check whether process is frozen
+				# # Unfreeze process if it has been frozen
 				if [[ -n "${is_frozen_pid_map["$process_pid"]}" ]]; then
-					# Unfreeze process
 					passed_process_pid="$process_pid" \
 					passed_section="$section" \
 					passed_process_name="$process_name" \
 					passed_end_of_msg='on focus event' \
 					unfreeze_process
-				elif [[ -n "${is_cpu_limited_pid_map["$process_pid"]}" ]]; then # Check for CPU limit existence
+				elif [[ -n "${is_cpu_limited_pid_map["$process_pid"]}" ]]; then # Unset CPU limit if has been applied
 					# Unset CPU limit
 					passed_process_pid="$process_pid" \
 					passed_process_name="$process_name" \
 					passed_signal='-SIGUSR1' \
 					unset_cpu_limit
-				elif [[ -n "$section" && -n "${is_fps_limited_section_map["$section"]}" ]]; then # Check for FPS limit existence
+				elif [[ -n "$section" && -n "${is_fps_limited_section_map["$section"]}" ]]; then # Unset FPS limit if has been applied
 					# Unset FPS limit
 					passed_section="$section" \
 					passed_end_of_msg='on focus event' \
 					unset_fps_limit
 				fi
 			fi
-			# Check for section match, existence of command in 'focus' keys and disabled lazy mode
+			# Execute command from 'focus' key if section matches, specified 'focus' key and that is not lazy mode
 			if [[ -n "$section" && -n "${config_key_focus_map["$section"]}" && -z "$lazy" ]]; then
 				# Execute command from 'focus' key
 				passed_window_id="$window_id" \

@@ -85,7 +85,7 @@ Dependencies for other distributions will be added soon.
 ### Manual installation
 You can use this method if there is no package build script for your distro. Make sure you have installed dependencies as described above before continue.
 ```bash
-fluxver='1.7.7' # set latest version as I update it here every release
+fluxver='1.7.8' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -103,7 +103,7 @@ sudo install -Dm 755 flux-${fluxver}/flux /usr/local/bin/flux # install daemon t
 ### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
 ``` bash
-fluxver='1.7.7' # set latest version as I update it here every release
+fluxver='1.7.8' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -117,7 +117,7 @@ makepkg -sric # build a package and install it
 
 ### Debian and dereatives
 ```bash
-fluxver='1.7.7' # set latest version as I update it here every release
+fluxver='1.7.8' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -139,16 +139,16 @@ sudo dpkg -i flux-v${fluxver}.deb ; sudo apt install -f # install a package
 ```
 Usage: flux [option] <value>
 Options and values:
-    -c, --config     <path-to-config>    Specify path to config file
-    -f, --focused                        Display info about focused window in usable for config file way
-    -h, --help                           Display this help
-    -H, --hot                            Apply actions to already unfocused windows before handling events
-    -l, --lazy                           Avoid focus and unfocus commands on hot
-    -p, --pick                           Display info about picked window in usable for config file way
-    -q, --quiet                          Display errors and warnings only
-    -u, --usage                          Same as '--help'
-    -v, --verbose                        Detailed output
-    -V, --version                        Display release information
+    -c, --config     /path/to/config    Specify path to config file
+    -f, --focused                       Display info about focused window in usable for config file way
+    -h, --help                          Display this help
+    -H, --hot                           Apply actions to already unfocused windows before handling events
+    -l, --lazy                          Avoid focus and unfocus commands on hot
+    -p, --pick                          Display info about picked window in usable for config file way
+    -q, --quiet                         Display errors and warnings only
+    -u, --usage                         Same as '--help'
+    -v, --verbose                       Detailed output
+    -V, --version                       Display release information
 ```
 
 ### Autostart
@@ -169,13 +169,13 @@ Available keys and description:
 | `command` | Command of process, gets from `/proc/<PID>/cmdline`, required if neither `name` nor `executable` is specified. |
 | `mangohud-config` | Path to MangoHud config, required if you want change FPS limits and requires `fps-unfocus`. DO NOT USE THE SAME CONFIG FOR MULTIPLE SECTIONS! |
 | `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`, cannot be equal to `0` as that means no limit. |
-| `fps-focus` | FPS to set on focus, requires `fps-unfocus`, defaults to `0` (i.e. full unlimit). |
+| `fps-focus` | FPS to set on focus, requires `fps-unfocus`, defaults to `0` (i.e. no limit). |
 
 ### Config path
 - Daemon searches for following configuration files by priority:
-  - `/etc/flux.ini`
   - `$XDG_CONFIG_HOME/flux.ini`
   - `~/.config/flux.ini`
+  - `/etc/flux.ini`
 
 ### Limitations
 As INI is not standartized, I should mention all supported features here.
