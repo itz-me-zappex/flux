@@ -181,7 +181,7 @@ cache_get_process_info(){
 # Required to get process info using window ID
 get_process_info(){
 	local local_temp_status_line \
-	local_column_count \
+	local_column_count='0' \
 	local_status_column \
 	local_matching_window_id \
 	local_temp_cached_window_id
@@ -220,15 +220,18 @@ get_process_info(){
 				process_name="$(<"/proc/$process_pid/comm")"
 				# Extract executable path of process
 				process_executable="$(readlink "/proc/$process_pid/exe")"
-				# Extract UID of process
+				# Extract effective UID of process
 				while read -r local_temp_status_line; do
+					# Find a line which contains UID
 					if [[ "$local_temp_status_line" == 'Uid:'* ]]; then
-						local_column_count='0'
+						# Find 3rd column, which effective UID is
 						for local_status_column in $local_temp_status_line; do
+							# Current column number
+							(( local_column_count++ ))
+							# Remember UID and break cycle if that is effective UID
 							if (( local_column_count == 3 )); then
 								process_owner="$local_status_column"
-							else
-								(( local_column_count++ ))
+								break
 							fi
 						done
 					fi
