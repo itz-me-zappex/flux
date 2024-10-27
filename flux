@@ -1298,7 +1298,7 @@ else
 				fi
 				# Print message about section match
 				if [[ -n "$section" ]]; then
-					print_info "Process '$process_name' with PID $process_pid matches with section '$section'."
+					print_verbose "Process '$process_name' with PID $process_pid matches with section '$section'."
 				else
 					print_verbose "Process '$process_name' with PID $process_pid does not match with any section."
 				fi
