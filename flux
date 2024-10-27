@@ -1118,11 +1118,16 @@ else
 					once_terminated_process_pid="${cache_process_pid_map["$temp_terminated_window_id"]}"
 					# Simplify access to matching section of cached window info
 					once_terminated_section="${cache_section_map["$once_terminated_process_pid"]}"
-					# Unset limit requests
-					request_freeze_map["$once_terminated_process_pid"]=''
-					request_cpu_limit_map["$once_terminated_process_pid"]=''
-					if [[ -n "$once_terminated_section" ]]; then
+					# Unset limit request
+					if [[ -n "${request_freeze_map["$once_terminated_process_pid"]}" ]]; then
+						request_freeze_map["$once_terminated_process_pid"]=''
+						print_info "Freezing of process '${cache_process_name_map["$temp_terminated_window_id"]}' with PID $once_terminated_process_pid has been cancelled due to window termination."
+					elif [[ -n "${request_cpu_limit_map["$once_terminated_process_pid"]}" ]]; then
+						request_cpu_limit_map["$once_terminated_process_pid"]=''
+						print_info "CPU limiting of process '${cache_process_name_map["$temp_terminated_window_id"]}' with PID $once_terminated_process_pid has been cancelled due to window termination."
+					elif [[ -n "$once_terminated_section" && -n "${request_fps_limit_map["$once_terminated_section"]}" ]]; then
 						request_fps_limit_map["$once_terminated_section"]=''
+						print_info "FPS limiting of section '$once_terminated_section' has been cancelled due to termination of matching window(s)."
 					fi
 					# Unset data in cache related to terminated window
 					print_verbose "Cached info about window with ID $temp_terminated_window_id and process '${cache_process_name_map["$temp_terminated_window_id"]}' with PID ${cache_process_pid_map["$temp_terminated_window_id"]} has been removed as it has been terminated."
