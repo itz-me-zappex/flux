@@ -44,16 +44,16 @@ x11_session_check(){
 	fi
 }
 
-# Required to print events containing list of stacking windows IDs immediately after events containing IDs of focused windows
+# Required to print events containing IDs of focused windows immediately after events containing list of stacking windows IDs
 xprop_wrapper(){
 	local local_temp_xprop_event
-	# Read events related to window focus
+	# Read events related to opened windows
 	while read -r local_temp_xprop_event; do
 		# Print event containing window ID
-		echo "$local_temp_xprop_event"
+		xprop -root _NET_ACTIVE_WINDOW		
 		# Print event containing IDs of stacking windows
-		xprop -root _NET_CLIENT_LIST_STACKING
-	done < <(xprop -root -spy _NET_ACTIVE_WINDOW 2>/dev/null)
+		echo "$local_temp_xprop_event"
+	done < <(xprop -root -spy _NET_CLIENT_LIST_STACKING 2>/dev/null)
 }
 
 # Required to extract window IDs from xprop events and make '--hot' option work
@@ -270,7 +270,6 @@ get_process_info(){
 # Required to change FPS limit in specified MangoHud config
 mangohud_fps_set(){
 	local local_temp_config_line \
-	local_config_content \
 	local_new_config_content \
 	local_config="$1" \
 	local_fps_to_set="$2" \
@@ -281,9 +280,7 @@ mangohud_fps_set(){
 	# Check if config file exists before continue in case it has been removed
 	if [[ -f "$local_config" ]]; then
 		# Attempt to read MangoHud config file
-		if check_rw "$local_config"; then
-			local_config_content="$(<"$local_config")"
-		else
+		if ! check_rw "$local_config"; then
 			print_warn "Unable to read MangoHud config file '$local_config'!"
 			return 1
 		fi
@@ -309,7 +306,7 @@ mangohud_fps_set(){
 				# Add line to processed text
 				local_new_config_content+="$local_temp_config_line\n"
 			fi
-		done <<< "$local_config_content"
+		done < "$local_config"
 		# Pass key with FPS limit if line does not exist in config
 		if check_rw "$local_config"; then
 			# Check whether FPS limit has been set or not
