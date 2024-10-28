@@ -50,7 +50,7 @@ xprop_wrapper(){
 	# Read events related to opened windows
 	while read -r local_temp_xprop_event; do
 		# Print event containing window ID
-		xprop -root _NET_ACTIVE_WINDOW		
+		xprop -root _NET_ACTIVE_WINDOW
 		# Print event containing IDs of stacking windows
 		echo "$local_temp_xprop_event"
 	done < <(xprop -root -spy _NET_CLIENT_LIST_STACKING 2>/dev/null)
