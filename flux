@@ -61,8 +61,6 @@ xprop_event_reader(){
 	local local_stacking_windows_id \
 	local_focused_window_id \
 	local_temp_stacking_window_id \
-	local_window_id \
-	local_previous_window_id \
 	local_temp_xprop_event \
 	local_client_list_stacking_count \
 	local_temp_client_list_stacking_column \
@@ -112,9 +110,8 @@ xprop_event_reader(){
 	while read -r local_temp_xprop_event; do
 		# Get window ID
 		if [[ "$local_temp_xprop_event" == '_NET_ACTIVE_WINDOW(WINDOW):'* ]]; then
-			# Extract ID from line
-			local_window_id="${local_temp_xprop_event/* \# /}"
-			echo "$local_window_id"
+			# Extract window ID from line and print it
+			echo "${local_temp_xprop_event/* \# /}"
 		elif [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* ]]; then # Get count of columns in output with list of stacking windows and skip event if it repeats
 			# Count columns in event
 			local_client_list_stacking_count='0'
@@ -132,11 +129,13 @@ xprop_event_reader(){
 				local_previous_windows_ids="${local_previous_windows_ids//\,/}" # Remove commas
 				# Find terminated windows
 				for local_temp_previous_local_window_id in $local_previous_windows_ids; do
+					# Skip existing window ID as I want to store IDs of terminated windows to array
 					if [[ " $local_windows_ids " != *" $local_temp_previous_local_window_id "* ]]; then
 						local_once_terminated_windows_array+=("$local_temp_previous_local_window_id")
 					fi
 				done
-				unset local_temp_previous_local_window_id
+				unset local_temp_previous_local_window_id \
+				local_previous_windows_ids
 				# Print event with terminated (required to remove info about them from cache) and existing (required to determine whether all windows matching woth section are closed or not in order to remove FPS limit) windows IDs
 				echo "refresh -- terminated: ${local_once_terminated_windows_array[*]} existing: $local_windows_ids"
 				unset local_once_terminated_windows_array
@@ -150,6 +149,7 @@ xprop_event_reader(){
 		if [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* ]]; then
 			echo "check_requests: $local_windows_ids"
 		fi
+		unset local_windows_ids
 	done < <(xprop_wrapper)
 	unset local_temp_xprop_event
 	# Print event for safe exit if 'xprop' has been terminated
@@ -166,7 +166,7 @@ exec_on_event(){
 	FLUX_PROCESS_EXECUTABLE="$passed_process_executable" \
 	FLUX_PROCESS_OWNER="$passed_process_owner" \
 	FLUX_PROCESS_COMMAND="$passed_process_command"
-	# Run command on event
+	# Run command on passed event
 	nohup setsid bash -c "$passed_event_command" > /dev/null 2>&1 &
 	# Unset environment variables exported above
 	unset FLUX_WINDOW_ID \
