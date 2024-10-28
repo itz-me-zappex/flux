@@ -44,26 +44,16 @@ x11_session_check(){
 	fi
 }
 
-# Required to print events in proper order and skip repeating events
-xprop_event_arranger(){
-	local local_temp_xprop_event \
-	local_active_window \
-	local_client_list_stacking
-	# Read xprop events
+# Required to print events containing list of stacking windows IDs immediately after events containing IDs of focused windows
+xprop_wrapper(){
+	local local_temp_xprop_event
+	# Read events related to window focus
 	while read -r local_temp_xprop_event; do
-		# Assign string to proper variable
-		if [[ "$local_temp_xprop_event" == '_NET_ACTIVE_WINDOW(WINDOW):'* ]]; then
-			local_active_window="$local_temp_xprop_event"
-		elif [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* ]]; then
-			local_client_list_stacking="$local_temp_xprop_event"
-		fi
-		# Print them in specified order only if both variables have been set
-		if [[ -n "$local_active_window" && -n "$local_client_list_stacking" ]]; then
-			echo "$local_active_window" # 1st
-			echo "$local_client_list_stacking" # 2nd
-			unset local_active_window local_client_list_stacking
-		fi
-	done < <(xprop -root -spy _NET_ACTIVE_WINDOW _NET_CLIENT_LIST_STACKING 2>/dev/null)
+		# Print event containing window ID
+		echo "$local_temp_xprop_event"
+		# Print event containing IDs of stacking windows
+		xprop -root _NET_CLIENT_LIST_STACKING
+	done < <(xprop -root -spy _NET_ACTIVE_WINDOW 2>/dev/null)
 }
 
 # Required to extract window IDs from xprop events and make '--hot' option work
@@ -153,12 +143,14 @@ xprop_event_reader(){
 			fi
 			# Required to compare columns count in previous and current events
 			local_previous_client_list_stacking_count="$local_client_list_stacking_count"
+			# Required to find terminated windows comparing previous list with new one
+			local_previous_client_list_stacking="$local_temp_xprop_event"
 		fi
 		# Print event to check requests and apply limits
 		if [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* ]]; then
 			echo "check_requests: $local_windows_ids"
 		fi
-	done < <(xprop_event_arranger)
+	done < <(xprop_wrapper)
 	unset local_temp_xprop_event
 	# Print event for safe exit if 'xprop' has been terminated
 	print_warn "Process 'xprop' required to read X11 events has been terminated!"
@@ -717,7 +709,7 @@ Options and values:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.7.10
+		echo "flux 1.7.11
 A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
