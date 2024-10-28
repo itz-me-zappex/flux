@@ -545,7 +545,7 @@ unset_fps_limit(){
 }
 
 # Required to unset limits on SIGTERM and SIGINT signals
-actions_on_sigterm(){
+actions_on_exit(){
 	local local_temp_frozen_process_pid \
 	local_temp_cpulimit_bgprocess_pid \
 	local_temp_fps_limited_section
@@ -560,14 +560,12 @@ actions_on_sigterm(){
 			kill -CONT "$local_temp_frozen_process_pid" > /dev/null 2>&1
 		fi
 	done
-	unset local_temp_frozen_process_pid
 	# Terminate 'cpulimit' background processes
 	for local_temp_cpulimit_bgprocess_pid in "${cpulimit_bgprocesses_pids_array[@]}"; do
 		if check_pid_existence "$local_temp_cpulimit_bgprocess_pid"; then
 			kill "$local_temp_cpulimit_bgprocess_pid" > /dev/null 2>&1
 		fi
 	done
-	unset local_temp_cpulimit_bgprocess_pid
 	# Remove FPS limits
 	for local_temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
 		echo "$local_temp_fps_limited_section"
@@ -578,7 +576,6 @@ actions_on_sigterm(){
 		# Set FPS from 'fps-focus' key to remove limit
 		mangohud_fps_set "${config_key_mangohud_config_map["$local_temp_fps_limited_section"]}" "${config_key_fps_focus_map["$local_temp_fps_limited_section"]}" > /dev/null 2>&1
 	done
-	unset local_temp_fps_limited_section
 	# Wait a bit to avoid delayed messages after termination
 	sleep 0.1
 	# Remove lock file which prevents multiple instances of daemon from running
@@ -1040,7 +1037,7 @@ else
 		fi
 	fi
 	# Remove CPU and FPS limits of processes on exit
-	trap 'actions_on_sigterm ; print_info "Daemon has been terminated successfully." ; exit 0' SIGTERM SIGINT
+	trap 'actions_on_exit ; print_info "Daemon has been terminated successfully." ; exit 0' SIGTERM SIGINT
 	# Ignore user signals as they used in 'background_cpulimit' function to avoid next output ('X' - path to 'flux', 'Y' - line, 'Z' - PID of 'background_cpulimit'):
 	# X: line Y: Z User defined signal 2   background_cpulimit
 	trap '' SIGUSR1 SIGUSR2
@@ -1048,7 +1045,7 @@ else
 	while read -r event; do
 		# Exit with an error in case 'exit' event appears
 		if [[ "$event" == 'exit' ]]; then
-			actions_on_sigterm
+			actions_on_exit
 			print_error "Daemon has been terminated unexpectedly!"
 			exit 1
 		elif [[ "$event" == 'nolazy' ]]; then # Unset '--lazy' option if responding event appears, otherwise focus and unfocus commands will not work
