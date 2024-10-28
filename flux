@@ -909,6 +909,8 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 				config_key_command_map["$once_section"]="$once_config_value"
 			;;
 			mangohud-config* )
+				# Get absolute path to MangoHud config in case it is specified as relative
+				once_config_value="$(realpath -m "${once_config_value/'~'/"$HOME"}")"
 				# Exit with an error if specified MangoHud config file does not exist
 				if [[ -f "$once_config_value" ]]; then
 					config_key_mangohud_config_map["$once_section"]="$once_config_value"
