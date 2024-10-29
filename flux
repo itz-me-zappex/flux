@@ -44,16 +44,37 @@ x11_session_check(){
 	fi
 }
 
-# Required to print events containing IDs of focused windows immediately after events containing list of stacking windows IDs
+# Required to track events related to window focus and changes in count of opened windows in 'xprop_event_reader' function
+# Pretty complicated because of buggyness of 'xprop' tool which in spy mode prints events in random order, which sometimes repeats or not valid at all
+# To fix that, despite performance impact I prefered to call 'xprop' tool manually every event to get proper info, because I did not find better way yet
+# That is still is not perfect solution, because from time to time there is a chance to get multiple events because of one action like openning window from panel
+# But at least that works and does not cause critical issues like previous event reading implementaions
 xprop_wrapper(){
-	local local_temp_xprop_event
-	# Read events related to opened windows
+	local local_temp_xprop_event \
+	local_previous_xprop_event \
+	local_xprop_output \
+	local_previous_xprop_output
+	# Track events related to window focus and changes in count of opened windows
 	while read -r local_temp_xprop_event; do
-		# Print event containing window ID
-		xprop -root _NET_ACTIVE_WINDOW
-		# Print event containing IDs of stacking windows
-		echo "$local_temp_xprop_event"
-	done < <(xprop -root -spy _NET_CLIENT_LIST_STACKING 2>/dev/null)
+		# Skip event if it repeats for some reason
+		if [[ -n "$local_previous_xprop_event" && "$local_temp_xprop_event" == "$local_previous_xprop_event" ]]; then
+			continue
+		else
+			# Obtain ID of focused window and list of opened windows
+			local_xprop_output="$(xprop -root _NET_ACTIVE_WINDOW _NET_CLIENT_LIST_STACKING)"
+			# Do not send event to 'xprop_event_reader' it it repeats for some reason
+			if [[ -n "$local_previous_xprop_output" && "$local_xprop_output" == "$local_previous_xprop_output" ]]; then
+				continue
+			else
+				# Send event to 'xprop_event_reader'
+				echo "$local_xprop_output"
+				# Remember obtained info to compare it on next event and skip if it repeats
+				local_previous_xprop_output="$local_xprop_output"
+			fi
+			# Remember current event to compare it next time
+			local_previous_xprop_event="$local_temp_xprop_event"
+		fi
+	done < <(xprop -root -spy _NET_ACTIVE_WINDOW _NET_CLIENT_LIST_STACKING 2>/dev/null)
 }
 
 # Required to extract window IDs from xprop events and make '--hot' option work
@@ -68,7 +89,9 @@ xprop_event_reader(){
 	local_windows_ids \
 	local_previous_windows_ids \
 	local_once_terminated_windows_array \
-	local_temp_previous_local_window_id
+	local_temp_previous_local_window_id \
+	local_previous_active_window \
+	local_previous_client_list_stacking
 	# Print windows IDs of opened windows to apply limits immediately if '--hot' option was passed
 	if [[ -n "$hot" ]]; then
 		# Extract IDs of opened windows
@@ -108,11 +131,13 @@ xprop_event_reader(){
 	fi
 	# Read events from 'xprop' and print IDs of windows
 	while read -r local_temp_xprop_event; do
-		# Get window ID
-		if [[ "$local_temp_xprop_event" == '_NET_ACTIVE_WINDOW(WINDOW):'* ]]; then
+		# Print window ID if that is responding event and it does not repeat
+		if [[ "$local_temp_xprop_event" == '_NET_ACTIVE_WINDOW(WINDOW):'* && "$local_temp_xprop_event" != "$local_previous_active_window" ]]; then
+			# Remember current event to compare it with new one and skip if it repeats
+			local_previous_active_window="$local_temp_xprop_event"
 			# Extract window ID from line and print it
 			echo "${local_temp_xprop_event/* \# /}"
-		elif [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* ]]; then # Get count of columns in output with list of stacking windows and skip event if it repeats
+		elif [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* && "$local_temp_xprop_event" != "$local_previous_client_list_stacking" ]]; then # Get count of columns in output with list of stacking windows and skip event if it repeats
 			# Count columns in event
 			local_client_list_stacking_count='0'
 			for local_temp_client_list_stacking_column in $local_temp_xprop_event; do
@@ -703,7 +728,7 @@ Options and values:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.7.12
+		echo "flux 1.7.13
 A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
