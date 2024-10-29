@@ -131,6 +131,11 @@ xprop_event_reader(){
 	fi
 	# Read events from 'xprop' and print IDs of windows
 	while read -r local_temp_xprop_event; do
+		# Extract windows IDs from current event
+		if [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* ]]; then
+			local_windows_ids="${local_temp_xprop_event/*\# /}" # Remove everything before including '#'
+			local_windows_ids="${local_windows_ids//\,/}" # Remove commas
+		fi
 		# Print window ID if that is responding event and it does not repeat
 		if [[ "$local_temp_xprop_event" == '_NET_ACTIVE_WINDOW(WINDOW):'* && "$local_temp_xprop_event" != "$local_previous_active_window" ]]; then
 			# Remember current event to compare it with new one and skip if it repeats
@@ -144,9 +149,6 @@ xprop_event_reader(){
 				(( local_client_list_stacking_count++ ))
 			done
 			unset local_temp_client_list_stacking_column
-			# Extract windows IDs from current event
-			local_windows_ids="${local_temp_xprop_event/*\# /}" # Remove everything before including '#'
-			local_windows_ids="${local_windows_ids//\,/}" # Remove commas
 			# Compare count of columns and if previous event contains more columns (windows IDs), then print event to refresh PIDs in arrays and cache
 			if [[ -n "$local_previous_client_list_stacking_count" ]] && (( local_previous_client_list_stacking_count > local_client_list_stacking_count )); then
 				# Extract windows IDs from previous event
@@ -298,10 +300,7 @@ mangohud_fps_set(){
 	local_new_config_content \
 	local_config="$1" \
 	local_fps_to_set="$2" \
-	local_fps_limit_is_changed \
-	local_temp_column \
-	local_temp_line_buffer \
-	local_once_ignore_numbers
+	local_fps_limit_is_changed
 	# Check if config file exists before continue in case it has been removed
 	if [[ -f "$local_config" ]]; then
 		# Attempt to read MangoHud config file
@@ -313,18 +312,8 @@ mangohud_fps_set(){
 		while read -r local_temp_config_line || [[ -n "$local_temp_config_line" ]]; do
 			# Find 'fps_limit' line, regexp means 'fps_limit[space(s)?]=[space(s)?][integer][anything else]'
 			if [[ "$local_temp_config_line" =~ ^fps_limit([[:space:]]+)?=([[:space:]]+)?[0-9]+* ]]; then
-				# Find and replace FPS limit value in line by splitting it to columns, shell parameter expansion replaces spaces with regexp to make it easier to restore them after changing value
-				for local_temp_column in ${local_temp_config_line//' '/' [[:space:]] '}; do
-					# Define type of column, regexp means any integer
-					if [[ "$local_temp_column" =~ ^[0-9]+$ && -z "$local_once_ignore_numbers" ]]; then
-						local_temp_line_buffer+="$local_fps_to_set"
-						local_once_ignore_numbers='1'
-					else
-						local_temp_line_buffer+="$local_temp_column"
-					fi
-				done
-				# Set specified FPS limit, shell parameter expansion replaces regexp with regular spaces
-				local_new_config_content+="${local_temp_line_buffer//'[[:space:]]'/' '}\n"
+				# Set specified FPS limit, shell parameter expansion replaces first number on line with specified new one
+				local_new_config_content+="${local_temp_config_line/[0-9]*/"$local_fps_to_set"}\n"
 				# Set mark which signals about successful setting of FPS limit
 				local_fps_limit_is_changed='1'
 			else
@@ -340,7 +329,7 @@ mangohud_fps_set(){
 				echo "fps_limit = $local_fps_to_set" >> "$local_config"
 			else
 				# Pass config content if FPS has been already changed
-				echo -e "$local_new_config_content" > "$local_config"
+				echo -e "${local_new_config_content/%'\n'/}" > "$local_config"
 			fi
 		else
 			print_warn "Unable to modify MangoHud config file '$local_config'!"
@@ -590,7 +579,6 @@ actions_on_exit(){
 	done
 	# Remove FPS limits
 	for local_temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
-		echo "$local_temp_fps_limited_section"
 		# Terminate background process if exists
 		if check_pid_existence "${fps_limit_bgprocess_pid_map["$local_temp_fps_limited_section"]}"; then
 			kill "${fps_limit_bgprocess_pid_map["$local_temp_fps_limited_section"]}" > /dev/null 2>&1
@@ -728,7 +716,7 @@ Options and values:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.7.13
+		echo "flux 1.7.14
 A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
