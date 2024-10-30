@@ -1,26 +1,46 @@
 #!/usr/bin/bash
 
+# Required to store output to log file if '--log' option is specified
+print_log(){
+	local local_timestamp
+	# Print message to stdout
+	echo -e "$*"
+	# Print message with timestamp to log file if responding option is specified and logging has been allowed before event reading
+	if [[ -n "$allow_logging" ]]; then
+		# Get timestamp if that behavior is not disabled using '--log-disable-timestamps' option
+		if [[ -z "$log_disable_timestamps" ]]; then
+			local_timestamp="$(printf "[%($log_timestamp)T]") "
+		fi
+		# Check log file for read-write access before store message to log
+		if check_rw "$log"; then
+			echo -e "$local_timestamp$*" >> "$log"
+		else
+			allow_logging='' print_warn "Unable to write message to log file '$log', check read-write access or recreate it!"
+		fi
+	fi
+}
+
 # Required to print errors (redirect to stderr)
 print_error(){
-	echo -e "[e] $*" >&2
+	print_log "$prefix_error $*" >&2
 }
 
 # Required to print warnings (redirect to stderr)
 print_warn(){
-	echo -e "[w] $*" >&2
+	print_log "$prefix_warning $*" >&2
 }
 
 # Required to print messages in verbose mode
 print_verbose(){
 	if [[ -n "$verbose" ]]; then
-		echo -e "[v] $*"
+		print_log "$prefix_verbose $*"
 	fi
 }
 
 # Required to print messages if quiet mode is not specified
 print_info(){
 	if [[ -z "$quiet" ]]; then
-		echo -e "[i] $*"
+		print_log "$prefix_info $*"
 	fi
 }
 
@@ -30,6 +50,29 @@ option_repeat_check(){
 		print_error "Option '$2' is repeated!$advice_on_option_error"
 		exit 1
 	fi
+}
+
+# Required to obtain values from command line options
+cmdline_get(){
+	# Remember that option is passed in case value is not specified
+	option_repeat_check "$passed_check" "$passed_option"
+	eval "$passed_check"='1'
+	# Define option type (short, long or long+value) and remember specified value
+	case "$1" in
+	"$passed_option" | "$passed_short_option" )
+		# Remember value only if that is not an another option, regexp means long or short option
+		if [[ -n "$2" && ! "$2" =~ ^(--.*|-.*)$ ]]; then
+			eval "$passed_set"=\'"$2"\'
+			once_shift='2'
+		else
+			once_shift='1'
+		fi
+	;;
+	* )
+		# Shell parameter expansion, remove option name from string
+		eval "$passed_set"=\'"${1/"$passed_option"=/}"\'
+		once_shift='1'
+	esac
 }
 
 # Required to exit with an error if that is not a X11 session
@@ -277,7 +320,7 @@ get_process_info(){
 				process_command="$(tr '\0' ' ' < "/proc/$process_pid/cmdline")"
 				# Remove last space because '\0' (which is replaced with space) is last symbol too
 				process_command="${process_command/%\ /}"
-				print_verbose "Obtained from '/proc/$process_pid' info about window with ID $window_id and process '$process_name' with PID $process_pid has been cached."
+				print_verbose "Obtained info about window with ID $window_id and process '$process_name' with PID $process_pid has been cached."
 			fi
 			# Store info about window and process to cache
 			cache_event_type_map["$window_id"]='good'
@@ -594,6 +637,15 @@ actions_on_exit(){
 	fi
 }
 
+# Set default prefixes for messages
+prefix_error='[e]'
+prefix_info='[i]'
+prefix_verbose='[v]'
+prefix_warning='[w]'
+
+# Set default timestamp format for logger
+log_timestamp='%Y-%m-%dT%H:%M:%S%z'
+
 # Additional text for errors related to option parsing
 advice_on_option_error="\n[i] Try 'flux --help' for more information."
 
@@ -601,25 +653,18 @@ advice_on_option_error="\n[i] Try 'flux --help' for more information."
 while (( $# > 0 )); do
 	case "$1" in
 	--config | -c | --config=* )
-		# Remember that option is passed in case path is not specified
-		option_repeat_check config_is_passed --config
-		config_is_passed='1'
-		# Define option type (short, long or long+value) and remember specified path
-		case "$1" in
-		--config | -c )
-			# Remember config path only if that is not an another option, regexp means long or short option
-			if [[ -n "$2" && ! "$2" =~ ^(--.*|-.*)$ ]]; then
-				config="$2"
-				shift 2
-			else
-				shift 1
-			fi
-		;;
-		* )
-			# Shell parameter expansion, remove '--config=' from string
-			config="${1/--config=/}"
-			shift 1
-		esac
+		# Assign value from option to variable using 'cmdline_get' function
+		passed_check='config_is_passed' \
+		passed_set='config' \
+		passed_option='--config' \
+		passed_short_option='-c' \
+		cmdline_get "$@"
+		# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
+		shift "$once_shift"
+		# Get absolute path to config in case it is specified as relative
+		if [[ -n "$config" ]]; then
+			config="$(realpath -m "${config/'~'/"$HOME"}")"
+		fi
 	;;
 	--focus | -f | --pick | -p )
 		# Check for X11 session
@@ -679,18 +724,30 @@ owner = "$process_owner"
 		fi
 	;;
 	--help | -h | --usage | -u )
-		echo "Usage: flux [option] <value>
+		echo "Usage: flux [-c <…>] [-f] [-h] [-H] [-Hl] [-L <…>] [-p] [-q] [-u] [-v] [-V]
 Options and values:
-    -c, --config     /path/to/config    Specify path to config file
+    -c, --config <…>                    Specify path to config file
     -f, --focused                       Display info about focused window in usable for config file way
     -h, --help                          Display this help
     -H, --hot                           Apply actions to already unfocused windows before handling events
-    -l, --lazy                          Avoid focus and unfocus commands on hot
+    -l, --lazy                          Avoid focus and unfocus commands on hot, use only with '--hot'
+    -L, --log <…>                       Store output to specified file
     -p, --pick                          Display info about picked window in usable for config file way
     -q, --quiet                         Display errors and warnings only
     -u, --usage                         Same as '--help'
     -v, --verbose                       Detailed output
     -V, --version                       Display release information
+
+Prefixes configuration:
+    --prefix-error                      Default: [e]
+    --prefix-info                       Default: [i]
+    --prefix-verbose                    Default: [v]
+    --prefix-warning                    Default: [w]
+
+Logging configuration, use only with '--log':
+    --log-disable-timestamps            Do not store timestamps in log, do not use with '--log-timestamp'
+    --log-overwrite                     Clean log file before start
+    --log-timestamp <…>                 Set timestamp format, default: %Y-%m-%dT%H:%M:%S%z
 "
 		exit 0
 	;;
@@ -704,6 +761,20 @@ Options and values:
 		lazy='1'
 		shift 1
 	;;
+	--log | -L | --log=* )
+		# Assign value from option to variable using 'cmdline_get' function
+		passed_check='log_is_passed' \
+		passed_set='log' \
+		passed_option='--log' \
+		passed_short_option='-L' \
+		cmdline_get "$@"
+		# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
+		shift "$once_shift"
+		# Get absolute path to log file in case it is specified as relative
+		if [[ -n "$log" ]]; then
+			log="$(realpath -m "${log/'~'/"$HOME"}")"
+		fi
+	;;
 	--quiet | -q )
 		option_repeat_check quiet --quiet
 		quiet='1'
@@ -716,7 +787,7 @@ Options and values:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.7.14
+		echo "flux 1.8
 A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
@@ -725,6 +796,61 @@ This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 "
 		exit 0
+	;;
+	--prefix-error | --prefix-error=* )
+		# Assign value from option to variable using 'cmdline_get' function
+		passed_check='prefix_error_is_passed' \
+		passed_set='new_prefix_error' \
+		passed_option='--prefix-error' \
+		cmdline_get "$@"
+		# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
+		shift "$once_shift"
+	;;
+	--prefix-info | --prefix-info=* )
+		# Assign value from option to variable using 'cmdline_get' function
+		passed_check='prefix_info_is_passed' \
+		passed_set='new_prefix_info' \
+		passed_option='--prefix-info' \
+		cmdline_get "$@"
+		# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
+		shift "$once_shift"
+	;;
+	--prefix-verbose | --prefix-verbose=* )
+		# Assign value from option to variable using 'cmdline_get' function
+		passed_check='prefix_verbose_is_passed' \
+		passed_set='new_prefix_verbose' \
+		passed_option='--prefix-verbose' \
+		cmdline_get "$@"
+		# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
+		shift "$once_shift"
+	;;
+	--prefix-warning | --prefix-warning=* )
+		# Assign value from option to variable using 'cmdline_get' function
+		passed_check='prefix_warning_is_passed' \
+		passed_set='new_prefix_warning' \
+		passed_option='--prefix-warning' \
+		cmdline_get "$@"
+		# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
+		shift "$once_shift"
+	;;
+	--log-disable-timestamps )
+		option_repeat_check log_disable_timestamps --log-disable-timestamps
+		log_disable_timestamps='1'
+		shift 1
+	;;
+	--log-overwrite )
+		option_repeat_check log_overwrite --log-overwrite
+		log_overwrite='1'
+		shift 1
+	;;
+	--log-timestamp | --log-timestamp=* )
+		# Assign value from option to variable using 'cmdline_get' function
+		passed_check='log_timestamp_is_passed' \
+		passed_set='new_log_timestamp' \
+		passed_option='--log-timestamp' \
+		cmdline_get "$@"
+		# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
+		shift "$once_shift"
 	;;
 	* )
 		# First regexp means 2+ symbols after hyphen (combined short options)
@@ -745,6 +871,7 @@ There is NO WARRANTY, to the extent permitted by law.
 		fi
 	esac
 done
+unset once_shift
 
 # Exit with an error if verbose and quiet modes are specified at the same time
 if [[ -n "$verbose" && -n "$quiet" ]]; then
@@ -758,12 +885,39 @@ if [[ -n "$lazy" && -z "$hot" ]]; then
 	exit 1
 fi
 
+# Exit with an error if logging specific options are specified without '--log' option
+if [[ -z "$log_is_passed" ]] && [[ -n "$log_disable_timestamps" || -n "$log_overwrite" || -n "$log_timestamp_is_passed" ]]; then
+	print_error "Do not use options related to logging without '--log' options!$advice_on_option_error"
+	exit 1
+fi
+
+# Exit with an error if '--log-timestamp' and '--log-disable-timestamps' options are specified at the same time
+if [[ -n "$log_timestamp_is_passed" && -n "$log_disable_timestamps" ]]; then
+	print_error "Do not use '--log-timestamp' and '--log-disable-timestamps' options at the same time!$advice_on_option_error"
+	exit 1
+fi
+
 # Exit with an error if '--config' option is specified without a path to config file
 if [[ -n "$config_is_passed" && -z "$config" ]]; then
 	print_error "Option '--config' is specified without path to config file!$advice_on_option_error"
 	exit 1
 fi
 unset config_is_passed
+
+# Exit with error if at least one prefix option is specified without prefix
+for temp_prefix_type in error info verbose warning; do
+	# Set proper variables names to obtain their values using indirectly
+	once_is_passed="prefix_${temp_prefix_type}_is_passed"
+	once_new_prefix="new_prefix_$temp_prefix_type"
+	# Exit with an error if option is passed but value does not exist
+	if [[ -n "${!once_is_passed}" && -z "${!once_new_prefix}" ]]; then
+		print_info "Option '--prefix-$temp_prefix_type' is specified without prefix!$advice_on_option_error"
+		exit 1
+	fi
+done
+unset temp_prefix_type \
+once_is_passed \
+once_new_prefix
 
 # Automatically set a path to config file if it is not specified
 if [[ -z "$config" ]]; then
@@ -791,6 +945,33 @@ elif [[ ! -f "$config" ]]; then # Exit with an error if config file does not exi
 elif ! check_ro "$config"; then # Exit with an error if config file is not readable
 	print_error "Config file '$config' is not accessible for reading!"
 	exit 1
+fi
+
+# Run multiple checks related to logging if '--log' option is specified
+if [[ -n "$log_is_passed" ]]; then
+	unset log_is_passed
+	# Exit with an error if '--log-timestamp' option is specified without timestamp format
+	if [[ -n "$log_timestamp_is_passed" && -z "$new_log_timestamp" ]]; then
+		print_error "Option '--log-timestamp' is specified without timestamp!$advice_on_option_error"
+		exit 1
+	fi
+	unset log_timestamp_is_passed
+	# Exit with an error if '--log' option is specified without path to log file
+	if [[ -z "$log" ]]; then
+		print_error "Option '--log' is specified without path to log file!$advice_on_option_error"
+		exit 1
+	fi
+	# Exit with an error if specified log file exists but not accessible for read-write operations
+	if [[ -f "$log" ]] && ! check_rw "$log"; then
+		print_error "Log file '$log' is not accessible for read-write operations!"
+		exit 1
+	elif [[ -e "$log" && ! -f "$log" ]]; then # Exit with an error if path to log exists and that is not a file
+		print_error "Path '$log' specified in '--log' option is expected to be a file!"
+		exit 1
+	elif [[ -d "${log%/*}" ]] && ! check_rw "${log%/*}"; then # Exit with an error if log file directory is not accessible for read-write operations
+		print_error "Directory of log file '$log' is not accessible for read-write operations!"
+		exit 1
+	fi
 fi
 
 # Calculate maximum allowable CPU limit and CPU threads
@@ -1048,6 +1229,34 @@ else
 			exit 1
 		fi
 	fi
+	# Prepare before logging if log file is specified
+	if [[ -n "$log" ]]; then
+		# Allow logging before start event reading
+		allow_logging='1'
+		# Remove content from log file if '--log-overwrite' option is specified or create a file if it does not exist
+		if [[ -n "$log_overwrite" || ! -f "$log" ]]; then
+			echo -n > "$log"
+			unset log_overwrite
+		fi
+		# Set specified timestamp format if specified
+		if [[ -n "$new_log_timestamp" ]]; then
+			log_timestamp="$new_log_timestamp"
+			unset new_log_timestamp
+		fi
+	fi
+	# Set specified from command line prefixes if any
+	for temp_prefix_type in error info verbose warning; do
+		# Get name of variable with new prefix
+		once_variable_name="new_prefix_$temp_prefix_type"
+		# Check for existence of value in variable indirectly
+		if [[ -n "${!once_variable_name}" ]]; then
+			# Replace old prefix with new one
+			eval "prefix_$temp_prefix_type"=\'"${!once_variable_name}"\'
+			unset "new_prefix_$temp_prefix_type"
+		fi
+	done
+	unset temp_prefix_type \
+	once_variable_name
 	# Remove CPU and FPS limits of processes on exit
 	trap 'actions_on_exit ; print_info "Daemon has been terminated successfully." ; exit 0' SIGTERM SIGINT
 	# Ignore user signals as they used in 'background_cpulimit' function to avoid next output ('X' - path to 'flux', 'Y' - line, 'Z' - PID of 'background_cpulimit'):
