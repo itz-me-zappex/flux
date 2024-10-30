@@ -85,7 +85,7 @@ Dependencies for other distributions will be added soon.
 ### Manual installation
 You can use this method if there is no package build script for your distro. Make sure you have installed dependencies as described above before continue.
 ```bash
-fluxver='1.7.14' # set latest version as I update it here every release
+fluxver='1.8' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -103,7 +103,7 @@ sudo install -Dm 755 flux-${fluxver}/flux /usr/local/bin/flux # install daemon t
 ### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
 ``` bash
-fluxver='1.7.14' # set latest version as I update it here every release
+fluxver='1.8' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -117,7 +117,7 @@ makepkg -sric # build a package and install it
 
 ### Debian and dereatives
 ```bash
-fluxver='1.7.14' # set latest version as I update it here every release
+fluxver='1.8' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -137,18 +137,30 @@ sudo dpkg -i flux-v${fluxver}.deb ; sudo apt install -f # install a package
 
 ## Usage
 ```
-Usage: flux [option] <value>
+Usage: flux [-c <…>] [-f] [-h] [-H] [-Hl] [-L <…>] [-p] [-q] [-u] [-v] [-V]
 Options and values:
-    -c, --config     /path/to/config    Specify path to config file
+    -c, --config <…>                    Specify path to config file
     -f, --focused                       Display info about focused window in usable for config file way
     -h, --help                          Display this help
     -H, --hot                           Apply actions to already unfocused windows before handling events
-    -l, --lazy                          Avoid focus and unfocus commands on hot
+    -l, --lazy                          Avoid focus and unfocus commands on hot, use only with '--hot'
+    -L, --log <…>                       Store output to specified file
     -p, --pick                          Display info about picked window in usable for config file way
     -q, --quiet                         Display errors and warnings only
     -u, --usage                         Same as '--help'
     -v, --verbose                       Detailed output
     -V, --version                       Display release information
+
+Prefixes configuration:
+    --prefix-error                      Default: [e]
+    --prefix-info                       Default: [i]
+    --prefix-verbose                    Default: [v]
+    --prefix-warning                    Default: [w]
+
+Logging configuration, use only with '--log':
+    --log-disable-timestamps            Do not store timestamps in log, do not use with '--log-timestamp'
+    --log-overwrite                     Clean log file before start
+    --log-timestamp <…>                 Set timestamp format, default: %Y-%m-%dT%H:%M:%S%z
 ```
 
 ### Autostart
