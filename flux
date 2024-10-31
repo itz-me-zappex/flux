@@ -204,8 +204,8 @@ xprop_event_reader(){
 				done
 				unset local_temp_previous_local_window_id \
 				local_previous_windows_ids
-				# Print event with terminated (required to remove info about them from cache) and existing (required to determine whether all windows matching woth section are closed or not in order to remove FPS limit) windows IDs
-				echo "refresh -- terminated: ${local_once_terminated_windows_array[*]} existing: $local_windows_ids"
+				# Print event with terminated and existing windows IDs, required to check limit requests and unset cached info about terminated windows
+				echo "terminated: ${local_once_terminated_windows_array[*]}; existing: $local_windows_ids"
 				unset local_once_terminated_windows_array
 			fi
 			# Required to compare columns count in previous and current events
@@ -1266,12 +1266,12 @@ else
 			lazy_is_unset='1'
 		elif [[ "$event" == 'nohot' ]]; then # Unset '--hot' if responding event appears, as it becomes useless from this moment
 			unset hot
-		elif [[ "$event" == 'refresh'* ]]; then # Unset info about terminated windows from arrays and cache if responding event appears
+		elif [[ "$event" == 'terminated'* ]]; then # Unset info about terminated windows from arrays and cache if responding event appears
 			# Obtain list of terminated windows IDs
-			once_terminated_windows_ids="${event/*' terminated: '/}" # Remove everything before including type name of list with windows IDs
-			once_terminated_windows_ids="${once_terminated_windows_ids/' existing: '*/}" # Remove list of existing windows IDs
+			once_terminated_windows_ids="${event/'terminated: '/}" # Remove everything before including type name of list with windows IDs
+			once_terminated_windows_ids="${once_terminated_windows_ids/'; existing: '*/}" # Remove list of existing windows IDs
 			# Obtain list of existing windows IDs
-			once_existing_windows_ids="${event/*' existing: '/}" # Remove everything including type name of list with windows IDs
+			once_existing_windows_ids="${event/*'existing: '/}" # Remove everything including type name of list with windows IDs
 			# Unset info about freezing and CPU limits of terminated windows
 			for temp_terminated_window_id in $once_terminated_windows_ids; do
 				# Skip window ID if that is bad event or info about it does not exist in cache
