@@ -224,7 +224,7 @@ name = ForzaHorizon4.e
 executable = /run/media/zappex/WD-BLUE/Games/Steam/steamapps/common/Proton 9.0 (Beta)/files/bin/wine64-preloader
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\ForzaHorizon4\ForzaHorizon4.exe 
 owner = 1000
-mangohud-config = /home/zappex/.config/MangoHud/wine-ForzaHorizon4.conf
+mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
 fps-unfocus = 5 ; FPS to set on unfocus event
 fps-focus = 60 ; I have 60 FPS lock, so I want restore it on focus event
 focus = killall picom
@@ -251,7 +251,7 @@ cpu-limit = 0%
 ; Example using FPS limit as that is online game and I use MangoHud
 [Forza Horizon 4]
 name = ForzaHorizon4.e
-mangohud-config = /home/zappex/.config/MangoHud/wine-ForzaHorizon4.conf
+mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
 fps-unfocus = 5 ; FPS to set on unfocus event
 fps-focus = 60 ; I have 60 FPS lock, so I want restore it on focus event
 
