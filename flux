@@ -100,15 +100,11 @@ xprop_wrapper(){
 	# Track events related to window focus and changes in count of opened windows
 	while read -r local_temp_xprop_event; do
 		# Skip event if it repeats for some reason
-		if [[ -n "$local_previous_xprop_event" && "$local_temp_xprop_event" == "$local_previous_xprop_event" ]]; then
-			continue
-		else
+		if [[ -z "$local_previous_xprop_event" || "$local_temp_xprop_event" != "$local_previous_xprop_event" ]]; then
 			# Obtain ID of focused window and list of opened windows
 			local_xprop_output="$(xprop -root _NET_ACTIVE_WINDOW _NET_CLIENT_LIST_STACKING)"
 			# Do not send event to 'xprop_event_reader' it it repeats for some reason
-			if [[ -n "$local_previous_xprop_output" && "$local_xprop_output" == "$local_previous_xprop_output" ]]; then
-				continue
-			else
+			if [[ -z "$local_previous_xprop_output" || "$local_xprop_output" != "$local_previous_xprop_output" ]]; then
 				# Send event to 'xprop_event_reader'
 				echo "$local_xprop_output"
 				# Remember obtained info to compare it on next event and skip if it repeats
@@ -1000,9 +996,7 @@ config_key_fps_focus_map
 # Parse INI config
 while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 	# Skip cycle if line is commented or blank, regexp means comments which beginning from ';' or '#' symbols
-	if [[ "$temp_config_line" =~ ^(\;|\#) || -z "$temp_config_line" ]]; then
-		continue
-	else
+	if [[ ! "$temp_config_line" =~ ^(\;|\#) && -n "$temp_config_line" ]]; then
 		# Exit with an error if first line is not a section, otherwise remember section name, regexp means any symbols in square brackes
 		if [[ ! "$temp_config_line" =~ ^\[.*\]$ && -z "$once_section" ]]; then
 			print_error "Initial section is not found in config '$config'!"
@@ -1283,9 +1277,7 @@ else
 			# Unset info about freezing and CPU limits of terminated windows
 			for temp_terminated_window_id in $once_terminated_windows_ids; do
 				# Skip window ID if that is bad event or info about it does not exist in cache
-				if [[ -z "${cache_event_type_map["$temp_terminated_window_id"]}" || "${cache_event_type_map["$temp_terminated_window_id"]}" == 'bad' ]]; then
-					continue
-				else
+				if [[ -n "${cache_event_type_map["$temp_terminated_window_id"]}" && "${cache_event_type_map["$temp_terminated_window_id"]}" != 'bad' ]]; then
 					# Obtain PID of terminated process using cache, required to check and unset FPS limit
 					once_terminated_process_pid="${cache_process_pid_map["$temp_terminated_window_id"]}"
 					# Do not do anything if window is not frozen
@@ -1335,7 +1327,6 @@ else
 					# Unset only event type for bad window, otherwise bash will fail
 					print_verbose "Cached info about bad window with ID $temp_terminated_window_id has been removed as it has been terminated."
 					cache_event_type_map["$temp_terminated_window_id"]=''
-					continue
 				elif [[ "${cache_event_type_map["$temp_terminated_window_id"]}" == 'good' ]]; then
 					# Simplify access to PID of cached window info
 					once_terminated_process_pid="${cache_process_pid_map["$temp_terminated_window_id"]}"
@@ -1374,55 +1365,54 @@ else
 			# Apply requested limits to existing windows
 			for temp_existing_window_id in $once_existing_windows_ids; do
 				# Skip cycle if window has bad event type of not at all
-				if [[ -z "${cache_event_type_map["$temp_existing_window_id"]}" || "${cache_event_type_map["$temp_existing_window_id"]}" == 'bad' ]]; then
-					continue
-				fi
-				# Simplify access to PID of cached window info
-				once_existing_process_pid="${cache_process_pid_map["$temp_existing_window_id"]}"
-				# Simplify access to matching section of cached window info
-				once_existing_section="${cache_section_map["$once_existing_process_pid"]}"
-				# Check for request existence to apply one of limits
-				if [[ -n "${request_freeze_map["$once_existing_process_pid"]}" ]]; then
-					# Unset request as it becomes useless
-					request_freeze_map["$once_existing_process_pid"]=''
-					# Freeze process
-					passed_section="$once_existing_section" \
-					passed_process_name="${cache_process_name_map["$temp_existing_window_id"]}" \
-					passed_process_pid="${cache_process_pid_map["$temp_existing_window_id"]}" \
-					background_freeze_process &
-					# Associate PID of background process with PID of process to interrupt it in case focus event appears earlier than delay ends
-					freeze_bgprocess_pid_map["$once_existing_process_pid"]="$!"
-					# Mark process as frozen
-					is_frozen_pid_map["$once_existing_process_pid"]='1'
-					# Store PID to array to unfreeze process in case daemon interruption
-					frozen_processes_pids_array+=("$once_existing_process_pid")
-				elif [[ -n "${request_cpu_limit_map["$once_existing_process_pid"]}" ]]; then
-					# Unset request as it becomes useless
-					request_cpu_limit_map["$once_existing_process_pid"]=''
-					# Apply CPU limit
-					passed_section="$once_existing_section" \
-					passed_process_name="${cache_process_name_map["$temp_existing_window_id"]}" \
-					passed_process_pid="${cache_process_pid_map["$temp_existing_window_id"]}" \
-					background_cpulimit &
-					# Store PID of background process to array to interrupt it in case daemon exit
-					cpulimit_bgprocesses_pids_array+=("$!")
-					# Associate PID of background process with PID of process to interrupt it on focus event
-					cpulimit_bgprocess_pid_map["$once_existing_process_pid"]="$!"
-					# Mark process as CPU limited
-					is_cpu_limited_pid_map["$once_existing_process_pid"]='1'
-				elif [[ -n "$once_existing_section" && -n "${request_fps_limit_map["$once_existing_section"]}" ]]; then
-					# Unset request as it becomes useless
-					request_fps_limit_map["$once_existing_section"]=''
-					# Set FPS limit
-					passed_section="$once_existing_section" \
-					passed_process_pid="${cache_process_pid_map["$temp_existing_window_id"]}" \
-					background_mangohud_fps_set &
-					# Associate PID of background process with section to interrupt in case focus event appears earlier than delay ends
-					fps_limit_bgprocess_pid_map["$once_existing_section"]="$!"
-					# Mark section as FPS limited, required to check FPS limit existence on focus event
-					is_fps_limited_section_map["$once_existing_section"]='1'
-					# Store section to array, required to unset FPS limits on daemon termination
-					fps_limited_sections_array+=("$once_existing_section")
+				if [[ -n "${cache_event_type_map["$temp_existing_window_id"]}" && "${cache_event_type_map["$temp_existing_window_id"]}" != 'bad' ]]; then
+					# Simplify access to PID of cached window info
+					once_existing_process_pid="${cache_process_pid_map["$temp_existing_window_id"]}"
+					# Simplify access to matching section of cached window info
+					once_existing_section="${cache_section_map["$once_existing_process_pid"]}"
+					# Check for request existence to apply one of limits
+					if [[ -n "${request_freeze_map["$once_existing_process_pid"]}" ]]; then
+						# Unset request as it becomes useless
+						request_freeze_map["$once_existing_process_pid"]=''
+						# Freeze process
+						passed_section="$once_existing_section" \
+						passed_process_name="${cache_process_name_map["$temp_existing_window_id"]}" \
+						passed_process_pid="${cache_process_pid_map["$temp_existing_window_id"]}" \
+						background_freeze_process &
+						# Associate PID of background process with PID of process to interrupt it in case focus event appears earlier than delay ends
+						freeze_bgprocess_pid_map["$once_existing_process_pid"]="$!"
+						# Mark process as frozen
+						is_frozen_pid_map["$once_existing_process_pid"]='1'
+						# Store PID to array to unfreeze process in case daemon interruption
+						frozen_processes_pids_array+=("$once_existing_process_pid")
+					elif [[ -n "${request_cpu_limit_map["$once_existing_process_pid"]}" ]]; then
+						# Unset request as it becomes useless
+						request_cpu_limit_map["$once_existing_process_pid"]=''
+						# Apply CPU limit
+						passed_section="$once_existing_section" \
+						passed_process_name="${cache_process_name_map["$temp_existing_window_id"]}" \
+						passed_process_pid="${cache_process_pid_map["$temp_existing_window_id"]}" \
+						background_cpulimit &
+						# Store PID of background process to array to interrupt it in case daemon exit
+						cpulimit_bgprocesses_pids_array+=("$!")
+						# Associate PID of background process with PID of process to interrupt it on focus event
+						cpulimit_bgprocess_pid_map["$once_existing_process_pid"]="$!"
+						# Mark process as CPU limited
+						is_cpu_limited_pid_map["$once_existing_process_pid"]='1'
+					elif [[ -n "$once_existing_section" && -n "${request_fps_limit_map["$once_existing_section"]}" ]]; then
+						# Unset request as it becomes useless
+						request_fps_limit_map["$once_existing_section"]=''
+						# Set FPS limit
+						passed_section="$once_existing_section" \
+						passed_process_pid="${cache_process_pid_map["$temp_existing_window_id"]}" \
+						background_mangohud_fps_set &
+						# Associate PID of background process with section to interrupt in case focus event appears earlier than delay ends
+						fps_limit_bgprocess_pid_map["$once_existing_section"]="$!"
+						# Mark section as FPS limited, required to check FPS limit existence on focus event
+						is_fps_limited_section_map["$once_existing_section"]='1'
+						# Store section to array, required to unset FPS limits on daemon termination
+						fps_limited_sections_array+=("$once_existing_section")
+					fi
 				fi
 			done
 			unset temp_existing_window_id \
@@ -1433,9 +1423,7 @@ else
 			window_id="$event"
 		fi
 		# Skip event if event does not contain window ID
-		if [[ -z "$window_id" ]]; then
-			continue
-		else
+		if [[ -n "$window_id" ]]; then
 			# Check for previous section match, existence of command in 'unfocus' key, status of '--lazy' and signal about unsetting '--lazy'
 			if [[ -n "$previous_section" && -n "${config_key_unfocus_map["$previous_section"]}" && -z "$lazy" && -z "$lazy_is_unset" ]]; then
 				# Execute command from 'unfocus' key
@@ -1471,27 +1459,19 @@ else
 						# Attempt to find a matching section in config
 						for temp_section in "${sections_array[@]}"; do
 							# Compare process name with specified in section
-							if [[ -n "${config_key_name_map["$temp_section"]}" && "${config_key_name_map["$temp_section"]}" != "$process_name" ]]; then
-								continue
-							else
+							if [[ -z "${config_key_name_map["$temp_section"]}" || "${config_key_name_map["$temp_section"]}" == "$process_name" ]]; then
 								once_name_match='1'
 							fi
 							# Compare process executable path with specified in section
-							if [[ -n "${config_key_executable_map["$temp_section"]}" && "${config_key_executable_map["$temp_section"]}" != "$process_executable" ]]; then
-								continue
-							else
+							if [[ -z "${config_key_executable_map["$temp_section"]}" || "${config_key_executable_map["$temp_section"]}" == "$process_executable" ]]; then
 								once_executable_match='1'
 							fi
 							# Compare UID of process with specified in section
-							if [[ -n "${config_key_owner_map["$temp_section"]}" && "${config_key_owner_map["$temp_section"]}" != "$process_owner" ]]; then
-								continue
-							else
+							if [[ -z "${config_key_owner_map["$temp_section"]}" || "${config_key_owner_map["$temp_section"]}" == "$process_owner" ]]; then
 								once_owner_match='1'
 							fi
 							# Compare process command with specified in section
-							if [[ -n "${config_key_command_map["$temp_section"]}" && "${config_key_command_map["$temp_section"]}" != "$process_command" ]]; then
-								continue
-							else
+							if [[ -z "${config_key_command_map["$temp_section"]}" || "${config_key_command_map["$temp_section"]}" == "$process_command" ]]; then
 								once_command_match='1'
 							fi
 							# Mark as matching if all identifiers containing non-zero value
