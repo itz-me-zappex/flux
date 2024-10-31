@@ -1017,11 +1017,7 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 			once_section="${temp_config_line/\[/}"
 			once_section="${once_section/%\]/}"
 			sections_array+=("$once_section")
-			# Forward to next line
-			continue
-		fi
-		# Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
-		if [[ "${temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|focus|unfocus|command|mangohud-config|fps-unfocus|fps-focus)([[:space:]]+)?=([[:space:]]+)?* ]]; then
+		elif [[ "${temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|focus|unfocus|command|mangohud-config|fps-unfocus|fps-focus)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
 			# Remove key name and equal symbol
 			once_config_value="${temp_config_line/*=/}"
 			# Remove comments from value, 1st regexp means comments after '#' or ';' symbols, 2nd - single or double quoted strings
