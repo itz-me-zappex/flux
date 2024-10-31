@@ -162,12 +162,12 @@ xprop_event_reader(){
 		local_focused_window_id \
 		local_temp_stacking_window_id
 		# Print event to unset '--hot' option as it becomes useless from this moment
-		echo 'nohot'
+		echo '-hot'
 		unset hot
 	fi
 	# Print event for unset '--lazy' option before read events, otherwise focus and unfocus commands will not work
 	if [[ -n "$lazy" ]]; then
-		echo 'nolazy'
+		echo '-lazy'
 		unset lazy
 	fi
 	# Read events from 'xprop' and print IDs of windows
@@ -1261,10 +1261,10 @@ else
 			actions_on_exit
 			print_error "Daemon has been terminated unexpectedly!"
 			exit 1
-		elif [[ "$event" == 'nolazy' ]]; then # Unset '--lazy' option if responding event appears, otherwise focus and unfocus commands will not work
+		elif [[ "$event" == '-lazy' ]]; then # Unset '--lazy' option if responding event appears, otherwise focus and unfocus commands will not work
 			unset lazy
 			lazy_is_unset='1'
-		elif [[ "$event" == 'nohot' ]]; then # Unset '--hot' if responding event appears, as it becomes useless from this moment
+		elif [[ "$event" == '-hot' ]]; then # Unset '--hot' if responding event appears, as it becomes useless from this moment
 			unset hot
 		elif [[ "$event" == 'terminated'* ]]; then # Unset info about terminated windows from arrays and cache if responding event appears
 			# Obtain list of terminated windows IDs
