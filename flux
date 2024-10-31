@@ -15,7 +15,7 @@ print_log(){
 		if check_rw "$log"; then
 			echo -e "$local_timestamp$*" >> "$log"
 		else
-			allow_logging='' print_warn "Unable to write message to log file '$log', check read-write access or recreate it!"
+			allow_logging='' print_warn "Unable to write message to log file '$log', recreate it or check read-write access!"
 		fi
 	fi
 }
