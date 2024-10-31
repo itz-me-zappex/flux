@@ -1481,11 +1481,7 @@ else
 							once_owner_match \
 							once_command_match
 						done
-						unset temp_section \
-						once_name_match \
-						once_executable_match \
-						once_owner_match \
-						once_command_match
+						unset temp_section
 						# Mark process as mismatched if matching section was not found
 						if [[ -z "$section" ]]; then
 							cache_mismatch_map["$process_pid"]='1'
