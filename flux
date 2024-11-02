@@ -131,98 +131,127 @@ xprop_event_reader(){
 	local_temp_previous_local_window_id \
 	local_previous_active_window \
 	local_previous_client_list_stacking
-	# Print windows IDs of opened windows to apply limits immediately if '--hot' option was passed
-	if [[ -n "$hot" ]]; then
-		# Extract IDs of opened windows
-		local_stacking_windows_id="$(xprop -root _NET_CLIENT_LIST_STACKING 2>/dev/null)"
-		if [[ "$local_stacking_windows_id" != '_NET_CLIENT_LIST_STACKING:  no such atom on any window.' ]]; then
-			local_stacking_windows_id="${local_stacking_windows_id/* \# /}" # Remove everything before including '#'
-			local_stacking_windows_id="${local_stacking_windows_id//\,/}" # Remove commas
-		else
-			# Print event for safe exit if cannot obtain list of stacking windows
-			print_warn "Unable to get list of stacking windows!"
-			echo 'exit'
+	# Run in loop to make daemon able restart itself and reapply limits again when list of stacking windows becomes blank, that happens because of DE/WM restart and daemon unsets limits because windows disappearing one by one
+	while :; do
+		# Print message related to event reader restart and wait a bit to give DE/WM a time to restart properly
+		if [[ -n "$restart" ]]; then
+			unset restart
+			print_warn "Event reading will be restarted after 2 seconds because of desktop environment or window manager restart."
+			sleep 2
 		fi
-		# Extract ID of focused window
-		local_focused_window_id="$(xprop -root _NET_ACTIVE_WINDOW 2>/dev/null)"
-		if [[ "$local_focused_window_id" != '_NET_ACTIVE_WINDOW:  no such atom on any window.' ]]; then
-			local_focused_window_id="${local_focused_window_id/* \# /}" # Remove everything before including '#'
-		else
-			# Print event for safe exit if cannot obtain ID of focused window
-			print_warn "Unable to get ID of focused window!"
-			echo 'exit'
-		fi
-		# Print IDs of windows, but skip currently focused window as it should appear as first event when 'xprop' starts
-		for local_temp_stacking_window_id in $local_stacking_windows_id; do
-			if [[ "$local_temp_stacking_window_id" != "$local_focused_window_id" ]]; then
-				echo "$local_temp_stacking_window_id"
+		# Print windows IDs of opened windows to apply limits immediately if '--hot' option was passed
+		if [[ -n "$hot" ]]; then
+			# Extract IDs of opened windows
+			local_stacking_windows_id="$(xprop -root _NET_CLIENT_LIST_STACKING 2>/dev/null)"
+			if [[ "$local_stacking_windows_id" != '_NET_CLIENT_LIST_STACKING:  no such atom on any window.' ]]; then
+				local_stacking_windows_id="${local_stacking_windows_id/* \# /}" # Remove everything before including '#'
+				local_stacking_windows_id="${local_stacking_windows_id//\,/}" # Remove commas
+			else
+				# Print event for safe exit if cannot obtain list of stacking windows
+				print_warn "Unable to get list of stacking windows!"
+				echo 'exit'
 			fi
-		done
-		unset local_stacking_windows_id \
-		local_focused_window_id \
-		local_temp_stacking_window_id
-		# Print event to unset '--hot' option as it becomes useless from this moment
-		echo '-hot'
-		unset hot
-	fi
-	# Print event for unset '--lazy' option before read events, otherwise focus and unfocus commands will not work
-	if [[ -n "$lazy" ]]; then
-		echo '-lazy'
-		unset lazy
-	fi
-	# Read events from 'xprop' and print IDs of windows
-	while read -r local_temp_xprop_event; do
-		# Extract windows IDs from current event
-		if [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* ]]; then
-			local_windows_ids="${local_temp_xprop_event/*\# /}" # Remove everything before including '#'
-			local_windows_ids="${local_windows_ids//\,/}" # Remove commas
-		fi
-		# Print window ID if that is responding event and it does not repeat
-		if [[ "$local_temp_xprop_event" == '_NET_ACTIVE_WINDOW(WINDOW):'* && "$local_temp_xprop_event" != "$local_previous_active_window" ]]; then
-			# Remember current event to compare it with new one and skip if it repeats
-			local_previous_active_window="$local_temp_xprop_event"
-			# Extract window ID from line and print it
-			echo "${local_temp_xprop_event/* \# /}"
-		elif [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* && "$local_temp_xprop_event" != "$local_previous_client_list_stacking" ]]; then # Get count of columns in output with list of stacking windows and skip event if it repeats
-			# Count columns in event
-			local_client_list_stacking_count='0'
-			for local_temp_client_list_stacking_column in $local_temp_xprop_event; do
-				(( local_client_list_stacking_count++ ))
+			# Extract ID of focused window
+			local_focused_window_id="$(xprop -root _NET_ACTIVE_WINDOW 2>/dev/null)"
+			if [[ "$local_focused_window_id" != '_NET_ACTIVE_WINDOW:  no such atom on any window.' ]]; then
+				local_focused_window_id="${local_focused_window_id/* \# /}" # Remove everything before including '#'
+			else
+				# Print event for safe exit if cannot obtain ID of focused window
+				print_warn "Unable to get ID of focused window!"
+				echo 'exit'
+			fi
+			# Print IDs of windows, but skip currently focused window as it should appear as first event when 'xprop' starts
+			for local_temp_stacking_window_id in $local_stacking_windows_id; do
+				if [[ "$local_temp_stacking_window_id" != "$local_focused_window_id" ]]; then
+					echo "$local_temp_stacking_window_id"
+				fi
 			done
-			unset local_temp_client_list_stacking_column
-			# Compare count of columns and if previous event contains more columns (windows IDs), then print event to refresh PIDs in arrays and cache
-			if [[ -n "$local_previous_client_list_stacking_count" ]] && (( local_previous_client_list_stacking_count > local_client_list_stacking_count )); then
-				# Extract windows IDs from previous event
-				local_previous_windows_ids="${local_previous_client_list_stacking/*\# /}" # Remove everything before including '#'
-				local_previous_windows_ids="${local_previous_windows_ids//\,/}" # Remove commas
-				# Find terminated windows
-				for local_temp_previous_local_window_id in $local_previous_windows_ids; do
-					# Skip existing window ID as I want to store IDs of terminated windows to array
-					if [[ " $local_windows_ids " != *" $local_temp_previous_local_window_id "* ]]; then
-						local_once_terminated_windows_array+=("$local_temp_previous_local_window_id")
-					fi
-				done
-				unset local_temp_previous_local_window_id \
-				local_previous_windows_ids
-				# Print event with terminated and existing windows IDs, required to check limit requests and unset cached info about terminated windows
-				echo "terminated: ${local_once_terminated_windows_array[*]}; existing: $local_windows_ids"
-				unset local_once_terminated_windows_array
+			unset local_stacking_windows_id \
+			local_focused_window_id \
+			local_temp_stacking_window_id
+			# Print event to unset '--hot' option as it becomes useless from this moment
+			echo '-hot'
+			unset hot
+		fi
+		# Print event for unset '--lazy' option before read events, otherwise focus and unfocus commands will not work
+		if [[ -n "$lazy" ]]; then
+			echo '-lazy'
+			unset lazy
+		fi
+		# Read events from 'xprop' and print IDs of windows
+		while read -r local_temp_xprop_event; do
+			# Extract windows IDs from current event
+			if [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* ]]; then
+				local_windows_ids="${local_temp_xprop_event/*\# /}" # Remove everything before including '#'
+				local_windows_ids="${local_windows_ids//\,/}" # Remove commas
 			fi
-			# Required to compare columns count in previous and current events
-			local_previous_client_list_stacking_count="$local_client_list_stacking_count"
-			# Required to find terminated windows comparing previous list with new one
-			local_previous_client_list_stacking="$local_temp_xprop_event"
+			# Print window ID if that is responding event and it does not repeat
+			if [[ "$local_temp_xprop_event" == '_NET_ACTIVE_WINDOW(WINDOW):'* && "$local_temp_xprop_event" != "$local_previous_active_window" ]]; then
+				# Remember current event to compare it with new one and skip if it repeats
+				local_previous_active_window="$local_temp_xprop_event"
+				# Extract window ID from line and print it
+				echo "${local_temp_xprop_event/* \# /}"
+			elif [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* && "$local_temp_xprop_event" != "$local_previous_client_list_stacking" ]]; then # Get count of columns in output with list of stacking windows and skip event if it repeats
+				# Count columns in event
+				local_client_list_stacking_count='0'
+				for local_temp_client_list_stacking_column in $local_temp_xprop_event; do
+					(( local_client_list_stacking_count++ ))
+				done
+				unset local_temp_client_list_stacking_column
+				# Compare count of columns and if previous event contains more columns (windows IDs), then print event to refresh PIDs in arrays and cache
+				if [[ -n "$local_previous_client_list_stacking_count" ]] && (( local_previous_client_list_stacking_count > local_client_list_stacking_count )); then
+					# Extract windows IDs from previous event
+					local_previous_windows_ids="${local_previous_client_list_stacking/*\# /}" # Remove everything before including '#'
+					local_previous_windows_ids="${local_previous_windows_ids//\,/}" # Remove commas
+					# Find terminated windows
+					for local_temp_previous_local_window_id in $local_previous_windows_ids; do
+						# Skip existing window ID as I want to store IDs of terminated windows to array
+						if [[ " $local_windows_ids " != *" $local_temp_previous_local_window_id "* ]]; then
+							local_once_terminated_windows_array+=("$local_temp_previous_local_window_id")
+						fi
+					done
+					unset local_temp_previous_local_window_id \
+					local_previous_windows_ids
+					# Print event with terminated and existing windows IDs, required to check limit requests and unset cached info about terminated windows
+					echo "terminated: ${local_once_terminated_windows_array[*]}; existing: $local_windows_ids"
+					unset local_once_terminated_windows_array
+				fi
+				# Required to compare columns count in previous and current events
+				local_previous_client_list_stacking_count="$local_client_list_stacking_count"
+				# Required to find terminated windows comparing previous list with new one
+				local_previous_client_list_stacking="$local_temp_xprop_event"
+			fi
+			# Print event to check requests and apply limits
+			if [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* ]]; then
+				echo "check_requests: $local_windows_ids"
+			fi
+			# Handle blank list of stacking windows which appears on DE/WM restart
+			if [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW): window id #' ]]; then
+				# Print event to set '--hot' and '--lazy' options in event reader (outside of 'pipe_read'), required to reapply limits in case DE/WM restarts
+				echo 'restart'
+				# Set '--hot' and '--lazy' here to handle list of already opened windows
+				hot='1'
+				lazy='1'
+				# Unset variables which storing info about previous event to avoid ignoring of focused window after restart
+				unset local_previous_client_list_stacking_count \
+				local_previous_windows_ids \
+				local_temp_previous_local_window_id \
+				local_previous_active_window \
+				local_previous_client_list_stacking
+				# Restart event reader
+				restart='1'
+				break
+			fi
+			unset local_windows_ids
+		done < <(xprop_wrapper)
+		unset local_temp_xprop_event
+		# Print event for safe exit if 'xprop' has been terminated
+		if [[ -z "$restart" ]]; then
+			print_warn "Process 'xprop' required to read X11 events has been terminated!"
+			echo 'exit'
+			break
 		fi
-		# Print event to check requests and apply limits
-		if [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* ]]; then
-			echo "check_requests: $local_windows_ids"
-		fi
-		unset local_windows_ids
-	done < <(xprop_wrapper)
-	unset local_temp_xprop_event
-	# Print event for safe exit if 'xprop' has been terminated
-	print_warn "Process 'xprop' required to read X11 events has been terminated!"
-	echo 'exit'
+	done
 }
 
 # Required to run commands on focus and unfocus events
@@ -1417,11 +1446,29 @@ else
 			once_existing_windows_ids \
 			once_existing_process_pid \
 			once_existing_section
-		else # Set window ID variable if event does not match with statements above
+		elif [[ "$event" == 'restart' ]]; then
+			# Prepare daemon to reapply limits on 'xprop_event_reader' restart casued by restart of DE/WM
+			hot='1'
+			lazy='1'
+			lazy_is_unset=''
+			# Unset info about processes to avoid using it by accident
+			unset window_id \
+			process_pid \
+			process_name \
+			process_executable \
+			process_owner \
+			process_command \
+			section \
+			previous_window_id \
+			previous_process_pid \
+			previous_process_name \
+			previous_process_executable \
+			previous_process_owner \
+			previous_process_command \
+			previous_section
+		else
+			# Set window ID variable if event does not match with statements above
 			window_id="$event"
-		fi
-		# Skip event if event does not contain window ID
-		if [[ -n "$window_id" ]]; then
 			# Check for previous section match, existence of command in 'unfocus' key, status of '--lazy' and signal about unsetting '--lazy'
 			if [[ -n "$previous_section" && -n "${config_key_unfocus_map["$previous_section"]}" && -z "$lazy" && -z "$lazy_is_unset" ]]; then
 				# Execute command from 'unfocus' key
@@ -1483,7 +1530,11 @@ else
 							once_owner_match \
 							once_command_match
 						done
-						unset temp_section
+						unset temp_section \
+						once_name_match \
+						once_executable_match \
+						once_owner_match \
+						once_command_match
 						# Mark process as mismatched if matching section was not found
 						if [[ -z "$section" ]]; then
 							cache_mismatch_map["$process_pid"]='1'
