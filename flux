@@ -751,7 +751,7 @@ owner = "$process_owner"
 		fi
 	;;
 	--help | -h | --usage | -u )
-		echo "Usage: flux [-c <…>] [-f] [-h] [-H] [-Hl] [-L <…>] [-p] [-q] [-u] [-v] [-V]
+		echo "Usage: flux [-c <…>] [-f] [-h] [-H] [-l] [-L <…>] [-p] [-q] [-u] [-v] [-V]
 Options and values:
     -c, --config <…>                    Specify path to config file
     -f, --focused                       Display info about focused window in usable for config file way
