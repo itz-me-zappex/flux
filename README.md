@@ -165,10 +165,10 @@ Options and values:
     -V, --version                       Display release information
 
 Prefixes configuration:
-    --prefix-error                      Default: [e]
+    --prefix-error                      Default: [x]
     --prefix-info                       Default: [i]
-    --prefix-verbose                    Default: [v]
-    --prefix-warning                    Default: [w]
+    --prefix-verbose                    Default: [~]
+    --prefix-warning                    Default: [!]
 
 Logging configuration, use only with '--log':
     --log-disable-timestamps            Do not add timestamps to messages in log, do not use with '--log-timestamp'

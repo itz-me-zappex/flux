@@ -81,13 +81,12 @@ x11_session_check(){
 	# Or if $XDG_SESSION_TYPE is not equal to 'x11' (e.g. 'tty', 'wayland' etc.)
 	if [[ ! "$DISPLAY" =~ ^\:[0-9]+(\.[0-9]+)?$ || "$XDG_SESSION_TYPE" != 'x11' ]]; then
 		return 1
-	elif ! xprop -root > /dev/null 2>&1; then
-		# Fail if something is wrong with X11 session
+	elif ! xprop -root > /dev/null 2>&1; then # Fail if 'xprop' unable to get info about any opened window
 		return 1
 	fi
 }
 
-# Required to track events related to window focus and changes in count of opened windows in 'xprop_event_reader' function
+# Required to track events related to window focus and changes in count of opened windows in 'event_source' function
 # Pretty complicated because of buggyness of 'xprop' tool which in spy mode prints events in random order, which sometimes repeats or not valid at all
 # To fix that, despite performance impact I prefered to call 'xprop' tool manually every event to get proper info, because I did not find better way yet
 # That is still is not perfect solution, because from time to time there is a chance to get multiple events because of one action like openning window from panel
@@ -103,9 +102,9 @@ xprop_wrapper(){
 		if [[ -z "$local_previous_xprop_event" || "$local_temp_xprop_event" != "$local_previous_xprop_event" ]]; then
 			# Obtain ID of focused window and list of opened windows
 			local_xprop_output="$(xprop -root _NET_ACTIVE_WINDOW _NET_CLIENT_LIST_STACKING)"
-			# Do not send event to 'xprop_event_reader' it it repeats for some reason
+			# Do not send event to 'event_source' it it repeats for some reason
 			if [[ -z "$local_previous_xprop_output" || "$local_xprop_output" != "$local_previous_xprop_output" ]]; then
-				# Send event to 'xprop_event_reader'
+				# Send event to 'event_source'
 				echo "$local_xprop_output"
 				# Remember obtained info to compare it on next event and skip if it repeats
 				local_previous_xprop_output="$local_xprop_output"
@@ -117,7 +116,7 @@ xprop_wrapper(){
 }
 
 # Required to extract window IDs from xprop events and make '--hot' option work
-xprop_event_reader(){
+event_source(){
 	local local_stacking_windows_id \
 	local_focused_window_id \
 	local_temp_stacking_window_id \
@@ -672,16 +671,16 @@ actions_on_exit(){
 }
 
 # Set default prefixes for messages
-prefix_error='[e]'
+prefix_error='[x]'
 prefix_info='[i]'
-prefix_verbose='[v]'
-prefix_warning='[w]'
+prefix_verbose='[~]'
+prefix_warning='[!]'
 
 # Set default timestamp format for logger
 log_timestamp='%Y-%m-%dT%H:%M:%S%z'
 
 # Additional text for errors related to option parsing
-advice_on_option_error="\n[i] Try 'flux --help' for more information."
+advice_on_option_error="\n$prefix_info Try 'flux --help' for more information."
 
 # Option parsing
 while (( $# > 0 )); do
@@ -773,10 +772,10 @@ Options and values:
     -V, --version                       Display release information
 
 Prefixes configuration:
-    --prefix-error                      Default: [e]
+    --prefix-error                      Default: [x]
     --prefix-info                       Default: [i]
-    --prefix-verbose                    Default: [v]
-    --prefix-warning                    Default: [w]
+    --prefix-verbose                    Default: [~]
+    --prefix-warning                    Default: [!]
 
 Logging configuration, use only with '--log':
     --log-disable-timestamps            Do not add timestamps to messages in log, do not use with '--log-timestamp'
@@ -971,7 +970,10 @@ fi
 
 # Exit with an error if config file is not found
 if [[ -z "$config" ]]; then
-	print_error "Config file is not found!$advice_on_option_error"
+	print_error "Config file is not found!"
+	exit 1
+elif [[ -e "$config" && ! -f "$config" ]]; then # Exit with an error if path exists but that is not a file
+	print_error "Path '$config' specified in '--config' is not a file!"
 	exit 1
 elif [[ ! -f "$config" ]]; then # Exit with an error if config file does not exist
 	print_error "Config file '$config' does not exist!"
@@ -1121,11 +1123,19 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 					exit 1
 				fi
 			;;
-			focus* )
-				config_key_focus_map["$once_section"]="$once_config_value"
-			;;
-			unfocus* )
-				config_key_unfocus_map["$once_section"]="$once_config_value"
+			focus* | unfocus* )
+				# Get real path if value is a path to script
+				if [[ -f "$once_config_value" ]]; then
+					once_config_value="$(realpath -m "${once_config_value/'~'/"$HOME"}")"
+				fi
+				# Remember value from key
+				case "${temp_config_line,,}" in
+				focus* )
+					config_key_focus_map["$once_section"]="$once_config_value"
+				;;
+				unfocus* )
+					config_key_unfocus_map["$once_section"]="$once_config_value"
+				esac
 			;;
 			command* )
 				config_key_command_map["$once_section"]="$once_config_value"
@@ -1454,7 +1464,7 @@ else
 			once_existing_process_pid \
 			once_existing_section
 		elif [[ "$event" == 'restart' ]]; then
-			# Prepare daemon to reapply limits on 'xprop_event_reader' restart casued by restart of DE/WM
+			# Prepare daemon to reapply limits on 'event_source' restart casued by restart of DE/WM
 			hot='1'
 			lazy='1'
 			lazy_is_unset=''
@@ -1645,5 +1655,5 @@ else
 			# Unset to avoid false positive on next event
 			unset section
 		fi
-	done < <(xprop_event_reader)
+	done < <(event_source)
 fi
