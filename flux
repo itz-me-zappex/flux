@@ -1464,7 +1464,7 @@ else
 			once_existing_process_pid \
 			once_existing_section
 		elif [[ "$event" == 'restart' ]]; then
-			# Prepare daemon to reapply limits on 'event_source' restart casued by restart of DE/WM
+			# Prepare daemon to reapply limits on 'event_source' restart caused by restart of DE/WM
 			hot='1'
 			lazy='1'
 			lazy_is_unset=''
