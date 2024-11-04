@@ -262,7 +262,7 @@ event_source(){
 
 # Required to run commands on focus and unfocus events
 exec_on_event(){
-	# Export environment variables to interact with them using commands/scripts in 'focus'/'unfocus' key
+	# Export environment variables to interact with them using commands/scripts in 'exec-focus' or 'exec-unfocus' key
 	export FLUX_WINDOW_ID="$passed_window_id" \
 	FLUX_PROCESS_PID="$passed_process_pid" \
 	FLUX_PROCESS_NAME="$passed_process_name" \
@@ -1026,8 +1026,8 @@ config_key_executable_map \
 config_key_owner_map \
 config_key_cpu_limit_map \
 config_key_delay_map \
-config_key_focus_map \
-config_key_unfocus_map \
+config_key_exec_focus_map \
+config_key_exec_unfocus_map \
 config_key_command_map \
 config_key_mangohud_config_map \
 config_key_fps_unfocus_map \
@@ -1057,7 +1057,7 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 			once_section="${temp_config_line/\[/}"
 			once_section="${once_section/%\]/}"
 			sections_array+=("$once_section")
-		elif [[ "${temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|focus|unfocus|command|mangohud-config|fps-unfocus|fps-focus)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
+		elif [[ "${temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|exec-(un)?focus|command|mangohud-config|fps-unfocus|fps-focus)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
 			# Remove key name and equal symbol
 			once_config_value="${temp_config_line/*=/}"
 			# Remove comments from value, 1st regexp means comments after '#' or ';' symbols, 2nd - single or double quoted strings
@@ -1123,18 +1123,18 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 					exit 1
 				fi
 			;;
-			focus* | unfocus* )
+			exec-focus* | exec-unfocus* )
 				# Get real path if value is a path to script
 				if [[ -f "$once_config_value" ]]; then
 					once_config_value="$(realpath -m "${once_config_value/'~'/"$HOME"}")"
 				fi
 				# Remember value from key
 				case "${temp_config_line,,}" in
-				focus* )
-					config_key_focus_map["$once_section"]="$once_config_value"
+				exec-focus* )
+					config_key_exec_focus_map["$once_section"]="$once_config_value"
 				;;
-				unfocus* )
-					config_key_unfocus_map["$once_section"]="$once_config_value"
+				exec-unfocus* )
+					config_key_exec_unfocus_map["$once_section"]="$once_config_value"
 				esac
 			;;
 			command* )
@@ -1486,9 +1486,9 @@ else
 		else
 			# Set window ID variable if event does not match with statements above
 			window_id="$event"
-			# Check for previous section match, existence of command in 'unfocus' key, status of '--lazy' and signal about unsetting '--lazy'
-			if [[ -n "$previous_section" && -n "${config_key_unfocus_map["$previous_section"]}" && -z "$lazy" && -z "$lazy_is_unset" ]]; then
-				# Execute command from 'unfocus' key
+			# Check for previous section match, existence of command in 'exec-unfocus' key, status of '--lazy' and signal about unsetting '--lazy'
+			if [[ -n "$previous_section" && -n "${config_key_exec_unfocus_map["$previous_section"]}" && -z "$lazy" && -z "$lazy_is_unset" ]]; then
+				# Execute command from 'exec-unfocus' key
 				passed_window_id="$previous_window_id" \
 				passed_process_pid="$previous_process_pid" \
 				passed_process_name="$previous_process_name" \
@@ -1496,11 +1496,11 @@ else
 				passed_process_owner="$previous_process_owner" \
 				passed_process_command="$previous_process_command" \
 				passed_section="$previous_section" \
-				passed_event_command="${config_key_unfocus_map["$previous_section"]}" \
+				passed_event_command="${config_key_exec_unfocus_map["$previous_section"]}" \
 				passed_event='unfocus' \
 				exec_on_event
 			elif [[ -n "$lazy_is_unset" ]]; then # Check for existence of variable which signals about unsetting of '--lazy' option
-				# Unset variable which signals about unsetting of '--lazy' option, required to make 'unfocus' commands work after hot run (using '--hot')
+				# Unset variable which signals about unsetting of '--lazy' option, required to make 'exec-unfocus' commands work after hot run (using '--hot')
 				unset lazy_is_unset
 			fi
 			# Get process info using window ID if ID is not '0x0'
@@ -1623,9 +1623,9 @@ else
 					unset_fps_limit
 				fi
 			fi
-			# Execute command from 'focus' key if section matches, specified 'focus' key and that is not lazy mode
-			if [[ -n "$section" && -n "${config_key_focus_map["$section"]}" && -z "$lazy" ]]; then
-				# Execute command from 'focus' key
+			# Execute command from 'exec-focus' key if section matches, specified 'exec-focus' key and that is not lazy mode
+			if [[ -n "$section" && -n "${config_key_exec_focus_map["$section"]}" && -z "$lazy" ]]; then
+				# Execute command from 'exec-focus' key
 				passed_window_id="$window_id" \
 				passed_process_pid="$process_pid" \
 				passed_process_name="$process_name" \
@@ -1633,11 +1633,11 @@ else
 				passed_process_owner="$process_owner" \
 				passed_process_command="$process_command" \
 				passed_section="$section" \
-				passed_event_command="${config_key_focus_map["$section"]}" \
+				passed_event_command="${config_key_exec_focus_map["$section"]}" \
 				passed_event='focus' \
 				exec_on_event
 			fi
-			# Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'unfocus' key
+			# Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
 			previous_window_id="$window_id"
 			previous_process_pid="$process_pid"
 			previous_process_name="$process_name"
