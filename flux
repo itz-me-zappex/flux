@@ -1123,19 +1123,11 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 					exit 1
 				fi
 			;;
-			exec-focus* | exec-unfocus* )
-				# Get real path if value is a path to script
-				if [[ -f "$once_config_value" ]]; then
-					once_config_value="$(realpath -m "${once_config_value/'~'/"$HOME"}")"
-				fi
-				# Remember value from key
-				case "${temp_config_line,,}" in
-				exec-focus* )
-					config_key_exec_focus_map["$once_section"]="$once_config_value"
-				;;
-				exec-unfocus* )
-					config_key_exec_unfocus_map["$once_section"]="$once_config_value"
-				esac
+			exec-focus* )
+				config_key_exec_focus_map["$once_section"]="$once_config_value"
+			;;
+			exec-unfocus* )
+				config_key_exec_unfocus_map["$once_section"]="$once_config_value"
 			;;
 			command* )
 				config_key_command_map["$once_section"]="$once_config_value"
