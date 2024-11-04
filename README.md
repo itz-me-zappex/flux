@@ -189,8 +189,8 @@ Available keys and description:
 | `owner` | User ID of process, gets from `/proc/<PID>/status`. |
 | `cpu-limit` | CPU limit between `0%` and `100%`, defaults to `-1%` which means no CPU limit, `%` symbol is optional. |
 | `delay` | Delay in seconds before applying CPU/FPS limit. Optional, defaults to `0`, supports values with floating point. |
-| `focus` | Command to execute on focus event, command runs via bash and will not be killed on daemon exit, output is hidden to avoid mess in output of daemon. |
-| `unfocus` | Command to execute on unfocus event, command runs via bash and will not be killed on daemon exit, output is hidden to avoid mess in output of daemon. |
+| `exec-focus` | Command to execute on focus event, command runs via bash and will not be killed on daemon exit, output is hidden to avoid mess in output of daemon. |
+| `exec-unfocus` | Command to execute on unfocus event, command runs via bash and will not be killed on daemon exit, output is hidden to avoid mess in output of daemon. |
 | `command` | Command of process, gets from `/proc/<PID>/cmdline`, required if neither `name` nor `executable` is specified. |
 | `mangohud-config` | Path to MangoHud config, required if you want change FPS limits and requires `fps-unfocus`. DO NOT USE THE SAME CONFIG FOR MULTIPLE SECTIONS! |
 | `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`, cannot be equal to `0` as that means no limit. |
@@ -228,8 +228,8 @@ executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bi
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\The Witcher 3\bin\x64\witcher3.exe 
 owner = 1000
 cpu-limit = 0%
-focus = killall picom
-unfocus = picom
+exec-focus = killall picom
+exec-unfocus = picom
 
 ; Example using FPS limit as that is online game and I use MangoHud
 [Forza Horizon 4]
@@ -240,8 +240,8 @@ owner = 1000
 mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
 fps-unfocus = 5 ; FPS to set on unfocus event
 fps-focus = 60 ; I have 60 FPS lock, so I want restore it on focus event
-focus = killall picom
-unfocus = picom
+exec-focus = killall picom
+exec-unfocus = picom
 
 ; Example using CPU limit as game does not consume GPU resources if minimized but still uses CPU and requires network connection to download levels and music
 [Geometry Dash]
@@ -250,8 +250,8 @@ executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bi
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\Geometry Dash\GeometryDash.exe 
 owner = 1000
 cpu-limit = 2%
-focus = killall picom
-unfocus = picom
+exec-focus = killall picom
+exec-unfocus = picom
 ```
 
 #### Short examples
@@ -275,7 +275,7 @@ cpu-limit = 2%
 ```
 
 ## Variables
-Flux does not support environment variables, but passes them to commands in `focus` and `unfocus` keys.
+Flux does not support environment variables, but passes them to commands in `exec-focus` and `exec-unfocus` keys.
 
 | Variable | Description |
 |----------|-------------|
@@ -286,7 +286,7 @@ Flux does not support environment variables, but passes them to commands in `foc
 | `FLUX_PROCESS_OWNER` | UID of process |
 | `FLUX_PROCESS_COMMAND` | Command of process |
 
-Daemon passes absolutely same values for both `focus` and `unfocus` commands.
+Daemon passes absolutely same values for both `exec-focus` and `exec-unfocus` commands.
 
 ## Tips and tricks
 ### Keybinding to obtain template from focused window for config
@@ -306,7 +306,7 @@ Now you can easily grab templates from windows to use them in config by pasting 
 
 ## Possible questions
 ### How does daemon work?
-- Daemon reads X11 events related to window focus, then it gets PID of process using window ID via `xprop` tool and uses it to collect info about process (process name, its executable path, command which is used to run it and effective UID) to compare it with identifiers in config, if it finds window which matches with identifier(s) specified in specific section in config, it can run command from `focus` key, in case you switch to another window - apply FPS or CPU limit and run command from `unfocus` key (if all of those has been specified in config of course). If window does not match with any section in config, nothing happens. To reduce CPU usage and speed up daemon I implemented a caching algorithm which stores info about windows and processes into associative arrays, that allows to collect info about process and window once and then use cache to get this info immediately, if window with the same ID or if new window with the same PID appears (in this case it runs `xprop` to get PID of window and searches for cached info about this process), daemon uses cache to get info. Do not worry, daemon forgets info about window and process immediately if window disappears (i.e. becomes closed, not minimized), so memory leak should not occur.
+- Daemon reads X11 events related to window focus, then it gets PID of process using window ID via `xprop` tool and uses it to collect info about process (process name, its executable path, command which is used to run it and effective UID) to compare it with identifiers in config, if it finds window which matches with identifier(s) specified in specific section in config, it can run command from `exec-focus` key, in case you switch to another window - apply FPS or CPU limit and run command from `exec-unfocus` key (if all of those has been specified in config of course). If window does not match with any section in config, nothing happens. To reduce CPU usage and speed up daemon I implemented a caching algorithm which stores info about windows and processes into associative arrays, that allows to collect info about process and window once and then use cache to get this info immediately, if window with the same ID or if new window with the same PID appears (in this case it runs `xprop` to get PID of window and searches for cached info about this process), daemon uses cache to get info. Do not worry, daemon forgets info about window and process immediately if window disappears (i.e. becomes closed, not minimized), so memory leak should not occur.
 
 ### Does that daemon reduce performance?
 - Long story short, impact on neither performance nor battery life should be noticeable. It uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time, but it just chills out when you playing game or working in single window.
