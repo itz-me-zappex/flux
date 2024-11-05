@@ -759,28 +759,28 @@ owner = "$process_owner"
 	--help | -h | --usage | -u )
 		echo "Usage: flux [-c <…>] [-f] [-h] [-H] [-l] [-L <…>] [-p] [-q] [-u] [-v] [-V]
 Options and values:
-    -c, --config <…>                    Specify path to config file
-    -f, --focused                       Display info about focused window in usable for config file way
-    -h, --help                          Display this help
-    -H, --hot                           Apply actions to already unfocused windows before handling events
-    -l, --lazy                          Avoid focus and unfocus commands on hot, use only with '--hot'
-    -L, --log <…>                       Store output to specified file
-    -p, --pick                          Display info about picked window in usable for config file way
-    -q, --quiet                         Display errors and warnings only
-    -u, --usage                         Same as '--help'
-    -v, --verbose                       Detailed output
-    -V, --version                       Display release information
+  -c, --config <…>            Specify path to config file
+  -f, --focused               Display info about focused window in usable for config file way
+  -h, --help                  Display this help
+  -H, --hot                   Apply actions to already unfocused windows before handling events
+  -l, --lazy                  Avoid focus and unfocus commands on hot, use only with '--hot'
+  -L, --log <…>               Store output to specified file
+  -p, --pick                  Display info about picked window in usable for config file way
+  -q, --quiet                 Display errors and warnings only
+  -u, --usage                 Same as '--help'
+  -v, --verbose               Detailed output
+  -V, --version               Display release information
 
 Prefixes configuration:
-    --prefix-error                      Default: [x]
-    --prefix-info                       Default: [i]
-    --prefix-verbose                    Default: [~]
-    --prefix-warning                    Default: [!]
+  --prefix-error              Default: [x]
+  --prefix-info               Default: [i]
+  --prefix-verbose            Default: [~]
+  --prefix-warning            Default: [!]
 
 Logging configuration, use only with '--log':
-    --log-disable-timestamps            Do not add timestamps to messages in log, do not use with '--log-timestamp'
-    --log-overwrite                     Recreate log file before start
-    --log-timestamp <…>                 Set timestamp format, default: %Y-%m-%dT%H:%M:%S%z
+  --log-disable-timestamps    Do not add timestamps to messages in log, do not use with '--log-timestamp'
+  --log-overwrite             Recreate log file before start
+  --log-timestamp <…>         Set timestamp format, default: %Y-%m-%dT%H:%M:%S%z
 "
 		exit 0
 	;;
