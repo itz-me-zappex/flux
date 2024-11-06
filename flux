@@ -135,12 +135,13 @@ event_source(){
 		# Print message related to event reader restart and wait a bit to give DE/WM a time to restart properly
 		if [[ -n "$restart" ]]; then
 			unset restart
-			print_warn "Event reading will be restarted because of desktop environment or window manager restart."
+			print_warn "Waiting until DE/WM restart fully…"
 			# Wait for appearance of windows IDs, i.e. until DE/WM restart fully
 			while :; do
 				sleep 0.5
 				# Break loop if list of stacking windows is not blank
-				if [[ "$(xprop -root _NET_CLIENT_LIST_STACKING)" == '_NET_CLIENT_LIST_STACKING(WINDOW): window id # '* ]]; then
+				if [[ "$(xprop -root _NET_CLIENT_LIST_STACKING)" != '_NET_CLIENT_LIST_STACKING(WINDOW): window id # ' ]]; then
+					print_warn "Event reading has been restarted!"
 					break
 				fi
 			done
