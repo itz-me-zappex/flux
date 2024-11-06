@@ -1090,6 +1090,8 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 				config_key_name_map["$once_section"]="$once_config_value"
 			;;
 			executable* )
+				# Get absolute path to executable
+				once_config_value="$(realpath -m "${once_config_value/'~'/"$HOME"}")"
 				config_key_executable_map["$once_section"]="$once_config_value"
 			;;
 			owner* )
