@@ -173,7 +173,7 @@ Prefixes configuration:
 Logging configuration, use only with '--log':
   --log-disable-timestamps    Do not add timestamps to messages in log, do not use with '--log-timestamp'
   --log-overwrite             Recreate log file before start
-  --log-timestamp <…>         Set timestamp format, default: %Y-%m-%dT%H:%M:%S%z
+  --log-timestamp <…>         Set timestamp format, default: [%Y-%m-%dT%H:%M:%S%z]
 ```
 
 ### Autostart

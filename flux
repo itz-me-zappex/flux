@@ -9,7 +9,7 @@ print_log(){
 	if [[ -n "$allow_logging" ]]; then
 		# Get timestamp if that behavior is not disabled using '--log-disable-timestamps' option
 		if [[ -z "$log_disable_timestamps" ]]; then
-			local_timestamp="$(printf "[%($log_timestamp)T]") "
+			local_timestamp="$(printf "%($log_timestamp)T") "
 		fi
 		# Check log file for read-write access before store message to log
 		if check_rw "$log"; then
@@ -686,7 +686,7 @@ prefix_verbose='[~]'
 prefix_warning='[!]'
 
 # Set default timestamp format for logger
-log_timestamp='%Y-%m-%dT%H:%M:%S%z'
+log_timestamp='[%Y-%m-%dT%H:%M:%S%z]'
 
 # Additional text for errors related to option parsing
 advice_on_option_error="\n$prefix_info Try 'flux --help' for more information."
@@ -789,7 +789,7 @@ Prefixes configuration:
 Logging configuration, use only with '--log':
   --log-disable-timestamps    Do not add timestamps to messages in log, do not use with '--log-timestamp'
   --log-overwrite             Recreate log file before start
-  --log-timestamp <…>         Set timestamp format, default: %Y-%m-%dT%H:%M:%S%z
+  --log-timestamp <…>         Set timestamp format, default: [%Y-%m-%dT%H:%M:%S%z]
 "
 		exit 0
 	;;
