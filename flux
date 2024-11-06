@@ -371,6 +371,14 @@ get_process_info(){
 	fi
 }
 
+
+# Required to convert relative paths to absolute, used in '--config' and '--log' options, also in 'executable' and 'mangohud-config' config keys
+get_realpath(){
+	local local_relative_path="$1"
+	# Output will be stored to variable which calls this function from '$(…)'
+	realpath -m "${local_relative_path/'~'/"$HOME"}"
+}
+
 # Required to change FPS limit in specified MangoHud config
 mangohud_fps_set(){
 	local local_temp_config_line \
@@ -697,7 +705,7 @@ while (( $# > 0 )); do
 		shift "$once_shift"
 		# Get absolute path to config in case it is specified as relative
 		if [[ -n "$config" ]]; then
-			config="$(realpath -m "${config/'~'/"$HOME"}")"
+			config="$(get_realpath "$config")"
 		fi
 	;;
 	--focus | -f | --pick | -p )
@@ -806,7 +814,7 @@ Logging configuration, use only with '--log':
 		shift "$once_shift"
 		# Get absolute path to log file in case it is specified as relative
 		if [[ -n "$log" ]]; then
-			log="$(realpath -m "${log/'~'/"$HOME"}")"
+			log="$(get_realpath "$log")"
 		fi
 	;;
 	--quiet | -q )
@@ -1091,7 +1099,7 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 			;;
 			executable* )
 				# Get absolute path to executable
-				once_config_value="$(realpath -m "${once_config_value/'~'/"$HOME"}")"
+				once_config_value="$(get_realpath "$once_config_value")"
 				config_key_executable_map["$once_section"]="$once_config_value"
 			;;
 			owner* )
@@ -1137,7 +1145,7 @@ while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
 			;;
 			mangohud-config* )
 				# Get absolute path to MangoHud config in case it is specified as relative
-				once_config_value="$(realpath -m "${once_config_value/'~'/"$HOME"}")"
+				once_config_value="$(get_realpath "$once_config_value")"
 				# Exit with an error if specified MangoHud config file does not exist
 				if [[ -f "$once_config_value" ]]; then
 					config_key_mangohud_config_map["$once_section"]="$once_config_value"
