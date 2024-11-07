@@ -150,30 +150,38 @@ sudo dpkg -i flux-v${fluxver}.deb ; sudo apt install -f # install a package
 
 ## Usage
 ```
-Usage: flux [-c <…>] [-f] [-h] [-H] [-l] [-L <…>] [-p] [-q] [-u] [-v] [-V]
+Usage: flux [OPTIONS]
+
 Options and values:
-  -c, --config <…>            Specify path to config file
-  -f, --focused               Display info about focused window in usable for config file way
-  -h, --help                  Display this help
-  -H, --hot                   Apply actions to already unfocused windows before handling events
-  -l, --lazy                  Avoid focus and unfocus commands on hot, use only with '--hot'
-  -L, --log <…>               Store output to specified file
-  -p, --pick                  Display info about picked window in usable for config file way
-  -q, --quiet                 Display errors and warnings only
-  -u, --usage                 Same as '--help'
-  -v, --verbose               Detailed output
-  -V, --version               Display release information
+  -c, --config <path>        Specify path to config file
+                             (default: \$XDG_CONFIG_HOME/flux.ini; \$HOME/.config/flux.ini; /etc/flux.ini)
+  -f, --focused              Display info about focused window in compatible with config way and exit
+  -h, --help                 Display this help and exit
+  -H, --hot                  Apply actions to already unfocused windows before handling events
+  -l, --lazy                 Avoid focus and unfocus commands on hot (use only with '--hot')
+  -L, --log <path>           Store messages to specified file
+  -p, --pick                 Display info about picked window in usable for config file way and exit
+  -q, --quiet                Display errors and warnings only
+  -u, --usage                Alias for '--help'
+  -v, --verbose              Detailed output
+  -V, --version              Display release information and exit
 
 Prefixes configuration:
-  --prefix-error              Default: [x]
-  --prefix-info               Default: [i]
-  --prefix-verbose            Default: [~]
-  --prefix-warning            Default: [!]
+  --prefix-error <prefix>    Set prefix for error messages (default: [x])
+  --prefix-info <prefix>     Set prefix for info messages (default: [i])
+  --prefix-verbose <prefix>  Set prefix for verbose messages (default: [~])
+  --prefix-warning <prefix>  Set prefix for warning messages (default: [!])
 
-Logging configuration, use only with '--log':
-  --log-disable-timestamps    Do not add timestamps to messages in log, do not use with '--log-timestamp'
-  --log-overwrite             Recreate log file before start
-  --log-timestamp <…>         Set timestamp format, default: [%Y-%m-%dT%H:%M:%S%z]
+Logging configuration (use only with '--log'):
+  --log-disable-timestamps   Do not add timestamps to messages in log (do not use with '--log-timestamp')
+  --log-overwrite            Recreate log file before start
+  --log-timestamp <format>   Set timestamp format (default: [%Y-%m-%dT%H:%M:%S%z])
+
+Examples:
+  flux -Hlv
+  flux -HlL ~/.flux.log --log-overwrite --log-timestamp '[%d.%m.%Y %H:%M:%S]'
+  flux -qL ~/.flux.log --log-disable-timestamps
+  flux -c ~/.config/flux.ini.bak
 ```
 
 ### Autostart
