@@ -134,7 +134,7 @@ event_source(){
 	# Run in loop to make daemon able restart event reading and apply limits again if list of stacking windows becomes blank
 	while :; do
 		# Wait for window appearance if list of windows IDs appears blank
-		if [[ "$(xprop -root _NET_CLIENT_LIST_STACKING)" == '_NET_CLIENT_LIST_STACKING(WINDOW): window id # ' ]]; then
+		if [[ -n "$restart" || "$(xprop -root _NET_CLIENT_LIST_STACKING)" == '_NET_CLIENT_LIST_STACKING(WINDOW): window id # ' ]]; then
 			print_warn "Windows not found, waiting for appearance…"
 			# Wait for windows appearance
 			while read -r local_xprop_net_client_list_stacking; do
@@ -143,7 +143,8 @@ event_source(){
 					break
 				fi
 			done < <(xprop -root -spy _NET_CLIENT_LIST_STACKING)
-			unset local_xprop_net_client_list_stacking
+			unset local_xprop_net_client_list_stacking \
+			restart
 		fi
 		# Print windows IDs of opened windows to apply limits immediately if '--hot' option was passed
 		if [[ -n "$hot" ]]; then
@@ -256,8 +257,6 @@ event_source(){
 			print_warn "Process 'xprop' required to read X11 events has been terminated!"
 			echo 'exit'
 			break
-		else
-			unset restart
 		fi
 	done
 }
