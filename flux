@@ -129,22 +129,21 @@ event_source(){
 	local_once_terminated_windows_array \
 	local_temp_previous_local_window_id \
 	local_previous_active_window \
-	local_previous_client_list_stacking
-	# Run in loop to make daemon able restart itself and reapply limits again when list of stacking windows becomes blank, that happens because of DE/WM restart and daemon unsets limits because windows disappearing one by one
+	local_previous_client_list_stacking \
+	local_xprop_net_client_list_stacking
+	# Run in loop to make daemon able restart event reading and apply limits again if list of stacking windows becomes blank
 	while :; do
-		# Print message related to event reader restart and wait a bit to give DE/WM a time to restart properly
-		if [[ -n "$restart" ]]; then
-			unset restart
-			print_warn "Waiting until DE/WM restart fully…"
-			# Wait for appearance of windows IDs, i.e. until DE/WM restart fully
-			while :; do
-				sleep 0.5
+		# Wait for window appearance if list of windows IDs appears blank
+		if [[ "$(xprop -root _NET_CLIENT_LIST_STACKING)" == '_NET_CLIENT_LIST_STACKING(WINDOW): window id # ' ]]; then
+			print_warn "Windows not found, waiting for appearance…"
+			# Wait for windows appearance
+			while read -r local_xprop_net_client_list_stacking; do
 				# Break loop if list of stacking windows is not blank
-				if [[ "$(xprop -root _NET_CLIENT_LIST_STACKING)" != '_NET_CLIENT_LIST_STACKING(WINDOW): window id # ' ]]; then
-					print_warn "Event reading has been restarted!"
+				if [[ "$local_xprop_net_client_list_stacking" != '_NET_CLIENT_LIST_STACKING(WINDOW): window id #' ]]; then
 					break
 				fi
-			done
+			done < <(xprop -root -spy _NET_CLIENT_LIST_STACKING)
+			unset local_xprop_net_client_list_stacking
 		fi
 		# Print windows IDs of opened windows to apply limits immediately if '--hot' option was passed
 		if [[ -n "$hot" ]]; then
@@ -232,9 +231,9 @@ event_source(){
 			if [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* ]]; then
 				echo "check_requests: $local_windows_ids"
 			fi
-			# Handle blank list of stacking windows which appears on DE/WM restart
+			# Handle blank list of stacking windows
 			if [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW): window id #' ]]; then
-				# Print event to set '--hot' and '--lazy' options in event reader (outside of 'pipe_read'), required to reapply limits in case DE/WM restarts
+				# Print event to set '--hot' and '--lazy' options in event reader (outside of 'pipe_read'), required to apply limits again in case list appears blank
 				echo 'restart'
 				# Set '--hot' and '--lazy' here to handle list of already opened windows
 				hot='1'
@@ -257,6 +256,8 @@ event_source(){
 			print_warn "Process 'xprop' required to read X11 events has been terminated!"
 			echo 'exit'
 			break
+		else
+			unset restart
 		fi
 	done
 }
@@ -1475,7 +1476,7 @@ else
 			once_existing_process_pid \
 			once_existing_section
 		elif [[ "$event" == 'restart' ]]; then
-			# Prepare daemon to reapply limits on 'event_source' restart caused by restart of DE/WM
+			# Prepare daemon to reapply limits on 'event_source' restart event which appears if list of windows IDs becomes blank
 			hot='1'
 			lazy='1'
 			lazy_is_unset=''
