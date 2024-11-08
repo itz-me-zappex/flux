@@ -740,7 +740,7 @@ while (( $# > 0 )); do
 					# Extract ID of focused window
 					while read -r temp_xwininfo_output_line; do
 						if [[ "$temp_xwininfo_output_line" == 'xwininfo: Window id: '* ]]; then
-							window_id="${temp_xwininfo_output_line/*: /}"
+							window_id="${temp_xwininfo_output_line/xwininfo: Window id: /}"
 							window_id="${window_id/ */}"
 							break
 						fi
