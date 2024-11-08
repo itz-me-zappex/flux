@@ -201,8 +201,8 @@ event_source(){
 						(( local_client_list_stacking_count++ ))
 					done
 					unset local_temp_client_list_stacking_column
-					# Compare count of columns and if previous event contains more columns (windows IDs), then print event to refresh PIDs in arrays and cache
-					if [[ -n "$local_previous_client_list_stacking_count" ]] && (( local_previous_client_list_stacking_count > local_client_list_stacking_count )); then
+					# Compare count of columns and if previous event contains more columns (windows IDs) or workaround for KDE Plasma has been applied, then print event to refresh PIDs in arrays and cache
+					if [[ -n "$kde_plasma_workaround" ]] || [[ -n "$local_previous_client_list_stacking_count" && "$local_previous_client_list_stacking_count" -gt "$local_client_list_stacking_count" ]]; then
 						# Extract windows IDs from previous event
 						local_previous_windows_ids="${local_previous_client_list_stacking/*\# /}" # Remove everything before including '#'
 						local_previous_windows_ids="${local_previous_windows_ids//\,/}" # Remove commas
@@ -1303,6 +1303,11 @@ else
 	done
 	unset temp_prefix_type \
 	once_variable_name
+	# Required to apply workaround for KDE Plasma which prevents list of stacking windows from being skipped if it contains the same columns count as previous one in 'event_source()'
+	if [[ "$DESKTOP_SESSION" == 'plasmax11' ]]; then
+		kde_plasma_workaround='1'
+		print_warn "Workaround for KDE Plasma has been applied, expect higher CPU usage because daemon will try to find terminated windows in every '_NET_CLIENT_LIST_STACKING' event!"
+	fi
 	# Remove CPU and FPS limits of processes on exit
 	trap 'actions_on_exit ; print_info "Daemon has been terminated successfully." ; exit 0' SIGTERM SIGINT
 	# Ignore user signals as they used in 'background_cpulimit' function to avoid next output ('X' - path to 'flux', 'Y' - line, 'Z' - PID of 'background_cpulimit'):
