@@ -15,7 +15,9 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
   - [Arch Linux and dereatives](#arch-linux-and-dereatives-1)
   - [Debian and dereatives](#debian-and-dereatives-1)
 - [Usage](#usage)
+  - [List of available options](#list-of-available-options)
   - [Autostart](#autostart)
+  - [Warning for KDE Plasma users](#warning-for-kde-plasma-users)
 - [Configuration](#configuration)
   - [Config path](#config-path)
   - [Limitations](#limitations)
@@ -149,6 +151,7 @@ sudo dpkg -i flux-v${fluxver}.deb ; sudo apt install -f # install a package
 ```
 
 ## Usage
+### List of available options
 ```
 Usage: flux [OPTIONS]
 
@@ -186,6 +189,9 @@ Examples:
 
 ### Autostart
 Just add command to autostart using your DE settings or WM config. Running daemon as root also possible, but that feature almost useless.
+
+### Warning for KDE Plasma users
+If you use KDE Plasma on X11, make sure `$DESKTOP_SESSION` variable contains `plasmax11` (that is what it contains on KDE Neon which I used for testing) to apply workaround which fixes issue with inability to detect termination of windows. Alternatively, run `flux` with command like `DESKTOP_SESSION='plasmax11' flux [OPTIONS]`.
 
 ## Configuration
 A simple INI is used for configuration.
