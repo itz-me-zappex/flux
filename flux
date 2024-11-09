@@ -7,8 +7,8 @@ print_log(){
 	echo -e "$*"
 	# Print message with timestamp to log file if responding option is specified and logging has been allowed before event reading
 	if [[ -n "$allow_logging" ]]; then
-		# Get timestamp if that behavior is not disabled using '--log-disable-timestamps' option
-		if [[ -z "$log_disable_timestamps" ]]; then
+		# Get timestamp if that behavior is not disabled using '--log-no-timestamps' option
+		if [[ -z "$log_no_timestamps" ]]; then
 			local_timestamp="$(printf "%($log_timestamp)T") "
 		fi
 		# Check log file for read-write access before store message to log
@@ -796,14 +796,14 @@ Prefixes configuration:
   --prefix-warning <prefix>  Set prefix for warning messages (default: [!])
 
 Logging configuration (use only with '--log'):
-  --log-disable-timestamps   Do not add timestamps to messages in log (do not use with '--log-timestamp')
+  --log-no-timestamps        Do not add timestamps to messages in log (do not use with '--log-timestamp')
   --log-overwrite            Recreate log file before start
   --log-timestamp <format>   Set timestamp format (default: [%Y-%m-%dT%H:%M:%S%z])
 
 Examples:
   flux -Hlv
   flux -HlL ~/.flux.log --log-overwrite --log-timestamp '[%d.%m.%Y %H:%M:%S]'
-  flux -qL ~/.flux.log --log-disable-timestamps
+  flux -qL ~/.flux.log --log-no-timestamps
   flux -c ~/.config/flux.ini.bak
 "
 		exit 0
@@ -890,9 +890,9 @@ There is NO WARRANTY, to the extent permitted by law.
 		# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
 		shift "$once_shift"
 	;;
-	--log-disable-timestamps )
-		option_repeat_check log_disable_timestamps --log-disable-timestamps
-		log_disable_timestamps='1'
+	--log-no-timestamps )
+		option_repeat_check log_no_timestamps --log-no-timestamps
+		log_no_timestamps='1'
 		shift 1
 	;;
 	--log-overwrite )
@@ -943,14 +943,14 @@ if [[ -n "$lazy" && -z "$hot" ]]; then
 fi
 
 # Exit with an error if logging specific options are specified without '--log' option
-if [[ -z "$log_is_passed" ]] && [[ -n "$log_disable_timestamps" || -n "$log_overwrite" || -n "$log_timestamp_is_passed" ]]; then
+if [[ -z "$log_is_passed" ]] && [[ -n "$log_no_timestamps" || -n "$log_overwrite" || -n "$log_timestamp_is_passed" ]]; then
 	print_error "Do not use options related to logging without '--log' options!$advice_on_option_error"
 	exit 1
 fi
 
-# Exit with an error if '--log-timestamp' and '--log-disable-timestamps' options are specified at the same time
-if [[ -n "$log_timestamp_is_passed" && -n "$log_disable_timestamps" ]]; then
-	print_error "Do not use '--log-timestamp' and '--log-disable-timestamps' options at the same time!$advice_on_option_error"
+# Exit with an error if '--log-timestamp' and '--log-no-timestamps' options are specified at the same time
+if [[ -n "$log_timestamp_is_passed" && -n "$log_no_timestamps" ]]; then
+	print_error "Do not use '--log-timestamp' and '--log-no-timestamps' options at the same time!$advice_on_option_error"
 	exit 1
 fi
 
