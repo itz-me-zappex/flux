@@ -132,7 +132,8 @@ event_source(){
 	local_previous_client_list_stacking \
 	local_xprop_net_client_list_stacking \
 	local_restart \
-	local_list_is_not_blank
+	local_list_is_not_blank \
+	local_active_window_id
 	# Run in loop to make daemon able restart event reading and apply limits again if list of stacking windows becomes blank
 	while :; do
 		unset local_list_is_not_blank
@@ -193,7 +194,10 @@ event_source(){
 					# Remember current event to compare it with new one and skip if it repeats
 					local_previous_active_window="$local_temp_xprop_event"
 					# Extract window ID from line and print it
-					echo "${local_temp_xprop_event/* \# /}"
+					local_active_window_id="${local_temp_xprop_event/* \# /}"
+					local_active_window_id="${local_active_window_id/,*/}"
+					echo "$local_active_window_id"
+					unset local_active_window_id
 				elif [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* && "$local_temp_xprop_event" != "$local_previous_client_list_stacking" ]]; then # Get count of columns in output with list of stacking windows and skip event if it repeats
 					# Count columns in event if that is not KDE Plasma (because of workaround, that type of detection of terminated windows does not work there)
 					if [[ -z "$kde_plasma_workaround" ]]; then
