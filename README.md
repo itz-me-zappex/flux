@@ -25,7 +25,8 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
   - [Configuration example](#configuration-example)
     - [Long examples](#long-examples)
     - [Short examples](#short-examples)
-- [Variables](#variables)
+  - [Environment variables passed to `exec-focus` and `exec-unfocus`](#environment-variables-passed-to-exec-focus-and-exec-unfocus)
+    - [List of variables and description](#list-of-variables-and-description)
 - [Tips and tricks](#tips-and-tricks)
   - [Keybinding to obtain template from focused window for config](#keybinding-to-obtain-template-from-focused-window-for-config)
   - [Apply changes in config file](#apply-changes-in-config-file)
@@ -290,19 +291,18 @@ name = GeometryDash.ex
 cpu-limit = 2%
 ```
 
-## Variables
-Flux does not support environment variables, but passes them to commands in `exec-focus` and `exec-unfocus` keys.
+### Environment variables passed to `exec-focus` and `exec-unfocus`
+Note: Daemon passes absolutely the same values for both `exec-focus` and `exec-unfocus` commands.
 
+#### List of variables and description
 | Variable | Description |
 |----------|-------------|
 | `FLUX_WINDOW_ID` | ID of focused window |
 | `FLUX_PROCESS_PID` | Process PID of focused window |
 | `FLUX_PROCESS_NAME` | Process name of focused window |
 | `FLUX_PROCESS_EXECUTABLE` | Path to process binary |
-| `FLUX_PROCESS_OWNER` | UID of process |
+| `FLUX_PROCESS_OWNER` | Effective UID of process |
 | `FLUX_PROCESS_COMMAND` | Command of process |
-
-Daemon passes absolutely same values for both `exec-focus` and `exec-unfocus` commands.
 
 ## Tips and tricks
 ### Keybinding to obtain template from focused window for config
