@@ -195,12 +195,14 @@ event_source(){
 					# Extract window ID from line and print it
 					echo "${local_temp_xprop_event/* \# /}"
 				elif [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* && "$local_temp_xprop_event" != "$local_previous_client_list_stacking" ]]; then # Get count of columns in output with list of stacking windows and skip event if it repeats
-					# Count columns in event
-					local_client_list_stacking_count='0'
-					for local_temp_client_list_stacking_column in $local_temp_xprop_event; do
-						(( local_client_list_stacking_count++ ))
-					done
-					unset local_temp_client_list_stacking_column
+					# Count columns in event if that is not KDE Plasma (because of workaround, that type of detection of terminated windows does not work there)
+					if [[ -z "$kde_plasma_workaround" ]]; then
+						local_client_list_stacking_count='0'
+						for local_temp_client_list_stacking_column in $local_temp_xprop_event; do
+							(( local_client_list_stacking_count++ ))
+						done
+						unset local_temp_client_list_stacking_column
+					fi
 					# Compare count of columns and if previous event contains more columns (windows IDs) or workaround for KDE Plasma has been applied, then print event to refresh PIDs in arrays and cache
 					if [[ -n "$kde_plasma_workaround" ]] || [[ -n "$local_previous_client_list_stacking_count" && "$local_previous_client_list_stacking_count" -gt "$local_client_list_stacking_count" ]]; then
 						# Extract windows IDs from previous event
@@ -215,12 +217,16 @@ event_source(){
 						done
 						unset local_temp_previous_local_window_id \
 						local_previous_windows_ids
-						# Print event with terminated and existing windows IDs, required to check limit requests and unset cached info about terminated windows
-						echo "terminated: ${local_once_terminated_windows_array[*]}; existing: $local_windows_ids"
-						unset local_once_terminated_windows_array
+						# Print event with terminated and existing windows IDs if array with terminated windows IDs is not blank, required to check limit requests and unset cached info about terminated windows
+						if [[ -n "${local_once_terminated_windows_array[*]}" ]]; then
+							echo "terminated: ${local_once_terminated_windows_array[*]}; existing: $local_windows_ids"
+							unset local_once_terminated_windows_array
+						fi
 					fi
 					# Required to compare columns count in previous and current events
-					local_previous_client_list_stacking_count="$local_client_list_stacking_count"
+					if [[ -z "$kde_plasma_workaround" ]]; then
+						local_previous_client_list_stacking_count="$local_client_list_stacking_count"
+					fi
 					# Required to find terminated windows comparing previous list with new one
 					local_previous_client_list_stacking="$local_temp_xprop_event"
 				fi
@@ -1306,7 +1312,7 @@ else
 	# Required to apply workaround for KDE Plasma which prevents list of stacking windows from being skipped if it contains the same columns count as previous one in 'event_source()'
 	if [[ "$DESKTOP_SESSION" == 'plasmax11' ]]; then
 		kde_plasma_workaround='1'
-		print_warn "Workaround for KDE Plasma has been applied, expect higher CPU usage because daemon will try to find terminated windows in every '_NET_CLIENT_LIST_STACKING' event!"
+		print_warn "Workaround for KDE Plasma has been applied, expect slightly higher CPU usage because daemon will try to find terminated windows in every '_NET_CLIENT_LIST_STACKING' event!"
 	fi
 	# Remove CPU and FPS limits of processes on exit
 	trap 'actions_on_exit ; print_info "Daemon has been terminated successfully." ; exit 0' SIGTERM SIGINT
