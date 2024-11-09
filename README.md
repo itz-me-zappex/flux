@@ -19,6 +19,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
   - [Autostart](#autostart)
   - [Warning for KDE Plasma users](#warning-for-kde-plasma-users)
 - [Configuration](#configuration)
+  - [Available keys and description](#available-keys-and-description)
   - [Config path](#config-path)
   - [Limitations](#limitations)
   - [Configuration example](#configuration-example)
@@ -195,12 +196,13 @@ If you use KDE Plasma on X11, make sure `$DESKTOP_SESSION` variable contains `pl
 
 ## Configuration
 A simple INI is used for configuration.
-Available keys and description:
+
+### Available keys and description
 | Key               | Description |
 |-------------------|-------------|
 | `name` | Name of process, gets from `/proc/<PID>/comm`, required if neither `executable` nor `command` is specified. |
 | `executable` | Path to binary of process, gets by reading `/proc/<PID>/exe` symlink, required if neither `name` nor `command` is specified. |
-| `owner` | User ID of process, gets from `/proc/<PID>/status`. |
+| `owner` | Effective UID of process, gets 2nd UID or 3rd column from `Uid:` string in `/proc/<PID>/status` file. |
 | `cpu-limit` | CPU limit between `0%` and `100%`, defaults to `-1%` which means no CPU limit, `%` symbol is optional. |
 | `delay` | Delay in seconds before applying CPU/FPS limit. Optional, defaults to `0`, supports values with floating point. |
 | `exec-focus` | Command to execute on focus event, command runs via bash and will not be killed on daemon exit, output is hidden to avoid mess in output of daemon. |
