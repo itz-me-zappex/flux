@@ -157,7 +157,7 @@ Usage: flux [OPTIONS]
 
 Options and values:
   -c, --config <path>        Specify path to config file
-                             (default: \$XDG_CONFIG_HOME/flux.ini; \$HOME/.config/flux.ini; /etc/flux.ini)
+                             (default: $XDG_CONFIG_HOME/flux.ini; $HOME/.config/flux.ini; /etc/flux.ini)
   -f, --focused              Display info about focused window in compatible with config way and exit
   -h, --help                 Display this help and exit
   -H, --hot                  Apply actions to already unfocused windows before handling events
