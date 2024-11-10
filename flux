@@ -1091,7 +1091,7 @@ for temp_config_line in "${config_content_array[@]}"; do
 			if [[ -n "${sections_array[*]}" ]]; then
 				for temp_section in "${sections_array[@]}"; do
 					if [[ "[$temp_section]" == "$temp_config_line" ]]; then
-						print_error "Section name '$temp_section' is repeated!"
+						print_error "Section name '$temp_section' is repeated in '$config' config file!"
 						exit 1
 					fi
 				done
@@ -1143,7 +1143,7 @@ for temp_config_line in "${config_content_array[@]}"; do
 				if [[ "$once_config_value" =~ ^[0-9]+$ ]]; then
 					config_key_owner_map["$once_section"]="$once_config_value"
 				else
-					print_error "Value '$once_config_value' in key 'owner' in section '$once_section' is not UID!"
+					print_error "Value '$once_config_value' in key 'owner' in section '$once_section' is not UID in '$config' config file!"
 					exit 1
 				fi
 			;;
@@ -1157,7 +1157,7 @@ for temp_config_line in "${config_content_array[@]}"; do
 						config_key_cpu_limit_map["$once_section"]="$(( "${once_config_value/%\%/}" * cpu_threads ))"
 					fi
 				else
-					print_error "Value '$once_config_value' in key 'cpulimit' in section '$once_section' is invalid! Allowed values are 0-100%."
+					print_error "Value '$once_config_value' in key 'cpulimit' in section '$once_section' is invalid in '$config' config file! Allowed values are 0-100%."
 					exit 1
 				fi
 			;;
@@ -1166,7 +1166,7 @@ for temp_config_line in "${config_content_array[@]}"; do
 				if [[ "$once_config_value" =~ ^[0-9]+((\.|\,)[0-9]+)?$ ]]; then
 					config_key_delay_map["$once_section"]="$once_config_value"
 				else
-					print_error "Value '$once_config_value' in key 'delay' in section '$once_section' is neither integer nor float!"
+					print_error "Value '$once_config_value' in key 'delay' in section '$once_section' is neither integer nor float in '$config' config file!"
 					exit 1
 				fi
 			;;
@@ -1186,7 +1186,7 @@ for temp_config_line in "${config_content_array[@]}"; do
 				if [[ -f "$once_config_value" ]]; then
 					config_key_mangohud_config_map["$once_section"]="$once_config_value"
 				else
-					print_error "Config file '$once_config_value' specified in key 'mangohud-config' in section '$once_section' does not exist!"
+					print_error "Config file '$once_config_value' specified in key 'mangohud-config' in section '$once_section' in '$config' config file does not exist!"
 					exit 1
 				fi
 			;;
@@ -1197,11 +1197,11 @@ for temp_config_line in "${config_content_array[@]}"; do
 					if [[ "$once_config_value" != '0' ]]; then
 						config_key_fps_unfocus_map["$once_section"]="$once_config_value"
 					else
-						print_error "Value $once_config_value in key 'fps-unfocus' in section '$once_section' should be greater than zero!"
+						print_error "Value $once_config_value in key 'fps-unfocus' in section '$once_section' in '$config' config file should be greater than zero!"
 						exit 1
 					fi
 				else
-					print_error "Value '$once_config_value' specified in key 'fps-unfocus' in section '$once_section' is not an integer!"
+					print_error "Value '$once_config_value' specified in key 'fps-unfocus' in section '$once_section' in '$config' config file is not an integer!"
 					exit 1
 				fi
 			;;
@@ -1210,12 +1210,12 @@ for temp_config_line in "${config_content_array[@]}"; do
 				if [[ "$once_config_value" =~ ^[0-9]+$ ]]; then
 					config_key_fps_focus_map["$once_section"]="$once_config_value"
 				else
-					print_error "Value '$once_config_value' specified in key 'fps-focus' in section '$once_section' is not an integer!"
+					print_error "Value '$once_config_value' specified in key 'fps-focus' in section '$once_section' in '$config' config file is not an integer!"
 					exit 1
 				fi
 			esac
 		else
-			print_error "Unable to define type of line '$temp_config_line'!"
+			print_error "Unable to define type of line '$temp_config_line' in '$config' config file!"
 			exit 1
 		fi
 	fi
