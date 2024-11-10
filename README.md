@@ -30,7 +30,6 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 - [Tips and tricks](#tips-and-tricks)
   - [Keybinding to obtain template from focused window for config](#keybinding-to-obtain-template-from-focused-window-for-config)
   - [Apply changes in config file](#apply-changes-in-config-file)
-  - [Improve performance of daemon](#improve-performance-of-daemon)
   - [Types of limits and which you should use](#types-of-limits-and-which-you-should-use)
 - [Possible questions](#possible-questions)
   - [How does daemon work?](#how-does-daemon-work)
@@ -227,7 +226,7 @@ As INI is not standartized, I should mention all supported features here.
   - Commented lines and inline comments using `;` and/or `#` symbols.
   - Сase insensitivity of keys names.
   - Insensetivity to spaces before and after `=` symbol.
-  - Line continuation using `\` symbol.
+  - Line continuation using `\` symbol, if list of commands separated using `;` symbol and string is not quoted, it still will work and it will not be accepted as comment, not a bug, but feature.
 - Unsupported
   - Regular expressions.
   - Inline comment on lines with section name.
@@ -311,9 +310,6 @@ Now you can easily grab templates from windows to use them in config by pasting 
 
 ### Apply changes in config file
 - Create shortcut for `$ killall flux ; flux --hot --lazy` command which restarts daemon and use it when you done config file editing.
-
-### Improve performance of daemon
-- Geeks only, casual users should not care about that. To do that, run daemon using command like `$ chrt --batch 0 flux --hot --lazy`. `SCHED_BATCH` scheduling policy is designed to improve performance of non-interactive tasks like daemons, timers, scripts etc..
 
 ### Types of limits and which you should use
 - FPS limits recommended for online and multiplayer games and if you do not mind to use MangoHud, this method reduces resource consumption when game unfocused/minimized.
