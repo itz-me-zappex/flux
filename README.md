@@ -222,16 +222,16 @@ A simple INI is used for configuration.
 ### Limitations
 As INI is not standartized, I should mention all supported features here.
 - Supported
-  - Spaces in section names.
+  - Spaces and other symbols in sections names.
   - Single and double quoted strings.
   - Commented lines and inline comments using `;` and/or `#` symbols.
-  - Сase insensitive name of keys.
+  - Сase insensitivity of keys names.
   - Insensetivity to spaces before and after `=` symbol.
+  - Line continuation using `\` symbol.
 - Unsupported
   - Regular expressions.
   - Inline comment on lines with section name.
-  - Line continuation using `\` symbol.
-  - Anything else what unmentioned above.
+  - Anything else that unmentioned here.
 
 ### Configuration example
 Tip: Use `--focus` or `--pick` option to obtain info about process in usable for configuration way from focused window or by picking it respectively.
