@@ -208,7 +208,7 @@ A simple INI is used for configuration.
 | `exec-focus` | Command to execute on focus event, command runs via bash and will not be killed on daemon exit, output is hidden to avoid mess in output of daemon. |
 | `exec-unfocus` | Command to execute on unfocus event, command runs via bash and will not be killed on daemon exit, output is hidden to avoid mess in output of daemon. |
 | `command` | Command of process, gets from `/proc/<PID>/cmdline`, required if neither `name` nor `executable` is specified. |
-| `mangohud-config` | Path to MangoHud config, required if you want change FPS limits and requires `fps-unfocus`. DO NOT USE THE SAME CONFIG FOR MULTIPLE SECTIONS! |
+| `mangohud-config` | Path to MangoHud config, required if you want change FPS limits and requires `fps-unfocus`. Make sure you created specified config, at least just keep it blank, because MangoHud can not load new config on fly unlike reload (if changed) or unload (if removed) it. Do not use the same config for multiple sections! |
 | `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`, cannot be equal to `0` as that means no limit. |
 | `fps-focus` | FPS to set on focus, requires `fps-unfocus`, defaults to `0` (i.e. no limit). |
 
