@@ -270,22 +270,14 @@ event_source(){
 
 # Required to run commands on focus and unfocus events
 exec_on_event(){
-	# Export environment variables to interact with them using commands/scripts in 'exec-focus' or 'exec-unfocus' key
-	export FLUX_WINDOW_ID="$passed_window_id" \
+	# Pass environment variables to interact with them using commands/scripts in 'exec-focus' or 'exec-unfocus' key and run command on passed event
+	FLUX_WINDOW_ID="$passed_window_id" \
 	FLUX_PROCESS_PID="$passed_process_pid" \
 	FLUX_PROCESS_NAME="$passed_process_name" \
 	FLUX_PROCESS_EXECUTABLE="$passed_process_executable" \
 	FLUX_PROCESS_OWNER="$passed_process_owner" \
-	FLUX_PROCESS_COMMAND="$passed_process_command"
-	# Run command on passed event
+	FLUX_PROCESS_COMMAND="$passed_process_command" \
 	nohup setsid bash -c "$passed_event_command" > /dev/null 2>&1 &
-	# Unset environment variables exported above
-	unset FLUX_WINDOW_ID \
-	FLUX_PROCESS_PID \
-	FLUX_PROCESS_NAME \
-	FLUX_PROCESS_EXECUTABLE \
-	FLUX_PROCESS_OWNER \
-	FLUX_PROCESS_COMMAND
 	print_verbose "Command '$passed_event_command' from section '$passed_section' has been executed on $passed_event event."
 }
 
@@ -1556,7 +1548,7 @@ else
 					print_warn "Unable to obtain PID of window with ID $window_id, getting process info skipped!"
 				fi
 			else
-				print_warn "Bad event with window ID 0x0 appeared, getting process info skipped!"
+				print_verbose "Bad event with window ID 0x0 appeared, getting process info skipped."
 			fi
 			# Do not find matching section if window does not report its PID
 			if [[ -n "$process_pid" ]]; then
