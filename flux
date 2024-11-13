@@ -139,7 +139,7 @@ event_source(){
 		unset local_list_is_not_blank
 		# Wait for window appearance if list of windows IDs appears blank
 		if [[ -n "$local_restart" || "$(xprop -root _NET_CLIENT_LIST_STACKING)" != '_NET_CLIENT_LIST_STACKING(WINDOW): window id # 0x'* ]]; then
-			print_warn "Windows not found, waiting for appearance…"
+			print_warn "Opened windows were not found, waiting for their appearance…"
 			# Wait for windows appearance
 			while read -r local_xprop_net_client_list_stacking; do
 				# Break loop if list of stacking windows is not blank
