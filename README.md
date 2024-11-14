@@ -224,13 +224,14 @@ As INI is not standartized, I should mention all supported features here.
 - Supported
   - Spaces and other symbols in sections names.
   - Single and double quoted strings.
-  - Commented lines and inline comments using `;` and/or `#` symbols.
   - Сase insensitivity of keys names.
+  - Comments using `;` and/or `#` symbols.
   - Insensetivity to spaces before and after `=` symbol.
-  - Line continuation using `\` symbol, if list of commands separated using `;` symbol and string is not quoted, it still will work and it will not be accepted as comment, not a bug, but feature.
 - Unsupported
   - Regular expressions.
   - Inline comment on lines with section name.
+  - Line continuation using `\` symbol.
+  - Inline comments using `;` and/or `#` symbols.
   - Anything else that unmentioned here.
 
 ### Configuration example
