@@ -1200,7 +1200,7 @@ for temp_config_line in "${config_content_array[@]}"; do
 						once_key_name='mangohud-source-config'
 					;;
 					mangohud-config* )
-						once_key_name='mangohud-source-config'
+						once_key_name='mangohud-config'
 					esac
 					# Exit with an error if specified MangoHud config file does not exist
 					print_error "MangoHud config file '$once_config_value' specified in key '$once_key_name' in section '$once_section' in '$config' config file does not exist!"
