@@ -1058,29 +1058,8 @@ config_key_mangohud_config_map \
 config_key_fps_unfocus_map \
 config_key_fps_focus_map
 
-# Get config content and merge splitten with line continuation strings
-while read -r temp_config_line || [[ -n "$temp_config_line" ]]; do
-	# Check for backslashes in the end of line, e.g. line continuation
-	if [[ "$temp_config_line" == *' \' || -n "$use_line_buffer" ]]; then
-		# Remove last backslash and store part of string to buffer
-		line_buffer+="${temp_config_line/%\\/}"
-		# Setting of '$use_line_buffer' required to grab last part of string as it should not contain backslash in the end and won't be recognized by statement
-		if [[ -z "$use_line_buffer" ]]; then
-			use_line_buffer='1'
-		elif [[ "$temp_config_line" != *' \' ]]; then # Check for continuation ending
-			# Store line buffer content to config content array
-			config_content_array+=("$line_buffer")
-			unset use_line_buffer \
-			line_buffer
-		fi
-	else
-		config_content_array+=("$temp_config_line")
-	fi
-done < "$config"
-unset temp_config_line
-
 # Parse INI config
-for temp_config_line in "${config_content_array[@]}"; do
+while read -r temp_config_line; do
 	# Skip cycle if line is commented or blank, regexp means comments which beginning from ';' or '#' symbols
 	if [[ ! "$temp_config_line" =~ ^(\;|\#) && -n "$temp_config_line" ]]; then
 		# Exit with an error if first line is not a section, otherwise remember section name, regexp means any symbols in square brackes
@@ -1106,15 +1085,6 @@ for temp_config_line in "${config_content_array[@]}"; do
 		elif [[ "${temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
 			# Remove key name and equal symbol
 			once_config_value="${temp_config_line/*=/}"
-			# Remove comments from value, 1st regexp means comments after '#' or ';' symbols, 2nd - single or double quoted strings
-			if [[ "$once_config_value" =~ (\#|\;) && ! "$once_config_value" =~ ^(\".*\"|\'.*\')$ ]]; then
-				# Regexp means comment after '#' symbol
-				if [[ "$once_config_value" =~ \# ]]; then
-					once_config_value="${once_config_value/\#*/}"
-				else
-					once_config_value="${once_config_value/\;*/}"
-				fi
-			fi
 			# Remove all spaces before and after string, internal shell parameter expansion required to get spaces supposed to be removed
 			once_config_value="${once_config_value#"${once_config_value%%[![:space:]]*}"}" # Remove spaces in beginning for string
 			once_config_value="${once_config_value%"${once_config_value##*[![:space:]]}"}" # Remove spaces in end of string
@@ -1236,12 +1206,11 @@ for temp_config_line in "${config_content_array[@]}"; do
 			exit 1
 		fi
 	fi
-done
+done < "$config"
 unset temp_config_line \
 once_config_value \
 once_section \
-config \
-config_content_array
+config
 
 # Check values in sections and exit with an error if something is wrong or set default values in some keys if is not specified
 for temp_section in "${sections_array[@]}"; do
