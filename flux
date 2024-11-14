@@ -371,7 +371,7 @@ get_process_info(){
 }
 
 
-# Required to convert relative paths to absolute, used in '--config' and '--log' options, also in 'executable' and 'mangohud-config' config keys
+# Required to convert relative paths to absolute, used in '--config' and '--log' options, also in 'executable', 'mangohud-source-config' and 'mangohud-target-config' config keys
 get_realpath(){
 	local local_relative_path="$1"
 	# Output will be stored to variable which calls this function from '$(…)'
@@ -382,14 +382,23 @@ get_realpath(){
 mangohud_fps_set(){
 	local local_temp_config_line \
 	local_new_config_content \
-	local_config="$1" \
-	local_fps_to_set="$2" \
+	local_target_config="$1" \
+	local_source_config="$2" \
+	local_fps_to_set="$3" \
 	local_fps_limit_is_changed
 	# Check if config file exists before continue in case it has been removed
-	if [[ -f "$local_config" ]]; then
-		# Attempt to read MangoHud config file
-		if ! check_rw "$local_config"; then
-			print_warn "Unable to read MangoHud config file '$local_config'!"
+	if [[ -f "$local_target_config" ]]; then
+		# Check for readability of source config only if it differs from target config
+		if [[ "$local_target_config" != "$local_source_config" ]]; then
+			# Check readability of source MangoHud config file
+			if ! check_ro "$local_source_config"; then
+				print_warn "Source MangoHud config file '$local_target_config' is not readable!"
+				return 1
+			fi
+		fi
+		# Check read-write ability of target MangoHud config file
+		if ! check_rw "$local_target_config"; then
+			print_warn "Target MangoHud config file '$local_target_config' is not rewritable!"
 			return 1
 		fi
 		# Replace 'fps_limit' value in config if exists
@@ -404,23 +413,17 @@ mangohud_fps_set(){
 				# Add line to processed text
 				local_new_config_content+="$local_temp_config_line\n"
 			fi
-		done < "$local_config"
-		# Pass key with FPS limit if line does not exist in config
-		if check_rw "$local_config"; then
-			# Check whether FPS limit has been set or not
-			if [[ -z "$local_fps_limit_is_changed" ]]; then
-				# Pass key with FPS limit if line does not exist in config
-				echo "fps_limit = $local_fps_to_set" >> "$local_config"
-			else
-				# Pass config content if FPS has been already changed
-				echo -e "${local_new_config_content/%'\n'/}" > "$local_config"
-			fi
+		done < "$local_source_config"
+		# Check whether FPS limit has been set or not
+		if [[ -z "$local_fps_limit_is_changed" ]]; then
+			# Pass config content with 'fps_limit' key if line does not exist in config
+			echo -e "${local_new_config_content/%'\n'/}\nfps_limit = $local_fps_to_set" > "$local_target_config"
 		else
-			print_warn "Unable to modify MangoHud config file '$local_config'!"
-			return 1
+			# Pass config content if FPS has been already changed
+			echo -e "${local_new_config_content/%'\n'/}" > "$local_target_config"
 		fi
 	else
-		print_warn "MangoHud config file '$local_config' was not found!"
+		print_warn "Target MangoHud config file '$local_target_config' does not exist!"
 		return 1
 	fi
 }
@@ -492,8 +495,8 @@ background_mangohud_fps_set(){
 	# Check for process existence before set FPS limit
 	if check_pid_existence "$passed_process_pid"; then
 		# Attempt to change 'fps_limit' in specified MangoHud config file
-		if mangohud_fps_set "${config_key_mangohud_config_map["$passed_section"]}" "${config_key_fps_unfocus_map["$passed_section"]}"; then
-			print_info "Section '$passed_section' has been FPS limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS on unfocus event."
+		if mangohud_fps_set "${config_key_mangohud_target_config_map["$passed_section"]}" "${config_key_mangohud_source_config_map["$passed_section"]}" "${config_key_fps_unfocus_map["$passed_section"]}"; then
+			print_info "Section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS on unfocus event."
 		fi
 	else
 		print_warn "Process matching with section '$passed_section' has been terminated before FPS limiting!"
@@ -606,18 +609,23 @@ unset_fps_limit(){
 		if ! kill "${fps_limit_bgprocess_pid_map["$passed_section"]}" > /dev/null 2>&1; then
 			# Avoid printing this message if delay is not specified
 			if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
-				print_warn "Unable to cancel delayed for ${config_key_delay_map["$passed_section"]} second(s) FPS limiting of section '$passed_section'!"
+				print_warn "Unable to cancel delayed for ${config_key_delay_map["$passed_section"]} second(s) FPS unlimiting of section '$passed_section'!"
 			fi
 		else
 			# Avoid printing this message if delay is not specified
 			if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
-				print_info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) FPS limiting of section '$passed_section' has been cancelled $passed_end_of_msg."
+				print_info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) FPS unlimiting of section '$passed_section' has been cancelled $passed_end_of_msg."
 			fi
 		fi
 	fi
 	# Set FPS from 'fps-focus' key
-	if mangohud_fps_set "${config_key_mangohud_config_map["$passed_section"]}" "${config_key_fps_focus_map["$passed_section"]}"; then
-		print_info "Section '$passed_section' has been FPS unlimited $passed_end_of_msg."
+	if mangohud_fps_set "${config_key_mangohud_target_config_map["$passed_section"]}" "${config_key_mangohud_source_config_map["$passed_section"]}" "${config_key_fps_focus_map["$passed_section"]}"; then
+		# Print message depending by FPS limit
+		if [[ "${config_key_fps_focus_map["$passed_section"]}" == '0' ]]; then
+			print_info "Section '$passed_section' has been FPS unlimited $passed_end_of_msg."
+		else
+			print_info "Section '$passed_section' has been limited to ${config_key_fps_focus_map["$passed_section"]} FPS $passed_end_of_msg."
+		fi
 	fi
 	# Forget that process(es) matching with current section have been FPS limited previously
 	for local_temp_fps_limited_pid in "${!fps_limited_section_map[@]}"; do
@@ -668,7 +676,7 @@ actions_on_exit(){
 			kill "${fps_limit_bgprocess_pid_map["$local_temp_fps_limited_section"]}" > /dev/null 2>&1
 		fi
 		# Set FPS from 'fps-focus' key to remove limit
-		mangohud_fps_set "${config_key_mangohud_config_map["$local_temp_fps_limited_section"]}" "${config_key_fps_focus_map["$local_temp_fps_limited_section"]}" > /dev/null 2>&1
+		mangohud_fps_set "${config_key_mangohud_target_config_map["$local_temp_fps_limited_section"]}" "${config_key_mangohud_source_config_map["$local_temp_fps_limited_section"]}" "${config_key_fps_focus_map["$local_temp_fps_limited_section"]}" > /dev/null 2>&1
 	done
 	# Wait a bit to avoid delayed messages after termination
 	sleep 0.1
@@ -1045,7 +1053,8 @@ config_key_delay_map \
 config_key_exec_focus_map \
 config_key_exec_unfocus_map \
 config_key_command_map \
-config_key_mangohud_config_map \
+config_key_mangohud_source_config_map \
+config_key_mangohud_target_config_map \
 config_key_fps_unfocus_map \
 config_key_fps_focus_map
 
@@ -1094,16 +1103,16 @@ for temp_config_line in "${config_content_array[@]}"; do
 			once_section="${temp_config_line/\[/}"
 			once_section="${once_section/%\]/}"
 			sections_array+=("$once_section")
-		elif [[ "${temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|exec-(un)?focus|command|mangohud-config|fps-unfocus|fps-focus)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
+		elif [[ "${temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|exec-(un)?focus|command|mangohud-(source|target)-config|fps-unfocus|fps-focus)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
 			# Remove key name and equal symbol
 			once_config_value="${temp_config_line/*=/}"
 			# Remove comments from value, 1st regexp means comments after '#' or ';' symbols, 2nd - single or double quoted strings
-			if [[ "$once_config_value" =~ \ (\#|\;) && ! "$once_config_value" =~ ^(\".*\"|\'.*\')$ ]]; then
+			if [[ "$once_config_value" =~ (\#|\;) && ! "$once_config_value" =~ ^(\".*\"|\'.*\')$ ]]; then
 				# Regexp means comment after '#' symbol
 				if [[ "$once_config_value" =~ \# ]]; then
-					once_config_value="${once_config_value/ \#*/}"
+					once_config_value="${once_config_value/\#*/}"
 				else
-					once_config_value="${once_config_value/ \;*/}"
+					once_config_value="${once_config_value/\;*/}"
 				fi
 			fi
 			# Remove all spaces before and after string, internal shell parameter expansion required to get spaces supposed to be removed
@@ -1171,14 +1180,30 @@ for temp_config_line in "${config_content_array[@]}"; do
 			command* )
 				config_key_command_map["$once_section"]="$once_config_value"
 			;;
-			mangohud-config* )
+			mangohud-source-config* | mangohud-target-config* )
 				# Get absolute path to MangoHud config in case it is specified as relative
 				once_config_value="$(get_realpath "$once_config_value")"
-				# Exit with an error if specified MangoHud config file does not exist
+				# Check for config file existence
 				if [[ -f "$once_config_value" ]]; then
-					config_key_mangohud_config_map["$once_section"]="$once_config_value"
+					# Set path to MangoHud config depending by specified key
+					case "${temp_config_line,,}" in
+					mangohud-source-config* )
+						config_key_mangohud_source_config_map["$once_section"]="$once_config_value"
+					;;
+					mangohud-target-config* )
+						config_key_mangohud_target_config_map["$once_section"]="$once_config_value"
+					esac
 				else
-					print_error "Config file '$once_config_value' specified in key 'mangohud-config' in section '$once_section' in '$config' config file does not exist!"
+					# Set key name depending by key name on line
+					case "${temp_config_line,,}" in
+					mangohud-source-config* )
+						once_key_name='mangohud-source-config'
+					;;
+					mangohud-target-config* )
+						once_key_name='mangohud-source-config'
+					esac
+					# Exit with an error if specified MangoHud config file does not exist
+					print_error "MangoHud config file '$once_config_value' specified in key '$once_key_name' in section '$once_section' in '$config' config file does not exist!"
 					exit 1
 				fi
 			;;
@@ -1226,8 +1251,8 @@ for temp_section in "${sections_array[@]}"; do
 		exit 1
 	fi
 	# Exit with an error if MangoHud FPS limit is not specified along with config path
-	if [[ -n "${config_key_fps_unfocus_map["$temp_section"]}" && -z "${config_key_mangohud_config_map["$temp_section"]}" ]]; then
-		print_error "Value ${config_key_fps_unfocus_map["$temp_section"]} in key 'fps-unfocus' in section '$temp_section' is specified without path to MangoHud config!"
+	if [[ -n "${config_key_fps_unfocus_map["$temp_section"]}" && -z "${config_key_mangohud_target_config_map["$temp_section"]}" ]]; then
+		print_error "Value ${config_key_fps_unfocus_map["$temp_section"]} in 'fps-unfocus' key in section '$temp_section' is specified without 'mangohud-target-config' key!"
 		exit 1
 	fi
 	# Exit with an error if MangoHud FPS limit is specified along with CPU limit
@@ -1240,9 +1265,14 @@ for temp_section in "${sections_array[@]}"; do
 		print_error "Do not use 'fps-focus' key without 'fps-unfocus' key in section '$temp_section'!"
 		exit 1
 	fi
-	# Exit with an error if 'mangohud-config' is specified without 'fps-unfocus'
-	if [[ -n "${config_key_mangohud_config_map["$temp_section"]}" && -z "${config_key_fps_unfocus_map["$temp_section"]}" ]]; then
-		print_error "Do not use 'mangohud-config' key without 'fps-unfocus' key in section '$temp_section'!"
+	# Exit with an error if 'mangohud-target-config' is specified without 'fps-unfocus'
+	if [[ -n "${config_key_mangohud_target_config_map["$temp_section"]}" && -z "${config_key_fps_unfocus_map["$temp_section"]}" ]]; then
+		print_error "Do not use 'mangohud-target-config' key without 'fps-unfocus' key in section '$temp_section'!"
+		exit 1
+	fi
+	# Exit with an error if 'mangohud-source-config' is specified without 'mangohud-target-config'
+	if [[ -n "${config_key_mangohud_source_config_map["$temp_section"]}" && -z "${config_key_mangohud_target_config_map["$temp_section"]}" ]]; then
+		print_error "Do not use 'mangohud-source-config' key without 'mangohud-target-config' key in section '$temp_section'!"
 		exit 1
 	fi
 	# Set 'fps-focus' to '0' (full FPS unlock) if it is not specified
@@ -1256,6 +1286,10 @@ for temp_section in "${sections_array[@]}"; do
 	# Set 'delay' to '0' if it is not specified
 	if [[ -z "${config_key_delay_map["$temp_section"]}" ]]; then
 		config_key_delay_map["$temp_section"]='0'
+	fi
+	# Set 'mangohud-target-config' as 'mangohud-source-config' if it is not specified
+	if [[ -z "${config_key_mangohud_source_config_map["$temp_section"]}" && -n "${config_key_mangohud_target_config_map["$temp_section"]}" ]]; then
+		config_key_mangohud_source_config_map["$temp_section"]="${config_key_mangohud_target_config_map["$temp_section"]}"
 	fi
 done
 unset temp_section
@@ -1654,7 +1688,7 @@ else
 					passed_process_name="$process_name" \
 					passed_signal='-SIGUSR1' \
 					unset_cpu_limit
-				elif [[ -n "$section" && -n "${is_fps_limited_section_map["$section"]}" ]]; then # Unset FPS limit if has been applied
+				elif [[ -n "$section" && -n "${config_key_mangohud_target_config_map["$section"]}" ]]; then # Unset FPS limit or update target config on focus
 					# Unset FPS limit
 					passed_section="$section" \
 					passed_end_of_msg='on focus event' \
