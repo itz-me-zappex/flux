@@ -101,7 +101,7 @@ xprop_wrapper(){
 		# Skip event if it repeats for some reason
 		if [[ -z "$local_previous_xprop_event" || "$local_temp_xprop_event" != "$local_previous_xprop_event" ]]; then
 			# Obtain ID of focused window and list of opened windows
-			local_xprop_output="$(xprop -root _NET_ACTIVE_WINDOW _NET_CLIENT_LIST_STACKING)"
+			local_xprop_output="$(xprop -root _NET_CLIENT_LIST_STACKING _NET_ACTIVE_WINDOW)"
 			# Do not send event to 'event_source' it it repeats for some reason
 			if [[ -z "$local_previous_xprop_output" || "$local_xprop_output" != "$local_previous_xprop_output" ]]; then
 				# Send event to 'event_source'
@@ -234,9 +234,10 @@ event_source(){
 					# Required to find terminated windows comparing previous list with new one
 					local_previous_client_list_stacking="$local_temp_xprop_event"
 				fi
-				# Print event to check requests and apply limits
-				if [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* ]]; then
+				# Print event to check requests and apply limits if that is ID of focused window
+				if [[ "$local_temp_xprop_event" == '_NET_ACTIVE_WINDOW(WINDOW):'* && -n "$local_previous_client_list_stacking" ]]; then
 					echo "check_requests: $local_windows_ids"
+					unset local_windows_ids
 				fi
 				# Handle blank list of stacking windows
 				if [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW): window id #' ]]; then
@@ -255,7 +256,6 @@ event_source(){
 					local_restart='1'
 					break
 				fi
-				unset local_windows_ids
 			done < <(xprop_wrapper)
 			unset local_temp_xprop_event
 		fi
@@ -278,7 +278,7 @@ exec_on_event(){
 	FLUX_PROCESS_OWNER="$passed_process_owner" \
 	FLUX_PROCESS_COMMAND="$passed_process_command" \
 	nohup setsid bash -c "$passed_event_command" > /dev/null 2>&1 &
-	print_verbose "Command '$passed_event_command' from section '$passed_section' has been executed on $passed_event event."
+	print_info "Command '$passed_event_command' from section '$passed_section' has been executed on $passed_event event."
 }
 
 # Required to get process info from cache in 'get_process_info' function
