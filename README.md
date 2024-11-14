@@ -256,8 +256,8 @@ executable = /run/media/zappex/WD-BLUE/Games/Steam/steamapps/common/Proton 9.0 (
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\ForzaHorizon4\ForzaHorizon4.exe 
 owner = 1000
 mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
-fps-unfocus = 5 ; FPS to set on unfocus event
-fps-focus = 60 ; I have 60 FPS lock, so I want restore it on focus event
+fps-unfocus = 5
+fps-focus = 60
 exec-focus = killall picom
 exec-unfocus = picom
 
@@ -283,8 +283,8 @@ cpu-limit = 0%
 [Forza Horizon 4]
 name = ForzaHorizon4.e
 mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
-fps-unfocus = 5 ; FPS to set on unfocus event
-fps-focus = 60 ; I have 60 FPS lock, so I want restore it on focus event
+fps-unfocus = 5
+fps-focus = 60
 
 ; Example using CPU limit as game does not consume GPU resources if minimized but still uses CPU and requires network connection to download levels and music
 [Geometry Dash]
