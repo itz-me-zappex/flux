@@ -1065,7 +1065,7 @@ while read -r temp_config_line; do
 	if [[ ! "$temp_config_line" =~ ^(\;|\#) && -n "$temp_config_line" ]]; then
 		# Exit with an error if first line is not a section, otherwise remember section name, regexp means any symbols in square brackes
 		if [[ ! "$temp_config_line" =~ ^\[.*\]$ && -z "$once_section" ]]; then
-			print_error "Initial section is not found in config '$config'!"
+			print_error "Initial section is not found in '$config' config file!"
 			exit 1
 		elif [[ "$temp_config_line" =~ ^\[.*\]$ ]]; then # Regexp means any symbols in square brackes
 			# Exit with an error if section repeated
