@@ -400,27 +400,28 @@ mangohud_fps_set(){
 		if ! check_rw "$local_target_config"; then
 			print_warn "Target MangoHud config file '$local_target_config' is not rewritable!"
 			return 1
-		fi
-		# Replace 'fps_limit' value in config if exists
-		while read -r local_temp_config_line || [[ -n "$local_temp_config_line" ]]; do
-			# Find 'fps_limit' line, regexp means 'fps_limit[space(s)?]=[space(s)?][integer][anything else]'
-			if [[ "$local_temp_config_line" =~ ^fps_limit([[:space:]]+)?=([[:space:]]+)?[0-9]+* ]]; then
-				# Set specified FPS limit, shell parameter expansion replaces first number on line with specified new one
-				local_new_config_content+="${local_temp_config_line/[0-9]*/"$local_fps_to_set"}\n"
-				# Set mark which signals about successful setting of FPS limit
-				local_fps_limit_is_changed='1'
-			else
-				# Add line to processed text
-				local_new_config_content+="$local_temp_config_line\n"
-			fi
-		done < "$local_source_config"
-		# Check whether FPS limit has been set or not
-		if [[ -z "$local_fps_limit_is_changed" ]]; then
-			# Pass config content with 'fps_limit' key if line does not exist in config
-			echo -e "${local_new_config_content/%'\n'/}\nfps_limit = $local_fps_to_set" > "$local_target_config"
 		else
-			# Pass config content if FPS has been already changed
-			echo -e "${local_new_config_content/%'\n'/}" > "$local_target_config"
+			# Replace 'fps_limit' value in config if exists
+			while read -r local_temp_config_line || [[ -n "$local_temp_config_line" ]]; do
+				# Find 'fps_limit' line, regexp means 'fps_limit[space(s)?]=[space(s)?][integer][anything else]'
+				if [[ "$local_temp_config_line" =~ ^fps_limit([[:space:]]+)?=([[:space:]]+)?[0-9]+* ]]; then
+					# Set specified FPS limit, shell parameter expansion replaces first number on line with specified new one
+					local_new_config_content+="${local_temp_config_line/[0-9]*/"$local_fps_to_set"}\n"
+					# Set mark which signals about successful setting of FPS limit
+					local_fps_limit_is_changed='1'
+				else
+					# Add line to processed text
+					local_new_config_content+="$local_temp_config_line\n"
+				fi
+			done < "$local_source_config"
+			# Check whether FPS limit has been set or not
+			if [[ -z "$local_fps_limit_is_changed" ]]; then
+				# Pass config content with 'fps_limit' key if line does not exist in config
+				echo -e "${local_new_config_content/%'\n'/}\nfps_limit = $local_fps_to_set" > "$local_target_config"
+			else
+				# Pass config content if FPS has been already changed
+				echo -e "${local_new_config_content/%'\n'/}" > "$local_target_config"
+			fi
 		fi
 	else
 		print_warn "Target MangoHud config file '$local_target_config' does not exist!"
