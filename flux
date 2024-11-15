@@ -727,7 +727,7 @@ while (( $# > 0 )); do
 			# Check for failure related to X server check
 			if [[ -n "$once_fail" ]]; then
 				# Exit with an error if something wrong with X server
-				print_error "Unable to get info about focused window, invalid X11 session."
+				print_error "Unable to get info about focused window, something is wrong with X11 session!"
 				exit 1
 			else
 				# Get output of xprop containing window ID
@@ -739,7 +739,7 @@ while (( $# > 0 )); do
 		--pick | -p )
 			# Exit with an error if something wrong with X server
 			if [[ -n "$once_fail" ]]; then
-				print_error "Unable to call window picker, invalid X11 session."
+				print_error "Unable to call window picker, something is wrong with X11 session!"
 				exit 1
 			else
 				# Get xwininfo output containing window ID
@@ -1288,7 +1288,7 @@ cache_mismatch_map
 # Exit with an error if that is not a X11 session
 if ! x11_session_check; then
 	# Exit with an error if X11 session is invalid
-	print_error "Unable to start daemon, invalid X11 session."
+	print_error "Unable to start daemon, something is wrong with X11 session!"
 	exit 1
 else
 	# Exit with an error if daemon already running
