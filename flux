@@ -490,14 +490,14 @@ background_cpulimit(){
 background_mangohud_fps_set(){
 	# Wait for N seconds if delay is specified
 	if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
-		print_verbose "Section '$passed_section' will be FPS limited after ${config_key_delay_map["$passed_section"]} second(s) on unfocus event."
+		print_verbose "MangoHud '${config_key_mangohud_config_map["$passed_section"]}' config file from section '$passed_section' will be FPS limited after ${config_key_delay_map["$passed_section"]} second(s) on unfocus event."
 		sleep "${config_key_delay_map["$passed_section"]}"
 	fi
 	# Check for process existence before set FPS limit
 	if check_pid_existence "$passed_process_pid"; then
 		# Attempt to change 'fps_limit' in specified MangoHud config file
 		if mangohud_fps_set "${config_key_mangohud_config_map["$passed_section"]}" "${config_key_mangohud_source_config_map["$passed_section"]}" "${config_key_fps_unfocus_map["$passed_section"]}"; then
-			print_info "Section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS on unfocus event."
+			print_info "MangoHud '${config_key_mangohud_config_map["$passed_section"]}' config file from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS on unfocus event."
 		fi
 	else
 		print_warn "Process matching with section '$passed_section' has been terminated before FPS limiting!"
@@ -623,9 +623,9 @@ unset_fps_limit(){
 	if mangohud_fps_set "${config_key_mangohud_config_map["$passed_section"]}" "${config_key_mangohud_source_config_map["$passed_section"]}" "${config_key_fps_focus_map["$passed_section"]}"; then
 		# Print message depending by FPS limit
 		if [[ "${config_key_fps_focus_map["$passed_section"]}" == '0' ]]; then
-			print_info "Section '$passed_section' has been FPS unlimited $passed_end_of_msg."
+			print_info "MangoHud '${config_key_mangohud_config_map["$passed_section"]}' config file from section '$passed_section' has been FPS unlimited $passed_end_of_msg."
 		else
-			print_info "Section '$passed_section' has been limited to ${config_key_fps_focus_map["$passed_section"]} FPS $passed_end_of_msg."
+			print_info "MangoHud '${config_key_mangohud_config_map["$passed_section"]}' config file from section '$passed_section' has been limited to ${config_key_fps_focus_map["$passed_section"]} FPS $passed_end_of_msg."
 		fi
 	fi
 	# Forget that process(es) matching with current section have been FPS limited previously
