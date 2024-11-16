@@ -89,7 +89,7 @@ Dependencies for other distributions will be added soon.
 ### Manual installation using release tarball
 You can use this method if there is no package build script for your distro. Make sure you have installed dependencies as described above before continue.
 ```bash
-fluxver='1.9.1' # set latest version as I update it here every release
+fluxver='1.10' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -119,7 +119,7 @@ sudo install -Dm 755 flux /usr/local/bin/flux # install daemon to `/usr/local/bi
 ### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
 ``` bash
-fluxver='1.9.1' # set latest version as I update it here every release
+fluxver='1.10' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -133,7 +133,7 @@ makepkg -sric # build a package and install it
 
 ### Debian and dereatives
 ```bash
-fluxver='1.9.1' # set latest version as I update it here every release
+fluxver='1.10' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
