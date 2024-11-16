@@ -171,16 +171,16 @@ Options and values:
   -v, --verbose              Detailed output
   -V, --version              Display release information and exit
 
+Logging configuration (use only with '--log'):
+  --log-no-timestamps        Do not add timestamps to messages in log (do not use with '--log-timestamp')
+  --log-overwrite            Recreate log file before start
+  --log-timestamp <format>   Set timestamp format (default: [%Y-%m-%dT%H:%M:%S%z])
+
 Prefixes configuration:
   --prefix-error <prefix>    Set prefix for error messages (default: [x])
   --prefix-info <prefix>     Set prefix for info messages (default: [i])
   --prefix-verbose <prefix>  Set prefix for verbose messages (default: [~])
   --prefix-warning <prefix>  Set prefix for warning messages (default: [!])
-
-Logging configuration (use only with '--log'):
-  --log-no-timestamps        Do not add timestamps to messages in log (do not use with '--log-timestamp')
-  --log-overwrite            Recreate log file before start
-  --log-timestamp <format>   Set timestamp format (default: [%Y-%m-%dT%H:%M:%S%z])
 
 Examples:
   flux -Hlv
@@ -257,6 +257,7 @@ executable = /run/media/zappex/WD-BLUE/Games/Steam/steamapps/common/Proton 9.0 (
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\ForzaHorizon4\ForzaHorizon4.exe 
 owner = 1000
 mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
+mangohud-source-config = ~/.config/MangoHud/MangoHud.conf
 fps-unfocus = 5
 fps-focus = 60
 exec-focus = killall picom
@@ -284,6 +285,7 @@ cpu-limit = 0%
 [Forza Horizon 4]
 name = ForzaHorizon4.e
 mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
+mangohud-source-config = ~/.config/MangoHud/MangoHud.conf
 fps-unfocus = 5
 fps-focus = 60
 
