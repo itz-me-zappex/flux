@@ -49,39 +49,39 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 ## Dependencies
 ### Arch Linux and dereatives
 
-  Required: `bash util-linux cpulimit coreutils xorg-xprop xorg-xwininfo`
+  Required: `bash` `util-linux` `cpulimit` `coreutils` `xorg-xprop` `xorg-xwininfo`
   
-  Optional: `mangohud lib32-mangohud`
+  Optional: `mangohud` `lib32-mangohud` `libnotify`
 
 ### Debian and dereatives
   
-  Required: `bash cpulimit coreutils x11-utils`
+  Required: `bash` `cpulimit` `coreutils` `x11-utils`
 
-  Optional: `mangohud mangohud:i386`
+  Optional: `mangohud` `mangohud:i386` `libnotify-bin`
 
 ### Void Linux and dereatives
 
-  Required: `bash util-linux cpulimit coreutils xprop xwininfo`
+  Required: `bash` `util-linux` `cpulimit` `coreutils` `xprop` `xwininfo`
 
-  Optional: `MangoHud MangoHud-32bit`
+  Optional: `MangoHud` `MangoHud-32bit` `libnotify`
 
 ### Fedora and dereatives
 
-  Required: `bash util-linux cpulimit coreutils xprop xwininfo`
+  Required: `bash` `util-linux` `cpulimit` `coreutils` `xprop` `xwininfo`
 
-  Optional: `mangohud mangohud.i686`
+  Optional: `mangohud` `mangohud.i686` `libnotify`
 
 ### OpenSUSE Tumbleweed and dereatives
 
-  Required: `bash util-linux cpulimit coreutils xprop xwininfo`
+  Required: `bash` `util-linux` `cpulimit` `coreutils` `xprop` `xwininfo`
 
-  Optional: `mangohud mangohud-32bit`
+  Optional: `mangohud` `mangohud-32bit` `libnotify4`
 
 ### Gentoo and dereatives
 
-  Required: `app-shells/bash sys-apps/util-linux app-admin/cpulimit sys-apps/coreutils x11-apps/xprop x11-apps/xwininfo`
+  Required: `app-shells/bash` `sys-apps/util-linux` `app-admin/cpulimit` `sys-apps/coreutils` `x11-apps/xprop` `x11-apps/xwininfo`
 
-  Optional: [`mangohud`](https://github.com/flightlessmango/MangoHud) (is not packaged)
+  Optional: [`mangohud`](https://github.com/flightlessmango/MangoHud) (is not packaged) `x11-libs/libnotify`
 
 Dependencies for other distributions will be added soon.
 
@@ -164,6 +164,7 @@ Options and values:
   -H, --hot                  Apply actions to already unfocused windows before handling events
   -l, --lazy                 Avoid focus and unfocus commands on hot (use only with '--hot')
   -L, --log <path>           Store messages to specified file
+  -n, --notifications        Display messages as notifications
   -p, --pick                 Display info about picked window in usable for config file way and exit
   -q, --quiet                Display errors and warnings only
   -u, --usage                Alias for '--help'
@@ -184,7 +185,7 @@ Logging configuration (use only with '--log'):
 Examples:
   flux -Hlv
   flux -HlL ~/.flux.log --log-overwrite --log-timestamp '[%d.%m.%Y %H:%M:%S]'
-  flux -qL ~/.flux.log --log-disable-timestamps
+  flux -qL ~/.flux.log --log-no-timestamps
   flux -c ~/.config/flux.ini.bak
 ```
 
