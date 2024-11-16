@@ -23,17 +23,20 @@ print_log(){
 # Required to print errors (redirect to stderr)
 print_error(){
 	print_log "$prefix_error $*" >&2
+	print_notification "$*"
 }
 
 # Required to print warnings (redirect to stderr)
 print_warn(){
 	print_log "$prefix_warning $*" >&2
+	print_notification "$*"
 }
 
 # Required to print messages in verbose mode
 print_verbose(){
 	if [[ -n "$verbose" ]]; then
 		print_log "$prefix_verbose $*"
+		print_notification "$*"
 	fi
 }
 
@@ -41,6 +44,15 @@ print_verbose(){
 print_info(){
 	if [[ -z "$quiet" ]]; then
 		print_log "$prefix_info $*"
+		print_notification "$*"
+	fi
+}
+
+# Required to send notifications
+print_notification(){
+	# Print message as notification if '--notifications' option is specified and those have been allowed (before start event reading)
+	if [[ -n "$allow_notifications" ]]; then
+		notify-send -e "$(echo -e "$*")"
 	fi
 }
 
@@ -784,6 +796,7 @@ Options and values:
   -H, --hot                  Apply actions to already unfocused windows before handling events
   -l, --lazy                 Avoid focus and unfocus commands on hot (use only with '--hot')
   -L, --log <path>           Store messages to specified file
+  -n, --notifications        Display messages as notifications
   -p, --pick                 Display info about picked window in usable for config file way and exit
   -q, --quiet                Display errors and warnings only
   -u, --usage                Alias for '--help'
@@ -832,6 +845,11 @@ Examples:
 		if [[ -n "$log" ]]; then
 			log="$(get_realpath "$log")"
 		fi
+	;;
+	-n | --notifications )
+		option_repeat_check notifications --notifications
+		notifications='1'
+		shift 1
 	;;
 	--quiet | -q )
 		option_repeat_check quiet --quiet
@@ -1340,10 +1358,17 @@ else
 	done
 	unset temp_prefix_type \
 	once_variable_name
+	# Allow notifications if '--notifications' option is specified
+	if [[ -n "$notifications" ]]; then
+		allow_notifications='1'
+		unset notifications
+	fi
 	# Print warning related to workaround for KDE Plasma which prevents list of stacking windows from being skipped if it contains the same columns count as previous one in 'event_source()'
 	if [[ "$DESKTOP_SESSION" == 'plasmax11' ]]; then
 		print_warn "Workaround for KDE Plasma has been applied, expect slightly higher CPU usage because daemon will try to find terminated windows in every '_NET_CLIENT_LIST_STACKING' event!"
 	fi
+	# Print message about daemon start (to make it easier to understand when it has been started in log file, also to print notification if responding option is specified)
+	print_info "Flux has been started."
 	# Remove CPU and FPS limits of processes on exit
 	trap 'actions_on_exit ; print_info "Daemon has been terminated successfully." ; exit 0' SIGTERM SIGINT
 	# Ignore user signals as they used in 'background_cpulimit' function to avoid next output ('X' - path to 'flux', 'Y' - line, 'Z' - PID of 'background_cpulimit'):
