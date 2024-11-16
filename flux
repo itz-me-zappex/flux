@@ -1556,7 +1556,7 @@ else
 			if [[ "$window_id" != '0x0' ]]; then
 				# Attempt to obtain info about process using window ID
 				if ! get_process_info; then
-					print_warn "Unable to obtain PID of window with ID $window_id, getting process info skipped!"
+					print_warn "Bad window with ID $window_id appeared, unable to obtain process info!"
 				fi
 			else
 				print_verbose "Bad event with window ID 0x0 appeared, getting process info skipped."
