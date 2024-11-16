@@ -1370,7 +1370,7 @@ else
 	# Print message about daemon start (to make it easier to understand when it has been started in log file, also to print notification if responding option is specified)
 	print_info "Flux has been started."
 	# Remove CPU and FPS limits of processes on exit
-	trap 'actions_on_exit ; print_info "Daemon has been terminated successfully." ; exit 0' SIGTERM SIGINT
+	trap 'actions_on_exit ; print_info "Flux has been terminated successfully." ; exit 0' SIGTERM SIGINT
 	# Ignore user signals as they used in 'background_cpulimit' function to avoid next output ('X' - path to 'flux', 'Y' - line, 'Z' - PID of 'background_cpulimit'):
 	# X: line Y: Z User defined signal 2   background_cpulimit
 	trap '' SIGUSR1 SIGUSR2
@@ -1379,7 +1379,7 @@ else
 		# Exit with an error in case 'exit' event appears
 		if [[ "$event" == 'exit' ]]; then
 			actions_on_exit
-			print_error "Daemon has been terminated unexpectedly!"
+			print_error "Flux has been terminated unexpectedly!"
 			exit 1
 		elif [[ "$event" == '-lazy' ]]; then # Unset '--lazy' option if responding event appears, otherwise focus and unfocus commands will not work
 			unset lazy
