@@ -212,7 +212,7 @@ event_source(){
 					unset local_active_window_id
 				elif [[ "$local_temp_xprop_event" == '_NET_CLIENT_LIST_STACKING(WINDOW):'* && "$local_temp_xprop_event" != "$local_previous_client_list_stacking" ]]; then # Get count of columns in output with list of stacking windows and skip event if it repeats
 					# Count columns in event if that is not KDE Plasma (because of workaround, that type of detection of terminated windows does not work there)
-					if [[ "$DESKTOP_SESSION" == 'plasmax11' ]]; then
+					if [[ "$DESKTOP_SESSION" != 'plasmax11' ]]; then
 						local_client_list_stacking_count='0'
 						for local_temp_client_list_stacking_column in $local_temp_xprop_event; do
 							(( local_client_list_stacking_count++ ))
@@ -240,7 +240,7 @@ event_source(){
 						fi
 					fi
 					# Required to compare columns count in previous and current events
-					if [[ "$DESKTOP_SESSION" == 'plasmax11' ]]; then
+					if [[ "$DESKTOP_SESSION" != 'plasmax11' ]]; then
 						local_previous_client_list_stacking_count="$local_client_list_stacking_count"
 					fi
 					# Required to find terminated windows comparing previous list with new one
@@ -502,14 +502,14 @@ background_cpulimit(){
 background_mangohud_fps_set(){
 	# Wait for N seconds if delay is specified
 	if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
-		print_verbose "MangoHud '${config_key_mangohud_config_map["$passed_section"]}' config file from section '$passed_section' will be FPS limited after ${config_key_delay_map["$passed_section"]} second(s) on unfocus event."
+		print_verbose "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' will be FPS limited after ${config_key_delay_map["$passed_section"]} second(s) on unfocus event."
 		sleep "${config_key_delay_map["$passed_section"]}"
 	fi
 	# Check for process existence before set FPS limit
 	if check_pid_existence "$passed_process_pid"; then
 		# Attempt to change 'fps_limit' in specified MangoHud config file
 		if mangohud_fps_set "${config_key_mangohud_config_map["$passed_section"]}" "${config_key_mangohud_source_config_map["$passed_section"]}" "${config_key_fps_unfocus_map["$passed_section"]}"; then
-			print_info "MangoHud '${config_key_mangohud_config_map["$passed_section"]}' config file from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS on unfocus event."
+			print_info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS on unfocus event."
 		fi
 	else
 		print_warn "Process matching with section '$passed_section' has been terminated before FPS limiting!"
@@ -635,9 +635,9 @@ unset_fps_limit(){
 	if mangohud_fps_set "${config_key_mangohud_config_map["$passed_section"]}" "${config_key_mangohud_source_config_map["$passed_section"]}" "${config_key_fps_focus_map["$passed_section"]}"; then
 		# Print message depending by FPS limit
 		if [[ "${config_key_fps_focus_map["$passed_section"]}" == '0' ]]; then
-			print_info "MangoHud '${config_key_mangohud_config_map["$passed_section"]}' config file from section '$passed_section' has been FPS unlimited $passed_end_of_msg."
+			print_info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been FPS unlimited $passed_end_of_msg."
 		else
-			print_info "MangoHud '${config_key_mangohud_config_map["$passed_section"]}' config file from section '$passed_section' has been limited to ${config_key_fps_focus_map["$passed_section"]} FPS $passed_end_of_msg."
+			print_info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been limited to ${config_key_fps_focus_map["$passed_section"]} FPS $passed_end_of_msg."
 		fi
 	fi
 	# Forget that process(es) matching with current section have been FPS limited previously
@@ -863,7 +863,7 @@ Examples:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.10
+		echo "flux 1.10.1
 A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
