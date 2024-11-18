@@ -294,7 +294,7 @@ name = GeometryDash.ex
 cpu-limit = 2%
 ```
 
-### Environment variables passed to `exec-focus` and `exec-unfocus`
+### Environment variables passed to commands in `exec-focus` and `exec-unfocus` config keys
 Note: Daemon passes absolutely the same values for both `exec-focus` and `exec-unfocus` commands.
 
 #### List of variables and description
