@@ -52,7 +52,7 @@ print_info(){
 print_notification(){
 	# Print message as notification if '--notifications' option is specified and those have been allowed (before start event reading)
 	if [[ -n "$allow_notifications" ]]; then
-		notify-send -e "$(echo -e "$*")"
+		notify-send "$(echo -e "$*")"
 	fi
 }
 
@@ -98,7 +98,7 @@ x11_session_check(){
 	fi
 }
 
-# Required to track events related to window focus and changes in count of opened windows in 'event_source' function
+# Required to track events related to window focus and changes in count of opened windows in 'event_source()' function
 # Pretty complicated because of buggyness of 'xprop' tool which in spy mode prints events in random order, which sometimes repeats or not valid at all
 # To fix that, despite performance impact I prefered to call 'xprop' tool manually every event to get proper info, because I did not find better way yet
 # That is still is not perfect solution, because from time to time there is a chance to get multiple events because of one action like openning window from panel
@@ -114,9 +114,9 @@ xprop_wrapper(){
 		if [[ -z "$local_previous_xprop_event" || "$local_temp_xprop_event" != "$local_previous_xprop_event" ]]; then
 			# Obtain ID of focused window and list of opened windows
 			local_xprop_output="$(xprop -root _NET_CLIENT_LIST_STACKING _NET_ACTIVE_WINDOW)"
-			# Do not send event to 'event_source' it it repeats for some reason
+			# Do not send event to 'event_source()' it it repeats for some reason
 			if [[ -z "$local_previous_xprop_output" || "$local_xprop_output" != "$local_previous_xprop_output" ]]; then
-				# Send event to 'event_source'
+				# Send event to 'event_source()'
 				echo "$local_xprop_output"
 				# Remember obtained info to compare it on next event and skip if it repeats
 				local_previous_xprop_output="$local_xprop_output"
@@ -863,7 +863,7 @@ Examples:
 	;;
 	--version | -V )
 		author_github_link='https://github.com/itz-me-zappex'
-		echo "flux 1.10.1
+		echo "flux 1.10.2
 A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused windows and run commands on focus and unfocus events.
 License: GPL-3.0-only
 Author: $author_github_link
@@ -1051,6 +1051,12 @@ if [[ -n "$log_is_passed" ]]; then
 		print_error "Directory of log file '$log' is not accessible for read-write operations!"
 		exit 1
 	fi
+fi
+
+# Exit with an error if '--notifications' option is specified but 'notify-send' command is not found
+if [[ -n "$notifications" ]] && ! type notify-send > /dev/null 2>&1; then
+	print_error "Command 'notify-send' required to print notifications is not found!"
+	exit 1
 fi
 
 # Calculate maximum allowable CPU limit and CPU threads
@@ -1538,7 +1544,7 @@ else
 			once_existing_process_pid \
 			once_existing_section
 		elif [[ "$event" == 'restart' ]]; then
-			# Prepare daemon to reapply limits on 'event_source' restart event which appears if list of windows IDs becomes blank
+			# Prepare daemon to reapply limits on 'event_source()' restart event which appears if list of windows IDs becomes blank
 			hot='1'
 			lazy='1'
 			lazy_is_unset=''
