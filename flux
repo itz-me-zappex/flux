@@ -1,10 +1,35 @@
 #!/usr/bin/bash
 
-# Required to store output to log file if '--log' option is specified
-print_log(){
-	local local_timestamp
-	# Print message to stdout
-	echo -e "$*"
+# Required to print messages to console, log and notifications
+message(){
+	local local_timestamp \
+	local_log_prefix
+	# Print message depending by type
+	case "$1" in
+	--error )
+		shift 1
+		echo -e "$prefix_error $*" >&2
+		local_log_prefix="$prefix_error"
+	;;
+	--info )
+		shift 1
+		if [[ -z "$quiet" ]]; then
+			echo -e "$prefix_info $*"
+		fi
+		local_log_prefix="$prefix_info"
+	;;
+	--verbose )
+		shift 1
+		if [[ -n "$verbose" ]]; then
+			echo -e "$prefix_verbose $*"
+		fi
+		local_log_prefix="$prefix_verbose"
+	;;
+	--warning )
+		shift 1
+		echo -e "$prefix_warning $*" >&2
+		local_log_prefix="$prefix_warning"
+	esac
 	# Print message with timestamp to log file if responding option is specified and logging has been allowed before event reading
 	if [[ -n "$allow_logging" ]]; then
 		# Get timestamp if that behavior is not disabled using '--log-no-timestamps' option
@@ -13,43 +38,11 @@ print_log(){
 		fi
 		# Check log file for read-write access before store message to log
 		if check_rw "$log"; then
-			echo -e "$local_timestamp$*" >> "$log"
+			echo -e "$local_timestamp$local_log_prefix $*" >> "$log"
 		else
-			allow_logging='' print_warn "Unable to write message to log file '$log', recreate it or check read-write access!"
+			allow_logging='' message --warning "Unable to write message to log file '$log', recreate it or check read-write access!"
 		fi
 	fi
-}
-
-# Required to print errors (redirect to stderr)
-print_error(){
-	print_log "$prefix_error $*" >&2
-	print_notification "$*"
-}
-
-# Required to print warnings (redirect to stderr)
-print_warn(){
-	print_log "$prefix_warning $*" >&2
-	print_notification "$*"
-}
-
-# Required to print messages in verbose mode
-print_verbose(){
-	if [[ -n "$verbose" ]]; then
-		print_log "$prefix_verbose $*"
-		print_notification "$*"
-	fi
-}
-
-# Required to print messages if quiet mode is not specified
-print_info(){
-	if [[ -z "$quiet" ]]; then
-		print_log "$prefix_info $*"
-		print_notification "$*"
-	fi
-}
-
-# Required to send notifications
-print_notification(){
 	# Print message as notification if '--notifications' option is specified and those have been allowed (before start event reading)
 	if [[ -n "$allow_notifications" ]]; then
 		notify-send "$(echo -e "$*")"
@@ -59,7 +52,7 @@ print_notification(){
 # Required to exit with an error if option repeated
 option_repeat_check(){
 	if [[ -n "${!1}" ]]; then
-		print_error "Option '$2' is repeated!$advice_on_option_error"
+		message --error "Option '$2' is repeated!$advice_on_option_error"
 		exit 1
 	fi
 }
@@ -151,7 +144,7 @@ event_source(){
 		unset local_list_is_not_blank
 		# Wait for window appearance if list of windows IDs appears blank
 		if [[ -n "$local_restart" || "$(xprop -root _NET_CLIENT_LIST_STACKING)" != '_NET_CLIENT_LIST_STACKING(WINDOW): window id # 0x'* ]]; then
-			print_warn "Opened windows were not found, waiting for their appearance…"
+			message --warning "Opened windows were not found, waiting for their appearance…"
 			# Wait for windows appearance
 			while read -r local_xprop_net_client_list_stacking; do
 				# Break loop if list of stacking windows is not blank
@@ -273,7 +266,7 @@ event_source(){
 		fi
 		# Print event for safe exit if 'xprop' has been terminated
 		if [[ -z "$local_restart" ]]; then
-			print_warn "Process 'xprop' required to read X11 events has been terminated!"
+			message --warning "Process 'xprop' required to read X11 events has been terminated!"
 			echo 'exit'
 			break
 		fi
@@ -290,7 +283,7 @@ exec_on_event(){
 	FLUX_PROCESS_OWNER="$passed_process_owner" \
 	FLUX_PROCESS_COMMAND="$passed_process_command" \
 	nohup setsid bash -c "$passed_event_command" > /dev/null 2>&1 &
-	print_info "Command '$passed_event_command' from section '$passed_section' has been executed on $passed_event event."
+	message --info "Command '$passed_event_command' from section '$passed_section' has been executed on $passed_event event."
 }
 
 # Required to get process info from cache in 'get_process_info' function
@@ -313,7 +306,7 @@ get_process_info(){
 	if [[ "${cache_event_type_map["$window_id"]}" == 'good' ]]; then
 		# Get process info from cache
 		passed_window_id="$window_id" cache_get_process_info
-		print_verbose "Cache has been used to obtain info about window with ID $window_id and process '$process_name' with PID $process_pid."
+		message --verbose "Cache has been used to obtain info about window with ID $window_id and process '$process_name' with PID $process_pid."
 	elif [[ -z "${cache_event_type_map["$window_id"]}" ]]; then # Extract process info if it is not cached
 		# Attempt to obtain output with PID
 		if ! process_pid="$(xprop -id "$window_id" _NET_WM_PID 2>/dev/null)" || [[ "$process_pid" == '_NET_WM_PID:  not found.' ]]; then
@@ -338,7 +331,7 @@ get_process_info(){
 			if [[ -n "$local_matching_window_id" ]]; then
 				# Get process info using cache of parent window
 				passed_window_id="$local_matching_window_id" cache_get_process_info
-				print_verbose "Cache of parent window with ID $local_matching_window_id has been used to obtain info about window with ID $window_id and process '$process_name' with PID $process_pid."
+				message --verbose "Cache of parent window with ID $local_matching_window_id has been used to obtain info about window with ID $window_id and process '$process_name' with PID $process_pid."
 			else
 				# Extract name of process
 				process_name="$(<"/proc/$process_pid/comm")"
@@ -365,7 +358,7 @@ get_process_info(){
 				process_command="$(tr '\0' ' ' < "/proc/$process_pid/cmdline")"
 				# Remove last space because '\0' (which is replaced with space) is last symbol too
 				process_command="${process_command/%\ /}"
-				print_verbose "Obtained info about window with ID $window_id and process '$process_name' with PID $process_pid has been cached."
+				message --verbose "Obtained info about window with ID $window_id and process '$process_name' with PID $process_pid has been cached."
 			fi
 			# Store info about window and process to cache
 			cache_event_type_map["$window_id"]='good'
@@ -404,13 +397,13 @@ mangohud_fps_set(){
 		if [[ "$local_target_config" != "$local_source_config" ]]; then
 			# Check readability of source MangoHud config file
 			if ! check_ro "$local_source_config"; then
-				print_warn "Source MangoHud config file '$local_target_config' is not readable!"
+				message --warning "Source MangoHud config file '$local_target_config' is not readable!"
 				return 1
 			fi
 		fi
 		# Check read-write ability of target MangoHud config file
 		if ! check_rw "$local_target_config"; then
-			print_warn "Target MangoHud config file '$local_target_config' is not rewritable!"
+			message --warning "Target MangoHud config file '$local_target_config' is not rewritable!"
 			return 1
 		else
 			# Replace 'fps_limit' value in config if exists
@@ -436,7 +429,7 @@ mangohud_fps_set(){
 			fi
 		fi
 	else
-		print_warn "Target MangoHud config file '$local_target_config' does not exist!"
+		message --warning "Target MangoHud config file '$local_target_config' does not exist!"
 		return 1
 	fi
 }
@@ -445,19 +438,19 @@ mangohud_fps_set(){
 background_freeze_process(){
 	# Wait for N seconds if delay is specified
 	if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
-		print_verbose "Process '$passed_process_name' with PID $passed_process_pid will be frozen after ${config_key_delay_map["$passed_section"]} second(s) on unfocus event."
+		message --verbose "Process '$passed_process_name' with PID $passed_process_pid will be frozen after ${config_key_delay_map["$passed_section"]} second(s) on unfocus event."
 		sleep "${config_key_delay_map["$passed_section"]}"
 	fi
 	# Check for process existence before freezing
 	if check_pid_existence "$passed_process_pid"; then
 		# Attempt to send 'SIGSTOP' signal to freeze process completely
 		if ! kill -STOP "$passed_process_pid" > /dev/null 2>&1; then
-			print_warn "Process '$passed_process_name' with PID $passed_process_pid cannot be frozen on unfocus event!"
+			message --warning "Process '$passed_process_name' with PID $passed_process_pid cannot be frozen on unfocus event!"
 		else
-			print_info "Process '$passed_process_name' with PID $passed_process_pid has been frozen on unfocus event."
+			message --info "Process '$passed_process_name' with PID $passed_process_pid has been frozen on unfocus event."
 		fi
 	else
-		print_warn "Process '$passed_process_name' with PID $passed_process_pid has been terminated before freezing!"
+		message --warning "Process '$passed_process_name' with PID $passed_process_pid has been terminated before freezing!"
 	fi
 }
 
@@ -467,21 +460,21 @@ background_cpulimit(){
 	local_sleep_pid
 	# Wait for N seconds if delay is specified
 	if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
-		print_verbose "Process '$passed_process_name' with PID $passed_process_pid will be CPU limited after ${config_key_delay_map["$passed_section"]} second(s) on unfocus event."
+		message --verbose "Process '$passed_process_name' with PID $passed_process_pid will be CPU limited after ${config_key_delay_map["$passed_section"]} second(s) on unfocus event."
 		sleep "${config_key_delay_map["$passed_section"]}" &
 		# Remember PID of 'sleep' sent into background, required to print message about cancelling CPU limit and terminate 'sleep' process on SIGINT/SIGTERM signal
 		local_sleep_pid="$!"
 		# Terminate 'sleep' process quietly on daemon termination
 		trap 'kill "$local_sleep_pid" > /dev/null 2>&1' SIGINT SIGTERM
 		# Terminate 'sleep' process on focus event and print relevant message (SIGUSR1)
-		trap 'print_info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled on focus event." ; kill "$local_sleep_pid" > /dev/null 2>&1 ; return 0' SIGUSR1
+		trap 'message --info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled on focus event." ; kill "$local_sleep_pid" > /dev/null 2>&1 ; return 0' SIGUSR1
 		# Terminate 'sleep' process on termination of target process and print relevant message (SIGUSR2)
-		trap 'print_info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to window termination." ; kill "$local_sleep_pid" > /dev/null 2>&1 ; return 0' SIGUSR2
+		trap 'message --info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to window termination." ; kill "$local_sleep_pid" > /dev/null 2>&1 ; return 0' SIGUSR2
 		wait "$local_sleep_pid"
 	fi
 	# Apply CPU limit if process still exists, otherwise throw warning
 	if check_pid_existence "$passed_process_pid"; then
-		print_info "Process '$passed_process_name' with PID $passed_process_pid has been CPU limited to $(( ${config_key_cpu_limit_map["$passed_section"]} / cpu_threads ))% on unfocus event."
+		message --info "Process '$passed_process_name' with PID $passed_process_pid has been CPU limited to $(( ${config_key_cpu_limit_map["$passed_section"]} / cpu_threads ))% on unfocus event."
 		# Apply CPU limit
 		cpulimit --lazy --limit="${config_key_cpu_limit_map["$passed_section"]}" --pid="$passed_process_pid" > /dev/null 2>&1 &
 		# Remember PID of 'cpulimit' sent into background, required to print message about CPU unlimiting and terminate 'cpulimit' process on SIGINT/SIGTERM signal
@@ -489,12 +482,12 @@ background_cpulimit(){
 		# Terminate 'cpulimit' process quietly on daemon termination
 		trap 'kill "$local_cpulimit_pid" > /dev/null 2>&1' SIGINT SIGTERM
 		# Terminate 'cpulimit' process on focus event and print relevant message (SIGUSR1)
-		trap 'print_info "Process '"'$passed_process_name'"' with PID $passed_process_pid has been CPU unlimited on focus event." ; kill "$local_cpulimit_pid" > /dev/null 2>&1 ; return 0' SIGUSR1
+		trap 'message --info "Process '"'$passed_process_name'"' with PID $passed_process_pid has been CPU unlimited on focus event." ; kill "$local_cpulimit_pid" > /dev/null 2>&1 ; return 0' SIGUSR1
 		# Terminate 'cpulimit' process on termination of target process and print relevant message (SIGUSR2)
-		trap 'print_info "Process '"'$passed_process_name'"' with PID $passed_process_pid has been CPU unlimited due to window termination." ; kill "$local_cpulimit_pid" > /dev/null 2>&1 ; return 0' SIGUSR2
+		trap 'message --info "Process '"'$passed_process_name'"' with PID $passed_process_pid has been CPU unlimited due to window termination." ; kill "$local_cpulimit_pid" > /dev/null 2>&1 ; return 0' SIGUSR2
 		wait "$local_cpulimit_pid"
 	else
-		print_warn "Process '$passed_process_name' with PID $passed_process_pid has been terminated before applying CPU limit!"
+		message --warning "Process '$passed_process_name' with PID $passed_process_pid has been terminated before applying CPU limit!"
 	fi
 }
 
@@ -502,17 +495,17 @@ background_cpulimit(){
 background_mangohud_fps_set(){
 	# Wait for N seconds if delay is specified
 	if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
-		print_verbose "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' will be FPS limited after ${config_key_delay_map["$passed_section"]} second(s) on unfocus event."
+		message --verbose "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' will be FPS limited after ${config_key_delay_map["$passed_section"]} second(s) on unfocus event."
 		sleep "${config_key_delay_map["$passed_section"]}"
 	fi
 	# Check for process existence before set FPS limit
 	if check_pid_existence "$passed_process_pid"; then
 		# Attempt to change 'fps_limit' in specified MangoHud config file
 		if mangohud_fps_set "${config_key_mangohud_config_map["$passed_section"]}" "${config_key_mangohud_source_config_map["$passed_section"]}" "${config_key_fps_unfocus_map["$passed_section"]}"; then
-			print_info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS on unfocus event."
+			message --info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS on unfocus event."
 		fi
 	else
-		print_warn "Process matching with section '$passed_section' has been terminated before FPS limiting!"
+		message --warning "Process matching with section '$passed_section' has been terminated before FPS limiting!"
 	fi
 }
 
@@ -559,20 +552,20 @@ unfreeze_process(){
 		if ! kill "${freeze_bgprocess_pid_map["$passed_process_pid"]}" > /dev/null 2>&1; then
 			# Avoid printing this message if delay is not specified
 			if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
-				print_warn "Unable to cancel delayed for ${config_key_delay_map["$passed_section"]} second(s) freezing of process '$passed_process_name' with PID $passed_process_pid!"
+				message --warning "Unable to cancel delayed for ${config_key_delay_map["$passed_section"]} second(s) freezing of process '$passed_process_name' with PID $passed_process_pid!"
 			fi
 		else
 			# Avoid printing this message if delay is not specified
 			if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
-				print_info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) freezing of process $passed_process_name' with PID $passed_process_pid has been cancelled $passed_end_of_msg."
+				message --info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) freezing of process $passed_process_name' with PID $passed_process_pid has been cancelled $passed_end_of_msg."
 			fi
 		fi
 	else
 		# Attempt to unfreeze target process
 		if ! kill -CONT "$passed_process_pid" > /dev/null 2>&1; then
-			print_warn "Unable to unfreeze process '$passed_process_name' with PID $passed_process_pid!"
+			message --warning "Unable to unfreeze process '$passed_process_name' with PID $passed_process_pid!"
 		else
-			print_info "Process '$passed_process_name' with PID $passed_process_pid has been unfrozen $passed_end_of_msg."
+			message --info "Process '$passed_process_name' with PID $passed_process_pid has been unfrozen $passed_end_of_msg."
 		fi
 	fi
 	# Remove PID from array
@@ -595,7 +588,7 @@ unset_cpu_limit(){
 	local_once_cpulimit_bgprocesses_pids_array
 	# Attempt to terminate CPU limit background process
 	if ! kill "$passed_signal" "${cpulimit_bgprocess_pid_map["$passed_process_pid"]}" > /dev/null 2>&1; then
-		print_warn "Process '$passed_process_name' with PID $passed_process_pid cannot be CPU unlimited!"
+		message --warning "Process '$passed_process_name' with PID $passed_process_pid cannot be CPU unlimited!"
 	fi
 	# Remove PID of 'cpulimit' background process from array
 	for local_temp_cpulimit_bgprocess_pid in "${cpulimit_bgprocesses_pids_array[@]}"; do
@@ -622,12 +615,12 @@ unset_fps_limit(){
 		if ! kill "${fps_limit_bgprocess_pid_map["$passed_section"]}" > /dev/null 2>&1; then
 			# Avoid printing this message if delay is not specified
 			if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
-				print_warn "Unable to cancel delayed for ${config_key_delay_map["$passed_section"]} second(s) FPS unlimiting of section '$passed_section'!"
+				message --warning "Unable to cancel delayed for ${config_key_delay_map["$passed_section"]} second(s) FPS unlimiting of section '$passed_section'!"
 			fi
 		else
 			# Avoid printing this message if delay is not specified
 			if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
-				print_info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) FPS unlimiting of section '$passed_section' has been cancelled $passed_end_of_msg."
+				message --info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) FPS unlimiting of section '$passed_section' has been cancelled $passed_end_of_msg."
 			fi
 		fi
 	fi
@@ -635,9 +628,9 @@ unset_fps_limit(){
 	if mangohud_fps_set "${config_key_mangohud_config_map["$passed_section"]}" "${config_key_mangohud_source_config_map["$passed_section"]}" "${config_key_fps_focus_map["$passed_section"]}"; then
 		# Print message depending by FPS limit
 		if [[ "${config_key_fps_focus_map["$passed_section"]}" == '0' ]]; then
-			print_info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been FPS unlimited $passed_end_of_msg."
+			message --info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been FPS unlimited $passed_end_of_msg."
 		else
-			print_info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been limited to ${config_key_fps_focus_map["$passed_section"]} FPS $passed_end_of_msg."
+			message --info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been limited to ${config_key_fps_focus_map["$passed_section"]} FPS $passed_end_of_msg."
 		fi
 	fi
 	# Forget that process(es) matching with current section have been FPS limited previously
@@ -695,7 +688,7 @@ actions_on_exit(){
 	sleep 0.1
 	# Remove lock file which prevents multiple instances of daemon from running
 	if [[ -f "$lock_file" ]] && ! rm "$lock_file" > /dev/null 2>&1; then
-		print_warn "Unable to remove lock file '$lock_file' which prevents multiple instances from running!"
+		message --warning "Unable to remove lock file '$lock_file' which prevents multiple instances from running!"
 	fi
 }
 
@@ -740,7 +733,7 @@ while (( $# > 0 )); do
 			# Check for failure related to X server check
 			if [[ -n "$once_fail" ]]; then
 				# Exit with an error if something wrong with X server
-				print_error "Unable to get info about focused window, something is wrong with X11 session!"
+				message --error "Unable to get info about focused window, something is wrong with X11 session!"
 				exit 1
 			else
 				# Get output of xprop containing window ID
@@ -752,12 +745,12 @@ while (( $# > 0 )); do
 		--pick | -p )
 			# Exit with an error if something wrong with X server
 			if [[ -n "$once_fail" ]]; then
-				print_error "Unable to call window picker, something is wrong with X11 session!"
+				message --error "Unable to call window picker, something is wrong with X11 session!"
 				exit 1
 			else
 				# Get xwininfo output containing window ID
 				if ! xwininfo_output="$(xwininfo 2>/dev/null)"; then
-					print_error "Unable to grab cursor to pick a window!"
+					message --error "Unable to grab cursor to pick a window!"
 					exit 1
 				else
 					# Extract ID of focused window
@@ -781,7 +774,7 @@ owner = "$process_owner"
 "
 			exit 0
 		else
-			print_error "Unable to create template for window with ID $window_id as it does not report its PID!"
+			message --error "Unable to create template for window with ID $window_id as it does not report its PID!"
 			exit 1
 		fi
 	;;
@@ -942,7 +935,7 @@ There is NO WARRANTY, to the extent permitted by law.
 			set -- "${once_options_array[@]}" "$@"
 			unset once_options_array i
 		else
-			print_error "Unknown option '$1'!$advice_on_option_error"
+			message --error "Unknown option '$1'!$advice_on_option_error"
 			exit 1
 		fi
 	esac
@@ -951,31 +944,31 @@ unset once_shift
 
 # Exit with an error if verbose and quiet modes are specified at the same time
 if [[ -n "$verbose" && -n "$quiet" ]]; then
-	print_error "Do not use verbose and quiet modes at the same time!$advice_on_option_error"
+	message --error "Do not use verbose and quiet modes at the same time!$advice_on_option_error"
 	exit 1
 fi
 
 # Exit with an error if '--lazy' option is specified without '--hot'
 if [[ -n "$lazy" && -z "$hot" ]]; then
-	print_error "Do not use '--lazy' option without '--hot'!$advice_on_option_error"
+	message --error "Do not use '--lazy' option without '--hot'!$advice_on_option_error"
 	exit 1
 fi
 
 # Exit with an error if logging specific options are specified without '--log' option
 if [[ -z "$log_is_passed" ]] && [[ -n "$log_no_timestamps" || -n "$log_overwrite" || -n "$log_timestamp_is_passed" ]]; then
-	print_error "Do not use options related to logging without '--log' options!$advice_on_option_error"
+	message --error "Do not use options related to logging without '--log' options!$advice_on_option_error"
 	exit 1
 fi
 
 # Exit with an error if '--log-timestamp' and '--log-no-timestamps' options are specified at the same time
 if [[ -n "$log_timestamp_is_passed" && -n "$log_no_timestamps" ]]; then
-	print_error "Do not use '--log-timestamp' and '--log-no-timestamps' options at the same time!$advice_on_option_error"
+	message --error "Do not use '--log-timestamp' and '--log-no-timestamps' options at the same time!$advice_on_option_error"
 	exit 1
 fi
 
 # Exit with an error if '--config' option is specified without a path to config file
 if [[ -n "$config_is_passed" && -z "$config" ]]; then
-	print_error "Option '--config' is specified without path to config file!$advice_on_option_error"
+	message --error "Option '--config' is specified without path to config file!$advice_on_option_error"
 	exit 1
 fi
 unset config_is_passed
@@ -987,7 +980,7 @@ for temp_prefix_type in error info verbose warning; do
 	once_new_prefix="new_prefix_$temp_prefix_type"
 	# Exit with an error if option is passed but value does not exist
 	if [[ -n "${!once_is_passed}" && -z "${!once_new_prefix}" ]]; then
-		print_info "Option '--prefix-$temp_prefix_type' is specified without prefix!$advice_on_option_error"
+		message --info "Option '--prefix-$temp_prefix_type' is specified without prefix!$advice_on_option_error"
 		exit 1
 	fi
 done
@@ -1013,16 +1006,16 @@ fi
 
 # Exit with an error if config file is not found
 if [[ -z "$config" ]]; then
-	print_error "Config file is not found!"
+	message --error "Config file is not found!"
 	exit 1
 elif [[ -e "$config" && ! -f "$config" ]]; then # Exit with an error if path exists but that is not a file
-	print_error "Path '$config' specified in '--config' is not a file!"
+	message --error "Path '$config' specified in '--config' is not a file!"
 	exit 1
 elif [[ ! -f "$config" ]]; then # Exit with an error if config file does not exist
-	print_error "Config file '$config' does not exist!"
+	message --error "Config file '$config' does not exist!"
 	exit 1
 elif ! check_ro "$config"; then # Exit with an error if config file is not readable
-	print_error "Config file '$config' is not accessible for reading!"
+	message --error "Config file '$config' is not accessible for reading!"
 	exit 1
 fi
 
@@ -1031,31 +1024,31 @@ if [[ -n "$log_is_passed" ]]; then
 	unset log_is_passed
 	# Exit with an error if '--log-timestamp' option is specified without timestamp format
 	if [[ -n "$log_timestamp_is_passed" && -z "$new_log_timestamp" ]]; then
-		print_error "Option '--log-timestamp' is specified without timestamp!$advice_on_option_error"
+		message --error "Option '--log-timestamp' is specified without timestamp!$advice_on_option_error"
 		exit 1
 	fi
 	unset log_timestamp_is_passed
 	# Exit with an error if '--log' option is specified without path to log file
 	if [[ -z "$log" ]]; then
-		print_error "Option '--log' is specified without path to log file!$advice_on_option_error"
+		message --error "Option '--log' is specified without path to log file!$advice_on_option_error"
 		exit 1
 	fi
 	# Exit with an error if specified log file exists but not accessible for read-write operations
 	if [[ -f "$log" ]] && ! check_rw "$log"; then
-		print_error "Log file '$log' is not accessible for read-write operations!"
+		message --error "Log file '$log' is not accessible for read-write operations!"
 		exit 1
 	elif [[ -e "$log" && ! -f "$log" ]]; then # Exit with an error if path to log exists and that is not a file
-		print_error "Path '$log' specified in '--log' option is expected to be a file!"
+		message --error "Path '$log' specified in '--log' option is expected to be a file!"
 		exit 1
 	elif [[ -d "${log%/*}" ]] && ! check_rw "${log%/*}"; then # Exit with an error if log file directory is not accessible for read-write operations
-		print_error "Directory of log file '$log' is not accessible for read-write operations!"
+		message --error "Directory of log file '$log' is not accessible for read-write operations!"
 		exit 1
 	fi
 fi
 
 # Exit with an error if '--notifications' option is specified but 'notify-send' command is not found
 if [[ -n "$notifications" ]] && ! type notify-send > /dev/null 2>&1; then
-	print_error "Command 'notify-send' required to print notifications is not found!"
+	message --error "Command 'notify-send' required to print notifications is not found!"
 	exit 1
 fi
 
@@ -1089,14 +1082,14 @@ while read -r temp_config_line; do
 	if [[ ! "$temp_config_line" =~ ^(\;|\#) && -n "$temp_config_line" ]]; then
 		# Exit with an error if first line is not a section, otherwise remember section name, regexp means any symbols in square brackes
 		if [[ ! "$temp_config_line" =~ ^\[.*\]$ && -z "$once_section" ]]; then
-			print_error "Initial section is not found in '$config' config file!"
+			message --error "Initial section is not found in '$config' config file!"
 			exit 1
 		elif [[ "$temp_config_line" =~ ^\[.*\]$ ]]; then # Regexp means any symbols in square brackes
 			# Exit with an error if section repeated
 			if [[ -n "${sections_array[*]}" ]]; then
 				for temp_section in "${sections_array[@]}"; do
 					if [[ "[$temp_section]" == "$temp_config_line" ]]; then
-						print_error "Section name '$temp_section' is repeated in '$config' config file!"
+						message --error "Section name '$temp_section' is repeated in '$config' config file!"
 						exit 1
 					fi
 				done
@@ -1141,7 +1134,7 @@ while read -r temp_config_line; do
 					if [[ "$once_config_value" =~ ^[0-9]+$ ]]; then
 						config_key_owner_map["$once_section"]="$once_config_value"
 					else
-						print_error "Value '$once_config_value' in key 'owner' in section '$once_section' is not UID in '$config' config file!"
+						message --error "Value '$once_config_value' in key 'owner' in section '$once_section' is not UID in '$config' config file!"
 						exit 1
 					fi
 				;;
@@ -1155,7 +1148,7 @@ while read -r temp_config_line; do
 							config_key_cpu_limit_map["$once_section"]="$(( "${once_config_value/%\%/}" * cpu_threads ))"
 						fi
 					else
-						print_error "Value '$once_config_value' in key 'cpulimit' in section '$once_section' is invalid in '$config' config file! Allowed values are 0-100%."
+						message --error "Value '$once_config_value' in key 'cpulimit' in section '$once_section' is invalid in '$config' config file! Allowed values are 0-100%."
 						exit 1
 					fi
 				;;
@@ -1164,7 +1157,7 @@ while read -r temp_config_line; do
 					if [[ "$once_config_value" =~ ^[0-9]+((\.|\,)[0-9]+)?$ ]]; then
 						config_key_delay_map["$once_section"]="$once_config_value"
 					else
-						print_error "Value '$once_config_value' in key 'delay' in section '$once_section' is neither integer nor float in '$config' config file!"
+						message --error "Value '$once_config_value' in key 'delay' in section '$once_section' is neither integer nor float in '$config' config file!"
 						exit 1
 					fi
 				;;
@@ -1200,7 +1193,7 @@ while read -r temp_config_line; do
 							once_key_name='mangohud-config'
 						esac
 						# Exit with an error if specified MangoHud config file does not exist
-						print_error "MangoHud config file '$once_config_value' specified in key '$once_key_name' in section '$once_section' in '$config' config file does not exist!"
+						message --error "MangoHud config file '$once_config_value' specified in key '$once_key_name' in section '$once_section' in '$config' config file does not exist!"
 						exit 1
 					fi
 				;;
@@ -1211,11 +1204,11 @@ while read -r temp_config_line; do
 						if [[ "$once_config_value" != '0' ]]; then
 							config_key_fps_unfocus_map["$once_section"]="$once_config_value"
 						else
-							print_error "Value $once_config_value in key 'fps-unfocus' in section '$once_section' in '$config' config file should be greater than zero!"
+							message --error "Value $once_config_value in key 'fps-unfocus' in section '$once_section' in '$config' config file should be greater than zero!"
 							exit 1
 						fi
 					else
-						print_error "Value '$once_config_value' specified in key 'fps-unfocus' in section '$once_section' in '$config' config file is not an integer!"
+						message --error "Value '$once_config_value' specified in key 'fps-unfocus' in section '$once_section' in '$config' config file is not an integer!"
 						exit 1
 					fi
 				;;
@@ -1224,7 +1217,7 @@ while read -r temp_config_line; do
 					if [[ "$once_config_value" =~ ^[0-9]+$ ]]; then
 						config_key_fps_focus_map["$once_section"]="$once_config_value"
 					else
-						print_error "Value '$once_config_value' specified in key 'fps-focus' in section '$once_section' in '$config' config file is not an integer!"
+						message --error "Value '$once_config_value' specified in key 'fps-focus' in section '$once_section' in '$config' config file is not an integer!"
 						exit 1
 					fi
 				esac
@@ -1232,9 +1225,9 @@ while read -r temp_config_line; do
 		else
 			# Print error message depending on whether section is defined or not
 			if [[ -n "$once_section" ]]; then
-				print_error "Unable to define type of line '$temp_config_line' in section '$once_section' in '$config' config file!"
+				message --error "Unable to define type of line '$temp_config_line' in section '$once_section' in '$config' config file!"
 			else
-				print_error "Unable to define type of line '$once_config_line' in '$config' config file!"
+				message --error "Unable to define type of line '$once_config_line' in '$config' config file!"
 			fi
 			exit 1
 		fi
@@ -1248,32 +1241,32 @@ once_section
 for temp_section in "${sections_array[@]}"; do
 	# Exit with an error if neither identifier 'name' nor 'executable' nor 'command' is specified
 	if [[ -z "${config_key_name_map["$temp_section"]}" && -z "${config_key_executable_map["$temp_section"]}" && -z "${config_key_command_map["$temp_section"]}" ]]; then
-		print_error "At least one process identifier required in section '$temp_section' in '$config' config file!"
+		message --error "At least one process identifier required in section '$temp_section' in '$config' config file!"
 		exit 1
 	fi
 	# Exit with an error if MangoHud FPS limit is not specified along with config path
 	if [[ -n "${config_key_fps_unfocus_map["$temp_section"]}" && -z "${config_key_mangohud_config_map["$temp_section"]}" ]]; then
-		print_error "Value ${config_key_fps_unfocus_map["$temp_section"]} in 'fps-unfocus' key in section '$temp_section' is specified without 'mangohud-config' key in '$config' config file!"
+		message --error "Value ${config_key_fps_unfocus_map["$temp_section"]} in 'fps-unfocus' key in section '$temp_section' is specified without 'mangohud-config' key in '$config' config file!"
 		exit 1
 	fi
 	# Exit with an error if MangoHud FPS limit is specified along with CPU limit
 	if [[ -n "${config_key_fps_unfocus_map["$temp_section"]}" && -n "${config_key_cpu_limit_map["$temp_section"]}" && "${config_key_cpu_limit_map["$temp_section"]}" != '-1' ]]; then
-		print_error "Do not use FPS limit along with CPU limit in section '$temp_section' in '$config' config file!"
+		message --error "Do not use FPS limit along with CPU limit in section '$temp_section' in '$config' config file!"
 		exit 1
 	fi
 	# Exit with an error if 'fps-focus' is specified without 'fps-unfocus'
 	if [[ -n "${config_key_fps_focus_map["$temp_section"]}" && -z "${config_key_fps_unfocus_map["$temp_section"]}" ]]; then
-		print_error "Do not use 'fps-focus' key without 'fps-unfocus' key in section '$temp_section' in '$config' config file!"
+		message --error "Do not use 'fps-focus' key without 'fps-unfocus' key in section '$temp_section' in '$config' config file!"
 		exit 1
 	fi
 	# Exit with an error if 'mangohud-config' is specified without 'fps-unfocus'
 	if [[ -n "${config_key_mangohud_config_map["$temp_section"]}" && -z "${config_key_fps_unfocus_map["$temp_section"]}" ]]; then
-		print_error "Do not use 'mangohud-config' key without 'fps-unfocus' key in section '$temp_section' in '$config' config file!"
+		message --error "Do not use 'mangohud-config' key without 'fps-unfocus' key in section '$temp_section' in '$config' config file!"
 		exit 1
 	fi
 	# Exit with an error if 'mangohud-source-config' is specified without 'mangohud-config'
 	if [[ -n "${config_key_mangohud_source_config_map["$temp_section"]}" && -z "${config_key_mangohud_config_map["$temp_section"]}" ]]; then
-		print_error "Do not use 'mangohud-source-config' key without 'mangohud-config' key in section '$temp_section' in '$config' config file!"
+		message --error "Do not use 'mangohud-source-config' key without 'mangohud-config' key in section '$temp_section' in '$config' config file!"
 		exit 1
 	fi
 	# Set 'fps-focus' to '0' (full FPS unlock) if it is not specified
@@ -1321,18 +1314,18 @@ cache_mismatch_map
 # Exit with an error if that is not a X11 session
 if ! x11_session_check; then
 	# Exit with an error if X11 session is invalid
-	print_error "Unable to start daemon, something is wrong with X11 session!"
+	message --error "Unable to start daemon, something is wrong with X11 session!"
 	exit 1
 else
 	# Exit with an error if daemon already running
 	lock_file='/tmp/flux-lock'
 	if [[ -f "$lock_file" ]] && check_pid_existence "$(<"$lock_file")"; then
-		print_error "Multiple instances are not allowed, make sure that daemon is not running before start, if you are really sure, then remove '$lock_file' file."
+		message --error "Multiple instances are not allowed, make sure that daemon is not running before start, if you are really sure, then remove '$lock_file' file."
 		exit 1
 	else
 		# Store PID to lock file to check its existence on next launch (if lock file exists, e.g. after crash or SIGKILL)
 		if ! echo "$$" > "$lock_file"; then
-			print_error "Unable to create lock file '$lock_file' required to prevent multiple instances!"
+			message --error "Unable to create lock file '$lock_file' required to prevent multiple instances!"
 			exit 1
 		fi
 	fi
@@ -1371,12 +1364,12 @@ else
 	fi
 	# Print warning related to workaround for KDE Plasma which prevents list of stacking windows from being skipped if it contains the same columns count as previous one in 'event_source()'
 	if [[ "$DESKTOP_SESSION" == 'plasmax11' ]]; then
-		print_warn "Workaround for KDE Plasma has been applied, expect slightly higher CPU usage because daemon will try to find terminated windows in every '_NET_CLIENT_LIST_STACKING' event!"
+		message --warning "Workaround for KDE Plasma has been applied, expect slightly higher CPU usage because daemon will try to find terminated windows in every '_NET_CLIENT_LIST_STACKING' event!"
 	fi
 	# Print message about daemon start (to make it easier to understand when it has been started in log file, also to print notification if responding option is specified)
-	print_info "Flux has been started."
+	message --info "Flux has been started."
 	# Remove CPU and FPS limits of processes on exit
-	trap 'actions_on_exit ; print_info "Flux has been terminated successfully." ; exit 0' SIGTERM SIGINT
+	trap 'actions_on_exit ; message --info "Flux has been terminated successfully." ; exit 0' SIGTERM SIGINT
 	# Ignore user signals as they used in 'background_cpulimit' function to avoid next output ('X' - path to 'flux', 'Y' - line, 'Z' - PID of 'background_cpulimit'):
 	# X: line Y: Z User defined signal 2   background_cpulimit
 	trap '' SIGUSR1 SIGUSR2
@@ -1385,7 +1378,7 @@ else
 		# Exit with an error in case 'exit' event appears
 		if [[ "$event" == 'exit' ]]; then
 			actions_on_exit
-			print_error "Flux has been terminated unexpectedly!"
+			message --error "Flux has been terminated unexpectedly!"
 			exit 1
 		elif [[ "$event" == '-lazy' ]]; then # Unset '--lazy' option if responding event appears, otherwise focus and unfocus commands will not work
 			unset lazy
@@ -1449,7 +1442,7 @@ else
 				# Check for event type before unset cache
 				if [[ "${cache_event_type_map["$temp_terminated_window_id"]}" == 'bad' ]]; then
 					# Unset only event type for bad window, otherwise bash will fail
-					print_verbose "Cached info about bad window with ID $temp_terminated_window_id has been removed as it has been terminated."
+					message --verbose "Cached info about bad window with ID $temp_terminated_window_id has been removed as it has been terminated."
 					cache_event_type_map["$temp_terminated_window_id"]=''
 				elif [[ "${cache_event_type_map["$temp_terminated_window_id"]}" == 'good' ]]; then
 					# Simplify access to PID of cached window info
@@ -1459,16 +1452,16 @@ else
 					# Unset limit request
 					if [[ -n "${request_freeze_map["$once_terminated_process_pid"]}" ]]; then
 						request_freeze_map["$once_terminated_process_pid"]=''
-						print_info "Freezing of process '${cache_process_name_map["$temp_terminated_window_id"]}' with PID $once_terminated_process_pid has been cancelled due to window termination."
+						message --info "Freezing of process '${cache_process_name_map["$temp_terminated_window_id"]}' with PID $once_terminated_process_pid has been cancelled due to window termination."
 					elif [[ -n "${request_cpu_limit_map["$once_terminated_process_pid"]}" ]]; then
 						request_cpu_limit_map["$once_terminated_process_pid"]=''
-						print_info "CPU limiting of process '${cache_process_name_map["$temp_terminated_window_id"]}' with PID $once_terminated_process_pid has been cancelled due to window termination."
+						message --info "CPU limiting of process '${cache_process_name_map["$temp_terminated_window_id"]}' with PID $once_terminated_process_pid has been cancelled due to window termination."
 					elif [[ -n "$once_terminated_section" && -n "${request_fps_limit_map["$once_terminated_section"]}" ]]; then
 						request_fps_limit_map["$once_terminated_section"]=''
-						print_info "FPS limiting of section '$once_terminated_section' has been cancelled due to termination of matching window(s)."
+						message --info "FPS limiting of section '$once_terminated_section' has been cancelled due to termination of matching window(s)."
 					fi
 					# Unset data in cache related to terminated window
-					print_verbose "Cached info about window with ID $temp_terminated_window_id and process '${cache_process_name_map["$temp_terminated_window_id"]}' with PID ${cache_process_pid_map["$temp_terminated_window_id"]} has been removed as it has been terminated."
+					message --verbose "Cached info about window with ID $temp_terminated_window_id and process '${cache_process_name_map["$temp_terminated_window_id"]}' with PID ${cache_process_pid_map["$temp_terminated_window_id"]} has been removed as it has been terminated."
 					cache_mismatch_map["$once_terminated_process_pid"]=''
 					cache_section_map["$once_terminated_process_pid"]=''
 					cache_event_type_map["$temp_terminated_window_id"]=''
@@ -1587,10 +1580,10 @@ else
 			if [[ "$window_id" != '0x0' ]]; then
 				# Attempt to obtain info about process using window ID
 				if ! get_process_info; then
-					print_warn "Bad window with ID $window_id appeared, unable to obtain process info!"
+					message --warning "Bad window with ID $window_id appeared, unable to obtain process info!"
 				fi
 			else
-				print_verbose "Bad event with window ID 0x0 appeared, getting process info skipped."
+				message --verbose "Bad event with window ID 0x0 appeared, getting process info skipped."
 			fi
 			# Do not find matching section if window does not report its PID
 			if [[ -n "$process_pid" ]]; then
@@ -1643,9 +1636,9 @@ else
 				fi
 				# Print message about section match
 				if [[ -n "$section" ]]; then
-					print_verbose "Process '$process_name' with PID $process_pid matches with section '$section'."
+					message --verbose "Process '$process_name' with PID $process_pid matches with section '$section'."
 				else
-					print_verbose "Process '$process_name' with PID $process_pid does not match with any section."
+					message --verbose "Process '$process_name' with PID $process_pid does not match with any section."
 				fi
 			fi
 			# Do not apply limit if previous and current PIDs are exactly the same
@@ -1678,7 +1671,7 @@ else
 					# I know that FPS limiting does not require root rights as it just should change 'fps_limit' value in MangoHud config
 					# But who will run a game as root?
 					# That is dumb and I am not looking for spend time on this
-					print_warn "Unable to apply any kind of limit to process '$previous_process_name' with PID $previous_process_pid due to insufficient rights (process - $previous_process_owner, user - $UID)!"
+					message --warning "Unable to apply any kind of limit to process '$previous_process_name' with PID $previous_process_pid due to insufficient rights (process - $previous_process_owner, user - $UID)!"
 				fi
 			fi
 			# Do not apply actions if window does not report its PID
