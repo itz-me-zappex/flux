@@ -839,7 +839,7 @@ Examples:
 			log="$(get_realpath "$log")"
 		fi
 	;;
-	-n | --notifications )
+	--notifications | -n )
 		option_repeat_check notifications --notifications
 		notifications='1'
 		shift 1
