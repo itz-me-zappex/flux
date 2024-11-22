@@ -935,6 +935,9 @@ There is NO WARRANTY, to the extent permitted by law.
 
 # Required to validate options
 validate_options(){
+	local local_temp_prefix_type \
+	local_once_is_passed \
+	local_once_new_prefix
 	# Exit with an error if verbose and quiet modes are specified at the same time
 	if [[ -n "$verbose" && -n "$quiet" ]]; then
 		message --error "Do not use verbose and quiet modes at the same time!$advice_on_option_error"
@@ -962,23 +965,21 @@ validate_options(){
 	fi
 	unset config_is_passed
 	# Exit with error if at least one prefix option is specified without prefix
-	for temp_prefix_type in error info verbose warning; do
+	for local_temp_prefix_type in error info verbose warning; do
 		# Set proper variables names to obtain their values using indirectly
-		once_is_passed="prefix_${temp_prefix_type}_is_passed"
-		once_new_prefix="new_prefix_$temp_prefix_type"
+		local_once_is_passed="prefix_${local_temp_prefix_type}_is_passed"
+		local_once_new_prefix="new_prefix_$local_temp_prefix_type"
 		# Exit with an error if option is passed but value does not exist
-		if [[ -n "${!once_is_passed}" && -z "${!once_new_prefix}" ]]; then
-			message --info "Option '--prefix-$temp_prefix_type' is specified without prefix!$advice_on_option_error"
+		if [[ -n "${!local_once_is_passed}" && -z "${!local_once_new_prefix}" ]]; then
+			message --info "Option '--prefix-$local_temp_prefix_type' is specified without prefix!$advice_on_option_error"
 			exit 1
 		fi
 	done
-	unset temp_prefix_type \
-	once_is_passed \
-	once_new_prefix
 }
 
 # Required to validate config file
 validate_config(){
+	local local_temp_config
 	# Automatically set a path to config file if it is not specified
 	if [[ -z "$config" ]]; then
 		# Set XDG_CONFIG_HOME automatically if it is not specified
@@ -986,13 +987,12 @@ validate_config(){
 			XDG_CONFIG_HOME="$HOME/.config"
 		fi
 		# Find a config
-		for temp_config in "$XDG_CONFIG_HOME/flux.ini" "$HOME/.config/flux.ini" '/etc/flux.ini'; do
-			if [[ -f "$temp_config" ]]; then
-				config="$temp_config"
+		for local_temp_config in "$XDG_CONFIG_HOME/flux.ini" "$HOME/.config/flux.ini" '/etc/flux.ini'; do
+			if [[ -f "$local_temp_config" ]]; then
+				config="$local_temp_config"
 				break
 			fi
 		done
-		unset temp_config
 	fi
 	# Exit with an error if config file is not found
 	if [[ -z "$config" ]]; then
@@ -1047,129 +1047,132 @@ validate_log(){
 
 # Required to calculate maximum CPU limit
 calculate_max_limit(){
+	local local_temp_cpuinfo_line
 	# Calculate maximum allowable CPU limit and CPU threads
 	cpu_threads='0'
-	while read -r temp_cpuinfo_line; do
-		if [[ "$temp_cpuinfo_line" == 'processor'* ]]; then
+	while read -r local_temp_cpuinfo_line; do
+		if [[ "$local_temp_cpuinfo_line" == 'processor'* ]]; then
 			(( cpu_threads++ ))
 		fi
 	done < '/proc/cpuinfo'
 	max_cpu_limit="$(( cpu_threads * 100 ))"
-	unset temp_cpuinfo_line
 }
 
 # Required to parse INI config file
 parse_ini(){
+	local local_temp_config_line \
+	local_once_config_value \
+	local_once_section \
+	local_temp_section
 	# Parse INI config
-	while read -r temp_config_line; do
+	while read -r local_temp_config_line; do
 		# Skip cycle if line is commented or blank, regexp means comments which beginning from ';' or '#' symbols
-		if [[ ! "$temp_config_line" =~ ^(\;|\#) && -n "$temp_config_line" ]]; then
+		if [[ ! "$local_temp_config_line" =~ ^(\;|\#) && -n "$local_temp_config_line" ]]; then
 			# Exit with an error if first line is not a section, otherwise remember section name, regexp means any symbols in square brackes
-			if [[ ! "$temp_config_line" =~ ^\[.*\]$ && -z "$once_section" ]]; then
+			if [[ ! "$local_temp_config_line" =~ ^\[.*\]$ && -z "$local_once_section" ]]; then
 				message --error "Initial section is not found in '$config' config file!"
 				exit 1
-			elif [[ "$temp_config_line" =~ ^\[.*\]$ ]]; then # Regexp means any symbols in square brackes
+			elif [[ "$local_temp_config_line" =~ ^\[.*\]$ ]]; then # Regexp means any symbols in square brackes
 				# Exit with an error if section repeated
 				if [[ -n "${sections_array[*]}" ]]; then
-					for temp_section in "${sections_array[@]}"; do
-						if [[ "[$temp_section]" == "$temp_config_line" ]]; then
-							message --error "Section name '$temp_section' is repeated in '$config' config file!"
+					for local_temp_section in "${sections_array[@]}"; do
+						if [[ "[$local_temp_section]" == "$local_temp_config_line" ]]; then
+							message --error "Section name '$local_temp_section' is repeated in '$config' config file!"
 							exit 1
 						fi
 					done
-					unset temp_section
 				fi
 				# Remove square brackets from section name and add it to array
 				# Array required to check for repeating sections and find matching rule(s) for process in config
-				once_section="${temp_config_line/\[/}"
-				once_section="${once_section/%\]/}"
-				sections_array+=("$once_section")
-			elif [[ "${temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
+				local_once_section="${local_temp_config_line/\[/}"
+				local_once_section="${local_once_section/%\]/}"
+				sections_array+=("$local_once_section")
+			elif [[ "${local_temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
 				# Remove key name and equal symbol
-				once_config_value="${temp_config_line/*=/}"
+				local_once_config_value="${local_temp_config_line/*=/}"
 				# Remove all spaces before and after string, internal shell parameter expansion required to get spaces supposed to be removed
-				once_config_value="${once_config_value#"${once_config_value%%[![:space:]]*}"}" # Remove spaces in beginning for string
-				once_config_value="${once_config_value%"${once_config_value##*[![:space:]]}"}" # Remove spaces in end of string
+				local_once_config_value="${local_once_config_value#"${local_once_config_value%%[![:space:]]*}"}" # Remove spaces in beginning for string
+				local_once_config_value="${local_once_config_value%"${local_once_config_value##*[![:space:]]}"}" # Remove spaces in end of string
 				# Remove single or double quotes from strings, that is what regexp means
-				if [[ "$once_config_value" =~ ^(\".*\"|\'.*\')$ ]]; then
+				if [[ "$local_once_config_value" =~ ^(\".*\"|\'.*\')$ ]]; then
 					# Regexp means double quoted string
-					if [[ "$once_config_value" =~ ^\".*\"$ ]]; then
-						once_config_value="${once_config_value/\"/}" # Remove first double quote
-						once_config_value="${once_config_value/%\"/}" # And last one
+					if [[ "$local_once_config_value" =~ ^\".*\"$ ]]; then
+						local_once_config_value="${local_once_config_value/\"/}" # Remove first double quote
+						local_once_config_value="${local_once_config_value/%\"/}" # And last one
 					else
-						once_config_value="${once_config_value/\'/}" # Remove first single quote
-						once_config_value="${once_config_value/%\'/}" # And last one
+						local_once_config_value="${local_once_config_value/\'/}" # Remove first single quote
+						local_once_config_value="${local_once_config_value/%\'/}" # And last one
 					fi
 				fi
 				# Associate value with section if it is not blank
-				if [[ -n "$once_config_value" ]]; then
+				if [[ -n "$local_once_config_value" ]]; then
 					# Define type of key to associate value properly
-					case "${temp_config_line,,}" in
+					case "${local_temp_config_line,,}" in
 					name* )
-						config_key_name_map["$once_section"]="$once_config_value"
+						config_key_name_map["$local_once_section"]="$local_once_config_value"
 					;;
 					executable* )
 						# Get absolute path to executable
-						once_config_value="$(get_realpath "$once_config_value")"
-						config_key_executable_map["$once_section"]="$once_config_value"
+						local_once_config_value="$(get_realpath "$local_once_config_value")"
+						config_key_executable_map["$local_once_section"]="$local_once_config_value"
 					;;
 					owner* )
 						# Exit with an error if UID is not numeric, regexp means any number
-						if [[ "$once_config_value" =~ ^[0-9]+$ ]]; then
-							config_key_owner_map["$once_section"]="$once_config_value"
+						if [[ "$local_once_config_value" =~ ^[0-9]+$ ]]; then
+							config_key_owner_map["$local_once_section"]="$local_once_config_value"
 						else
-							message --error "Value '$once_config_value' in key 'owner' in section '$once_section' is not UID in '$config' config file!"
+							message --error "Value '$local_once_config_value' in key 'owner' in section '$local_once_section' is not UID in '$config' config file!"
 							exit 1
 						fi
 					;;
 					cpu-limit* )
 						# Exit with an error if CPU limit is specified incorrectly, 1st regexp - any number with optional '%' symbol, 2nd - '-1' or '-1%'
-						if [[ "$once_config_value" =~ ^[0-9]+(\%)?$ || "$once_config_value" =~ ^('-1'|'-1%')$ ]] && (( "${once_config_value/%\%/}" * cpu_threads <= max_cpu_limit )); then
+						if [[ "$local_once_config_value" =~ ^[0-9]+(\%)?$ || "$local_once_config_value" =~ ^('-1'|'-1%')$ ]] && (( "${local_once_config_value/%\%/}" * cpu_threads <= max_cpu_limit )); then
 							# Regexp means '-1' or '-1%'
-							if [[ "$once_config_value" =~ ^('-1'|'-1%')$ ]]; then
-								config_key_cpu_limit_map["$once_section"]="${once_config_value/%\%/}"
+							if [[ "$local_once_config_value" =~ ^('-1'|'-1%')$ ]]; then
+								config_key_cpu_limit_map["$local_once_section"]="${local_once_config_value/%\%/}"
 							else
-								config_key_cpu_limit_map["$once_section"]="$(( "${once_config_value/%\%/}" * cpu_threads ))"
+								config_key_cpu_limit_map["$local_once_section"]="$(( "${local_once_config_value/%\%/}" * cpu_threads ))"
 							fi
 						else
-							message --error "Value '$once_config_value' in key 'cpulimit' in section '$once_section' is invalid in '$config' config file! Allowed values are 0-100%."
+							message --error "Value '$local_once_config_value' in key 'cpulimit' in section '$local_once_section' is invalid in '$config' config file! Allowed values are 0-100%."
 							exit 1
 						fi
 					;;
 					delay* )
 						# Exit with an error if value is neither an integer nor a float (that is what regexp means)
-						if [[ "$once_config_value" =~ ^[0-9]+((\.|\,)[0-9]+)?$ ]]; then
-							config_key_delay_map["$once_section"]="$once_config_value"
+						if [[ "$local_once_config_value" =~ ^[0-9]+((\.|\,)[0-9]+)?$ ]]; then
+							config_key_delay_map["$local_once_section"]="$local_once_config_value"
 						else
-							message --error "Value '$once_config_value' in key 'delay' in section '$once_section' is neither integer nor float in '$config' config file!"
+							message --error "Value '$local_once_config_value' in key 'delay' in section '$local_once_section' is neither integer nor float in '$config' config file!"
 							exit 1
 						fi
 					;;
 					exec-focus* )
-						config_key_exec_focus_map["$once_section"]="$once_config_value"
+						config_key_exec_focus_map["$local_once_section"]="$local_once_config_value"
 					;;
 					exec-unfocus* )
-						config_key_exec_unfocus_map["$once_section"]="$once_config_value"
+						config_key_exec_unfocus_map["$local_once_section"]="$local_once_config_value"
 					;;
 					command* )
-						config_key_command_map["$once_section"]="$once_config_value"
+						config_key_command_map["$local_once_section"]="$local_once_config_value"
 					;;
 					mangohud-source-config* | mangohud-config* )
 						# Get absolute path to MangoHud config in case it is specified as relative
-						once_config_value="$(get_realpath "$once_config_value")"
+						local_once_config_value="$(get_realpath "$local_once_config_value")"
 						# Check for config file existence
-						if [[ -f "$once_config_value" ]]; then
+						if [[ -f "$local_once_config_value" ]]; then
 							# Set path to MangoHud config depending by specified key
-							case "${temp_config_line,,}" in
+							case "${local_temp_config_line,,}" in
 							mangohud-source-config* )
-								config_key_mangohud_source_config_map["$once_section"]="$once_config_value"
+								config_key_mangohud_source_config_map["$local_once_section"]="$local_once_config_value"
 							;;
 							mangohud-config* )
-								config_key_mangohud_config_map["$once_section"]="$once_config_value"
+								config_key_mangohud_config_map["$local_once_section"]="$local_once_config_value"
 							esac
 						else
 							# Set key name depending by key name on line
-							case "${temp_config_line,,}" in
+							case "${local_temp_config_line,,}" in
 							mangohud-source-config* )
 								once_key_name='mangohud-source-config'
 							;;
@@ -1177,39 +1180,39 @@ parse_ini(){
 								once_key_name='mangohud-config'
 							esac
 							# Exit with an error if specified MangoHud config file does not exist
-							message --error "MangoHud config file '$once_config_value' specified in key '$once_key_name' in section '$once_section' in '$config' config file does not exist!"
+							message --error "MangoHud config file '$local_once_config_value' specified in key '$once_key_name' in section '$local_once_section' in '$config' config file does not exist!"
 							exit 1
 						fi
 					;;
 					fps-unfocus* )
 						# Exit with an error if value is not integer, that is what regexp means
-						if [[ "$once_config_value" =~ ^[0-9]+$ ]]; then
+						if [[ "$local_once_config_value" =~ ^[0-9]+$ ]]; then
 							# Exit with an error if value equal to zero
-							if [[ "$once_config_value" != '0' ]]; then
-								config_key_fps_unfocus_map["$once_section"]="$once_config_value"
+							if [[ "$local_once_config_value" != '0' ]]; then
+								config_key_fps_unfocus_map["$local_once_section"]="$local_once_config_value"
 							else
-								message --error "Value $once_config_value in key 'fps-unfocus' in section '$once_section' in '$config' config file should be greater than zero!"
+								message --error "Value $local_once_config_value in key 'fps-unfocus' in section '$local_once_section' in '$config' config file should be greater than zero!"
 								exit 1
 							fi
 						else
-							message --error "Value '$once_config_value' specified in key 'fps-unfocus' in section '$once_section' in '$config' config file is not an integer!"
+							message --error "Value '$local_once_config_value' specified in key 'fps-unfocus' in section '$local_once_section' in '$config' config file is not an integer!"
 							exit 1
 						fi
 					;;
 					fps-focus* )
 						# Exit with an error if value is not integer, that is what regexp means
-						if [[ "$once_config_value" =~ ^[0-9]+$ ]]; then
-							config_key_fps_focus_map["$once_section"]="$once_config_value"
+						if [[ "$local_once_config_value" =~ ^[0-9]+$ ]]; then
+							config_key_fps_focus_map["$local_once_section"]="$local_once_config_value"
 						else
-							message --error "Value '$once_config_value' specified in key 'fps-focus' in section '$once_section' in '$config' config file is not an integer!"
+							message --error "Value '$local_once_config_value' specified in key 'fps-focus' in section '$local_once_section' in '$config' config file is not an integer!"
 							exit 1
 						fi
 					esac
 				fi
 			else
 				# Print error message depending on whether section is defined or not
-				if [[ -n "$once_section" ]]; then
-					message --error "Unable to define type of line '$temp_config_line' in section '$once_section' in '$config' config file!"
+				if [[ -n "$local_once_section" ]]; then
+					message --error "Unable to define type of line '$local_temp_config_line' in section '$local_once_section' in '$config' config file!"
 				else
 					message --error "Unable to define type of line '$once_config_line' in '$config' config file!"
 				fi
@@ -1217,68 +1220,67 @@ parse_ini(){
 			fi
 		fi
 	done < "$config"
-	unset temp_config_line \
-	once_config_value \
-	once_section
 }
 
 # Required to validate config keys
 validate_config_keys(){
+	local local_temp_section
 	# Check values in sections and exit with an error if something is wrong or set default values in some keys if is not specified
-	for temp_section in "${sections_array[@]}"; do
+	for local_temp_section in "${sections_array[@]}"; do
 		# Exit with an error if neither identifier 'name' nor 'executable' nor 'command' is specified
-		if [[ -z "${config_key_name_map["$temp_section"]}" && -z "${config_key_executable_map["$temp_section"]}" && -z "${config_key_command_map["$temp_section"]}" ]]; then
-			message --error "At least one process identifier required in section '$temp_section' in '$config' config file!"
+		if [[ -z "${config_key_name_map["$local_temp_section"]}" && -z "${config_key_executable_map["$local_temp_section"]}" && -z "${config_key_command_map["$local_temp_section"]}" ]]; then
+			message --error "At least one process identifier required in section '$local_temp_section' in '$config' config file!"
 			exit 1
 		fi
 		# Exit with an error if MangoHud FPS limit is not specified along with config path
-		if [[ -n "${config_key_fps_unfocus_map["$temp_section"]}" && -z "${config_key_mangohud_config_map["$temp_section"]}" ]]; then
-			message --error "Value ${config_key_fps_unfocus_map["$temp_section"]} in 'fps-unfocus' key in section '$temp_section' is specified without 'mangohud-config' key in '$config' config file!"
+		if [[ -n "${config_key_fps_unfocus_map["$local_temp_section"]}" && -z "${config_key_mangohud_config_map["$local_temp_section"]}" ]]; then
+			message --error "Value ${config_key_fps_unfocus_map["$local_temp_section"]} in 'fps-unfocus' key in section '$local_temp_section' is specified without 'mangohud-config' key in '$config' config file!"
 			exit 1
 		fi
 		# Exit with an error if MangoHud FPS limit is specified along with CPU limit
-		if [[ -n "${config_key_fps_unfocus_map["$temp_section"]}" && -n "${config_key_cpu_limit_map["$temp_section"]}" && "${config_key_cpu_limit_map["$temp_section"]}" != '-1' ]]; then
-			message --error "Do not use FPS limit along with CPU limit in section '$temp_section' in '$config' config file!"
+		if [[ -n "${config_key_fps_unfocus_map["$local_temp_section"]}" && -n "${config_key_cpu_limit_map["$local_temp_section"]}" && "${config_key_cpu_limit_map["$local_temp_section"]}" != '-1' ]]; then
+			message --error "Do not use FPS limit along with CPU limit in section '$local_temp_section' in '$config' config file!"
 			exit 1
 		fi
 		# Exit with an error if 'fps-focus' is specified without 'fps-unfocus'
-		if [[ -n "${config_key_fps_focus_map["$temp_section"]}" && -z "${config_key_fps_unfocus_map["$temp_section"]}" ]]; then
-			message --error "Do not use 'fps-focus' key without 'fps-unfocus' key in section '$temp_section' in '$config' config file!"
+		if [[ -n "${config_key_fps_focus_map["$local_temp_section"]}" && -z "${config_key_fps_unfocus_map["$local_temp_section"]}" ]]; then
+			message --error "Do not use 'fps-focus' key without 'fps-unfocus' key in section '$local_temp_section' in '$config' config file!"
 			exit 1
 		fi
 		# Exit with an error if 'mangohud-config' is specified without 'fps-unfocus'
-		if [[ -n "${config_key_mangohud_config_map["$temp_section"]}" && -z "${config_key_fps_unfocus_map["$temp_section"]}" ]]; then
-			message --error "Do not use 'mangohud-config' key without 'fps-unfocus' key in section '$temp_section' in '$config' config file!"
+		if [[ -n "${config_key_mangohud_config_map["$local_temp_section"]}" && -z "${config_key_fps_unfocus_map["$local_temp_section"]}" ]]; then
+			message --error "Do not use 'mangohud-config' key without 'fps-unfocus' key in section '$local_temp_section' in '$config' config file!"
 			exit 1
 		fi
 		# Exit with an error if 'mangohud-source-config' is specified without 'mangohud-config'
-		if [[ -n "${config_key_mangohud_source_config_map["$temp_section"]}" && -z "${config_key_mangohud_config_map["$temp_section"]}" ]]; then
-			message --error "Do not use 'mangohud-source-config' key without 'mangohud-config' key in section '$temp_section' in '$config' config file!"
+		if [[ -n "${config_key_mangohud_source_config_map["$local_temp_section"]}" && -z "${config_key_mangohud_config_map["$local_temp_section"]}" ]]; then
+			message --error "Do not use 'mangohud-source-config' key without 'mangohud-config' key in section '$local_temp_section' in '$config' config file!"
 			exit 1
 		fi
 		# Set 'fps-focus' to '0' (full FPS unlock) if it is not specified
-		if [[ -n "${config_key_fps_unfocus_map["$temp_section"]}" && -z "${config_key_fps_focus_map["$temp_section"]}" ]]; then
-			config_key_fps_focus_map["$temp_section"]='0'
+		if [[ -n "${config_key_fps_unfocus_map["$local_temp_section"]}" && -z "${config_key_fps_focus_map["$local_temp_section"]}" ]]; then
+			config_key_fps_focus_map["$local_temp_section"]='0'
 		fi
 		# Set CPU limit to '-1' (none) if it is not specified
-		if [[ -z "${config_key_cpu_limit_map["$temp_section"]}" ]]; then
-			config_key_cpu_limit_map["$temp_section"]='-1'
+		if [[ -z "${config_key_cpu_limit_map["$local_temp_section"]}" ]]; then
+			config_key_cpu_limit_map["$local_temp_section"]='-1'
 		fi
 		# Set 'delay' to '0' if it is not specified
-		if [[ -z "${config_key_delay_map["$temp_section"]}" ]]; then
-			config_key_delay_map["$temp_section"]='0'
+		if [[ -z "${config_key_delay_map["$local_temp_section"]}" ]]; then
+			config_key_delay_map["$local_temp_section"]='0'
 		fi
 		# Set 'mangohud-config' as 'mangohud-source-config' if it is not specified
-		if [[ -z "${config_key_mangohud_source_config_map["$temp_section"]}" && -n "${config_key_mangohud_config_map["$temp_section"]}" ]]; then
-			config_key_mangohud_source_config_map["$temp_section"]="${config_key_mangohud_config_map["$temp_section"]}"
+		if [[ -z "${config_key_mangohud_source_config_map["$local_temp_section"]}" && -n "${config_key_mangohud_config_map["$local_temp_section"]}" ]]; then
+			config_key_mangohud_source_config_map["$local_temp_section"]="${config_key_mangohud_config_map["$local_temp_section"]}"
 		fi
 	done
-	unset temp_section \
-	config
+	unset config
 }
 
 # Required to prepare daemon for event reading
 daemon_prepare(){
+	local local_temp_prefix_type \
+	local_once_variable_name
 	# Exit with an error if daemon already running
 	lock_file='/tmp/flux-lock'
 	if [[ -f "$lock_file" ]] && check_pid_existence "$(<"$lock_file")"; then
@@ -1307,18 +1309,16 @@ daemon_prepare(){
 		fi
 	fi
 	# Set specified from command line prefixes if any
-	for temp_prefix_type in error info verbose warning; do
+	for local_temp_prefix_type in error info verbose warning; do
 		# Get name of variable with new prefix
-		once_variable_name="new_prefix_$temp_prefix_type"
+		local_once_variable_name="new_prefix_$local_temp_prefix_type"
 		# Check for existence of value in variable indirectly
-		if [[ -n "${!once_variable_name}" ]]; then
+		if [[ -n "${!local_once_variable_name}" ]]; then
 			# Replace old prefix with new one
-			eval "prefix_$temp_prefix_type"=\'"${!once_variable_name}"\'
-			unset "new_prefix_$temp_prefix_type"
+			eval "prefix_$local_temp_prefix_type"=\'"${!local_once_variable_name}"\'
+			unset "new_prefix_$local_temp_prefix_type"
 		fi
 	done
-	unset temp_prefix_type \
-	once_variable_name
 	# Allow notifications if '--notifications' option is specified
 	if [[ -n "$notifications" ]]; then
 		allow_notifications='1'
@@ -1402,6 +1402,11 @@ focus_unset_limit(){
 
 # Required to find matching section for process
 find_matching_section(){
+	local local_temp_section \
+	local_once_name_match \
+	local_once_executable_match \
+	local_once_owner_match \
+	local_once_command_match
 	# Do not find matching section if window does not report its PID
 	if [[ -n "$process_pid" ]]; then
 		# Find matching section if was not found previously and store it to cache
@@ -1409,39 +1414,34 @@ find_matching_section(){
 			# Avoid searching for matching section if it was not found previously
 			if [[ -z "${cache_mismatch_map["$process_pid"]}" ]]; then
 				# Attempt to find a matching section in config
-				for temp_section in "${sections_array[@]}"; do
+				for local_temp_section in "${sections_array[@]}"; do
 					# Compare process name with specified in section
-					if [[ -z "${config_key_name_map["$temp_section"]}" || "${config_key_name_map["$temp_section"]}" == "$process_name" ]]; then
-						once_name_match='1'
+					if [[ -z "${config_key_name_map["$local_temp_section"]}" || "${config_key_name_map["$local_temp_section"]}" == "$process_name" ]]; then
+						local_once_name_match='1'
 					fi
 					# Compare process executable path with specified in section
-					if [[ -z "${config_key_executable_map["$temp_section"]}" || "${config_key_executable_map["$temp_section"]}" == "$process_executable" ]]; then
-						once_executable_match='1'
+					if [[ -z "${config_key_executable_map["$local_temp_section"]}" || "${config_key_executable_map["$local_temp_section"]}" == "$process_executable" ]]; then
+						local_once_executable_match='1'
 					fi
 					# Compare UID of process with specified in section
-					if [[ -z "${config_key_owner_map["$temp_section"]}" || "${config_key_owner_map["$temp_section"]}" == "$process_owner" ]]; then
-						once_owner_match='1'
+					if [[ -z "${config_key_owner_map["$local_temp_section"]}" || "${config_key_owner_map["$local_temp_section"]}" == "$process_owner" ]]; then
+						local_once_owner_match='1'
 					fi
 					# Compare process command with specified in section
-					if [[ -z "${config_key_command_map["$temp_section"]}" || "${config_key_command_map["$temp_section"]}" == "$process_command" ]]; then
-						once_command_match='1'
+					if [[ -z "${config_key_command_map["$local_temp_section"]}" || "${config_key_command_map["$local_temp_section"]}" == "$process_command" ]]; then
+						local_once_command_match='1'
 					fi
 					# Mark as matching if all identifiers containing non-zero value
-					if [[ -n "$once_name_match" && -n "$once_executable_match" && -n "$once_owner_match" && -n "$once_command_match" ]]; then
-						section="$temp_section"
-						cache_section_map["$process_pid"]="$temp_section"
+					if [[ -n "$local_once_name_match" && -n "$local_once_executable_match" && -n "$local_once_owner_match" && -n "$local_once_command_match" ]]; then
+						section="$local_temp_section"
+						cache_section_map["$process_pid"]="$local_temp_section"
 						break
 					fi
-					unset once_name_match \
-					once_executable_match \
-					once_owner_match \
-					once_command_match
+					unset local_once_name_match \
+					local_once_executable_match \
+					local_once_owner_match \
+					local_once_command_match
 				done
-				unset temp_section \
-				once_name_match \
-				once_executable_match \
-				once_owner_match \
-				once_command_match
 				# Mark process as mismatched if matching section was not found
 				if [[ -z "$section" ]]; then
 					cache_mismatch_map["$process_pid"]='1'
@@ -1462,108 +1462,107 @@ find_matching_section(){
 
 # Required to apply CPU/FPS limit on requests
 apply_limits(){
+	local local_temp_existing_window_id \
+	local_once_existing_windows_ids \
+	local_once_existing_process_pid \
+	local_once_existing_section
 	# Get list of existing windows
-	once_existing_windows_ids="${event/'check_requests: '/}"
+	local_once_existing_windows_ids="${event/'check_requests: '/}"
 	# Apply requested limits to existing windows
-	for temp_existing_window_id in $once_existing_windows_ids; do
+	for local_temp_existing_window_id in $local_once_existing_windows_ids; do
 		# Skip cycle if window has bad event type of not at all
-		if [[ -n "${cache_event_type_map["$temp_existing_window_id"]}" && "${cache_event_type_map["$temp_existing_window_id"]}" != 'bad' ]]; then
+		if [[ -n "${cache_event_type_map["$local_temp_existing_window_id"]}" && "${cache_event_type_map["$local_temp_existing_window_id"]}" != 'bad' ]]; then
 			# Simplify access to PID of cached window info
-			once_existing_process_pid="${cache_process_pid_map["$temp_existing_window_id"]}"
+			local_once_existing_process_pid="${cache_process_pid_map["$local_temp_existing_window_id"]}"
 			# Simplify access to matching section of cached window info
-			once_existing_section="${cache_section_map["$once_existing_process_pid"]}"
+			local_once_existing_section="${cache_section_map["$local_once_existing_process_pid"]}"
 			# Check for request existence to apply one of limits
-			if [[ -n "${request_freeze_map["$once_existing_process_pid"]}" ]]; then
+			if [[ -n "${request_freeze_map["$local_once_existing_process_pid"]}" ]]; then
 				# Unset request as it becomes useless
-				request_freeze_map["$once_existing_process_pid"]=''
+				request_freeze_map["$local_once_existing_process_pid"]=''
 				# Freeze process
-				passed_section="$once_existing_section" \
-				passed_process_name="${cache_process_name_map["$temp_existing_window_id"]}" \
-				passed_process_pid="${cache_process_pid_map["$temp_existing_window_id"]}" \
+				passed_section="$local_once_existing_section" \
+				passed_process_name="${cache_process_name_map["$local_temp_existing_window_id"]}" \
+				passed_process_pid="${cache_process_pid_map["$local_temp_existing_window_id"]}" \
 				background_freeze_process &
 				# Associate PID of background process with PID of process to interrupt it in case focus event appears earlier than delay ends
-				freeze_bgprocess_pid_map["$once_existing_process_pid"]="$!"
+				freeze_bgprocess_pid_map["$local_once_existing_process_pid"]="$!"
 				# Mark process as frozen
-				is_frozen_pid_map["$once_existing_process_pid"]='1'
+				is_frozen_pid_map["$local_once_existing_process_pid"]='1'
 				# Store PID to array to unfreeze process in case daemon interruption
-				frozen_processes_pids_array+=("$once_existing_process_pid")
-			elif [[ -n "${request_cpu_limit_map["$once_existing_process_pid"]}" ]]; then
+				frozen_processes_pids_array+=("$local_once_existing_process_pid")
+			elif [[ -n "${request_cpu_limit_map["$local_once_existing_process_pid"]}" ]]; then
 				# Unset request as it becomes useless
-				request_cpu_limit_map["$once_existing_process_pid"]=''
+				request_cpu_limit_map["$local_once_existing_process_pid"]=''
 				# Apply CPU limit
-				passed_section="$once_existing_section" \
-				passed_process_name="${cache_process_name_map["$temp_existing_window_id"]}" \
-				passed_process_pid="${cache_process_pid_map["$temp_existing_window_id"]}" \
+				passed_section="$local_once_existing_section" \
+				passed_process_name="${cache_process_name_map["$local_temp_existing_window_id"]}" \
+				passed_process_pid="${cache_process_pid_map["$local_temp_existing_window_id"]}" \
 				background_cpulimit &
 				# Store PID of background process to array to interrupt it in case daemon exit
 				cpulimit_bgprocesses_pids_array+=("$!")
 				# Associate PID of background process with PID of process to interrupt it on focus event
-				cpulimit_bgprocess_pid_map["$once_existing_process_pid"]="$!"
+				cpulimit_bgprocess_pid_map["$local_once_existing_process_pid"]="$!"
 				# Mark process as CPU limited
-				is_cpu_limited_pid_map["$once_existing_process_pid"]='1'
-			elif [[ -n "$once_existing_section" && -n "${request_fps_limit_map["$once_existing_section"]}" ]]; then
+				is_cpu_limited_pid_map["$local_once_existing_process_pid"]='1'
+			elif [[ -n "$local_once_existing_section" && -n "${request_fps_limit_map["$local_once_existing_section"]}" ]]; then
 				# Unset request as it becomes useless
-				request_fps_limit_map["$once_existing_section"]=''
+				request_fps_limit_map["$local_once_existing_section"]=''
 				# Set FPS limit
-				passed_section="$once_existing_section" \
-				passed_process_pid="${cache_process_pid_map["$temp_existing_window_id"]}" \
+				passed_section="$local_once_existing_section" \
+				passed_process_pid="${cache_process_pid_map["$local_temp_existing_window_id"]}" \
 				background_mangohud_fps_set &
 				# Associate PID of background process with section to interrupt in case focus event appears earlier than delay ends
-				fps_limit_bgprocess_pid_map["$once_existing_section"]="$!"
+				fps_limit_bgprocess_pid_map["$local_once_existing_section"]="$!"
 				# Mark section as FPS limited, required to check FPS limit existence on focus event
-				is_fps_limited_section_map["$once_existing_section"]='1'
+				is_fps_limited_section_map["$local_once_existing_section"]='1'
 				# Store section to array, required to unset FPS limits on daemon termination
-				fps_limited_sections_array+=("$once_existing_section")
+				fps_limited_sections_array+=("$local_once_existing_section")
 			fi
 		fi
 	done
-	unset temp_existing_window_id \
-	once_existing_windows_ids \
-	once_existing_process_pid \
-	once_existing_section
 }
 
 # Required to remove cached info about terminated windows
 cache_collect_garbage(){
+	local local_temp_terminated_window_id \
+	local_once_terminated_process_pid \
+	local_once_terminated_section
 	# Remove cached info about terminated windows
-	for temp_terminated_window_id in $once_terminated_windows_ids; do
+	for local_temp_terminated_window_id in $local_once_terminated_windows_ids; do
 		# Check for event type before unset cache
-		if [[ "${cache_event_type_map["$temp_terminated_window_id"]}" == 'bad' ]]; then
+		if [[ "${cache_event_type_map["$local_temp_terminated_window_id"]}" == 'bad' ]]; then
 			# Unset only event type for bad window, otherwise bash will fail
-			message --verbose "Cached info about bad window with ID $temp_terminated_window_id has been removed as it has been terminated."
-			cache_event_type_map["$temp_terminated_window_id"]=''
-		elif [[ "${cache_event_type_map["$temp_terminated_window_id"]}" == 'good' ]]; then
+			message --verbose "Cached info about bad window with ID $local_temp_terminated_window_id has been removed as it has been terminated."
+			cache_event_type_map["$local_temp_terminated_window_id"]=''
+		elif [[ "${cache_event_type_map["$local_temp_terminated_window_id"]}" == 'good' ]]; then
 			# Simplify access to PID of cached window info
-			once_terminated_process_pid="${cache_process_pid_map["$temp_terminated_window_id"]}"
+			local_once_terminated_process_pid="${cache_process_pid_map["$local_temp_terminated_window_id"]}"
 			# Simplify access to matching section of cached window info
-			once_terminated_section="${cache_section_map["$once_terminated_process_pid"]}"
+			local_once_terminated_section="${cache_section_map["$local_once_terminated_process_pid"]}"
 			# Unset limit request
-			if [[ -n "${request_freeze_map["$once_terminated_process_pid"]}" ]]; then
-				request_freeze_map["$once_terminated_process_pid"]=''
-				message --info "Freezing of process '${cache_process_name_map["$temp_terminated_window_id"]}' with PID $once_terminated_process_pid has been cancelled due to window termination."
-			elif [[ -n "${request_cpu_limit_map["$once_terminated_process_pid"]}" ]]; then
-				request_cpu_limit_map["$once_terminated_process_pid"]=''
-				message --info "CPU limiting of process '${cache_process_name_map["$temp_terminated_window_id"]}' with PID $once_terminated_process_pid has been cancelled due to window termination."
-			elif [[ -n "$once_terminated_section" && -n "${request_fps_limit_map["$once_terminated_section"]}" ]]; then
-				request_fps_limit_map["$once_terminated_section"]=''
-				message --info "FPS limiting of section '$once_terminated_section' has been cancelled due to termination of matching window(s)."
+			if [[ -n "${request_freeze_map["$local_once_terminated_process_pid"]}" ]]; then
+				request_freeze_map["$local_once_terminated_process_pid"]=''
+				message --info "Freezing of process '${cache_process_name_map["$local_temp_terminated_window_id"]}' with PID $local_once_terminated_process_pid has been cancelled due to window termination."
+			elif [[ -n "${request_cpu_limit_map["$local_once_terminated_process_pid"]}" ]]; then
+				request_cpu_limit_map["$local_once_terminated_process_pid"]=''
+				message --info "CPU limiting of process '${cache_process_name_map["$local_temp_terminated_window_id"]}' with PID $local_once_terminated_process_pid has been cancelled due to window termination."
+			elif [[ -n "$local_once_terminated_section" && -n "${request_fps_limit_map["$local_once_terminated_section"]}" ]]; then
+				request_fps_limit_map["$local_once_terminated_section"]=''
+				message --info "FPS limiting of section '$local_once_terminated_section' has been cancelled due to termination of matching window(s)."
 			fi
 			# Unset data in cache related to terminated window
-			message --verbose "Cached info about window with ID $temp_terminated_window_id and process '${cache_process_name_map["$temp_terminated_window_id"]}' with PID ${cache_process_pid_map["$temp_terminated_window_id"]} has been removed as it has been terminated."
-			cache_mismatch_map["$once_terminated_process_pid"]=''
-			cache_section_map["$once_terminated_process_pid"]=''
-			cache_event_type_map["$temp_terminated_window_id"]=''
-			cache_process_pid_map["$temp_terminated_window_id"]=''
-			cache_process_name_map["$temp_terminated_window_id"]=''
-			cache_process_executable_map["$temp_terminated_window_id"]=''
-			cache_process_owner_map["$temp_terminated_window_id"]=''
-			cache_process_command_map["$temp_terminated_window_id"]=''
+			message --verbose "Cached info about window with ID $local_temp_terminated_window_id and process '${cache_process_name_map["$local_temp_terminated_window_id"]}' with PID ${cache_process_pid_map["$local_temp_terminated_window_id"]} has been removed as it has been terminated."
+			cache_mismatch_map["$local_once_terminated_process_pid"]=''
+			cache_section_map["$local_once_terminated_process_pid"]=''
+			cache_event_type_map["$local_temp_terminated_window_id"]=''
+			cache_process_pid_map["$local_temp_terminated_window_id"]=''
+			cache_process_name_map["$local_temp_terminated_window_id"]=''
+			cache_process_executable_map["$local_temp_terminated_window_id"]=''
+			cache_process_owner_map["$local_temp_terminated_window_id"]=''
+			cache_process_command_map["$local_temp_terminated_window_id"]=''
 		fi
 	done
-	unset temp_terminated_window_id \
-	once_terminated_process_pid \
-	once_terminated_section \
-	once_terminated_windows_ids
 }
 
 # Required to execute command from 'exec-focus' key in config
@@ -1607,57 +1606,64 @@ execute_unfocus(){
 
 # Required to unset CPU/FPS limit for terminated windows
 unset_terminated_limits(){
-	# Obtain list of terminated windows IDs
-	once_terminated_windows_ids="${event/'terminated: '/}" # Remove everything before including type name of list with windows IDs
-	once_terminated_windows_ids="${once_terminated_windows_ids/'; existing: '*/}" # Remove list of existing windows IDs
-	# Obtain list of existing windows IDs
-	once_existing_windows_ids="${event/*'existing: '/}" # Remove everything including type name of list with windows IDs
+	local local_once_terminated_process_pid \
+	local_temp_terminated_window_id \
+	local_once_existing_process_pid \
+	local_temp_existing_window_id \
+	local_once_found
 	# Unset info about freezing and CPU limits of terminated windows
-	for temp_terminated_window_id in $once_terminated_windows_ids; do
+	for local_temp_terminated_window_id in $local_once_terminated_windows_ids; do
 		# Skip window ID if that is bad event or info about it does not exist in cache
-		if [[ -n "${cache_event_type_map["$temp_terminated_window_id"]}" && "${cache_event_type_map["$temp_terminated_window_id"]}" != 'bad' ]]; then
+		if [[ -n "${cache_event_type_map["$local_temp_terminated_window_id"]}" && "${cache_event_type_map["$local_temp_terminated_window_id"]}" != 'bad' ]]; then
 			# Obtain PID of terminated process using cache, required to check and unset FPS limit
-			once_terminated_process_pid="${cache_process_pid_map["$temp_terminated_window_id"]}"
+			local_once_terminated_process_pid="${cache_process_pid_map["$local_temp_terminated_window_id"]}"
 			# Do not do anything if window is not frozen
-			if [[ -n "${is_frozen_pid_map["${cache_process_pid_map["$temp_terminated_window_id"]}"]}" ]]; then
+			if [[ -n "${is_frozen_pid_map["${cache_process_pid_map["$local_temp_terminated_window_id"]}"]}" ]]; then
 				# Unfreeze process
-				passed_process_pid="${cache_process_pid_map["$temp_terminated_window_id"]}" \
-				passed_section="${cache_section_map["$once_terminated_process_pid"]}" \
-				passed_process_name="${cache_process_name_map["$temp_terminated_window_id"]}" \
+				passed_process_pid="${cache_process_pid_map["$local_temp_terminated_window_id"]}" \
+				passed_section="${cache_section_map["$local_once_terminated_process_pid"]}" \
+				passed_process_name="${cache_process_name_map["$local_temp_terminated_window_id"]}" \
 				passed_end_of_msg='due to window termination' \
 				unfreeze_process
-			elif [[ -n "${is_cpu_limited_pid_map["${cache_process_pid_map["$temp_terminated_window_id"]}"]}" ]]; then # Do not do anything if window is not CPU limited
+			elif [[ -n "${is_cpu_limited_pid_map["${cache_process_pid_map["$local_temp_terminated_window_id"]}"]}" ]]; then # Do not do anything if window is not CPU limited
 				# Unset CPU limit
-				passed_process_pid="${cache_process_pid_map["$temp_terminated_window_id"]}" \
-				passed_process_name="${cache_process_name_map["$temp_terminated_window_id"]}" \
+				passed_process_pid="${cache_process_pid_map["$local_temp_terminated_window_id"]}" \
+				passed_process_name="${cache_process_name_map["$local_temp_terminated_window_id"]}" \
 				passed_signal='-SIGUSR2' \
 				unset_cpu_limit
-			elif [[ -n "${cache_section_map["$once_terminated_process_pid"]}" && -n "${is_fps_limited_section_map["${cache_section_map["$once_terminated_process_pid"]}"]}" ]]; then # Do not do anything if window is not FPS limited
+			elif [[ -n "${cache_section_map["$local_once_terminated_process_pid"]}" && -n "${is_fps_limited_section_map["${cache_section_map["$local_once_terminated_process_pid"]}"]}" ]]; then # Do not do anything if window is not FPS limited
 				# Do not remove FPS limit if one of existing windows matches with the same section
-				for temp_existing_window_id in $once_existing_windows_ids; do
+				for local_temp_existing_window_id in $local_once_existing_windows_ids; do
 					# Obtain PID of terminated process using cache
-					once_existing_process_pid="${cache_process_pid_map["$temp_existing_window_id"]}"
+					local_once_existing_process_pid="${cache_process_pid_map["$local_temp_existing_window_id"]}"
 					# Mark to not unset FPS limit if there is another window which matches with same section
-					if [[ "${cache_section_map["$once_existing_process_pid"]}" == "${cache_section_map["$once_terminated_process_pid"]}" ]]; then
-						once_found='1'
+					if [[ "${cache_section_map["$local_once_existing_process_pid"]}" == "${cache_section_map["$local_once_terminated_process_pid"]}" ]]; then
+						local_once_found='1'
 						break
 					fi
 				done
-				unset once_existing_process_pid \
-				temp_existing_window_id
 				# Unset FPS limit if there is no any matching windows except target
-				if [[ -z "$once_found" ]]; then
-					passed_section="${cache_section_map["$once_terminated_process_pid"]}" \
+				if [[ -z "$local_once_found" ]]; then
+					passed_section="${cache_section_map["$local_once_terminated_process_pid"]}" \
 					passed_end_of_msg='due to matching window(s) termination' \
 					unset_fps_limit
 				fi
-				unset once_found
 			fi
 		fi
 	done
-	unset once_terminated_process_pid \
-	once_existing_windows_ids \
-	temp_terminated_window_id
+}
+
+# Required to unset CPU/FPS limit for terminated windows and remove info about them from cache
+handle_terminated_windows(){
+	# Obtain list of terminated windows IDs
+	local local_once_terminated_windows_ids="${event/'terminated: '/}" # Remove everything before including type name of list with windows IDs
+	local local_once_terminated_windows_ids="${local_once_terminated_windows_ids/'; existing: '*/}" # Remove list of existing windows IDs
+	# Obtain list of existing windows IDs
+	local local_once_existing_windows_ids="${event/*'existing: '/}" # Remove everything including type name of list with windows IDs
+	# Unset CPU/FPS limit for terminated window, useful mostly to unset FPS limit in MangoHud config, but ability to unset all limits saves my ass from being burned
+	unset_terminated_limits
+	# Remove cached info about terminated windows
+	cache_collect_garbage
 }
 
 # Set default prefixes for messages
@@ -1752,10 +1758,8 @@ else
 			# Unset '--hot' if responding event appears, as it becomes useless from this moment
 			unset hot
 		elif [[ "$event" == 'terminated'* ]]; then
-			# Unset CPU/FPS limit for terminated window, useful mostly to unset FPS limit in MangoHud config, but ability to unset all limits saves my ass from being burned
-			unset_terminated_limits
-			# Remove cached info about terminated windows
-			cache_collect_garbage
+			# Unset CPU/FPS limits for terminated windows and remove info about them from cache
+			handle_terminated_windows
 		elif [[ "$event" == 'check_requests'* ]]; then
 			# Apply CPU/FPS limits for process which have been requested to be limited
 			apply_limits
