@@ -83,7 +83,7 @@ load_modules(){
 		# Load modules
 		for local_temp_module in "$local_modules_path"/*.sh; do
 			if ! source "$local_temp_module"; then
-				message --error "Unable to load module '' from path ''!"
+				message --error "Unable to load '$local_temp_module' module!"
 				exit 1
 			fi
 		done
