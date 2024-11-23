@@ -25,7 +25,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
   - [Configuration example](#configuration-example)
     - [Long examples](#long-examples)
     - [Short examples](#short-examples)
-  - [Environment variables passed to `exec-focus` and `exec-unfocus`](#environment-variables-passed-to-exec-focus-and-exec-unfocus)
+  - [Environment variables passed to commands in `exec-focus` and `exec-unfocus` config keys](#environment-variables-passed-to-commands-in-exec-focus-and-exec-unfocus-config-keys)
     - [List of variables and description](#list-of-variables-and-description)
 - [Tips and tricks](#tips-and-tricks)
   - [Keybinding to obtain template from focused window for config](#keybinding-to-obtain-template-from-focused-window-for-config)
