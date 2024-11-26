@@ -11,7 +11,6 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
   - [Gentoo and dereatives](#gentoo-and-dereatives)
 - [Installation](#installation)
   - [Manual installation using release tarball](#manual-installation-using-release-tarball)
-  - [Manual installation using executable from repository](#manual-installation-using-executable-from-repository)
   - [Arch Linux and dereatives](#arch-linux-and-dereatives-1)
   - [Debian and dereatives](#debian-and-dereatives-1)
 - [Usage](#usage)
@@ -102,18 +101,6 @@ tar -xvf v${fluxver}.tar.gz # extract it
 ```
 ```bash
 sudo install -Dm 755 flux-${fluxver}/flux /usr/local/bin/flux # install daemon to `/usr/local/bin`
-```
-
-### Manual installation using executable from repository
-I would not suggest to do that unless you found a bug in release and it has been fixed in repository.
-```bash
-mkdir flux && cd flux # create and change build directory
-```
-```bash
-wget https://raw.githubusercontent.com/itz-me-zappex/flux/refs/heads/main/flux # get `flux` executable from repository
-```
-```bash
-sudo install -Dm 755 flux /usr/local/bin/flux # install daemon to `/usr/local/bin`
 ```
 
 ### Arch Linux and dereatives
