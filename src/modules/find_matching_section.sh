@@ -52,5 +52,6 @@ find_matching_section(){
 		message --verbose "Process '$process_name' with PID $process_pid matches with section '$section'."
 	else
 		message --verbose "Process '$process_name' with PID $process_pid does not match with any section."
+		return 1
 	fi
 }
