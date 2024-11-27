@@ -244,14 +244,20 @@ else
 			# Get process info using window ID if ID is not '0x0'
 			if [[ "$window_id" != '0x0' ]]; then
 				# Attempt to obtain info about process using window ID
-				if ! get_process_info; then
+				get_process_info
+				once_exit_code="$?"
+				if (( once_exit_code == 1 )); then
 					message --warning "Bad window with ID $window_id appeared, unable to obtain process info!"
+				elif (( once_exit_code == 2 )); then
+					message --warning "Unable to obtain info about process with PID $process_pid!"
+				elif (( once_exit_code == 0 )); then
+					# Find matching section for process in config
+					find_matching_section
 				fi
+				unset once_exit_code
 			else
 				message --verbose "Bad event with window ID 0x0 appeared, getting process info skipped."
 			fi
-			# Find matching section for process in config
-			find_matching_section
 			# Request CPU/FPS limit for unfocused process if it matches with section
 			unfocus_request_limit
 			# Unset CPU/FPS limit for focused process if it has been limited on unfocus
