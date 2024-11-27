@@ -239,6 +239,8 @@ else
 		else
 			# Set window ID variable if event does not match with statements above
 			window_id="$event"
+			# Request CPU/FPS limit for unfocused process if it matches with section
+			unfocus_request_limit
 			# Execute command on unfocus event if specified in config
 			exec_unfocus
 			# Get process info using window ID if ID is not '0x0'
@@ -252,26 +254,25 @@ else
 					message --warning "Unable to obtain info about process with PID $process_pid!"
 				elif (( once_exit_code == 0 )); then
 					# Find matching section for process in config
-					find_matching_section
+					if find_matching_section; then
+						# Execute command on focus event if specified in config
+						exec_focus
+						# Unset CPU/FPS limit for focused process if it has been limited on unfocus
+						focus_unset_limit
+					fi
+					# Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
+					previous_window_id="$window_id"
+					previous_process_pid="$process_pid"
+					previous_process_name="$process_name"
+					previous_process_executable="$process_executable"
+					previous_process_owner="$process_owner"
+					previous_process_command="$process_command"
+					previous_section="$section"
 				fi
 				unset once_exit_code
 			else
 				message --verbose "Bad event with window ID 0x0 appeared, getting process info skipped."
 			fi
-			# Request CPU/FPS limit for unfocused process if it matches with section
-			unfocus_request_limit
-			# Unset CPU/FPS limit for focused process if it has been limited on unfocus
-			focus_unset_limit
-			# Execute command on focus event if specified in config
-			exec_focus
-			# Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
-			previous_window_id="$window_id"
-			previous_process_pid="$process_pid"
-			previous_process_name="$process_name"
-			previous_process_executable="$process_executable"
-			previous_process_owner="$process_owner"
-			previous_process_command="$process_command"
-			previous_section="$section"
 			# Unset info about process to avoid using it by an accident
 			unset window_id \
 			process_pid \
