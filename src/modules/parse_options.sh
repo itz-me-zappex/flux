@@ -11,7 +11,7 @@ parse_options(){
 			passed_short_option='-c' \
 			cmdline_get "$@"
 			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
-			shift "$once_shift"
+			shift "$shift"
 			# Get absolute path to config in case it is specified as relative
 			if [[ -n "$config" ]]; then
 				config="$(get_realpath "$config")"
@@ -21,13 +21,13 @@ parse_options(){
 			# Check for X11 session
 			if ! x11_session_check; then
 				# Fail if something wrong with X server
-				once_fail='1'
+				fail='1'
 			fi
 			# Select command depending by type of option
 			case "$1" in
 			--focus | -f )
 				# Check for failure related to X server check
-				if [[ -n "$once_fail" ]]; then
+				if [[ -n "$fail" ]]; then
 					# Exit with an error if something wrong with X server
 					message --error "Unable to get info about focused window, something is wrong with X11 session!"
 					exit 1
@@ -40,7 +40,7 @@ parse_options(){
 			;;
 			--pick | -p )
 				# Exit with an error if something wrong with X server
-				if [[ -n "$once_fail" ]]; then
+				if [[ -n "$fail" ]]; then
 					message --error "Unable to call window picker, something is wrong with X11 session!"
 					exit 1
 				else
@@ -129,7 +129,7 @@ Examples:
 			passed_short_option='-L' \
 			cmdline_get "$@"
 			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
-			shift "$once_shift"
+			shift "$shift"
 			# Get absolute path to log file in case it is specified as relative
 			if [[ -n "$log" ]]; then
 				log="$(get_realpath "$log")"
@@ -169,7 +169,7 @@ There is NO WARRANTY, to the extent permitted by law.
 			passed_option='--prefix-error' \
 			cmdline_get "$@"
 			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
-			shift "$once_shift"
+			shift "$shift"
 		;;
 		--prefix-info | --prefix-info=* )
 			# Assign value from option to variable using 'cmdline_get' function
@@ -178,7 +178,7 @@ There is NO WARRANTY, to the extent permitted by law.
 			passed_option='--prefix-info' \
 			cmdline_get "$@"
 			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
-			shift "$once_shift"
+			shift "$shift"
 		;;
 		--prefix-verbose | --prefix-verbose=* )
 			# Assign value from option to variable using 'cmdline_get' function
@@ -187,7 +187,7 @@ There is NO WARRANTY, to the extent permitted by law.
 			passed_option='--prefix-verbose' \
 			cmdline_get "$@"
 			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
-			shift "$once_shift"
+			shift "$shift"
 		;;
 		--prefix-warning | --prefix-warning=* )
 			# Assign value from option to variable using 'cmdline_get' function
@@ -196,7 +196,7 @@ There is NO WARRANTY, to the extent permitted by law.
 			passed_option='--prefix-warning' \
 			cmdline_get "$@"
 			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
-			shift "$once_shift"
+			shift "$shift"
 		;;
 		--log-no-timestamps )
 			option_repeat_check log_no_timestamps --log-no-timestamps
@@ -215,7 +215,7 @@ There is NO WARRANTY, to the extent permitted by law.
 			passed_option='--log-timestamp' \
 			cmdline_get "$@"
 			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
-			shift "$once_shift"
+			shift "$shift"
 		;;
 		* )
 			# First regexp means 2+ symbols after hyphen (combined short options)
@@ -223,18 +223,18 @@ There is NO WARRANTY, to the extent permitted by law.
 			if [[ "$1" =~ ^-.{2,}$ && ! "$1" =~ ^--.* ]]; then
 				# Split combined option and add result to array, also skip first symbol as that is hypen
 				for (( i = 1; i < ${#1} ; i++ )); do
-					once_options_array+=("-${1:i:1}")
+					options_array+=("-${1:i:1}")
 				done
 				# Forget current option
 				shift 1
 				# Set options obtained after splitting
-				set -- "${once_options_array[@]}" "$@"
-				unset once_options_array i
+				set -- "${options_array[@]}" "$@"
+				unset options_array i
 			else
 				message --error "Unknown option '$1'!$advice_on_option_error"
 				exit 1
 			fi
 		esac
 	done
-	unset once_shift
+	unset shift
 }
