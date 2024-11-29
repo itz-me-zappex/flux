@@ -208,10 +208,13 @@ else
 		'unset_hot' )
 			# Unset '--hot' as it becomes useless from this moment
 			unset hot
-			# Unset '--lazy' option, otherwise focus and unfocus commands will not work
-			unset lazy
-			# Mark required to prevent execution of 'exec-unfocus' on next cycle
-			lazy_is_unset='1'
+			# Do not do anything if '--lazy' is not set
+			if [[ -n "$lazy" ]]; then
+				# Unset '--lazy' option, otherwise focus and unfocus commands will not work
+				unset lazy
+				# Mark required to prevent execution of 'exec-unfocus' on next cycle
+				lazy_is_unset='1'
+			fi
 		;;
 		'terminated'* )
 			# Unset CPU/FPS limits for terminated windows and remove info about them from cache
