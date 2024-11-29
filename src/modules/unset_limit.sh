@@ -1,7 +1,7 @@
 # Required to terminate freeze background process or unfreeze process if window becomes focused or terminated
 unfreeze_process(){
 	local local_temp_frozen_process_pid \
-	local_once_frozen_processes_pids_array
+	local_frozen_processes_pids_array
 	# Check for existence of freeze background process
 	if check_pid_existence "${freeze_bgprocess_pid_map["$passed_process_pid"]}"; then
 		# Attempt to terminate background process
@@ -28,11 +28,11 @@ unfreeze_process(){
 	for local_temp_frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
 		# Skip current PID as I want remove it from array
 		if [[ "$local_temp_frozen_process_pid" != "$passed_process_pid" ]]; then
-			local_once_frozen_processes_pids_array+=("$local_temp_frozen_process_pid")
+			local_frozen_processes_pids_array+=("$local_temp_frozen_process_pid")
 		fi
 	done
 	# Store updated info into array
-	frozen_processes_pids_array=("${local_once_frozen_processes_pids_array[@]}")
+	frozen_processes_pids_array=("${local_frozen_processes_pids_array[@]}")
 	# Unset details about freezing
 	is_frozen_pid_map["$passed_process_pid"]=''
 	freeze_bgprocess_pid_map["$passed_process_pid"]=''
@@ -41,7 +41,7 @@ unfreeze_process(){
 # Required to terminate CPU limit background process if window becomes focused or terminated
 unset_cpu_limit(){
 	local local_temp_cpulimit_bgprocess_pid \
-	local_once_cpulimit_bgprocesses_pids_array
+	local_cpulimit_bgprocesses_pids_array
 	# Attempt to terminate CPU limit background process
 	if ! kill "$passed_signal" "${cpulimit_bgprocess_pid_map["$passed_process_pid"]}" > /dev/null 2>&1; then
 		message --warning "Process '$passed_process_name' with PID $passed_process_pid cannot be CPU unlimited!"
@@ -50,11 +50,11 @@ unset_cpu_limit(){
 	for local_temp_cpulimit_bgprocess_pid in "${cpulimit_bgprocesses_pids_array[@]}"; do
 		# Skip interrupted background process as I want remove it from array
 		if [[ "$local_temp_cpulimit_bgprocess_pid" != "${cpulimit_bgprocess_pid_map["$passed_process_pid"]}" ]]; then
-			local_once_cpulimit_bgprocesses_pids_array+=("$local_temp_cpulimit_bgprocess_pid")
+			local_cpulimit_bgprocesses_pids_array+=("$local_temp_cpulimit_bgprocess_pid")
 		fi
 	done
 	# Store updated info into array
-	cpulimit_bgprocesses_pids_array=("${local_once_cpulimit_bgprocesses_pids_array[@]}")
+	cpulimit_bgprocesses_pids_array=("${local_cpulimit_bgprocesses_pids_array[@]}")
 	# Unset details about CPU limiting
 	is_cpu_limited_pid_map["$passed_process_pid"]=''
 	cpulimit_bgprocess_pid_map["$passed_process_pid"]=''
@@ -64,7 +64,7 @@ unset_cpu_limit(){
 unset_fps_limit(){
 	local local_temp_fps_limited_pid \
 	local_temp_fps_limited_section \
-	local_once_fps_limited_sections_array
+	local_fps_limited_sections_array
 	# Check for existence of FPS limit background process
 	if check_pid_existence "${fps_limit_bgprocess_pid_map["$passed_section"]}"; then
 		# Terminate background process
@@ -99,11 +99,11 @@ unset_fps_limit(){
 	for local_temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
 		# Skip FPS unlimited section as I want remove it from array
 		if [[ "$local_temp_fps_limited_section" != "$passed_section" ]]; then
-			local_once_fps_limited_sections_array+=("$local_temp_fps_limited_section")
+			local_fps_limited_sections_array+=("$local_temp_fps_limited_section")
 		fi
 	done
 	# Store updated info into array
-	fps_limited_sections_array=("${local_once_fps_limited_sections_array[@]}")
+	fps_limited_sections_array=("${local_fps_limited_sections_array[@]}")
 	# Unset details about FPS limiting
 	is_fps_limited_section_map["$passed_section"]=''
 	fps_limit_bgprocess_pid_map["$passed_section"]=''
