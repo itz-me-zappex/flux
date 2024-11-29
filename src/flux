@@ -258,11 +258,11 @@ else
 			* )
 				# Attempt to obtain info about process using window ID
 				get_process_info
-				once_exit_code="$?"
+				exit_code="$?"
 				# Request CPU/FPS limit for unfocused process if it matches with section
 				unfocus_request_limit
 				# Actions depending by exit code of 'get_process_info()'
-				case "$once_exit_code" in
+				case "$exit_code" in
 				'0' )
 					# Find matching section for process in config
 					if find_matching_section; then
@@ -282,7 +282,7 @@ else
 				;;
 				* )
 					# Print message depending by exit code
-					case "$once_exit_code" in
+					case "$exit_code" in
 					'1' )
 						message --warning "Bad window with ID $window_id appeared, unable to obtain process info!"
 					;;
@@ -298,7 +298,7 @@ else
 					previous_process_command \
 					previous_section
 				esac
-				unset once_exit_code
+				unset exit_code
 			esac
 			# Unset info about process to avoid using it by an accident
 			unset window_id \
