@@ -86,13 +86,9 @@ event_source(){
 				local_focused_window_id \
 				local_temp_stacking_window_id
 				# Print event to unset '--hot' option as it becomes useless from this moment
-				echo '-hot'
-				unset hot
-			fi
-			# Print event for unset '--lazy' option before read events, otherwise focus and unfocus commands will not work
-			if [[ -n "$lazy" ]]; then
-				echo '-lazy'
-				unset lazy
+				echo 'unset_hot'
+				unset hot \
+				lazy
 			fi
 			# Read events from 'xprop' and print IDs of windows
 			while read -r local_temp_xprop_event; do
