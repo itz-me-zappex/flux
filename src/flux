@@ -205,14 +205,13 @@ else
 			message --error "Flux has been terminated unexpectedly!"
 			exit 1
 		;;
-		'-lazy' )
-			# Unset '--lazy' option if responding event appears, otherwise focus and unfocus commands will not work
-			unset lazy
-			lazy_is_unset='1'
-		;;
-		'-hot' )
-			# Unset '--hot' if responding event appears, as it becomes useless from this moment
+		'unset_hot' )
+			# Unset '--hot' as it becomes useless from this moment
 			unset hot
+			# Unset '--lazy' option, otherwise focus and unfocus commands will not work
+			unset lazy
+			# Mark required to prevent execution of 'exec-unfocus' on next cycle
+			lazy_is_unset='1'
 		;;
 		'terminated'* )
 			# Unset CPU/FPS limits for terminated windows and remove info about them from cache
