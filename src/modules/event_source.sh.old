@@ -38,7 +38,7 @@ event_source(){
 	local_previous_client_list_stacking_count \
 	local_windows_ids \
 	local_previous_windows_ids \
-	local_once_terminated_windows_array \
+	local_terminated_windows_array \
 	local_temp_previous_local_window_id \
 	local_previous_active_window \
 	local_previous_client_list_stacking \
@@ -124,15 +124,15 @@ event_source(){
 						for local_temp_previous_local_window_id in $local_previous_windows_ids; do
 							# Skip existing window ID as I want to store IDs of terminated windows to array
 							if [[ " $local_windows_ids " != *" $local_temp_previous_local_window_id "* ]]; then
-								local_once_terminated_windows_array+=("$local_temp_previous_local_window_id")
+								local_terminated_windows_array+=("$local_temp_previous_local_window_id")
 							fi
 						done
 						unset local_temp_previous_local_window_id \
 						local_previous_windows_ids
 						# Print event with terminated and existing windows IDs if array with terminated windows IDs is not blank, required to check limit requests and unset cached info about terminated windows
-						if [[ -n "${local_once_terminated_windows_array[*]}" ]]; then
-							echo "terminated: ${local_once_terminated_windows_array[*]}; existing: $local_windows_ids"
-							unset local_once_terminated_windows_array
+						if [[ -n "${local_terminated_windows_array[*]}" ]]; then
+							echo "terminated: ${local_terminated_windows_array[*]}; existing: $local_windows_ids"
+							unset local_terminated_windows_array
 						fi
 					fi
 					# Required to compare columns count in previous and current events
