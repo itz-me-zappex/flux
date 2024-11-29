@@ -196,27 +196,33 @@ if ! x11_session_check; then
 else
 	# Preparation for event reading
 	daemon_prepare
-	# Read IDs of windows and apply actions
+	# Read events and apply actions depending by event type
 	while read -r event; do
-		# Exit with an error in case 'exit' event appears
-		if [[ "$event" == 'exit' ]]; then
+		case "$event" in
+		'exit' )
+			# Exit with an error in case 'exit' event appears
 			actions_on_exit
 			message --error "Flux has been terminated unexpectedly!"
 			exit 1
-		elif [[ "$event" == '-lazy' ]]; then
+		;;
+		'-lazy' )
 			# Unset '--lazy' option if responding event appears, otherwise focus and unfocus commands will not work
 			unset lazy
 			lazy_is_unset='1'
-		elif [[ "$event" == '-hot' ]]; then
+		;;
+		'-hot' )
 			# Unset '--hot' if responding event appears, as it becomes useless from this moment
 			unset hot
-		elif [[ "$event" == 'terminated'* ]]; then
+		;;
+		'terminated'* )
 			# Unset CPU/FPS limits for terminated windows and remove info about them from cache
 			handle_terminated_windows
-		elif [[ "$event" == 'check_requests'* ]]; then
+		;;
+		'check_requests'* )
 			# Apply CPU/FPS limits for process which have been requested to be limited
 			set_requested_limits
-		elif [[ "$event" == 'restart' ]]; then
+		;;
+		'restart' )
 			# Prepare daemon to reapply limits on 'event_source()' restart event which appears if list of windows IDs becomes blank
 			hot='1'
 			lazy='1'
@@ -236,20 +242,26 @@ else
 			previous_process_owner \
 			previous_process_command \
 			previous_section
-		else
+		;;
+		* )
 			# Set window ID variable if event does not match with statements above
 			window_id="$event"
 			# Execute command on unfocus event if specified in config
 			exec_unfocus
 			# Get process info using window ID if ID is not '0x0'
-			if [[ "$window_id" != '0x0' ]]; then
+			case "$window_id" in
+			'0x0' )
+				message --verbose "Bad event with window ID 0x0 appeared, getting process info skipped."
+			;;
+			* )
 				# Attempt to obtain info about process using window ID
 				get_process_info
 				once_exit_code="$?"
 				# Request CPU/FPS limit for unfocused process if it matches with section
 				unfocus_request_limit
 				# Actions depending by exit code of 'get_process_info()'
-				if (( once_exit_code == 0 )); then
+				case "$once_exit_code" in
+				'0' )
 					# Find matching section for process in config
 					if find_matching_section; then
 						# Execute command on focus event if specified in config
@@ -265,13 +277,16 @@ else
 					previous_process_owner="$process_owner"
 					previous_process_command="$process_command"
 					previous_section="$section"
-				else
+				;;
+				* )
 					# Print message depending by exit code
-					if (( once_exit_code == 1 )); then
+					case "$once_exit_code" in
+					'1' )
 						message --warning "Bad window with ID $window_id appeared, unable to obtain process info!"
-					elif (( once_exit_code == 2 )); then
+					;;
+					'2' )
 						message --warning "Unable to obtain info about process with PID $process_pid!"
-					fi
+					esac
 					# Forget info about previous window/process because it is not changed
 					unset previous_window_id \
 					previous_process_pid \
@@ -280,11 +295,9 @@ else
 					previous_process_owner \
 					previous_process_command \
 					previous_section
-				fi
+				esac
 				unset once_exit_code
-			else
-				message --verbose "Bad event with window ID 0x0 appeared, getting process info skipped."
-			fi
+			esac
 			# Unset info about process to avoid using it by an accident
 			unset window_id \
 			process_pid \
@@ -294,6 +307,6 @@ else
 			process_command
 			# Unset to avoid false positive on next event
 			unset section
-		fi
+		esac
 	done < <(event_source)
 fi
