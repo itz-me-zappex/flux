@@ -199,8 +199,8 @@ else
 	# Read events and apply actions depending by event type
 	while read -r event; do
 		case "$event" in
-		'exit' )
-			# Exit with an error in case 'exit' event appears
+		'error' )
+			# Exit with an error in case 'error' event appears
 			actions_on_exit
 			message --error "Flux has been terminated unexpectedly!"
 			exit 1
