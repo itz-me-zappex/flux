@@ -1,10 +1,10 @@
 # Required to find matching section for process
 find_matching_section(){
 	local local_temp_section \
-	local_once_name_match \
-	local_once_executable_match \
-	local_once_owner_match \
-	local_once_command_match
+	local_name_match \
+	local_executable_match \
+	local_owner_match \
+	local_command_match
 	# Find matching section if was not found previously and store it to cache
 	if [[ -z "${cache_section_map["$process_pid"]}" ]]; then
 		# Avoid searching for matching section if it was not found previously
@@ -13,30 +13,30 @@ find_matching_section(){
 			for local_temp_section in "${sections_array[@]}"; do
 				# Compare process name with specified in section
 				if [[ -z "${config_key_name_map["$local_temp_section"]}" || "${config_key_name_map["$local_temp_section"]}" == "$process_name" ]]; then
-					local_once_name_match='1'
+					local_name_match='1'
 				fi
 				# Compare process executable path with specified in section
 				if [[ -z "${config_key_executable_map["$local_temp_section"]}" || "${config_key_executable_map["$local_temp_section"]}" == "$process_executable" ]]; then
-					local_once_executable_match='1'
+					local_executable_match='1'
 				fi
 				# Compare UID of process with specified in section
 				if [[ -z "${config_key_owner_map["$local_temp_section"]}" || "${config_key_owner_map["$local_temp_section"]}" == "$process_owner" ]]; then
-					local_once_owner_match='1'
+					local_owner_match='1'
 				fi
 				# Compare process command with specified in section
 				if [[ -z "${config_key_command_map["$local_temp_section"]}" || "${config_key_command_map["$local_temp_section"]}" == "$process_command" ]]; then
-					local_once_command_match='1'
+					local_command_match='1'
 				fi
 				# Mark as matching if all identifiers containing non-zero value
-				if [[ -n "$local_once_name_match" && -n "$local_once_executable_match" && -n "$local_once_owner_match" && -n "$local_once_command_match" ]]; then
+				if [[ -n "$local_name_match" && -n "$local_executable_match" && -n "$local_owner_match" && -n "$local_command_match" ]]; then
 					section="$local_temp_section"
 					cache_section_map["$process_pid"]="$local_temp_section"
 					break
 				fi
-				unset local_once_name_match \
-				local_once_executable_match \
-				local_once_owner_match \
-				local_once_command_match
+				unset local_name_match \
+				local_executable_match \
+				local_owner_match \
+				local_command_match
 			done
 			# Mark process as mismatched if matching section was not found
 			if [[ -z "$section" ]]; then
