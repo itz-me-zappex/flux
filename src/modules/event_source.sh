@@ -174,7 +174,7 @@ event_source(){
 		# Print event for safe exit if 'xprop' has been terminated
 		if [[ -z "$local_restart" ]]; then
 			message --warning "Process 'xprop' required to read X11 events has been terminated!"
-			echo 'exit'
+			echo 'error'
 			break
 		fi
 	done
