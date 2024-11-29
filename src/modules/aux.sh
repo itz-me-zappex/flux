@@ -17,15 +17,15 @@ cmdline_get(){
 		# Remember value only if that is not an another option, regexp means long or short option
 		if [[ -n "$2" && ! "$2" =~ ^(--.*|-.*)$ ]]; then
 			eval "$passed_set"=\'"$2"\'
-			once_shift='2'
+			shift='2'
 		else
-			once_shift='1'
+			shift='1'
 		fi
 	;;
 	* )
 		# Shell parameter expansion, remove option name from string
 		eval "$passed_set"=\'"${1/"$passed_option"=/}"\'
-		once_shift='1'
+		shift='1'
 	esac
 }
 
