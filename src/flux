@@ -18,15 +18,19 @@ message(){
 		shift 1
 		if [[ -z "$quiet" ]]; then
 			echo -e "$prefix_info $*"
+			local_log_prefix="$prefix_info"
+		else
+			return 0
 		fi
-		local_log_prefix="$prefix_info"
 	;;
 	--verbose )
 		shift 1
 		if [[ -n "$verbose" ]]; then
 			echo -e "$prefix_verbose $*"
+			local_log_prefix="$prefix_verbose"
+		else
+			return 0
 		fi
-		local_log_prefix="$prefix_verbose"
 	;;
 	--warning )
 		shift 1
@@ -257,7 +261,6 @@ else
 			case "$window_id" in
 			'0x0' )
 				message --verbose "Bad event with window ID 0x0 appeared, getting process info skipped."
-				exit_code='3' # To avoid warnings related to inability to obtain process info and just unset info about previous window
 			;;
 			* )
 				# Attempt to obtain info about process using window ID
@@ -286,7 +289,7 @@ else
 				previous_section="$section"
 			;;
 			* )
-				# Print message depending by exit code
+				# Print message depending by exit code of 'get_process_info()'
 				case "$exit_code" in
 				'1' )
 					message --warning "Bad window with ID $window_id appeared, unable to obtain process info!"
