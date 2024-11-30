@@ -45,10 +45,6 @@ daemon_prepare(){
 		allow_notifications='1'
 		unset notifications
 	fi
-	# Print warning related to workaround for KDE Plasma which prevents list of stacking windows from being skipped if it contains the same columns count as previous one in 'event_source()'
-	if [[ "$DESKTOP_SESSION" == 'plasmax11' ]]; then
-		message --warning "Workaround for KDE Plasma has been applied, expect slightly higher CPU usage because daemon will try to find terminated windows in every '_NET_CLIENT_LIST_STACKING' event!"
-	fi
 	# Print message about daemon start (to make it easier to understand when it has been started in log file, also to print notification if responding option is specified)
 	message --info "Flux has been started."
 	# Remove CPU and FPS limits of processes on exit
