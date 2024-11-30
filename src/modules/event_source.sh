@@ -58,8 +58,6 @@ xprop_reader(){
 	local_windows_list \
 	local_restart \
 	local_temp_window \
-	local_windows_count \
-	local_previous_windows_count \
 	local_previous_windows_list \
 	local_temp_previous_window
 	# Read output of 'xprop' line by line in realtime
@@ -99,28 +97,17 @@ xprop_reader(){
 						local_windows_list="${local_temp_xprop_output_line/*\# /}"
 						# Remove commas which are used as separators
 						local_windows_list="${local_windows_list//\,/}"
-						# Count IDs in list of windows, needed to detect windows disappearance because list is dynamic and I can not compare it with previous one that easily
-						local_windows_count='0'
-						for local_temp_window in $local_windows_list; do
-							(( local_windows_count++ ))
+						# Find terminated windows and store them to array
+						for local_temp_previous_window in $local_previous_windows_list; do
+							# Skip existing windows IDs
+							if [[ " $local_windows_list " != *" $local_temp_previous_window "* ]]; then
+								local_terminated_windows+="$local_temp_previous_window "
+							fi
 						done
-						unset local_temp_window
-						# Compare count of windows with previous one, if here less windows than before, then find which window has been terminated
-						if (( local_previous_windows_count > local_windows_count )); then
-							# Find terminated windows and store them to array
-							for local_temp_previous_window in $local_previous_windows_list; do
-								# Skip existing windows IDs
-								if [[ " $local_windows_list " != *" $local_temp_previous_window "* ]]; then
-									local_terminated_windows+="$local_temp_previous_window "
-								fi
-							done
-							unset local_temp_previous_window
-							# Print list of terminated and existing windows as event
-							echo "terminated: $local_terminated_windows; existing: $local_windows_list"
-							unset local_terminated_windows
-						fi
-						# Remember windows count to compare it with new one on next cycle
-						local_previous_windows_count="$local_windows_count"
+						unset local_temp_previous_window
+						# Print list of terminated and existing windows as event
+						echo "terminated: $local_terminated_windows; existing: $local_windows_list"
+						unset local_terminated_windows
 						# Send event with list of windows to check limit requests
 						echo "check_requests: $local_windows_list"
 						# Remember list of windows to use it for detection of terminated windows on next cycle
