@@ -3,7 +3,8 @@ parse_ini(){
 	local local_temp_config_line \
 	local_config_value \
 	local_section \
-	local_temp_section
+	local_temp_section \
+	local_key_name
 	# Parse INI config
 	while read -r local_temp_config_line; do
 		# Skip cycle if line is commented or blank, regexp means comments which beginning from ';' or '#' symbols
@@ -114,10 +115,10 @@ parse_ini(){
 							# Set key name depending by key name on line
 							case "${local_temp_config_line,,}" in
 							mangohud-source-config* )
-								key_name='mangohud-source-config'
+								local_key_name='mangohud-source-config'
 							;;
 							mangohud-config* )
-								key_name='mangohud-config'
+								local_key_name='mangohud-config'
 							esac
 							# Exit with an error if specified MangoHud config file does not exist
 							message --error "MangoHud config file '$local_config_value' specified in key '$key_name' in section '$local_section' in '$config' config file does not exist!"
