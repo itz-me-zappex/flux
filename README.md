@@ -16,7 +16,6 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 - [Usage](#usage)
   - [List of available options](#list-of-available-options)
   - [Autostart](#autostart)
-  - [Warning for KDE Plasma users](#warning-for-kde-plasma-users)
 - [Configuration](#configuration)
   - [Available keys and description](#available-keys-and-description)
   - [Config path](#config-path)
@@ -88,7 +87,7 @@ Dependencies for other distributions will be added soon.
 ### Manual installation using release tarball
 You can use this method if there is no package build script for your distro. Make sure you have installed dependencies as described above before continue.
 ```bash
-fluxver='1.10.2' # set latest version as I update it here every release
+fluxver='1.11' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -100,13 +99,19 @@ wget https://github.com/itz-me-zappex/flux/archive/refs/tags/v${fluxver}.tar.gz 
 tar -xvf v${fluxver}.tar.gz # extract it
 ```
 ```bash
-sudo install -Dm 755 flux-${fluxver}/flux /usr/local/bin/flux # install daemon to `/usr/local/bin`
+cd flux-${fluxver} # change directory to extracted archive
+```
+```bash
+chmod +x install.sh # make installation script executable
+```
+```bash
+sudo ./install.sh # install daemon to default prefix '/usr/local', you may want to use PREFIX=<path> and CONFIRM=1 optionally
 ```
 
 ### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
 ``` bash
-fluxver='1.10.2' # set latest version as I update it here every release
+fluxver='1.11' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -120,7 +125,7 @@ makepkg -sric # build a package and install it
 
 ### Debian and dereatives
 ```bash
-fluxver='1.10.2' # set latest version as I update it here every release
+fluxver='1.11' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -178,9 +183,6 @@ Examples:
 
 ### Autostart
 Just add command to autostart using your DE/WM settings. Running daemon as root also possible, but that feature almost useless.
-
-### Warning for KDE Plasma users
-If you use KDE Plasma on X11, make sure `printenv DESKTOP_SESSION` command returns `plasmax11` (that is what it returns on KDE Neon which I used for testing) to apply workaround which fixes issue with inability to detect termination of windows. If this variable blank or command above returns another value, then set it to be `plasmax11` in shell profile, alternatively, run `flux` with command like `DESKTOP_SESSION='plasmax11' flux`.
 
 ## Configuration
 A simple INI is used for configuration.
