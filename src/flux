@@ -257,52 +257,53 @@ else
 			case "$window_id" in
 			'0x0' )
 				message --verbose "Bad event with window ID 0x0 appeared, getting process info skipped."
+				exit_code='3' # To avoid warnings related to inability to obtain process info and just unset info about previous window
 			;;
 			* )
 				# Attempt to obtain info about process using window ID
 				get_process_info
 				exit_code="$?"
-				# Request CPU/FPS limit for unfocused process if it matches with section
-				unfocus_request_limit
-				# Actions depending by exit code of 'get_process_info()'
-				case "$exit_code" in
-				'0' )
-					# Find matching section for process in config
-					if find_matching_section; then
-						# Execute command on focus event if specified in config
-						exec_focus
-						# Unset CPU/FPS limit for focused process if it has been limited on unfocus
-						focus_unset_limit
-					fi
-					# Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
-					previous_window_id="$window_id"
-					previous_process_pid="$process_pid"
-					previous_process_name="$process_name"
-					previous_process_executable="$process_executable"
-					previous_process_owner="$process_owner"
-					previous_process_command="$process_command"
-					previous_section="$section"
-				;;
-				* )
-					# Print message depending by exit code
-					case "$exit_code" in
-					'1' )
-						message --warning "Bad window with ID $window_id appeared, unable to obtain process info!"
-					;;
-					'2' )
-						message --warning "Unable to obtain info about process with PID $process_pid!"
-					esac
-					# Forget info about previous window/process because it is not changed
-					unset previous_window_id \
-					previous_process_pid \
-					previous_process_name \
-					previous_process_executable \
-					previous_process_owner \
-					previous_process_command \
-					previous_section
-				esac
-				unset exit_code
 			esac
+			# Request CPU/FPS limit for unfocused process if it matches with section
+			unfocus_request_limit
+			# Actions depending by exit code of 'get_process_info()'
+			case "$exit_code" in
+			'0' )
+				# Find matching section for process in config
+				if find_matching_section; then
+					# Execute command on focus event if specified in config
+					exec_focus
+					# Unset CPU/FPS limit for focused process if it has been limited on unfocus
+					focus_unset_limit
+				fi
+				# Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
+				previous_window_id="$window_id"
+				previous_process_pid="$process_pid"
+				previous_process_name="$process_name"
+				previous_process_executable="$process_executable"
+				previous_process_owner="$process_owner"
+				previous_process_command="$process_command"
+				previous_section="$section"
+			;;
+			* )
+				# Print message depending by exit code
+				case "$exit_code" in
+				'1' )
+					message --warning "Bad window with ID $window_id appeared, unable to obtain process info!"
+				;;
+				'2' )
+					message --warning "Unable to obtain info about process with PID $process_pid!"
+				esac
+				# Forget info about previous window/process because it is not changed
+				unset previous_window_id \
+				previous_process_pid \
+				previous_process_name \
+				previous_process_executable \
+				previous_process_owner \
+				previous_process_command \
+				previous_section
+			esac
+			unset exit_code
 			# Unset info about process to avoid using it by an accident
 			unset window_id \
 			process_pid \
