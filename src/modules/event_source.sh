@@ -18,27 +18,24 @@ check_windows(){
 
 # Required to get list of opened windows and print windows IDs line by line if '--hot' option is specified to make daemon apply limits to them and run commands from 'exec-focus' and 'exec-unfocus' config keys (if '--lazy' is not specified of course)
 on_hot(){
-	local local_stacking_windows_id \
-	local_focused_window_id \
-	local_temp_stacking_window_id
+	local local_stacking_windows \
+	local_focused_window \
+	local_temp_stacking_window
 	# Do not do anything if '--hot' option is not specified
 	if [[ -n "$hot" ]]; then
 		# Extract IDs of opened windows
-		local_stacking_windows_id="$(xprop -root _NET_CLIENT_LIST_STACKING 2>/dev/null)"
-		local_stacking_windows_id="${local_stacking_windows_id/* \# /}" # Remove everything before including '#'
-		local_stacking_windows_id="${local_stacking_windows_id//\,/}" # Remove commas
+		local_stacking_windows="$(xprop -root _NET_CLIENT_LIST_STACKING 2>/dev/null)"
+		local_stacking_windows="${local_stacking_windows/* \# /}" # Remove everything before including '#'
+		local_stacking_windows="${local_stacking_windows//\,/}" # Remove commas
 		# Extract ID of focused window
-		local_focused_window_id="$(xprop -root _NET_ACTIVE_WINDOW 2>/dev/null)"
-		local_focused_window_id="${local_focused_window_id/* \# /}" # Remove everything before including '#'
+		local_focused_window="$(xprop -root _NET_ACTIVE_WINDOW 2>/dev/null)"
+		local_focused_window="${local_focused_window/* \# /}" # Remove everything before including '#'
 		# Print IDs of windows, but skip currently focused window as it should appear as first event when 'xprop' starts
-		for local_temp_stacking_window_id in $local_stacking_windows_id; do
-			if [[ "$local_temp_stacking_window_id" != "$local_focused_window_id" ]]; then
-				echo "$local_temp_stacking_window_id"
+		for local_temp_stacking_window in $local_stacking_windows; do
+			if [[ "$local_temp_stacking_window" != "$local_focused_window" ]]; then
+				echo "$local_temp_stacking_window"
 			fi
 		done
-		unset local_stacking_windows_id \
-		local_focused_window_id \
-		local_temp_stacking_window_id
 		# Print event to unset '--hot' and '--lazy' options as those are becoming useless
 		echo 'unset_hot'
 		# Also useless since now
