@@ -55,8 +55,7 @@ xprop_reader(){
 	local_temp_window \
 	local_previous_windows_list \
 	local_temp_previous_window \
-	local_previous_net_active_window \
-	local_previous_net_client_list_stacking
+	local_previous_net_active_window
 	# Read output of 'xprop' line by line in realtime
 	while read -r local_event; do
 		# Do not do anything if event repeats
@@ -95,32 +94,27 @@ xprop_reader(){
 						fi
 					;;
 					'_NET_CLIENT_LIST_STACKING'* )
-						# Do not do anything if event repeats
-						if [[ "$local_previous_net_client_list_stacking" != "$local_temp_xprop_output_line" ]]; then
-							# Remove everything before list of windows IDs
-							local_windows_list="${local_temp_xprop_output_line/*\# /}"
-							# Remove commas which are used as separators
-							local_windows_list="${local_windows_list//\,/}"
-							# Find terminated windows and store them to array
-							for local_temp_previous_window in $local_previous_windows_list; do
-								# Skip existing windows IDs
-								if [[ " $local_windows_list " != *" $local_temp_previous_window "* ]]; then
-									local_terminated_windows+="$local_temp_previous_window "
-								fi
-							done
-							unset local_temp_previous_window
-							# Print list of terminated and existing windows as event if terminated windows have been detected
-							if [[ -n "$local_terminated_windows" ]]; then
-								echo "terminated: $local_terminated_windows; existing: $local_windows_list"
-								unset local_terminated_windows
+						# Remove everything before list of windows IDs
+						local_windows_list="${local_temp_xprop_output_line/*\# /}"
+						# Remove commas which are used as separators
+						local_windows_list="${local_windows_list//\,/}"
+						# Find terminated windows and store them to array
+						for local_temp_previous_window in $local_previous_windows_list; do
+							# Skip existing windows IDs
+							if [[ " $local_windows_list " != *" $local_temp_previous_window "* ]]; then
+								local_terminated_windows+="$local_temp_previous_window "
 							fi
-							# Send event with list of windows to check limit requests
-							echo "check_requests: $local_windows_list"
-							# Remember list of windows to use it for detection of terminated windows on next cycle
-							local_previous_windows_list="$local_windows_list"
-							# Remember event to compare it with next one and skip it if repeats
-							local_previous_net_client_list_stacking="$local_temp_xprop_output_line"
+						done
+						unset local_temp_previous_window
+						# Print list of terminated and existing windows as event if terminated windows have been detected
+						if [[ -n "$local_terminated_windows" ]]; then
+							echo "terminated: $local_terminated_windows; existing: $local_windows_list"
+							unset local_terminated_windows
 						fi
+						# Send event with list of windows to check limit requests
+						echo "check_requests: $local_windows_list"
+						# Remember list of windows to use it for detection of terminated windows on next cycle
+						local_previous_windows_list="$local_windows_list"
 					esac
 				done <<< "$local_xprop_output"
 				unset local_temp_xprop_output_line
