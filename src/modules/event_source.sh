@@ -12,8 +12,6 @@ check_windows(){
 			fi
 		done < <(xprop -root -spy _NET_CLIENT_LIST_STACKING)
 	fi
-	# To avoid memory leak if loop restarts extremely often, no idea how and why that may happen
-	cycles_count='1'
 }
 
 # Required to get list of opened windows and print windows IDs line by line if '--hot' option is specified to make daemon apply limits to them and run commands from 'exec-focus' and 'exec-unfocus' config keys (if '--lazy' is not specified of course)
@@ -102,9 +100,11 @@ xprop_reader(){
 							fi
 						done
 						unset local_temp_previous_window
-						# Print list of terminated and existing windows as event
-						echo "terminated: $local_terminated_windows; existing: $local_windows_list"
-						unset local_terminated_windows
+						# Print list of terminated and existing windows as event if terminated windows have been detected
+						if [[ -n "$local_terminated_windows" ]]; then
+							echo "terminated: $local_terminated_windows; existing: $local_windows_list"
+							unset local_terminated_windows
+						fi
 						# Send event with list of windows to check limit requests
 						echo "check_requests: $local_windows_list"
 						# Remember list of windows to use it for detection of terminated windows on next cycle
@@ -130,10 +130,12 @@ event_source(){
 	local cycles_count='0'
 	# Infinite loop required to make daemon able to restart event reading if list of windows becomes blank, happens on Cinnamon when DE restarts
 	while :; do
-		# Increase count of cycles, required for 'check_windows()' to avoid running 'xprop' for check windows existence after restart of loop
+		# Increase count of cycles, required for 'check_windows()' which checks for '$cycles_count' being greater than 2 to avoid running 'xprop' for check windows existence after restart of loop
 		(( cycles_count++ ))
 		# Check for window(s) existence
 		check_windows
+		# To avoid memory leak if loop restarts extremely often, no idea how and why that may happen
+		cycles_count='1'
 		# Print IDs of opened windows if '--hot' is specified
 		on_hot
 		# Handle events from 'xprop' tool
