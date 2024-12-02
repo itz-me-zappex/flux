@@ -23,6 +23,8 @@ background_cpu_limit(){
 		cpulimit --lazy --limit="${config_key_cpu_limit_map["$passed_section"]}" --pid="$passed_process_pid" > /dev/null 2>&1 &
 		# Remember PID of 'cpulimit' sent into background, required to print message about CPU unlimiting and terminate 'cpulimit' process on SIGINT/SIGTERM signal
 		local_cpulimit_pid="$!"
+		# Enforce 'SCHED_BATCH' to improve interval stability between interrupts
+		chrt --batch --pid 0 "$local_cpulimit_pid" > /dev/null 2>&1
 		# Terminate 'cpulimit' process quietly on daemon termination
 		trap 'kill "$local_cpulimit_pid" > /dev/null 2>&1' SIGINT SIGTERM
 		# Terminate 'cpulimit' process on focus event and print relevant message (SIGUSR1)
