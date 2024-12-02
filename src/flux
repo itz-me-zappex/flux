@@ -69,10 +69,10 @@ load_modules(){
 	local_temp_module \
 	local_executable_path \
 	local_dirname \
-	local_modules_list_array \
+	local_modules_array \
 	local_module_path
 	# Define modules list
-	local_modules_list_array=(
+	local_modules_array=(
 		'actions_on_exit'
 		'aux'
 		'background_cpu_limit'
@@ -117,7 +117,7 @@ load_modules(){
 	# Check for existence of directory with modules and exit with an error if it does not exist
 	if [[ -d "$local_modules_path" ]]; then
 		# Load modules
-		for local_temp_module in "${local_modules_list_array[@]}"; do
+		for local_temp_module in "${local_modules_array[@]}"; do
 			# Define path to module
 			local_module_path="${local_modules_path}/${local_temp_module}.sh"
 			if ! source "$local_module_path" > /dev/null 2>&1; then
