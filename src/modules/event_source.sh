@@ -2,7 +2,8 @@
 check_windows(){
 	local local_temp_windows_list
 	# Check for existence of opened windows, if list appears blank, then wait for window(s) appearance
-	if (( cycles_count > 1 )) || [[ "$(xprop -root _NET_CLIENT_LIST_STACKING)" != '_NET_CLIENT_LIST_STACKING(WINDOW): window id # 0x'* ]]; then
+	# Variable '$cycles_count' cannot be greater than 2 because it resets to 1 after running this function
+	if (( cycles_count == 2 )) || [[ "$(xprop -root _NET_CLIENT_LIST_STACKING)" != '_NET_CLIENT_LIST_STACKING(WINDOW): window id # 0x'* ]]; then
 		message --warning "Opened windows were not found, waiting for their appearance…"
 		# Wait for windows appearance
 		while read -r local_temp_windows_list; do
@@ -136,7 +137,7 @@ event_source(){
 	local cycles_count='0'
 	# Infinite loop required to make daemon able to restart event reading if list of windows becomes blank, happens on Cinnamon when DE restarts
 	while :; do
-		# Increase count of cycles, required for 'check_windows()' which checks for '$cycles_count' being greater than 2 to avoid running 'xprop' for check windows existence after restart of loop
+		# Increase count of cycles, required for 'check_windows()' which checks for '$cycles_count' being equal to 2 to avoid running 'xprop' for check windows existence after restart of loop
 		(( cycles_count++ ))
 		# Check for window(s) existence
 		check_windows
