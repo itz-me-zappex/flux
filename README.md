@@ -87,7 +87,7 @@ Dependencies for other distributions will be added soon.
 ### Manual installation using release tarball
 You can use this method if there is no package build script for your distro. Make sure you have installed dependencies as described above before continue.
 ```bash
-fluxver='1.11.2' # set latest version as I update it here every release
+fluxver='1.12' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -111,7 +111,7 @@ sudo ./install.sh # install daemon to default prefix '/usr/local', you may want 
 ### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
 ``` bash
-fluxver='1.11.2' # set latest version as I update it here every release
+fluxver='1.12' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -125,7 +125,7 @@ makepkg -sric # build a package and install it
 
 ### Debian and dereatives
 ```bash
-fluxver='1.11.2' # set latest version as I update it here every release
+fluxver='1.12' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -190,7 +190,7 @@ A simple INI is used for configuration.
 ### Available keys and description
 | Key               | Description |
 |-------------------|-------------|
-| `name` | Name of process, required if neither `executable` nor `command` is specified. |
+| `name` | Name of process, required if neither `executable` nor `command` is specified. Daemon uses soft match for processes with names which have length 15 symbols, i.e. stripped. |
 | `executable` | Path to binary of process, required if neither `name` nor `command` is specified. |
 | `owner` | Effective UID of process, optional identifier. |
 | `cpu-limit` | CPU limit between `0%` and `100%`, defaults to `-1%` what means no CPU limit, `%` symbol is optional. |
@@ -240,7 +240,7 @@ exec-unfocus = picom
 
 ; Example using FPS limit as that is online game and I use MangoHud
 [Forza Horizon 4]
-name = ForzaHorizon4.e
+name = ForzaHorizon4.exe
 executable = /run/media/zappex/WD-BLUE/Games/Steam/steamapps/common/Proton 9.0 (Beta)/files/bin/wine64-preloader
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\ForzaHorizon4\ForzaHorizon4.exe 
 owner = 1000
@@ -253,7 +253,7 @@ exec-unfocus = picom
 
 ; Example using CPU limit as game does not consume GPU resources when minimized but still uses CPU and requires network connection to download levels and music
 [Geometry Dash]
-name = GeometryDash.ex
+name = GeometryDash.exe
 executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wine64-preloader
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\Geometry Dash\GeometryDash.exe 
 owner = 1000
@@ -271,7 +271,7 @@ cpu-limit = 0%
 
 ; Example using FPS limit as that is online game and I use MangoHud
 [Forza Horizon 4]
-name = ForzaHorizon4.e
+name = ForzaHorizon4.exe
 mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
 mangohud-source-config = ~/.config/MangoHud/MangoHud.conf
 fps-unfocus = 5
@@ -279,7 +279,7 @@ fps-focus = 60
 
 ; Example using CPU limit as game does not consume GPU resources when minimized but still uses CPU and requires network connection to download levels and music
 [Geometry Dash]
-name = GeometryDash.ex
+name = GeometryDash.exe
 cpu-limit = 2%
 ```
 
