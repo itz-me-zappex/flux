@@ -1,5 +1,5 @@
 # Apply CPU limit via 'cpulimit' tool on unfocus event, required to run it on background to avoid stopping a whole code if delay specified
-background_cpulimit(){
+background_cpu_limit(){
 	local local_cpulimit_pid \
 	local_sleep_pid
 	# Wait for N seconds if delay is specified
