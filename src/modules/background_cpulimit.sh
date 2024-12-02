@@ -1,23 +1,3 @@
-# Freeze process on unfocus event, required to run it on background to avoid stopping a whole code if delay specified
-background_freeze_process(){
-	# Wait for N seconds if delay is specified
-	if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
-		message --verbose "Process '$passed_process_name' with PID $passed_process_pid will be frozen after ${config_key_delay_map["$passed_section"]} second(s) on unfocus event."
-		sleep "${config_key_delay_map["$passed_section"]}"
-	fi
-	# Check for process existence before freezing
-	if check_pid_existence "$passed_process_pid"; then
-		# Attempt to send 'SIGSTOP' signal to freeze process completely
-		if ! kill -STOP "$passed_process_pid" > /dev/null 2>&1; then
-			message --warning "Process '$passed_process_name' with PID $passed_process_pid cannot be frozen on unfocus event!"
-		else
-			message --info "Process '$passed_process_name' with PID $passed_process_pid has been frozen on unfocus event."
-		fi
-	else
-		message --warning "Process '$passed_process_name' with PID $passed_process_pid has been terminated before freezing!"
-	fi
-}
-
 # Apply CPU limit via 'cpulimit' tool on unfocus event, required to run it on background to avoid stopping a whole code if delay specified
 background_cpulimit(){
 	local local_cpulimit_pid \
@@ -52,23 +32,5 @@ background_cpulimit(){
 		wait "$local_cpulimit_pid"
 	else
 		message --warning "Process '$passed_process_name' with PID $passed_process_pid has been terminated before applying CPU limit!"
-	fi
-}
-
-# Set specified FPS on unfocus, required to run it on background to avoid stopping a whole code if delay specified
-background_mangohud_fps_set(){
-	# Wait for N seconds if delay is specified
-	if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
-		message --verbose "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' will be FPS limited after ${config_key_delay_map["$passed_section"]} second(s) on unfocus event."
-		sleep "${config_key_delay_map["$passed_section"]}"
-	fi
-	# Check for process existence before set FPS limit
-	if check_pid_existence "$passed_process_pid"; then
-		# Attempt to change 'fps_limit' in specified MangoHud config file
-		if mangohud_fps_set "${config_key_mangohud_config_map["$passed_section"]}" "${config_key_mangohud_source_config_map["$passed_section"]}" "${config_key_fps_unfocus_map["$passed_section"]}"; then
-			message --info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS on unfocus event."
-		fi
-	else
-		message --warning "Process matching with section '$passed_section' has been terminated before FPS limiting!"
 	fi
 }
