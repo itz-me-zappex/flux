@@ -75,9 +75,9 @@ load_modules(){
 	local_modules_list_array=(
 		'actions_on_exit'
 		'aux'
-		'background_cpulimit'
+		'background_cpu_limit'
 		'background_freeze_process'
-		'background_mangohud_fps_set'
+		'background_fps_limit'
 		'calculate_max_limit'
 		'daemon_prepare'
 		'event_source'
