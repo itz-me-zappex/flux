@@ -12,8 +12,15 @@ find_matching_section(){
 			# Attempt to find a matching section in config
 			for local_temp_section in "${sections_array[@]}"; do
 				# Compare process name with specified in section
-				if [[ -z "${config_key_name_map["$local_temp_section"]}" || "${config_key_name_map["$local_temp_section"]}" == "$process_name" ]]; then
+				if [[ -z "${config_key_name_map["$local_temp_section"]}" ]]; then
 					local_name_match='1'
+				else
+					# Use soft match if name of process in 'name' config key longer than or equal to 16 symbols
+					if [[ "${config_key_name_map["$local_temp_section"]}" == "$process_name" ]]; then
+						local_name_match='1'
+					elif [[ "${config_key_name_map["$local_temp_section"]}" == "$process_name"* && "${config_key_name_map["$local_temp_section"]}" =~ ^.{16,}$ ]]; then
+						local_name_match='1'
+					fi
 				fi
 				# Compare process executable path with specified in section
 				if [[ -z "${config_key_executable_map["$local_temp_section"]}" || "${config_key_executable_map["$local_temp_section"]}" == "$process_executable" ]]; then
