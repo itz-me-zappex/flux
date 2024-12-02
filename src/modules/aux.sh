@@ -228,3 +228,16 @@ check_ro(){
 		return 1
 	fi
 }
+
+# Required to run commands on focus and unfocus events
+exec_on_event(){
+	# Pass environment variables to interact with them using commands/scripts in 'exec-focus' or 'exec-unfocus' key and run command on passed event
+	FLUX_WINDOW_ID="$passed_window_id" \
+	FLUX_PROCESS_PID="$passed_process_pid" \
+	FLUX_PROCESS_NAME="$passed_process_name" \
+	FLUX_PROCESS_EXECUTABLE="$passed_process_executable" \
+	FLUX_PROCESS_OWNER="$passed_process_owner" \
+	FLUX_PROCESS_COMMAND="$passed_process_command" \
+	nohup setsid bash -c "$passed_event_command" > /dev/null 2>&1 &
+	message --info "Command '$passed_event_command' from section '$passed_section' has been executed on $passed_event event."
+}
