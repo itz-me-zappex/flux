@@ -49,7 +49,7 @@ set_requested_limits(){
 				# Set FPS limit
 				passed_section="$local_existing_section" \
 				passed_process_pid="${cache_process_pid_map["$local_temp_existing_window_id"]}" \
-				background_mangohud_fps_set &
+				background_fps_limit &
 				# Associate PID of background process with section to interrupt in case focus event appears earlier than delay ends
 				fps_limit_bgprocess_pid_map["$local_existing_section"]="$!"
 				# Mark section as FPS limited, required to check FPS limit existence on focus event
