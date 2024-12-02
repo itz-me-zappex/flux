@@ -88,7 +88,10 @@ load_modules(){
 		'set_requested_limits'
 		'unfocus_request_limit'
 		'unset_limit'
-		'validate'
+		'validate_config'
+		'validate_config_keys'
+		'validate_log'
+		'validate_options'
 	)
 	# Obtain absolute path to executable
 	local_executable_path="$(get_realpath "$0")"
