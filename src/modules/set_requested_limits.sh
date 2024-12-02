@@ -36,7 +36,7 @@ set_requested_limits(){
 				passed_section="$local_existing_section" \
 				passed_process_name="${cache_process_name_map["$local_temp_existing_window_id"]}" \
 				passed_process_pid="${cache_process_pid_map["$local_temp_existing_window_id"]}" \
-				background_cpulimit &
+				background_cpu_limit &
 				# Store PID of background process to array to interrupt it in case daemon exit
 				cpulimit_bgprocesses_pids_array+=("$!")
 				# Associate PID of background process with PID of process to interrupt it on focus event
