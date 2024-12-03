@@ -155,7 +155,7 @@ parse_ini(){
 				if [[ -n "$local_section" ]]; then
 					message --error "Unable to define type of line '$local_temp_config_line' in section '$local_section' in '$config' config file!"
 				else
-					message --error "Unable to define type of line '$config_line' in '$config' config file!"
+					message --error "Unable to define type of line '$local_temp_config_line' in '$config' config file!"
 				fi
 				exit 1
 			fi
