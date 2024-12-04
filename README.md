@@ -284,17 +284,23 @@ cpu-limit = 2%
 ```
 
 ### Environment variables passed to commands in `exec-focus` and `exec-unfocus` config keys
-Note: Daemon passes absolutely the same values for both `exec-focus` and `exec-unfocus` commands.
+Node: You may want to use these variables in scripts running from `exec-focus` and `exec-unfocus` config keys to improve daemon functionality.
 
 #### List of variables and description
 | Variable | Description |
 |----------|-------------|
-| `FLUX_WINDOW_ID` | ID of focused window |
-| `FLUX_PROCESS_PID` | Process PID of focused window |
-| `FLUX_PROCESS_NAME` | Process name of focused window |
-| `FLUX_PROCESS_EXECUTABLE` | Path to process binary |
-| `FLUX_PROCESS_OWNER` | Effective UID of process |
-| `FLUX_PROCESS_COMMAND` | Command of process |
+| `FLUX_FOCUSED_WINDOW_ID` | ID of focused window |
+| `FLUX_FOCUSED_PROCESS_PID` | Process PID of focused window |
+| `FLUX_FOCUSED_PROCESS_NAME` | Process name of focused window |
+| `FLUX_FOCUSED_PROCESS_EXECUTABLE` | Path to process binary of focused window |
+| `FLUX_FOCUSED_PROCESS_OWNER` | Effective UID of process of focused window |
+| `FLUX_FOCUSED_PROCESS_COMMAND` | Command of process of focused window |
+| `FLUX_UNFOCUSED_WINDOW_ID` | ID of unfocused window |
+| `FLUX_UNFOCUSED_PROCESS_PID` | Process PID of unfocused window |
+| `FLUX_UNFOCUSED_PROCESS_NAME` | Process name of unfocused window |
+| `FLUX_UNFOCUSED_PROCESS_EXECUTABLE` | Path to process binary of unfocused window |
+| `FLUX_UNFOCUSED_PROCESS_OWNER` | Effective UID of process of unfocused window |
+| `FLUX_UNFOCUSED_PROCESS_COMMAND` | Command of process of unfocused window |
 
 ## Tips and tricks
 ### Keybinding to obtain template from focused window for config
