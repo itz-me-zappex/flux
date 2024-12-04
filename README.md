@@ -284,7 +284,7 @@ cpu-limit = 2%
 ```
 
 ### Environment variables passed to commands in `exec-focus` and `exec-unfocus` config keys
-Node: You may want to use these variables in scripts running from `exec-focus` and `exec-unfocus` config keys to improve daemon functionality.
+Note: You may want to use these variables in scripts running from `exec-focus` and `exec-unfocus` config keys to improve daemon functionality.
 
 #### List of variables and description
 | Variable | Description |
