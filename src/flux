@@ -263,8 +263,6 @@ else
 		* )
 			# Set window ID variable if event does not match with statements above
 			window_id="$event"
-			# Execute command on unfocus event if specified in config
-			exec_unfocus
 			# Get process info using window ID if ID is not '0x0'
 			case "$window_id" in
 			'0x0' )
@@ -273,12 +271,12 @@ else
 			* )
 				# Attempt to obtain info about process using window ID
 				get_process_info
-				exit_code="$?"
+				get_process_info_exit_code="$?"
 			esac
 			# Request CPU/FPS limit for unfocused process if it matches with section
 			unfocus_request_limit
 			# Actions depending by exit code of 'get_process_info()'
-			case "$exit_code" in
+			case "$get_process_info_exit_code" in
 			'0' )
 				# Find matching section for process in config
 				if find_matching_section; then
@@ -287,6 +285,22 @@ else
 					# Unset CPU/FPS limit for focused process if it has been limited on unfocus
 					focus_unset_limit
 				fi
+			;;
+			* )
+				# Print message depending by exit code of 'get_process_info()'
+				case "$get_process_info_exit_code" in
+				'1' )
+					message --warning "Bad window with ID $window_id appeared, unable to obtain process info!"
+				;;
+				'2' )
+					message --warning "Unable to obtain info about process with PID $process_pid!"
+				esac
+			esac
+			# Execute command on unfocus event if specified in config
+			exec_unfocus
+			# Define what to do with info about previous window depending by exit code (overwrite or unset)
+			case "$get_process_info_exit_code" in
+			'0' )
 				# Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
 				previous_window_id="$window_id"
 				previous_process_pid="$process_pid"
@@ -297,14 +311,6 @@ else
 				previous_section="$section"
 			;;
 			* )
-				# Print message depending by exit code of 'get_process_info()'
-				case "$exit_code" in
-				'1' )
-					message --warning "Bad window with ID $window_id appeared, unable to obtain process info!"
-				;;
-				'2' )
-					message --warning "Unable to obtain info about process with PID $process_pid!"
-				esac
 				# Forget info about previous window/process because it is not changed
 				unset previous_window_id \
 				previous_process_pid \
@@ -314,7 +320,7 @@ else
 				previous_process_command \
 				previous_section
 			esac
-			unset exit_code
+			unset get_process_info_exit_code
 			# Unset info about process to avoid using it by an accident
 			unset window_id \
 			process_pid \
