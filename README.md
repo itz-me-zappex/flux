@@ -87,19 +87,19 @@ Dependencies for other distributions will be added soon.
 ### Manual installation using release tarball
 You can use this method if there is no package build script for your distro. Make sure you have installed dependencies as described above before continue.
 ```bash
-fluxver='1.13' # set latest version as I update it here every release
+flux_version='1.13' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
 ```
 ```bash
-wget https://github.com/itz-me-zappex/flux/archive/refs/tags/v${fluxver}.tar.gz # download archive with release
+wget "https://github.com/itz-me-zappex/flux/archive/refs/tags/v${flux_version}.tar.gz" # download archive with release
 ```
 ```bash
-tar -xvf v${fluxver}.tar.gz # extract it
+tar -xvf "v${flux_version}.tar.gz" # extract it
 ```
 ```bash
-cd flux-${fluxver} # change directory to extracted archive
+cd "flux-${flux_version}" # change directory to extracted archive
 ```
 ```bash
 chmod +x install.sh # make installation script executable
@@ -111,13 +111,13 @@ sudo ./install.sh # install daemon to default prefix '/usr/local', you may want 
 ### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
 ``` bash
-fluxver='1.13' # set latest version as I update it here every release
+flux_version='1.13' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
 ```
 ```bash
-wget https://github.com/itz-me-zappex/flux/releases/download/v${fluxver}/PKGBUILD # download PKGBUILD
+wget "https://github.com/itz-me-zappex/flux/releases/download/v${flux_version}/PKGBUILD" # download PKGBUILD
 ```
 ```bash
 makepkg -sric # build a package and install it
@@ -125,13 +125,13 @@ makepkg -sric # build a package and install it
 
 ### Debian and dereatives
 ```bash
-fluxver='1.13' # set latest version as I update it here every release
+flux_version='1.13' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
 ```
 ```bash
-wget https://github.com/itz-me-zappex/flux/releases/download/v${fluxver}/build-deb.sh # download build script
+wget "https://github.com/itz-me-zappex/flux/releases/download/v${flux_version}/build-deb.sh" # download build script
 ```
 ```bash
 chmod +x build-deb.sh # make it executable
@@ -140,7 +140,7 @@ chmod +x build-deb.sh # make it executable
 ./build-deb.sh # build a package
 ```
 ```bash
-sudo dpkg -i flux-v${fluxver}.deb ; sudo apt install -f # install a package
+sudo dpkg -i "flux-v${flux_version}.deb" ; sudo apt install -f # install a package
 ```
 
 ## Usage
