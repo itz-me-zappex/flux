@@ -3,12 +3,6 @@ validate_log(){
 	# Run multiple checks related to logging if '--log' option is specified
 	if [[ -n "$log_is_passed" ]]; then
 		unset log_is_passed
-		# Exit with an error if '--log-timestamp' option is specified without timestamp format
-		if [[ -n "$log_timestamp_is_passed" && -z "$new_log_timestamp" ]]; then
-			message --error "Option '--log-timestamp' is specified without timestamp!$advice_on_option_error"
-			exit 1
-		fi
-		unset log_timestamp_is_passed
 		# Exit with an error if '--log' option is specified without path to log file
 		if [[ -z "$log" ]]; then
 			message --error "Option '--log' is specified without path to log file!$advice_on_option_error"
