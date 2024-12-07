@@ -169,6 +169,8 @@ config_key_cpu_limit_map \
 config_key_delay_map \
 config_key_exec_focus_map \
 config_key_exec_unfocus_map \
+config_key_lazy_exec_focus_map \
+config_key_lazy_exec_unfocus_map \
 config_key_command_map \
 config_key_mangohud_source_config_map \
 config_key_mangohud_config_map \
