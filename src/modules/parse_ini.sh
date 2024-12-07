@@ -152,7 +152,7 @@ parse_ini(){
 					lazy-exec-focus* )
 						config_key_lazy_exec_focus_map["$local_section"]="$local_config_value"
 					;;
-					lazy-exec-unfocus )
+					lazy-exec-unfocus* )
 						config_key_lazy_exec_unfocus_map["$local_section"]="$local_config_value"
 					esac
 				fi
