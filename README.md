@@ -194,6 +194,8 @@ A simple INI is used for configuration.
 | `delay` | Delay in seconds before applying CPU/FPS limit. Optional, defaults to `0`, supports values with floating point. |
 | `exec-focus` | Command to execute on focus event, command runs via bash and will not be killed on daemon exit, output is hidden to avoid mess in output of daemon. |
 | `exec-unfocus` | Command to execute on unfocus event, command runs via bash and will not be killed on daemon exit, output is hidden to avoid mess in output of daemon. |
+| `lazy-exec-focus` | Same as `exec-focus`, but command will not run when processing opened windows if `--hot` is specified. |
+| `lazy-exec-unfocus` | Same as `exec-unfocus`, but command will not run when processing opened windows if `--hot` is specified. |
 | `command` | Command which is used to start process, required if neither `name` nor `executable` is specified. |
 | `mangohud-source-config` | Path to MangoHud config which should be used as a base before apply FPS limit in `mangohud-config`, if not specified, then target behaves as source. Useful if you not looking for duplicate MangoHud config for multiple games. |
 | `mangohud-config` | Path to MangoHud config which should be changed (target), required if you want change FPS limits and requires `fps-unfocus`. Make sure you created specified config, at least just keep it blank, otherwise MangoHud will not be able to load new config on fly and daemon will throw warnings related to config absence. Do not use the same config for multiple sections! |
@@ -232,8 +234,8 @@ executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bi
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\The Witcher 3\bin\x64\witcher3.exe 
 owner = 1000
 cpu-limit = 0%
-exec-focus = killall picom
-exec-unfocus = picom
+lazy-exec-focus = killall picom
+lazy-exec-unfocus = picom
 
 ; Example using FPS limit as that is online game and I use MangoHud
 [Forza Horizon 4]
@@ -245,8 +247,10 @@ mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
 mangohud-source-config = ~/.config/MangoHud/MangoHud.conf
 fps-unfocus = 5
 fps-focus = 60
-exec-focus = killall picom
-exec-unfocus = picom
+lazy-exec-focus = killall picom
+lazy-exec-unfocus = picom
+exec-focus = wpctl set-mute -p $FLUX_FOCUSED_PROCESS_PID 0
+exec-unfocus = wpctl set-mute -p $FLUX_UNFOCUSED_PROCESS_PID 1
 
 ; Example using CPU limit as game does not consume GPU resources when minimized but still uses CPU and requires network connection to download levels and music
 [Geometry Dash]
@@ -255,8 +259,8 @@ executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bi
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\Geometry Dash\GeometryDash.exe 
 owner = 1000
 cpu-limit = 2%
-exec-focus = killall picom
-exec-unfocus = picom
+lazy-exec-focus = killall picom
+lazy-exec-unfocus = picom
 ```
 
 #### Short examples
@@ -273,6 +277,8 @@ mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
 mangohud-source-config = ~/.config/MangoHud/MangoHud.conf
 fps-unfocus = 5
 fps-focus = 60
+exec-focus = wpctl set-mute -p $FLUX_FOCUSED_PROCESS_PID 0
+exec-unfocus = wpctl set-mute -p $FLUX_UNFOCUSED_PROCESS_PID 1
 
 ; Example using CPU limit as game does not consume GPU resources when minimized but still uses CPU and requires network connection to download levels and music
 [Geometry Dash]
