@@ -35,11 +35,11 @@ on_hot(){
 				echo "$local_temp_stacking_window"
 			fi
 		done
-		# Print event to unset '--hot' option as it becomes useless
-		echo 'unset_hot'
-		# Also useless since now
-		unset hot
 	fi
+	# Print event to unset '--hot' option as it becomes useless and set '$hot_is_unset' mark to make command from 'lazy-exec-unfocus' work
+	echo 'unset_hot'
+	# Also useless since now
+	unset hot
 }
 
 # Required to handle events from 'xprop' and print internal events
