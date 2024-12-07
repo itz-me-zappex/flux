@@ -23,7 +23,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
   - [Configuration example](#configuration-example)
     - [Long examples](#long-examples)
     - [Short examples](#short-examples)
-  - [Environment variables passed to commands in `exec-focus` and `exec-unfocus` config keys](#environment-variables-passed-to-commands-in-exec-focus-and-exec-unfocus-config-keys)
+  - [Environment variables passed to commands](#environment-variables-passed-to-commands)
     - [List of variables and description](#list-of-variables-and-description)
 - [Tips and tricks](#tips-and-tricks)
   - [Keybinding to obtain template from focused window for config](#keybinding-to-obtain-template-from-focused-window-for-config)
@@ -286,8 +286,8 @@ name = GeometryDash.exe
 cpu-limit = 2%
 ```
 
-### Environment variables passed to commands in `exec-focus` and `exec-unfocus` config keys
-Note: You may want to use these variables in scripts running from `exec-focus` and `exec-unfocus` config keys to extend daemon functionality.
+### Environment variables passed to commands
+Note: You may want to use these variables in commands and scripts which running from `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys to extend daemon functionality.
 
 #### List of variables and description
 | Variable | Description |
