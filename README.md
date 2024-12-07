@@ -154,19 +154,16 @@ Options and values:
   -f, --focused              Display info about focused window in compatible with config way and exit
   -h, --help                 Display this help and exit
   -H, --hot                  Apply actions to already unfocused windows before handling events
-  -l, --lazy                 Avoid focus and unfocus commands on hot (use only with '--hot')
-  -L, --log <path>           Store messages to specified file
+  -l, --log <path>           Store messages to specified file
+  -L, --log-overwrite        Recreate log file before start, use only with '--log'
   -n, --notifications        Display messages as notifications
   -p, --pick                 Display info about picked window in usable for config file way and exit
   -q, --quiet                Display errors and warnings only
+  -T, --timestamp-format     Set timestamp format, use only with '--timestamps' (default: [%Y-%m-%dT%H:%M:%S%z])
+  -t, --timestamps           Add timestamps to messages
   -u, --usage                Alias for '--help'
   -v, --verbose              Detailed output
   -V, --version              Display release information and exit
-
-Logging configuration (use only with '--log'):
-  --log-no-timestamps        Do not add timestamps to messages in log (do not use with '--log-timestamp')
-  --log-overwrite            Recreate log file before start
-  --log-timestamp <format>   Set timestamp format (default: [%Y-%m-%dT%H:%M:%S%z])
 
 Prefixes configuration:
   --prefix-error <prefix>    Set prefix for error messages (default: [x])
@@ -175,9 +172,9 @@ Prefixes configuration:
   --prefix-warning <prefix>  Set prefix for warning messages (default: [!])
 
 Examples:
-  flux -Hlv
-  flux -HlL ~/.flux.log --log-overwrite --log-timestamp '[%d.%m.%Y %H:%M:%S]'
-  flux -qL ~/.flux.log --log-no-timestamps
+  flux -Hvt
+  flux -HtLl ~/.flux.log -T '[%d.%m.%Y %H:%M:%S]'
+  flux -ql ~/.flux.log
   flux -c ~/.config/flux.ini.bak
 ```
 
