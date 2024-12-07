@@ -223,13 +223,6 @@ else
 		'unset_hot' )
 			# Unset '--hot' as it becomes useless from this moment
 			unset hot
-			# Do not do anything if '--lazy' is not set
-			if [[ -n "$lazy" ]]; then
-				# Unset '--lazy' option, otherwise focus and unfocus commands will not work
-				unset lazy
-				# Mark required to prevent execution of 'exec-unfocus' on next cycle
-				lazy_is_unset='1'
-			fi
 		;;
 		'terminated'* )
 			# Unset CPU/FPS limits for terminated windows and remove info about them from cache
@@ -242,8 +235,6 @@ else
 		'restart' )
 			# Prepare daemon to reapply limits on 'event_source()' restart event which appears if list of windows IDs becomes blank
 			hot='1'
-			lazy='1'
-			lazy_is_unset=''
 			# Unset info about processes to avoid using it by accident
 			unset window_id \
 			process_pid \
