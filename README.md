@@ -287,7 +287,7 @@ cpu-limit = 2%
 ```
 
 ### Environment variables passed to commands in `exec-focus` and `exec-unfocus` config keys
-Note: You may want to use these variables in scripts running from `exec-focus` and `exec-unfocus` config keys to improve daemon functionality.
+Note: You may want to use these variables in scripts running from `exec-focus` and `exec-unfocus` config keys to extend daemon functionality.
 
 #### List of variables and description
 | Variable | Description |
@@ -311,7 +311,7 @@ Note: You may want to use these variables in scripts running from `exec-focus` a
 Now you can easily grab templates from focused windows to use them in config by pasting content using `Ctrl`+`V`.
 
 ### Apply changes in config file
-- Daemon does not support config parsing on a fly, but there is workaround you can use. Create keybinding for command like `killall flux ; flux --hot --lazy` which restarts daemon, use this keybinding if you done with config file editing.
+- Daemon does not support config parsing on a fly, but there is workaround you can use. Create keybinding for command like `killall flux ; flux --hot` which restarts daemon, use this keybinding if you done with config file editing.
 
 ### Types of limits and which you should use
 - FPS limits recommended for online and multiplayer games and if you do not mind to use MangoHud.
