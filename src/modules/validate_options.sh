@@ -8,19 +8,14 @@ validate_options(){
 		message --error "Do not use verbose and quiet modes at the same time!$advice_on_option_error"
 		exit 1
 	fi
-	# Exit with an error if '--lazy' option is specified without '--hot'
-	if [[ -n "$lazy" && -z "$hot" ]]; then
-		message --error "Do not use '--lazy' option without '--hot'!$advice_on_option_error"
+	# Exit with an error if '--log-overwrite' option is specified without '--log' option
+	if [[ -z "$log_is_passed" && -n "$log_overwrite" ]]; then
+		message --error "Do not use '--log-overwrite' without '--log' option!$advice_on_option_error"
 		exit 1
 	fi
-	# Exit with an error if logging specific options are specified without '--log' option
-	if [[ -z "$log_is_passed" ]] && [[ -n "$log_no_timestamps" || -n "$log_overwrite" || -n "$log_timestamp_is_passed" ]]; then
-		message --error "Do not use options related to logging without '--log' options!$advice_on_option_error"
-		exit 1
-	fi
-	# Exit with an error if '--log-timestamp' and '--log-no-timestamps' options are specified at the same time
-	if [[ -n "$log_timestamp_is_passed" && -n "$log_no_timestamps" ]]; then
-		message --error "Do not use '--log-timestamp' and '--log-no-timestamps' options at the same time!$advice_on_option_error"
+	# Exit with an error if '--timestamp-format' is specified without '--timestamps'
+	if [[ -n "$timestamp_format" && -z "$timestamps" ]]; then
+		message --error "Do not use '--timestamp-format' without '--timestamps' option."
 		exit 1
 	fi
 	# Exit with an error if '--config' option is specified without a path to config file
@@ -40,4 +35,10 @@ validate_options(){
 			exit 1
 		fi
 	done
+	# Exit with an error if '--timestamp-format' option is specified without timestamp format
+	if [[ -n "$timestamp_is_passed" && -z "$new_timestamp_format" ]]; then
+		message --error "Option '--timestamp-format' is specified without timestamp format!$advice_on_option_error"
+		exit 1
+	fi
+	unset timestamp_is_passed
 }
