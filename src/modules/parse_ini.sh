@@ -28,7 +28,7 @@ parse_ini(){
 				local_section="${local_temp_config_line/\[/}"
 				local_section="${local_section/%\]/}"
 				sections_array+=("$local_section")
-			elif [[ "${local_temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
+			elif [[ "${local_temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|(lazy-)?exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
 				# Remove key name and equal symbol
 				local_config_value="${local_temp_config_line/*=/}"
 				# Remove all spaces before and after string, internal shell parameter expansion required to get spaces supposed to be removed
@@ -148,6 +148,12 @@ parse_ini(){
 							message --error "Value '$local_config_value' specified in key 'fps-focus' in section '$local_section' in '$config' config file is not an integer!"
 							exit 1
 						fi
+					;;
+					lazy-exec-focus* )
+						config_key_lazy_exec_focus_map["$local_section"]="$local_config_value"
+					;;
+					lazy-exec-unfocus )
+						config_key_lazy_exec_unfocus_map["$local_section"]="$local_config_value"
 					esac
 				fi
 			else
