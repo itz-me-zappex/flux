@@ -225,6 +225,8 @@ else
 		'unset_hot' )
 			# Unset '--hot' as it becomes useless from this moment
 			unset hot
+			# Needed to make commands from 'lazy-exec-unfocus' keys work properly, 'exec_unfocus()' skips execution 'lazy-exec-unfocus' first time and increases value to '2'
+			hot_is_unset='1'
 		;;
 		'terminated'* )
 			# Unset CPU/FPS limits for terminated windows and remove info about them from cache
@@ -237,6 +239,7 @@ else
 		'restart' )
 			# Prepare daemon to reapply limits on 'event_source()' restart event which appears if list of windows IDs becomes blank
 			hot='1'
+			unset hot_is_unset
 			# Unset info about processes to avoid using it by accident
 			unset window_id \
 			process_pid \
