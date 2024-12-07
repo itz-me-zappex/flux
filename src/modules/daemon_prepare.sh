@@ -14,6 +14,11 @@ daemon_prepare(){
 			exit 1
 		fi
 	fi
+	# Use custom timestamp format if specified
+	if [[ -n "$new_timestamp_format" ]]; then
+		timestamp_format="$new_timestamp_format"
+		unset new_timestamp_format
+	fi
 	# Prepare before logging if log file is specified
 	if [[ -n "$log" ]]; then
 		# Allow logging before start event reading
@@ -22,11 +27,6 @@ daemon_prepare(){
 		if [[ -n "$log_overwrite" || ! -f "$log" ]]; then
 			echo -n > "$log"
 			unset log_overwrite
-		fi
-		# Set specified timestamp format if specified
-		if [[ -n "$new_timestamp_format" ]]; then
-			timestamp_format="$new_timestamp_format"
-			unset new_timestamp_format
 		fi
 	fi
 	# Set specified from command line prefixes if any
