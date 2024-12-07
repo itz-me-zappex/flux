@@ -83,19 +83,16 @@ Options and values:
   -f, --focused              Display info about focused window in compatible with config way and exit
   -h, --help                 Display this help and exit
   -H, --hot                  Apply actions to already unfocused windows before handling events
-  -l, --lazy                 Avoid focus and unfocus commands on hot (use only with '--hot')
-  -L, --log <path>           Store messages to specified file
+  -l, --log <path>           Store messages to specified file
+  -L, --log-overwrite        Recreate log file before start, use only with '--log'
   -n, --notifications        Display messages as notifications
   -p, --pick                 Display info about picked window in usable for config file way and exit
   -q, --quiet                Display errors and warnings only
+  -T, --timestamp-format     Set timestamp format, use only with '--timestamps' (default: [%Y-%m-%dT%H:%M:%S%z])
+  -t, --timestamps           Add timestamps to messages
   -u, --usage                Alias for '--help'
   -v, --verbose              Detailed output
   -V, --version              Display release information and exit
-
-Logging configuration (use only with '--log'):
-  --log-no-timestamps        Do not add timestamps to messages in log (do not use with '--log-timestamp')
-  --log-overwrite            Recreate log file before start
-  --log-timestamp <format>   Set timestamp format (default: [%Y-%m-%dT%H:%M:%S%z])
 
 Prefixes configuration:
   --prefix-error <prefix>    Set prefix for error messages (default: [x])
@@ -104,9 +101,9 @@ Prefixes configuration:
   --prefix-warning <prefix>  Set prefix for warning messages (default: [!])
 
 Examples:
-  flux -Hlv
-  flux -HlL ~/.flux.log --log-overwrite --log-timestamp '[%d.%m.%Y %H:%M:%S]'
-  flux -qL ~/.flux.log --log-no-timestamps
+  flux -Hvt
+  flux -HtLl ~/.flux.log -T '[%d.%m.%Y %H:%M:%S]'
+  flux -ql ~/.flux.log
   flux -c ~/.config/flux.ini.bak
 "
 			exit 0
@@ -116,17 +113,12 @@ Examples:
 			hot='1'
 			shift 1
 		;;
-		--lazy | -l )
-			option_repeat_check lazy --lazy
-			lazy='1'
-			shift 1
-		;;
-		--log | -L | --log=* )
+		--log | -l | --log=* )
 			# Assign value from option to variable using 'cmdline_get' function
 			passed_check='log_is_passed' \
 			passed_set='log' \
 			passed_option='--log' \
-			passed_short_option='-L' \
+			passed_short_option='-l' \
 			cmdline_get "$@"
 			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
 			shift "$shift"
@@ -134,6 +126,11 @@ Examples:
 			if [[ -n "$log" ]]; then
 				log="$(get_realpath "$log")"
 			fi
+		;;
+		--log-overwrite | -L )
+			option_repeat_check log_overwrite --log-overwrite
+			log_overwrite='1'
+			shift 1
 		;;
 		--notifications | -n )
 			option_repeat_check notifications --notifications
@@ -143,6 +140,21 @@ Examples:
 		--quiet | -q )
 			option_repeat_check quiet --quiet
 			quiet='1'
+			shift 1
+		;;
+		--timestamp-format | -T | --timestamp-format=* )
+			# Assign value from option to variable using 'cmdline_get' function
+			passed_check='timestamp_is_passed' \
+			passed_set='new_timestamp_format' \
+			passed_option='--timestamp-format' \
+			passed_short_option='-T' \
+			cmdline_get "$@"
+			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
+			shift "$shift"
+		;;
+		--timestamps | -t )
+			option_repeat_check timestamps --timestamps
+			timestamps='1'
 			shift 1
 		;;
 		--verbose | -v )
@@ -194,25 +206,6 @@ There is NO WARRANTY, to the extent permitted by law.
 			passed_check='prefix_warning_is_passed' \
 			passed_set='new_prefix_warning' \
 			passed_option='--prefix-warning' \
-			cmdline_get "$@"
-			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
-			shift "$shift"
-		;;
-		--log-no-timestamps )
-			option_repeat_check log_no_timestamps --log-no-timestamps
-			log_no_timestamps='1'
-			shift 1
-		;;
-		--log-overwrite )
-			option_repeat_check log_overwrite --log-overwrite
-			log_overwrite='1'
-			shift 1
-		;;
-		--log-timestamp | --log-timestamp=* )
-			# Assign value from option to variable using 'cmdline_get' function
-			passed_check='log_timestamp_is_passed' \
-			passed_set='new_log_timestamp' \
-			passed_option='--log-timestamp' \
 			cmdline_get "$@"
 			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
 			shift "$shift"
