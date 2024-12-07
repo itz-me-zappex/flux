@@ -24,9 +24,9 @@ daemon_prepare(){
 			unset log_overwrite
 		fi
 		# Set specified timestamp format if specified
-		if [[ -n "$new_log_timestamp" ]]; then
-			log_timestamp="$new_log_timestamp"
-			unset new_log_timestamp
+		if [[ -n "$new_timestamp_format" ]]; then
+			timestamp_format="$new_timestamp_format"
+			unset new_timestamp_format
 		fi
 	fi
 	# Set specified from command line prefixes if any
