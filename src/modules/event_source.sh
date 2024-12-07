@@ -15,7 +15,7 @@ check_windows(){
 	fi
 }
 
-# Required to get list of opened windows and print windows IDs line by line if '--hot' option is specified to make daemon apply limits to them and run commands from 'exec-focus' and 'exec-unfocus' config keys (if '--lazy' is not specified of course)
+# Required to get list of opened windows and print windows IDs line by line if '--hot' option is specified to make daemon apply limits to them and run commands from 'exec-focus' and 'exec-unfocus' config keys
 on_hot(){
 	local local_stacking_windows \
 	local_focused_window \
@@ -35,11 +35,10 @@ on_hot(){
 				echo "$local_temp_stacking_window"
 			fi
 		done
-		# Print event to unset '--hot' and '--lazy' options as those are becoming useless
+		# Print event to unset '--hot' option as it becomes useless
 		echo 'unset_hot'
 		# Also useless since now
-		unset hot \
-		lazy
+		unset hot
 	fi
 }
 
@@ -66,9 +65,8 @@ xprop_reader(){
 			if [[ "$local_event" == '_NET_CLIENT_LIST_STACKING(WINDOW): window id #' ]]; then
 				# Print event to prepare daemon for restart
 				echo 'restart'
-				# Set '--hot' and '--lazy' back to apply limits again as those have been unset
+				# Set '--hot' back to apply limits again as those have been unset
 				hot='1'
-				lazy='1'
 				# Mark required to avoid loop breakage misunderstood as 'xprop' crash
 				local_restart='1'
 				# Break loop
