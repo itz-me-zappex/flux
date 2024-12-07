@@ -7,17 +7,21 @@ daemon_version='1.13'
 message(){
 	local local_timestamp \
 	local_log_prefix
+	# Get timestamp if that behavior is allowed using '--timestamps' option
+	if [[ -n "$timestamps" ]]; then
+		local_timestamp="$(printf "%($timestamp_format)T") "
+	fi
 	# Print message depending by type
 	case "$1" in
 	--error )
 		shift 1
-		echo -e "$prefix_error $*" >&2
+		echo -e "$local_timestamp$prefix_error $*" >&2
 		local_log_prefix="$prefix_error"
 	;;
 	--info )
 		shift 1
 		if [[ -z "$quiet" ]]; then
-			echo -e "$prefix_info $*"
+			echo -e "$local_timestamp$prefix_info $*"
 			local_log_prefix="$prefix_info"
 		else
 			return 0
@@ -26,7 +30,7 @@ message(){
 	--verbose )
 		shift 1
 		if [[ -n "$verbose" ]]; then
-			echo -e "$prefix_verbose $*"
+			echo -e "$local_timestamp$prefix_verbose $*"
 			local_log_prefix="$prefix_verbose"
 		else
 			return 0
@@ -34,15 +38,11 @@ message(){
 	;;
 	--warning )
 		shift 1
-		echo -e "$prefix_warning $*" >&2
+		echo -e "$local_timestamp$prefix_warning $*" >&2
 		local_log_prefix="$prefix_warning"
 	esac
 	# Print message with timestamp to log file if responding option is specified and logging has been allowed before event reading
 	if [[ -n "$allow_logging" ]]; then
-		# Get timestamp if that behavior is not disabled using '--log-no-timestamps' option
-		if [[ -z "$log_no_timestamps" ]]; then
-			local_timestamp="$(printf "%($log_timestamp)T") "
-		fi
 		# Check log file for read-write access before store message to log
 		if check_rw "$log"; then
 			echo -e "$local_timestamp$local_log_prefix $*" >> "$log"
@@ -138,7 +138,7 @@ prefix_verbose='[~]'
 prefix_warning='[!]'
 
 # Set default timestamp format for logger
-log_timestamp='[%Y-%m-%dT%H:%M:%S%z]'
+timestamp_format='[%Y-%m-%dT%H:%M:%S%z]'
 
 # Additional text for errors related to option parsing
 advice_on_option_error="\n$prefix_info Try 'flux --help' for more information."
