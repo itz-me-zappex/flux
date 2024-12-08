@@ -292,18 +292,12 @@ Note: You may want to use these variables in commands and scripts which running 
 #### List of variables and description
 | Variable | Description |
 |----------|-------------|
-| `FLUX_FOCUSED_WINDOW_ID` | ID of focused window |
-| `FLUX_FOCUSED_PROCESS_PID` | Process PID of focused window |
-| `FLUX_FOCUSED_PROCESS_NAME` | Process name of focused window |
-| `FLUX_FOCUSED_PROCESS_EXECUTABLE` | Path to process binary of focused window |
-| `FLUX_FOCUSED_PROCESS_OWNER` | Effective UID of process of focused window |
-| `FLUX_FOCUSED_PROCESS_COMMAND` | Command of process of focused window |
-| `FLUX_UNFOCUSED_WINDOW_ID` | ID of unfocused window |
-| `FLUX_UNFOCUSED_PROCESS_PID` | Process PID of unfocused window |
-| `FLUX_UNFOCUSED_PROCESS_NAME` | Process name of unfocused window |
-| `FLUX_UNFOCUSED_PROCESS_EXECUTABLE` | Path to process binary of unfocused window |
-| `FLUX_UNFOCUSED_PROCESS_OWNER` | Effective UID of process of unfocused window |
-| `FLUX_UNFOCUSED_PROCESS_COMMAND` | Command of process of unfocused window |
+| `FLUX_(UN)FOCUSED_WINDOW_ID` | Hexadecimal ID of (un)focused window |
+| `FLUX_(UN)FOCUSED_PROCESS_PID` | Process PID of (un)focused window |
+| `FLUX_(UN)FOCUSED_PROCESS_NAME` | Process name of (un)focused window |
+| `FLUX_(UN)FOCUSED_PROCESS_EXECUTABLE` | Path to process executable of (un)focused window |
+| `FLUX_(UN)FOCUSED_PROCESS_OWNER` | Effective process UID of (un)focused window |
+| `FLUX_(UN)FOCUSED_PROCESS_COMMAND` | Command used to run process of (un)focused window |
 
 ## Tips and tricks
 ### Keybinding to obtain template from focused window for config
