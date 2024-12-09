@@ -74,7 +74,7 @@ load_modules(){
 	# Define modules list
 	local_modules_array=(
 		'actions_on_exit'
-		'aux'
+		'auxiliary'
 		'background_cpu_limit'
 		'background_freeze_process'
 		'background_fps_limit'
