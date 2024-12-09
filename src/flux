@@ -145,21 +145,29 @@ advice_on_option_error="\n$prefix_info Try 'flux --help' for more information."
 
 # Load functions from modules
 load_modules
+unset -f load_modules
 
 # Options parsing and forget cmdline options
 parse_options "$@" && shift "${#@}"
+unset -f parse_options \
+option_repeat_check \
+cmdline_get
 
 # Options validation
 validate_options
+unset -f validate_options
 
 # Config validation
 validate_config
+unset -f validate_config
 
 # Log validation
 validate_log
+unset -f validate_log
 
 # Calculation of maximum CPU limit
 calculate_max_limit
+unset -f calculate_max_limit
 
 # Create associative arrays to store values from config
 declare -A config_key_name_map \
@@ -179,9 +187,12 @@ config_key_fps_focus_map
 
 # Config parsing
 parse_ini
+unset -f parse_ini \
+get_realpath
 
 # Config keys validation
 validate_config_keys
+unset -f validate_config_keys
 
 # Declare associative arrays to store info about applied limits
 declare -A is_frozen_pid_map \
@@ -211,10 +222,22 @@ if ! x11_session_check; then
 	message --error "Unable to start daemon, something is wrong with X11 session!"
 	exit 1
 else
+	# Will not be used anymore
+	unset -f x11_session_check
 	# Preparation for event reading
 	daemon_prepare
-	# Read events and apply actions depending by event type
+	unset -f daemon_prepare
+	# Read events
 	while read -r event; do
+		# These functions are not needed anymore since reading from 'event_source()' subprocess has been started
+		# And I can not unset them before start of 'event_source()'
+		if [[ -z "$event_source_is_unset" ]]; then
+			unset -f check_windows \
+			on_hot \
+			event_source
+			event_source_is_unset='1'
+		fi
+		# Apply actions depending by event type
 		case "$event" in
 		'error' )
 			# Exit with an error in case 'error' event appears
@@ -323,9 +346,8 @@ else
 			process_name \
 			process_executable \
 			process_owner \
-			process_command
-			# Unset to avoid false positive on next event
-			unset section
+			process_command \
+			section
 		esac
 	done < <(event_source)
 fi
