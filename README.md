@@ -87,7 +87,7 @@ Dependencies for other distributions will be added soon.
 ### Manual installation using release tarball
 You can use this method if there is no package build script for your distro. Make sure you have installed dependencies as described above before continue.
 ```bash
-flux_version='1.14' # set latest version as I update it here every release
+flux_version='1.14.1' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -111,7 +111,7 @@ sudo ./install.sh # install daemon to default prefix '/usr/local', you may want 
 ### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
 ``` bash
-flux_version='1.14' # set latest version as I update it here every release
+flux_version='1.14.1' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -125,7 +125,7 @@ makepkg -sric # build a package and install it
 
 ### Debian and dereatives
 ```bash
-flux_version='1.14' # set latest version as I update it here every release
+flux_version='1.14.1' # set latest version as I update it here every release
 ```
 ```bash
 mkdir flux && cd flux # create and change build directory
@@ -314,7 +314,7 @@ Now you can easily grab templates from focused windows to use them in config by 
 
 ## Possible questions
 ### How does daemon work?
-- Daemon reads X11 events related to window focus, then it gets PID of process using window ID via `xprop` tool and uses PID to collect info about process (process name, its executable path, command which is used to run it and effective UID) to compare it with identifiers in config, if it finds window which matches with identifier(s) specified in specific section in config, it can run command from `exec-focus` key, in case you switch to another window - apply FPS or CPU limit and run command from `exec-unfocus` key (if all of those have been specified in config of course). If window does not match with any section in config, nothing happens. To reduce CPU usage and speed up daemon I implemented a caching algorithm which stores info about windows and processes into associative arrays, that allows to collect info about process and window once and then use cache to get this info immediately, if window with the same ID or if new window with the same PID appears (in this case it runs `xprop` to get PID of window and searches for cached info about this process), daemon uses cache to get info. Do not worry, daemon forgets info about window and process immediately if window disappears (i.e. becomes closed, not minimized), so memory leak should not occur.
+- Daemon reads X11 events related to window focus using `xprop`, then it gets PID of process using window ID using the same tool and uses PID to collect info about process (process name, its executable path, command which is used to run it and effective UID) to compare it with identifiers in config, if it finds window which matches with identifier(s) specified in specific section in config, it can run command from `(lazy-)exec-focus` key, in case you switch to another window - apply FPS or CPU limit and run command from `(lazy-)exec-unfocus` key (if all of those have been specified in config of course). If window does not match with any section in config, nothing happens. To reduce CPU usage and speed up daemon I implemented a caching algorithm which stores info about windows and processes into associative arrays, that allows to collect info about process and window once and then use cache to get this info immediately, if window with the same ID or if new window with the same PID appears (in this case it runs `xprop` to get PID of window and searches for cached info about this process), daemon uses cache to get info. Do not worry, daemon forgets info about window and process immediately if window disappears (i.e. becomes closed, not minimized), so memory leak should not occur.
 
 ### Does that daemon reduce performance?
 - Long story short, impact on neither performance nor battery life should be noticeable. It uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time and just chills out when you doing stuff in single window.
