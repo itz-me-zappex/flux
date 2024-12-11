@@ -301,10 +301,10 @@ else
 			'0' )
 				# Find matching section for process in config
 				if find_matching_section; then
-					# Execute command on focus event if specified in config
-					exec_focus
 					# Unset CPU/FPS limit for focused process if it has been limited on unfocus
 					focus_unset_limit
+					# Execute command on focus event if specified in config
+					exec_focus
 				fi
 			;;
 			* )
@@ -315,6 +315,9 @@ else
 				;;
 				'2' )
 					message --warning "Unable to obtain info about process with PID $process_pid!"
+				;;
+				'3' )
+					message --warning "Daemon does not have sufficient rights to get info about process $process_pid!"
 				esac
 			esac
 			# Execute command on unfocus event if specified in config
