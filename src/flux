@@ -317,7 +317,7 @@ else
 					message --warning "Unable to obtain info about process with PID $process_pid!"
 				;;
 				'3' )
-					message --warning "Daemon does not have sufficient rights to get info about process $process_pid!"
+					message --warning "Daemon does not have sufficient rights to get info about process with PID $process_pid!"
 				esac
 			esac
 			# Execute command on unfocus event if specified in config
