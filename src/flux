@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 # Version of daemon shown from 'parse_options()' if '--version' is specified
-daemon_version='1.14.4'
+daemon_version='1.14.5'
 
 # Required to print messages to console, log and notifications
 message(){
