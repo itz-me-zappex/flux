@@ -10,7 +10,7 @@ install_to_prefix(){
 	local local_module
 	# Prepare prefix before install
 	echo "[info] Creating required directories in '$PREFIX' prefix…"
-	mkdir -vp "$PREFIX/"{bin,share/flux/modules} || return 1
+	mkdir -vp "$PREFIX/"{bin,lib/flux} || return 1
 
 	# Install executable into prefix
 	echo "[info] Installing executable into '$PREFIX' prefix…"
@@ -19,7 +19,7 @@ install_to_prefix(){
 	# Install modules into prefix
 	echo "[info] Installing modules into '$PREFIX' prefix…"
 	for local_module in src/modules/*.sh; do
-		install -vDm 644 "$local_module" "$PREFIX/share/flux/modules/" || return 1
+		install -vDm 644 "$local_module" "$PREFIX/lib/flux/" || return 1
 	done
 }
 
