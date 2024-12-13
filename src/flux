@@ -111,7 +111,7 @@ load_modules(){
 	# Define path to modules depending by directory path
 	case "$local_dirname" in
 	*'/bin' )
-		local_modules_path="${local_dirname/%'/bin'/'/share/flux/modules'}"
+		local_modules_path="${local_dirname/%'/bin'/'/lib/flux'}"
 	;;
 	* )
 		local_modules_path="${local_dirname}/modules"
