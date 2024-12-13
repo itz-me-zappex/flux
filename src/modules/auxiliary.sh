@@ -1,7 +1,7 @@
 # Required to exit with an error if option repeated
 option_repeat_check(){
 	if [[ -n "${!1}" ]]; then
-		message --error "Option '$2' is repeated!$advice_on_option_error"
+		message --error-opt "Option '$2' is repeated!"
 		exit 1
 	fi
 }
