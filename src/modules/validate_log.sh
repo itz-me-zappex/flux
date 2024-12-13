@@ -5,7 +5,7 @@ validate_log(){
 		unset log_is_passed
 		# Exit with an error if '--log' option is specified without path to log file
 		if [[ -z "$log" ]]; then
-			message --error "Option '--log' is specified without path to log file!$advice_on_option_error"
+			message --error-opt "Option '--log' is specified without path to log file!"
 			exit 1
 		fi
 		# Exit with an error if specified log file exists but not accessible for read-write operations
