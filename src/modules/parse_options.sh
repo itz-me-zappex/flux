@@ -224,7 +224,7 @@ There is NO WARRANTY, to the extent permitted by law.
 				set -- "${options_array[@]}" "$@"
 				unset options_array i
 			else
-				message --error "Unknown option '$1'!$advice_on_option_error"
+				message --error-opt "Unknown option '$1'!"
 				exit 1
 			fi
 		esac
