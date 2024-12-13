@@ -9,8 +9,8 @@ fi
 uninstall_from_prefix(){
 	# Remove executable from prefix
 	rm -v "$PREFIX/bin/flux" || return 1
-	# Remove modules from prefix
-	rm -vrf "$PREFIX/share/flux" || return 1
+	# Remove modules directory from prefix
+	rm -vrf "$PREFIX/lib/flux" || return 1
 }
 
 # Ask user before continue
