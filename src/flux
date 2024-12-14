@@ -1,5 +1,3 @@
-#!/usr/bin/bash
-
 # Version of daemon shown from 'parse_options()' if '--version' is specified
 daemon_version='1.14.5'
 
