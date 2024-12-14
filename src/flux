@@ -3,13 +3,6 @@
 # Version of daemon shown from 'parse_options()' if '--version' is specified
 daemon_version='1.14.5'
 
-# Required to convert relative paths to absolute, used in '--config' and '--log' options, also in 'executable', 'mangohud-source-config' and 'mangohud-config' config keys
-get_realpath(){
-	local local_relative_path="$1"
-	# Output will be stored to variable which calls this function from '$(…)'
-	realpath -m "${local_relative_path/'~'/"$HOME"}"
-}
-
 # Required to load functions from separate files, i.e. modules
 load_modules(){
 	local local_modules_path \
