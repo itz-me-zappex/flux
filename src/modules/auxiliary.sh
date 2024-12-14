@@ -109,3 +109,10 @@ exec_on_event(){
 	FLUX_UNFOCUSED_PROCESS_OWNER \
 	FLUX_UNFOCUSED_PROCESS_COMMAND
 }
+
+# Required to convert relative paths to absolute, used in '--config' and '--log' options, also in 'executable', 'mangohud-source-config' and 'mangohud-config' config keys
+get_realpath(){
+	local local_relative_path="$1"
+	# Output will be stored to variable which calls this function from '$(…)'
+	realpath -m "${local_relative_path/'~'/"$HOME"}"
+}
