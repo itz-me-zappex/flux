@@ -10,10 +10,6 @@ prefix_warning='[!]'
 # Set default timestamp format for logger
 timestamp_format='[%Y-%m-%dT%H:%M:%S%z]'
 
-# Load functions from modules
-load_modules
-unset -f load_modules
-
 # Options parsing and forget cmdline options
 parse_options "$@" && shift "${#@}"
 unset -f parse_options \
