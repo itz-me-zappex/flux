@@ -253,8 +253,8 @@ fps-unfocus = 5
 fps-focus = 60
 lazy-exec-focus = killall picom
 lazy-exec-unfocus = picom
-exec-focus = wpctl set-mute -p $FLUX_FOCUSED_PROCESS_PID 0
-exec-unfocus = wpctl set-mute -p $FLUX_UNFOCUSED_PROCESS_PID 1
+exec-focus = wpctl set-mute -p $FLUX_PROCESS_PID 0
+exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1
 
 ; Example using CPU limit as game does not consume GPU resources when minimized but still uses CPU and requires network connection to download levels and music
 [Geometry Dash]
@@ -273,6 +273,8 @@ lazy-exec-unfocus = picom
 [The Witcher 3: Wild Hunt]
 name = witcher3.exe
 cpu-limit = 0%
+lazy-exec-focus = killall picom
+lazy-exec-unfocus = picom
 
 ; Example using FPS limit as that is online game and I use MangoHud
 [Forza Horizon 4]
@@ -281,13 +283,17 @@ mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
 mangohud-source-config = ~/.config/MangoHud/MangoHud.conf
 fps-unfocus = 5
 fps-focus = 60
-exec-focus = wpctl set-mute -p $FLUX_FOCUSED_PROCESS_PID 0
-exec-unfocus = wpctl set-mute -p $FLUX_UNFOCUSED_PROCESS_PID 1
+lazy-exec-focus = killall picom
+lazy-exec-unfocus = picom
+exec-focus = wpctl set-mute -p $FLUX_PROCESS_PID 0
+exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1
 
 ; Example using CPU limit as game does not consume GPU resources when minimized but still uses CPU and requires network connection to download levels and music
 [Geometry Dash]
 name = GeometryDash.exe
 cpu-limit = 2%
+lazy-exec-focus = killall picom
+lazy-exec-unfocus = picom
 ```
 
 ### Environment variables passed to commands
