@@ -24,7 +24,8 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
     - [Long examples](#long-examples)
     - [Short examples](#short-examples)
   - [Environment variables passed to commands](#environment-variables-passed-to-commands)
-    - [List of variables and description](#list-of-variables-and-description)
+    - [List of variables passed to `exec-focus` and `lazy-exec-focus` config keys and description](#list-of-variables-passed-to-exec-focus-and-lazy-exec-focus-config-keys-and-description)
+    - [List of variables passed to `exec-unfocus` and `lazy-exec-unfocus` config keys and description](#list-of-variables-passed-to-exec-unfocus-and-lazy-exec-unfocus-config-keys-and-description)
 - [Tips and tricks](#tips-and-tricks)
   - [Keybinding to obtain template from focused window for config](#keybinding-to-obtain-template-from-focused-window-for-config)
   - [Apply changes in config file](#apply-changes-in-config-file)
@@ -292,15 +293,37 @@ cpu-limit = 2%
 ### Environment variables passed to commands
 Note: You may want to use these variables in commands and scripts which running from `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys to extend daemon functionality.
 
-#### List of variables and description
+#### List of variables passed to `exec-focus` and `lazy-exec-focus` config keys and description
 | Variable | Description |
 |----------|-------------|
-| `FLUX_(UN)FOCUSED_WINDOW_ID` | Hexadecimal ID of (un)focused window |
-| `FLUX_(UN)FOCUSED_PROCESS_PID` | Process PID of (un)focused window |
-| `FLUX_(UN)FOCUSED_PROCESS_NAME` | Process name of (un)focused window |
-| `FLUX_(UN)FOCUSED_PROCESS_EXECUTABLE` | Path to process executable of (un)focused window |
-| `FLUX_(UN)FOCUSED_PROCESS_OWNER` | Effective process UID of (un)focused window |
-| `FLUX_(UN)FOCUSED_PROCESS_COMMAND` | Command used to run process of (un)focused window |
+| `FLUX_WINDOW_ID` | Hexadecimal ID of focused window |
+| `FLUX_PROCESS_PID` | Process PID of focused window |
+| `FLUX_PROCESS_NAME` | Process name of focused window |
+| `FLUX_PROCESS_EXECUTABLE` | Path to process executable of focused window |
+| `FLUX_PROCESS_OWNER` | Effective process UID of focused window |
+| `FLUX_PROCESS_COMMAND` | Command used to run process of focused window |
+| `FLUX_PREV_WINDOW_ID` | Hexadecimal ID of unfocused window |
+| `FLUX_PREV_PROCESS_PID` | Process PID of unfocused window |
+| `FLUX_PREV_PROCESS_NAME` | Process name of unfocused window |
+| `FLUX_PREV_PROCESS_EXECUTABLE` | Path to process executable of unfocused window |
+| `FLUX_PREV_PROCESS_OWNER` | Effective process UID of unfocused window |
+| `FLUX_PREV_PROCESS_COMMAND` | Command used to run process of unfocused window |
+
+#### List of variables passed to `exec-unfocus` and `lazy-exec-unfocus` config keys and description
+| Variable | Description |
+|----------|-------------|
+| `FLUX_WINDOW_ID` | Hexadecimal ID of unfocused window |
+| `FLUX_PROCESS_PID` | Process PID of unfocused window |
+| `FLUX_PROCESS_NAME` | Process name of unfocused window |
+| `FLUX_PROCESS_EXECUTABLE` | Path to process executable of unfocused window |
+| `FLUX_PROCESS_OWNER` | Effective process UID of unfocused window |
+| `FLUX_PROCESS_COMMAND` | Command used to run process of unfocused window |
+| `FLUX_NEW_WINDOW_ID` | Hexadecimal ID of focused window |
+| `FLUX_NEW_PROCESS_PID` | Process PID of focused window |
+| `FLUX_NEW_PROCESS_NAME` | Process name of focused window |
+| `FLUX_NEW_PROCESS_EXECUTABLE` | Path to process executable of focused window |
+| `FLUX_NEW_PROCESS_OWNER` | Effective process UID of focused window |
+| `FLUX_NEW_PROCESS_COMMAND` | Command used to run process of focused window |
 
 ## Tips and tricks
 ### Keybinding to obtain template from focused window for config
