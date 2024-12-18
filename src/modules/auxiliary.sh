@@ -81,7 +81,11 @@ exec_on_event(){
 	passed_event='' \
 	nohup setsid bash -c "$passed_event_command" > /dev/null 2>&1 &
 	# Notify user about execution
-	message --info "Command '$(bash -c "echo \"$passed_event_command\"")' from section '$passed_section' has been executed on $passed_event event."
+	if [[ "$passed_command_type" == 'default' ]]; then
+		message --info "Command '$(bash -c "echo \"$passed_event_command\"")' from section '$passed_section' has been executed $passed_event."
+	elif [[ "$passed_command_type" == 'lazy' ]]; then
+		message --info "Lazy command '$(bash -c "echo \"$passed_event_command\"")' from section '$passed_section' has been executed $passed_event."
+	fi
 }
 
 # Required to convert relative paths to absolute, used in '--config' and '--log' options, also in 'executable', 'mangohud-source-config' and 'mangohud-config' config keys
