@@ -34,6 +34,23 @@ actions_on_exit(){
 	if [[ -f "$lock_file" ]] && ! rm "$lock_file" > /dev/null 2>&1; then
 		message --warning "Unable to remove lock file '$lock_file' which prevents multiple instances from running!"
 	fi
+	# Execute command from 'lazy-exec-unfocus' if matching section for focused window is found and this config key contains command
+	if [[ -n "$previous_section" && -n "${config_key_lazy_exec_unfocus_map["$previous_section"]}" ]]; then
+		# Pass environment variables to interact with them using commands/scripts in 'lazy-exec-unfocus' config key
+		# These is no need to pass '$FLUX_NEW_*' because there is no focus event and new info about window respectively
+		# And yes, info about focused window becomes previous immediately after processing it, check event handling in 'main.sh'
+		FLUX_WINDOW_ID="$previous_window_id" \
+		FLUX_PROCESS_PID="$previous_process_pid" \
+		FLUX_PROCESS_NAME="$previous_process_name" \
+		FLUX_PROCESS_EXECUTABLE="$previous_process_executable" \
+		FLUX_PROCESS_OWNER="$previous_process_owner" \
+		FLUX_PROCESS_COMMAND="$previous_process_command" \
+		passed_command_type='lazy' \
+		passed_section="$previous_section" \
+		passed_event_command="${config_key_lazy_exec_unfocus_map["$previous_section"]}" \
+		passed_event='due to daemon termination' \
+		exec_on_event
+	fi
 	# Wait a bit to avoid delayed messages from functions in background after termination
 	sleep 0.1
 }
