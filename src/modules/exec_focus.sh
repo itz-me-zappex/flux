@@ -15,16 +15,18 @@ exec_focus(){
 	FLUX_PREV_PROCESS_COMMAND="$previous_process_command"
 	# Execute command from 'exec-focus' key if it has been specified
 	if [[ -n "${config_key_exec_focus_map["$section"]}" ]]; then
+		passed_command_type='default' \
 		passed_section="$section" \
 		passed_event_command="${config_key_exec_focus_map["$section"]}" \
-		passed_event='focus' \
+		passed_event='on focus event' \
 		exec_on_event
 	fi
 	# Execute command from 'lazy-exec-focus' key if it has been specified and if '--hot' has been unset by daemon after processing opened windows
 	if [[ -n "${config_key_lazy_exec_focus_map["$section"]}" && -z "$hot" ]]; then
+		passed_command_type='lazy' \
 		passed_section="$section" \
 		passed_event_command="${config_key_lazy_exec_focus_map["$section"]}" \
-		passed_event='focus' \
+		passed_event='on focus event' \
 		exec_on_event
 	fi
 	# Unset exported variables
