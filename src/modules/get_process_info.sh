@@ -5,6 +5,7 @@ cache_get_process_info(){
 	process_executable="${cache_process_executable_map["$passed_window_id"]}"
 	process_owner="${cache_process_owner_map["$passed_window_id"]}"
 	process_command="${cache_process_command_map["$passed_window_id"]}"
+	process_owner_username="${cache_process_owner_username_map["$passed_window_id"]}"
 }
 
 # Required to get process info using window ID
@@ -13,7 +14,8 @@ get_process_info(){
 	local_column_count='0' \
 	local_status_column \
 	local_matching_window_id \
-	local_temp_cached_window_id
+	local_temp_cached_window_id \
+	local_temp_passwd_line
 	# Use cache with window info if exists and is not bad
 	if [[ "${cache_event_type_map["$window_id"]}" == 'good' ]]; then
 		# Get process info from cache
@@ -87,6 +89,17 @@ get_process_info(){
 				fi
 				message --verbose "Obtained info about window with ID $window_id and process '$process_name' with PID $process_pid has been cached."
 			fi
+			# Obtain username from '/etc/passwd' file using UID of process
+			if check_ro '/etc/passwd'; then
+				while read -r local_temp_passwd_line; do
+					# Do not do anything if it does not match with pattern and UID of process
+					if [[ "$local_temp_passwd_line" =~ .*\:.*\:"$process_owner"\:.* ]]; then
+						process_owner_username="${local_temp_passwd_line/\:*/}"
+						echo "$process_owner_username"
+						break
+					fi
+				done < '/etc/passwd'
+			fi
 			# Associate info about window and process with cache-related associative arrays to use it next time
 			cache_event_type_map["$window_id"]='good'
 			cache_process_pid_map["$window_id"]="$process_pid"
@@ -94,6 +107,7 @@ get_process_info(){
 			cache_process_executable_map["$window_id"]="$process_executable"
 			cache_process_owner_map["$window_id"]="$process_owner"
 			cache_process_command_map["$window_id"]="$process_command"
+			cache_process_owner_username_map["$window_id"]="$process_owner_username"
 		else
 			return 1
 		fi
