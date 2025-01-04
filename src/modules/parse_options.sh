@@ -1,18 +1,15 @@
 # Required for options parsing
 parse_options(){
-	# Option parsing
+	# Continue until count of passed command line options is greater than zero
 	while (( $# > 0 )); do
 		case "$1" in
 		--config | -c | --config=* )
-			# Assign value from option to variable using 'cmdline_get' function
 			passed_check='config_is_passed' \
 			passed_set='config' \
 			passed_option='--config' \
 			passed_short_option='-c' \
 			cmdline_get "$@"
-			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
 			shift "$shift"
-			# Get absolute path to config in case it is specified as relative
 			if [[ -n "$config" ]]; then
 				config="$(get_realpath "$config")"
 			fi
@@ -23,7 +20,7 @@ parse_options(){
 				# Fail if something wrong with X server
 				fail='1'
 			fi
-			# Select command depending by type of option
+			# Define way to obtain info about window depending by type of option
 			case "$1" in
 			--focus | -f )
 				# Check for failure related to X server check
@@ -32,7 +29,7 @@ parse_options(){
 					message --error "Unable to get info about focused window, something is wrong with X11 session!"
 					exit 1
 				else
-					# Get output of xprop containing window ID
+					# Get output of 'xprop' tool containing window ID
 					window_id="$(xprop -root _NET_ACTIVE_WINDOW 2>/dev/null)"
 					# Extract ID of focused window
 					window_id="${window_id/*\# /}"
@@ -44,12 +41,12 @@ parse_options(){
 					message --error "Unable to call window picker, something is wrong with X11 session!"
 					exit 1
 				else
-					# Get xwininfo output containing window ID
+					# Get output of 'xwininfo' tool containing window ID
 					if ! xwininfo_output="$(xwininfo 2>/dev/null)"; then
 						message --error "Unable to grab cursor to pick a window!"
 						exit 1
 					else
-						# Extract ID of focused window
+						# Extract ID of focused window from output
 						while read -r temp_xwininfo_output_line; do
 							if [[ "$temp_xwininfo_output_line" == 'xwininfo: Window id: '* ]]; then
 								window_id="${temp_xwininfo_output_line/xwininfo: Window id: /}"
@@ -61,7 +58,7 @@ parse_options(){
 					fi
 				fi
 			esac
-			# Get process info and print it in a way to easy use it in config
+			# Get process info and print it in compatible with config way
 			if get_process_info; then
 				echo "name = '"$process_name"'
 executable = '"$process_executable"'
@@ -114,15 +111,12 @@ Examples:
 			shift 1
 		;;
 		--log | -l | --log=* )
-			# Assign value from option to variable using 'cmdline_get' function
 			passed_check='log_is_passed' \
 			passed_set='log' \
 			passed_option='--log' \
 			passed_short_option='-l' \
 			cmdline_get "$@"
-			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
 			shift "$shift"
-			# Get absolute path to log file in case it is specified as relative
 			if [[ -n "$log" ]]; then
 				log="$(get_realpath "$log")"
 			fi
@@ -143,13 +137,11 @@ Examples:
 			shift 1
 		;;
 		--timestamp-format | -T | --timestamp-format=* )
-			# Assign value from option to variable using 'cmdline_get' function
 			passed_check='timestamp_is_passed' \
 			passed_set='new_timestamp_format' \
 			passed_option='--timestamp-format' \
 			passed_short_option='-T' \
 			cmdline_get "$@"
-			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
 			shift "$shift"
 		;;
 		--timestamps | -t )
@@ -176,39 +168,31 @@ There is NO WARRANTY, to the extent permitted by law.
 			exit 0
 		;;
 		--prefix-error | --prefix-error=* )
-			# Assign value from option to variable using 'cmdline_get' function
 			passed_check='prefix_error_is_passed' \
 			passed_set='new_prefix_error' \
 			passed_option='--prefix-error' \
 			cmdline_get "$@"
-			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
 			shift "$shift"
 		;;
 		--prefix-info | --prefix-info=* )
-			# Assign value from option to variable using 'cmdline_get' function
 			passed_check='prefix_info_is_passed' \
 			passed_set='new_prefix_info' \
 			passed_option='--prefix-info' \
 			cmdline_get "$@"
-			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
 			shift "$shift"
 		;;
 		--prefix-verbose | --prefix-verbose=* )
-			# Assign value from option to variable using 'cmdline_get' function
 			passed_check='prefix_verbose_is_passed' \
 			passed_set='new_prefix_verbose' \
 			passed_option='--prefix-verbose' \
 			cmdline_get "$@"
-			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
 			shift "$shift"
 		;;
 		--prefix-warning | --prefix-warning=* )
-			# Assign value from option to variable using 'cmdline_get' function
 			passed_check='prefix_warning_is_passed' \
 			passed_set='new_prefix_warning' \
 			passed_option='--prefix-warning' \
 			cmdline_get "$@"
-			# Forget first N command line options after storing value to variable, function returns count of times to shift depending by option type
 			shift "$shift"
 		;;
 		* )
