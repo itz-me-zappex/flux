@@ -49,8 +49,8 @@ config_key_fps_unfocus_map \
 config_key_fps_focus_map
 
 # Config parsing
-parse_ini
-unset -f parse_ini \
+parse_config
+unset -f parse_config \
 get_realpath
 
 # Config keys validation
