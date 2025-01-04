@@ -1,5 +1,5 @@
 # Required to parse INI config file
-parse_ini(){
+parse_config(){
 	local local_temp_config_line \
 	local_config_value \
 	local_section \
