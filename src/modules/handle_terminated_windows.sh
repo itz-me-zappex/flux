@@ -85,6 +85,7 @@ cache_collect_garbage(){
 			cache_process_executable_map["$local_temp_terminated_window_id"]=''
 			cache_process_owner_map["$local_temp_terminated_window_id"]=''
 			cache_process_command_map["$local_temp_terminated_window_id"]=''
+			cache_process_owner_username_map["$local_temp_terminated_window_id"]=''
 		fi
 	done
 }
