@@ -123,7 +123,7 @@ else
 			set_requested_limits
 		;;
 		'restart' )
-			# Prepare daemon to reapply limits on 'event_source()' restart event which appears if list of windows IDs becomes blank
+			# Prepare daemon to reapply limits on 'event_source()' restart event which appears if list of window IDs becomes blank
 			hot='1'
 			unset hot_is_unset
 			# Unset info about processes to avoid using it by accident
