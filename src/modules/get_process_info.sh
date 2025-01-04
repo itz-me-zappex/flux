@@ -95,7 +95,6 @@ get_process_info(){
 					# Do not do anything if it does not match with pattern and UID of process
 					if [[ "$local_temp_passwd_line" =~ .*\:.*\:"$process_owner"\:.* ]]; then
 						process_owner_username="${local_temp_passwd_line/\:*/}"
-						echo "$process_owner_username"
 						break
 					fi
 				done < '/etc/passwd'
