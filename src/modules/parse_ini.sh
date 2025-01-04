@@ -58,13 +58,7 @@ parse_ini(){
 						config_key_executable_map["$local_section"]="$local_config_value"
 					;;
 					owner* )
-						# Exit with an error if UID is not numeric, regexp means any number
-						if [[ "$local_config_value" =~ ^[0-9]+$ ]]; then
-							config_key_owner_map["$local_section"]="$local_config_value"
-						else
-							message --error "Value '$local_config_value' in key 'owner' in section '$local_section' is not UID in '$config' config file!"
-							exit 1
-						fi
+						config_key_owner_map["$local_section"]="$local_config_value"
 					;;
 					cpu-limit* )
 						# Exit with an error if CPU limit is specified incorrectly, 1st regexp - any number with optional '%' symbol, 2nd - '-1' or '-1%'
