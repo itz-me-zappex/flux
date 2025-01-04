@@ -1,4 +1,4 @@
-# Required to exit with an error if option repeated
+# Required to check option repeating and exit with an error if that happens
 option_repeat_check(){
 	if [[ -n "${!1}" ]]; then
 		message --error-opt "Option '$2' is repeated!"
@@ -29,21 +29,21 @@ cmdline_get(){
 	esac
 }
 
-# Required to exit with an error if that is not a X11 session
+# Required to validate X11 session
 x11_session_check(){
-	# Fail if $DISPLAY does not match with `:[number]` and `:[number].[number]`
+	# Return an error if $DISPLAY does not match with `:[number]` and `:[number].[number]`
 	# Or if $XDG_SESSION_TYPE is not equal to 'x11' (e.g. 'tty', 'wayland' etc.)
 	if [[ ! "$DISPLAY" =~ ^\:[0-9]+(\.[0-9]+)?$ || "$XDG_SESSION_TYPE" != 'x11' ]]; then
 		return 1
-	elif ! xprop -root > /dev/null 2>&1; then # Fail if 'xprop' unable to get info about any opened window
+	elif ! xprop -root > /dev/null 2>&1; then # Return an error if 'xprop' unable to obtain info about session
 		return 1
 	fi
 }
 
-# Requred to check for process existence
+# Requred to check process existence
 check_pid_existence(){
 	local local_pid="$1"
-	# Check for process existence by checking PID directory in '/proc'
+	# Check PID directory in '/proc' for existence
 	if [[ -d "/proc/$local_pid" ]]; then
 		return 0
 	else
@@ -54,7 +54,6 @@ check_pid_existence(){
 # Required to check read-write access on file
 check_rw(){
 	local local_file="$1"
-	# Check for read-write access
 	if [[ -r "$local_file" && -w "$local_file" ]]; then
 		return 0
 	else
@@ -65,7 +64,6 @@ check_rw(){
 # Required to check read-only access on file
 check_ro(){
 	local local_file="$1"
-	# Check for read-only access
 	if [[ -r "$local_file" ]]; then
 		return 0
 	else
@@ -73,7 +71,7 @@ check_ro(){
 	fi
 }
 
-# Required to run commands on focus and unfocus events
+# Used in 'exec_focus()' and 'exec_unfocus()' as wrapper to run commands
 exec_on_event(){
 	# Run command separately from daemon in background
 	passed_section='' \
@@ -88,7 +86,7 @@ exec_on_event(){
 	fi
 }
 
-# Required to convert relative paths to absolute, used in '--config' and '--log' options, also in 'executable', 'mangohud-source-config' and 'mangohud-config' config keys
+# Required to convert relative paths to absolute
 get_realpath(){
 	local local_relative_path="$1"
 	# Output will be stored to variable which calls this function from '$(…)'

@@ -1,6 +1,6 @@
-# Set specified FPS on unfocus, runs in background via '&'
+# Required to set specified FPS on unfocus event, runs in background via '&'
 background_fps_limit(){
-	# Wait if delay is specified
+	# Wait before set limit and notify user if delay is specified
 	if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
 		message --verbose "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' will be FPS limited after ${config_key_delay_map["$passed_section"]} second(s) on unfocus event."
 		sleep "${config_key_delay_map["$passed_section"]}"

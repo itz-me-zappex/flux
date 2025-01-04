@@ -2,7 +2,7 @@
 daemon_prepare(){
 	local local_temp_prefix_type \
 	local_variable_name
-	# Exit with an error if daemon already running
+	# Exit with an error if lock file and PID specified there exists
 	lock_file='/tmp/flux-lock'
 	if [[ -f "$lock_file" ]] && check_pid_existence "$(<"$lock_file")"; then
 		message --error "Multiple instances are not allowed, make sure that daemon is not running before start, if you are really sure, then remove '$lock_file' file."
@@ -14,14 +14,14 @@ daemon_prepare(){
 			exit 1
 		fi
 	fi
-	# Use custom timestamp format if specified
+	# Set custom timestamp format if specified by user
 	if [[ -n "$new_timestamp_format" ]]; then
 		timestamp_format="$new_timestamp_format"
 		unset new_timestamp_format
 	fi
 	# Prepare before logging if log file is specified
 	if [[ -n "$log" ]]; then
-		# Allow logging before start event reading
+		# Allow logging before start event reading (it checks in 'message()')
 		allow_logging='1'
 		# Remove content from log file if '--log-overwrite' option is specified or create a file if it does not exist
 		if [[ -n "$log_overwrite" || ! -f "$log" ]]; then
@@ -40,16 +40,17 @@ daemon_prepare(){
 			unset "new_prefix_$local_temp_prefix_type"
 		fi
 	done
-	# Allow notifications if '--notifications' option is specified
+	# Allow notifications if '--notifications' option is specified (it checks in 'message()')
 	if [[ -n "$notifications" ]]; then
 		allow_notifications='1'
 		unset notifications
 	fi
-	# Print message about daemon start (to make it easier to understand when it has been started in log file, also to print notification if responding option is specified)
+	# Print message about daemon start to make it easier to understand when it has been started in log file and to print notification if responding option is specified
 	message --info "Flux has been started."
-	# Remove CPU and FPS limits of processes on exit
+	# Unset CPU and FPS limits on SIGTERM or SIGINT signals and print message about daemon termination
 	trap 'actions_on_exit ; message --info "Flux has been terminated successfully." ; exit 0' SIGTERM SIGINT
-	# Ignore user signals as they used in 'background_cpulimit' function to avoid next output ('X' - path to 'flux', 'Y' - line, 'Z' - PID of 'background_cpulimit'):
+	# Ignore USR signals to avoid output below as those are used in 'background_cpulimit()'
+	# ('X' - path to 'flux', 'Y' - line, 'Z' - PID of 'background_cpulimit')
 	# X: line Y: Z User defined signal 2   background_cpulimit
 	trap '' SIGUSR1 SIGUSR2
 }
