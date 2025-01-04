@@ -27,7 +27,7 @@ find_matching_section(){
 					local_executable_match='1'
 				fi
 				# Compare UID of process with specified in section
-				if [[ -z "${config_key_owner_map["$local_temp_section"]}" || "${config_key_owner_map["$local_temp_section"]}" == "$process_owner" ]]; then
+				if [[ -z "${config_key_owner_map["$local_temp_section"]}" || "${config_key_owner_map["$local_temp_section"]}" == "$process_owner" || "${config_key_owner_map["$local_temp_section"]}" == "$process_owner_username" ]]; then
 					local_owner_match='1'
 				fi
 				# Compare process command with specified in section
