@@ -77,7 +77,8 @@ cache_process_executable_map \
 cache_process_owner_map \
 cache_process_command_map \
 cache_section_map \
-cache_mismatch_map
+cache_mismatch_map \
+cache_process_owner_username_map
 
 # Exit with an error if that is not a X11 session
 if ! x11_session_check; then
