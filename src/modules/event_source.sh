@@ -2,8 +2,7 @@
 check_windows(){
 	local local_temp_windows_list
 	# Check for existence of opened windows, if list appears blank, then wait for window(s) appearance
-	# Variable '$cycles_count' cannot be greater than 2 because it resets to 1 after running this function
-	if [[ "$cycles_count" == '2' || "$(xprop -root _NET_CLIENT_LIST_STACKING)" != '_NET_CLIENT_LIST_STACKING(WINDOW): window id # 0x'* ]]; then
+	if [[ -z "$first_cycle" || "$(xprop -root _NET_CLIENT_LIST_STACKING)" != '_NET_CLIENT_LIST_STACKING(WINDOW): window id # 0x'* ]]; then
 		message --warning "Opened windows were not found, waiting for their appearance…"
 		# Wait for windows appearance
 		while read -r local_temp_windows_list; do
@@ -15,30 +14,30 @@ check_windows(){
 	fi
 }
 
-# Required to get list of opened windows and print windows IDs line by line if '--hot' option is specified to make daemon apply limits to them and run commands from 'exec-focus' and 'exec-unfocus' config keys
+# Required to get list of opened windows and print window IDs line by line if '--hot' option is specified
+# To make daemon apply limits to them and run commands from 'exec-focus' and 'exec-unfocus' config keys
 on_hot(){
 	local local_stacking_windows \
 	local_focused_window \
 	local_temp_stacking_window
 	# Do not do anything if '--hot' option is not specified
 	if [[ -n "$hot" ]]; then
-		# Extract IDs of opened windows
+		# Extract opened window IDs
 		local_stacking_windows="$(xprop -root _NET_CLIENT_LIST_STACKING 2>/dev/null)"
 		local_stacking_windows="${local_stacking_windows/* \# /}" # Remove everything before including '#'
 		local_stacking_windows="${local_stacking_windows//\,/}" # Remove commas
-		# Extract ID of focused window
+		# Extract focused window ID
 		local_focused_window="$(xprop -root _NET_ACTIVE_WINDOW 2>/dev/null)"
 		local_focused_window="${local_focused_window/* \# /}" # Remove everything before including '#'
-		# Print IDs of windows, but skip currently focused window as it should appear as first event when 'xprop' starts
+		# Print window IDs, but skip currently focused window as it should appear as first event when 'xprop_reader()' starts
 		for local_temp_stacking_window in $local_stacking_windows; do
 			if [[ "$local_temp_stacking_window" != "$local_focused_window" ]]; then
 				echo "$local_temp_stacking_window"
 			fi
 		done
 	fi
-	# Print event to unset '--hot' option as it becomes useless and set '$hot_is_unset' mark to make command from 'lazy-exec-unfocus' work
+	# Print event to unset '--hot' in main process as it becomes useless and set '$hot_is_unset' mark to make command from 'lazy-exec-unfocus' work
 	echo 'unset_hot'
-	# Also useless since now
 	unset hot
 }
 
@@ -65,7 +64,7 @@ xprop_reader(){
 			if [[ "$local_event" == '_NET_CLIENT_LIST_STACKING(WINDOW): window id #' ]]; then
 				# Print event to prepare daemon for restart
 				echo 'restart'
-				# Set '--hot' back to apply limits again as those have been unset
+				# Set '--hot' to apply limits again as those have been unset because of X11 events nature
 				hot='1'
 				# Mark required to avoid loop breakage misunderstood as 'xprop' crash
 				local_restart='1'
@@ -94,13 +93,13 @@ xprop_reader(){
 						fi
 					;;
 					'_NET_CLIENT_LIST_STACKING'* )
-						# Remove everything before list of windows IDs
+						# Remove everything before window IDs
 						local_windows_list="${local_temp_xprop_output_line/*\# /}"
 						# Remove commas which are used as separators
 						local_windows_list="${local_windows_list//\,/}"
 						# Do not do anything if event repeats
 						if [[ "$local_previous_net_client_list_stacking" != "$local_temp_xprop_output_line" ]]; then
-							# Find terminated windows and store them to array
+							# Find terminated window IDs and store to array
 							for local_temp_previous_window in $local_previous_windows_list; do
 								# Skip existing window ID
 								if [[ " $local_windows_list " != *" $local_temp_previous_window "* ]]; then
@@ -116,17 +115,17 @@ xprop_reader(){
 							# Remember event to compare it with next one and skip it if repeats
 							local_previous_net_client_list_stacking="$local_temp_xprop_output_line"
 						fi
-						# Send event with list of windows IDs to check limit requests
+						# Send event with list of window IDs to check limit requests
 						echo "check_requests: $local_windows_list"
 						# Remember list of windows to use it for detection of terminated windows on next cycle
 						local_previous_windows_list="$local_windows_list"
 					esac
 				done <<< "$local_xprop_output"
 				unset local_temp_xprop_output_line
-				# Remember to skip action if output repeats on next cycle
+				# Remember output of 'xprop' to skip action if output repeats on next cycle
 				local_previous_xprop_output="$local_xprop_output"
 			fi
-			# Remember to skip event if repeats on next cycle
+			# Remember 'xprop' event from spy mode to skip event if it repeats on next cycle
 			local_previous_event="$local_event"
 		fi
 	done < <(xprop -root -spy _NET_ACTIVE_WINDOW _NET_CLIENT_LIST_STACKING 2>/dev/null)
@@ -138,7 +137,7 @@ xprop_reader(){
 
 # Required to send events to loop in 'flux' executable which reads events from this function
 event_source(){
-	local cycles_count='1'
+	local first_cycle='1'
 	# Unset functions which are not used in 'event_source()' subprocess
 	unset -f actions_on_exit \
 	background_cpu_limit \
@@ -178,13 +177,13 @@ event_source(){
 	config_key_mangohud_config_map \
 	config_key_fps_unfocus_map \
 	config_key_fps_focus_map
-	# Infinite loop required to make daemon able to restart event reading if list of windows becomes blank, happens on Cinnamon when DE restarts
+	# Infinite loop required to make daemon able to restart event reading if list of windows becomes blank
+	# For example happens on Cinnamon when DE restarts and in pure Openbox environment
 	while :; do
 		# Check for window(s) existence
 		check_windows
-		# Required for 'check_windows()' which checks for '$cycles_count' being equal to 2 to avoid running 'xprop' for check windows existence after restart of loop
-		cycles_count='2'
-		# Print IDs of opened windows if '--hot' is specified
+		unset first_cycle
+		# Print opened window IDs if '--hot' is specified
 		on_hot
 		# Handle events from 'xprop' tool
 		if ! xprop_reader; then
