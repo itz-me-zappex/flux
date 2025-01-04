@@ -115,7 +115,7 @@ parse_ini(){
 								local_key_name='mangohud-config'
 							esac
 							# Exit with an error if specified MangoHud config file does not exist
-							message --error "MangoHud config file '$local_config_value' specified in key '$key_name' in section '$local_section' in '$config' config file does not exist!"
+							message --error "MangoHud config file '$local_config_value' specified in key '$local_key_name' in section '$local_section' in '$config' config file does not exist!"
 							exit 1
 						fi
 					;;
@@ -135,8 +135,8 @@ parse_ini(){
 						fi
 					;;
 					fps-focus* )
-						# Exit with an error if value is not integer, that is what regexp means
-						if [[ "$local_config_value" =~ ^[0-9]+$ ]]; then
+						# Exit with an error if value is neither integer nor list of comma-separated integers
+						if [[ "$local_config_value" =~ ^[0-9]+$ || "$local_config_value" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
 							config_key_fps_focus_map["$local_section"]="$local_config_value"
 						else
 							message --error "Value '$local_config_value' specified in key 'fps-focus' in section '$local_section' in '$config' config file is not an integer!"
