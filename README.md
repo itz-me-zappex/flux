@@ -30,6 +30,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
   - [Keybinding to obtain template from focused window for config](#keybinding-to-obtain-template-from-focused-window-for-config)
   - [Apply changes in config file](#apply-changes-in-config-file)
   - [Types of limits and which you should use](#types-of-limits-and-which-you-should-use)
+- [Known issues](#known-issues)
 - [Possible questions](#possible-questions)
   - [How does daemon work?](#how-does-daemon-work)
   - [Does that daemon reduce performance?](#does-that-daemon-reduce-performance)
@@ -39,7 +40,6 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
   - [Is not running commands on focus and unfocus makes system vulnerable?](#is-not-running-commands-on-focus-and-unfocus-makes-system-vulnerable)
   - [Can I get banned in a game because of this daemon?](#can-i-get-banned-in-a-game-because-of-this-daemon)
   - [Why was that daemon developed?](#why-was-that-daemon-developed)
-  - [Bugs?](#bugs)
   - [Why is code so complicated?](#why-is-code-so-complicated)
   - [Gamescope which allows limit FPS on unfocus exists, Wayland becomes more popular. Are you not late by any chance?](#gamescope-which-allows-limit-fps-on-unfocus-exists-wayland-becomes-more-popular-are-you-not-late-by-any-chance)
   - [What about Wayland support?](#what-about-wayland-support)
@@ -193,7 +193,7 @@ A simple INI is used for configuration.
 |-------------------|-------------|
 | `name` | Name of process, required if neither `executable` nor `command` is specified. Daemon uses soft match for processes with names which have length 15 symbols, i.e. stripped. |
 | `executable` | Path to binary of process, required if neither `name` nor `command` is specified. |
-| `owner` | Effective UID of process, optional identifier. |
+| `owner` | Effective UID of process or username (login), optional identifier. |
 | `cpu-limit` | CPU limit between `0%` and `100%`, defaults to `-1%` what means no CPU limit, `%` symbol is optional. |
 | `delay` | Delay in seconds before applying CPU/FPS limit. Optional, defaults to `0`, supports values with floating point. |
 | `exec-focus` | Command to execute on focus event, command runs via bash and will not be killed on daemon exit, output is hidden to avoid mess in output of daemon. |
@@ -204,7 +204,7 @@ A simple INI is used for configuration.
 | `mangohud-source-config` | Path to MangoHud config which should be used as a base before apply FPS limit in `mangohud-config`, if not specified, then target behaves as source. Useful if you not looking for duplicate MangoHud config for multiple games. |
 | `mangohud-config` | Path to MangoHud config which should be changed (target), required if you want change FPS limits and requires `fps-unfocus`. Make sure you created specified config, at least just keep it blank, otherwise MangoHud will not be able to load new config on fly and daemon will throw warnings related to config absence. Do not use the same config for multiple sections! |
 | `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`, cannot be equal to `0` as that means no limit. |
-| `fps-focus` | FPS to set on focus, requires `fps-unfocus`, defaults to `0` (i.e. no limit). |
+| `fps-focus` | FPS to set on focus or list of comma-separated integers (e.g. `30,60,120`, used in MangoHud as FPS limits you can switch between using built-in keybinding), requires `fps-unfocus`, defaults to `0` (i.e. no limit). |
 
 ### Config path
 - Daemon searches for following configuration files by priority:
@@ -236,7 +236,7 @@ Tip: Use `--focus` or `--pick` option to obtain info about process in usable for
 name = witcher3.exe
 executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wine64-preloader
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\The Witcher 3\bin\x64\witcher3.exe 
-owner = 1000
+owner = zappex
 cpu-limit = 0%
 lazy-exec-focus = killall picom
 lazy-exec-unfocus = picom
@@ -246,7 +246,7 @@ lazy-exec-unfocus = picom
 name = ForzaHorizon4.exe
 executable = /run/media/zappex/WD-BLUE/Games/Steam/steamapps/common/Proton 9.0 (Beta)/files/bin/wine64-preloader
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\ForzaHorizon4\ForzaHorizon4.exe 
-owner = 1000
+owner = zappex
 mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
 mangohud-source-config = ~/.config/MangoHud/MangoHud.conf
 fps-unfocus = 5
@@ -261,7 +261,7 @@ exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1
 name = GeometryDash.exe
 executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wine64-preloader
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\Geometry Dash\GeometryDash.exe 
-owner = 1000
+owner = zappex
 cpu-limit = 2%
 lazy-exec-focus = killall picom
 lazy-exec-unfocus = picom
@@ -344,6 +344,15 @@ Now you can easily grab templates from focused windows to use them in config by 
 - CPU limits greater than zero recommended for online and multiplayer games in case you do not use MangoHud, but you should be ready for stuttery audio, because `cpulimit` tool interrupts process with `SIGSTOP` and `SIGCONT` signals.
 - CPU limit equal to zero recommended for singleplayer games or online games in offline mode, this method freezes game completely to make it just hang in RAM without using any CPU or GPU resources.
 
+## Known issues
+- Inability to interact with `glxgears`, `vkcube` and `noisetorch` windows, as those are do not report their PIDs, probably there are more cases but in most cases everything should be fine.
+- Freezing online games (setting `cpu-limit` to `0%`) causes disconnects from matches, just use less aggressive CPU limit to allow game to send/receive packets.
+- Stuttery audio in game if CPU limit is very aggressive, as `cpulimit` tool interrupts process, that should be expected.
+- Unsetting of applied limits for all windows when DE or WM restarts, that happens because of buggyness of `xprop` tool, which is used to read X11 events and it prints multiple events meaning that windows terminating one by one until `_NET_CLIENT_LIST_STACKING(WINDOW): window id #` line becomes blank. Just run `$ xprop -root -spy _NET_CLIENT_LIST_STACKING` and restart DE/WM to make sure in that. Note: added workaround (not a fix!) in [94615aa
+](<https://github.com/itz-me-zappex/flux/commit/94615aa6a3d558e9c5413eaa1e1a277f67003f2f>) commit.
+- Inability to interact with windows of processes which running using Firejail, because `xprop` reports their internal PIDs and there is no way to identify process properly, e.g. Mednafen running with `firejail` has PID equal to `3` in sandbox and `xprop` reports that PID too, but an attempt to obtain info about that process fails because `/proc/3` contains info about absolutely unrelated process because this check happens out of sandbox. Because of that, false positive also possible. No idea how to fix that.
+- If `fps-focus` is a comma-separated list of integers, first value wins, and if value of `fps-focus` is e.g. `30,60,120`, on focus event MangoHud will set 30 FPS lock for game.
+
 ## Possible questions
 ### How does daemon work?
 - Daemon reads X11 events related to window focus using `xprop`, then it gets PID of process using window ID using the same tool and uses PID to collect info about process (process name, its executable path, command which is used to run it and effective UID) to compare it with identifiers in config, if it finds window which matches with identifier(s) specified in specific section in config, it can run command from `(lazy-)exec-focus` key, in case you switch to another window - apply FPS or CPU limit and run command from `(lazy-)exec-unfocus` key (if all of those have been specified in config of course). If window does not match with any section in config, nothing happens. To reduce CPU usage and speed up daemon I implemented a caching algorithm which stores info about windows and processes into associative arrays, that allows to collect info about process and window once and then use cache to get this info immediately, if window with the same ID or if new window with the same PID appears (in this case it runs `xprop` to get PID of window and searches for cached info about this process), daemon uses cache to get info. Do not worry, daemon forgets info about window and process immediately if window disappears (i.e. becomes closed, not minimized), so memory leak should not occur.
@@ -368,15 +377,6 @@ Now you can easily grab templates from focused windows to use them in config by 
 
 ### Why was that daemon developed?
 - Main task is to reduce CPU/GPU usage of games that have been minimized. Almost every engine fails to recognize that game is unfocused and still consumes a lot of CPU and GPU resources, what can make system slow for other tasks like browsing stuff, transcoding video etc. or even unresponsive at all. With that daemon, imaginated user now can simply play a game and then minimize it if needed without carrying about high CPU/GPU usage and suffering from low multitasking performance. Also, daemon does not care about type of software, so you can use it with games, VMs, video transcoders like Handbrake etc.. To be honest, inspiried by feature from NVIDIA driver for Windows, where user can set FPS limit for minimized software, this tool is not exactly the same, but better than nothing.
-
-### Bugs?
-- Nothing is perfect in this world. Almost all bugs I encountered during development have been fixed or will be fixed soon. If you find a bug, open an issue. Known issues that cannot be fixed are:
-  - Inability to interact with `glxgears`, `vkcube` and `noisetorch` windows, as those are do not report their PIDs, probably there are more cases but in most cases everything should be fine.
-  - Freezing online games (setting `cpu-limit` to `0%`) causes disconnects from matches, just use less aggressive CPU limit to allow game to send/receive packets.
-  - Stuttery audio in game if CPU limit is very aggressive, as `cpulimit` tool interrupts process, that should be expected.
-  - Unsetting of applied limits for all windows when DE or WM restarts, that happens because of buggyness of `xprop` tool, which is used to read X11 events and it prints multiple events meaning that windows terminating one by one until `_NET_CLIENT_LIST_STACKING(WINDOW): window id #` line becomes blank. Just run `$ xprop -root -spy _NET_CLIENT_LIST_STACKING` and restart DE/WM to make sure in that. Note: added workaround (not a fix!) in [94615aa
-](<https://github.com/itz-me-zappex/flux/commit/94615aa6a3d558e9c5413eaa1e1a277f67003f2f>) commit.
-  - Inability to interact with windows of processes which running using Firejail, because `xprop` reports their internal PIDs and there is no way to identify process properly, e.g. Mednafen running with `firejail` has PID equal to `3` in sandbox and `xprop` reports that PID too, but an attempt to obtain info about that process fails because `/proc/3` contains info about absolutely unrelated process because this check happens out of sandbox. Because of that, false positive also possible. No idea how to fix that.
 
 ### Why is code so complicated?
 - That sounds easy - just apply a CPU/FPS limit to window on unfocus and remove it on focus, but that is "a bit" more complicated. Just check how much logic is used for that "easy" task, and daemon has a lot of useful (or not very) features. Also I used built-in stuff in Bash like shell parameter expansions instead of `sed`, loops for reading text line-by-line with regexp in `if` statements instead of `grep` etc. to make code faster, calling external binaries consumes much more time and CPU resources than built-in options.
