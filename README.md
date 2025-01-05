@@ -29,6 +29,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 - [Tips and tricks](#tips-and-tricks)
   - [Keybinding to obtain template from focused window for config](#keybinding-to-obtain-template-from-focused-window-for-config)
   - [Apply changes in config file](#apply-changes-in-config-file)
+  - [Mute audio for unfocused window (Pipewire/Wireplumber)](#mute-audio-for-unfocused-window-pipewirewireplumber)
   - [Types of limits and which you should use](#types-of-limits-and-which-you-should-use)
 - [Known issues](#known-issues)
 - [Possible questions](#possible-questions)
@@ -338,6 +339,9 @@ Now you can easily grab templates from focused windows to use them in config by 
 
 ### Apply changes in config file
 - Daemon does not support config parsing on a fly, but there is workaround you can use. Create keybinding for command like `killall flux ; flux --hot` which restarts daemon, use this keybinding if you done with config file editing.
+
+### Mute audio for unfocused window (Pipewire/Wireplumber)
+- If you use Pipewire with Wireplumber, you may want to add `exec-focus = wpctl set-mute -p $FLUX_PROCESS_PID 0` and `exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1` lines to section responsible for game. No idea about neither Pulseaudio nor pure Alsa setups, that is why I can not just add `mute` config key.
 
 ### Types of limits and which you should use
 - FPS limits recommended for online and multiplayer games and if you do not mind to use MangoHud.
