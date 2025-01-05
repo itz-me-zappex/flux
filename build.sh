@@ -25,7 +25,7 @@ build(){
 		handle_terminated_windows.sh
 		mangohud_fps_set.sh
 		message.sh
-		parse_ini.sh
+		parse_config.sh
 		parse_options.sh
 		set_requested_limits.sh
 		unfocus_request_limit.sh
