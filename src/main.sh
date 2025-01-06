@@ -46,7 +46,8 @@ config_key_command_map \
 config_key_mangohud_source_config_map \
 config_key_mangohud_config_map \
 config_key_fps_unfocus_map \
-config_key_fps_focus_map
+config_key_fps_focus_map \
+config_key_idle_map
 
 # Config parsing
 parse_config
@@ -65,9 +66,13 @@ cpulimit_bgprocess_pid_map \
 is_fps_limited_section_map \
 fps_limit_bgprocess_pid_map \
 fps_limited_section_map \
-request_freeze_map \
+is_idle_map
+
+# Declare associative arrays to store info about requested limits
+declare -A request_freeze_map \
 request_cpu_limit_map \
-request_fps_limit_map
+request_fps_limit_map \
+request_idle_map
 
 # Declare associative arrays to store info about windows to avoid obtaining it every time to speed up code and reduce CPU-usage
 declare -A cache_event_type_map \
@@ -79,6 +84,10 @@ cache_process_command_map \
 cache_section_map \
 cache_mismatch_map \
 cache_process_owner_username_map
+
+# Declare associative arrays to remember previous scheduling policy and priority of process
+declare -A sched_previous_policy_map \
+sched_previous_priority_map
 
 # Exit with an error if that is not a X11 session
 if ! x11_session_check; then
