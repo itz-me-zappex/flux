@@ -66,13 +66,13 @@ cpulimit_bgprocess_pid_map \
 is_fps_limited_section_map \
 fps_limit_bgprocess_pid_map \
 fps_limited_section_map \
-is_idle_map
+is_sched_idle_map
 
 # Declare associative arrays to store info about requested limits
 declare -A request_freeze_map \
 request_cpu_limit_map \
 request_fps_limit_map \
-request_idle_map
+request_sched_idle_map
 
 # Declare associative arrays to store info about windows to avoid obtaining it every time to speed up code and reduce CPU-usage
 declare -A cache_event_type_map \
