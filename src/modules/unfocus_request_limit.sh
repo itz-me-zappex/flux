@@ -30,7 +30,7 @@ unfocus_request_limit(){
 					request_sched_idle_map["$previous_section"]='1'
 				fi
 			else
-				message --warning "Idle scheduling policy will not be set for process '$previous_process_name' with PID $previous_process_pid because of CPU limit equal to zero!"
+				message --warning "Idle scheduling policy will not be set for process '$previous_process_name' with PID $previous_process_pid because CPU limit equal to zero!"
 			fi
 		fi
 	fi
