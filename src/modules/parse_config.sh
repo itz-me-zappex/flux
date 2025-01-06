@@ -28,7 +28,7 @@ parse_config(){
 				local_section="${local_temp_config_line/\[/}"
 				local_section="${local_section/%\]/}"
 				sections_array+=("$local_section")
-			elif [[ "${local_temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|(lazy-)?exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
+			elif [[ "${local_temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|(lazy-)?exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus|idle)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
 				# Remove key name and equal symbol
 				local_config_value="${local_temp_config_line/*=/}"
 				# Remove all spaces before and after string, internal shell parameter expansion required to get spaces supposed to be removed
@@ -148,6 +148,20 @@ parse_config(){
 					;;
 					lazy-exec-unfocus* )
 						config_key_lazy_exec_unfocus_map["$local_section"]="$local_config_value"
+					;;
+					idle* )
+						# Exit with an error if value is not boolean
+						if [[ ! "${local_config_value,,}" =~ ^('true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0')$ ]]; then
+							message --error "Value '$local_config_value' specified in key 'idle' in section '$local_section' in '$config' config file is not boolean!"
+							exit 1
+						else
+							# Simplify value as it is boolean
+							if [[ "${local_config_value,,}" =~ ^('true'|'t'|'yes'|'y'|'1')$ ]]; then
+								config_key_idle_map["$local_section"]='1'
+							else
+								config_key_idle_map["$local_section"]='0'
+							fi
+						fi
 					esac
 				fi
 			else
