@@ -70,6 +70,7 @@ set_requested_limits(){
 				local_sched_info="$(chrt --pid "$local_process_pid")"
 				# Read output of 'chrt' tool line-by-line and remember scheduling policy with priority of process to restore it on daemon exit or window focus event
 				while read -r local_temp_sched_info_line; do
+					# Define associative array which should store value depending by what line contains
 					case "$local_temp_sched_info_line" in
 					*'scheduling policy'* )
 						# Extract scheduling policy name from string and remember it
@@ -93,17 +94,20 @@ set_requested_limits(){
 					message --warning "Daemon has insufficient rights to restore realtime scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle skipped!"
 					return 0 # Exit code will not be processed
 				fi
-				# Change scheduling policy to 'SCHED_IDLE'
-				passed_section="$local_section" \
-				passed_process_name="$local_process_name" \
-				passed_process_pid="$local_process_pid" \
-				background_sched_idle &
-				# Associate PID of background process with PID of process to interrupt it on focus event
-				set_sched_idle_bgprocess_pid_map["$local_process_pid"]="$!"
-				# Mark process as idle
-				is_idle_map["$local_process_pid"]='1'
-				# Store PID to array to restore scheduling policy of process in case daemon termination
-				idle_processes_pids_array+=("$local_process_pid")
+				# Do not do anything if scheduling policy already idle
+				if [[ "${sched_previous_policy_map["$local_process_pid"]}" != 'SCHED_IDLE' ]]; then
+					# Change scheduling policy to 'SCHED_IDLE'
+					passed_section="$local_section" \
+					passed_process_name="$local_process_name" \
+					passed_process_pid="$local_process_pid" \
+					background_sched_idle &
+					# Associate PID of background process with PID of process to interrupt it on focus event
+					set_sched_idle_bgprocess_pid_map["$local_process_pid"]="$!"
+					# Mark process as idle
+					is_idle_map["$local_process_pid"]='1'
+					# Store PID to array to restore scheduling policy of process in case daemon termination
+					idle_processes_pids_array+=("$local_process_pid")
+				fi
 			fi
 		fi
 	done
