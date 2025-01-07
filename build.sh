@@ -13,7 +13,7 @@ build(){
 		auxiliary.sh
 		background_cpu_limit.sh
 		background_fps_limit.sh
-		background_freeze_process.sh
+		background_freeze.sh
 		background_sched_idle.sh
 		calculate_max_limit.sh
 		daemon_prepare.sh
