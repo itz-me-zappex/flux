@@ -138,45 +138,6 @@ xprop_reader(){
 # Required to send events to loop in 'flux' executable which reads events from this function
 event_source(){
 	local first_cycle='1'
-	# Unset functions which are not used in 'event_source()' subprocess
-	unset -f actions_on_exit \
-	background_cpu_limit \
-	background_fps_limit \
-	background_freeze_process \
-	cache_collect_garbage \
-	cache_get_process_info \
-	check_pid_existence \
-	check_ro \
-	check_rw \
-	exec_focus \
-	exec_on_event \
-	exec_unfocus \
-	find_matching_section \
-	focus_unset_limit \
-	get_process_info \
-	handle_terminated_windows \
-	mangohud_fps_set \
-	set_requested_limits \
-	unfocus_request_limit \
-	unfreeze_process \
-	unset_cpu_limit \
-	unset_fps_limit \
-	unset_terminated_limits
-	# Unset config values which are not used in 'event_source()' subprocess
-	unset config_key_name_map \
-	config_key_executable_map \
-	config_key_owner_map \
-	config_key_cpu_limit_map \
-	config_key_delay_map \
-	config_key_exec_focus_map \
-	config_key_exec_unfocus_map \
-	config_key_lazy_exec_focus_map \
-	config_key_lazy_exec_unfocus_map \
-	config_key_command_map \
-	config_key_mangohud_source_config_map \
-	config_key_mangohud_config_map \
-	config_key_fps_unfocus_map \
-	config_key_fps_focus_map
 	# Infinite loop required to make daemon able to restart event reading if list of windows becomes blank
 	# For example happens on Cinnamon when DE restarts and in pure Openbox environment
 	while :; do
