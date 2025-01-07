@@ -14,7 +14,7 @@ build(){
 		background_cpu_limit.sh
 		background_fps_limit.sh
 		background_freeze_process.sh
-		background_set_sched_idle.sh
+		background_sched_idle.sh
 		calculate_max_limit.sh
 		daemon_prepare.sh
 		event_source.sh
