@@ -1,5 +1,5 @@
 # Required to freeze process on unfocus event, runs in background via '&'
-background_freeze_process(){
+background_freeze(){
 	# Wait before set limit and notify user if delay is specified
 	if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
 		message --verbose "Process '$passed_process_name' with PID $passed_process_pid will be frozen after ${config_key_delay_map["$passed_section"]} second(s) on unfocus event."
