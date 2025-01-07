@@ -86,9 +86,12 @@ cache_section_map \
 cache_mismatch_map \
 cache_process_owner_username_map
 
-# Declare associative arrays to remember previous scheduling policy and priority of process
+# Declare associative arrays to remember previous process scheduling policy, priority and parameters of 'SCHED_DEADLINE' scheduling policy
 declare -A sched_previous_policy_map \
-sched_previous_priority_map
+sched_previous_priority_map \
+sched_previous_runtime_map \
+sched_previous_deadline_map \
+sched_previous_period_map
 
 # Exit with an error if that is not a X11 session
 if ! x11_session_check; then
