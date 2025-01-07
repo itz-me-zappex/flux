@@ -6,7 +6,11 @@ set_requested_limits(){
 	local_section \
 	local_process_name \
 	local_sched_info \
-	local_temp_sched_info_line
+	local_temp_sched_info_line \
+	local_deadline_parameters \
+	local_temp_deadline_parameter \
+	local_count \
+	local_idle_cancelled
 	# Get list of existing windows
 	local_window_ids="${event/'check_requests: '/}"
 	# Apply requested limits to existing windows
@@ -79,6 +83,25 @@ set_requested_limits(){
 					*'scheduling priority'* )
 						# Extract scheduling priority value from string and remember it
 						sched_previous_priority_map["$local_process_pid"]="${local_temp_sched_info_line/*': '/}"
+					;;
+					*'runtime/deadline/period parameters'* )
+						# Extract parameters from string
+						local_deadline_parameters="${local_temp_sched_info_line/*': '/}"
+						# Remove slashes and remember 'SCHED_DEADLINE' parameters
+						local_count='0'
+						for local_temp_deadline_parameter in ${local_deadline_parameters//'/'/' '}; do
+							(( local_count++ ))
+							case "$local_count" in
+							'1' )
+								sched_previous_runtime_map["$local_process_pid"]="$local_temp_deadline_parameter"
+							;;
+							'2' )
+								sched_previous_deadline_map["$local_process_pid"]="$local_temp_deadline_parameter"
+							;;
+							'3' )
+								sched_previous_period_map["$local_process_pid"]="$local_temp_deadline_parameter"
+							esac
+						done
 					esac
 				done <<< "$local_sched_info"
 				# Attempt to execute command with realtime scheduling policy to check whether daemon can restore it on focus or not
@@ -89,13 +112,14 @@ set_requested_limits(){
 						sched_realtime_is_supported='1'
 					fi
 				fi
-				# Print warning if daemon has insufficient rights to set realtime scheduling policy
+				# Print warning if daemon has insufficient rights to set realtime/deadline scheduling policy, otherwise - change it to idle not set already
 				if [[ "$sched_realtime_is_supported" == '0' && "${sched_previous_policy_map["$local_process_pid"]}" =~ ^('SCHED_RR'|'SCHED_FIFO')$ ]]; then
-					message --warning "Daemon has insufficient rights to restore realtime scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle skipped!"
-					return 0 # Exit code will not be processed
-				fi
-				# Do not do anything if scheduling policy already idle
-				if [[ "${sched_previous_policy_map["$local_process_pid"]}" != 'SCHED_IDLE' ]]; then
+					message --warning "Daemon has insufficient rights to restore realtime scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle cancelled!"
+					local_idle_cancelled='1'
+				elif [[ "$UID" != '0' && "${sched_previous_policy_map["$local_process_pid"]}" == 'SCHED_DEADLINE' ]]; then
+					message --warning "Daemon has insufficient rights to restore deadline scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle cancelled!"
+					local_idle_cancelled='1'
+				elif [[ "${sched_previous_policy_map["$local_process_pid"]}" != 'SCHED_IDLE' ]]; then # Do not do anything if scheduling policy already idle
 					# Change scheduling policy to 'SCHED_IDLE'
 					passed_section="$local_section" \
 					passed_process_name="$local_process_name" \
@@ -107,6 +131,17 @@ set_requested_limits(){
 					is_idle_map["$local_process_pid"]='1'
 					# Store PID to array to restore scheduling policy of process in case daemon termination
 					idle_processes_pids_array+=("$local_process_pid")
+				else
+					message --info "Process '$local_process_name' with PID $local_process_pid already has scheduling policy set to idle, changing it to idle cancelled."
+					local_idle_cancelled='1'
+				fi
+				# Unset info about scheduling policy if changing it to idle is cancelled
+				if [[ -n "$local_idle_cancelled" ]]; then
+					sched_previous_policy_map["$local_process_pid"]=''
+					sched_previous_priority_map["$local_process_pid"]=''
+					sched_previous_runtime_map["$local_process_pid"]=''
+					sched_previous_deadline_map["$local_process_pid"]=''
+					sched_previous_period_map["$local_process_pid"]=''
 				fi
 			fi
 		fi
