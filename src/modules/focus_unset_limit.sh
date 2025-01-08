@@ -1,4 +1,4 @@
-# Required to unset CPU/FPS limit for focused process
+# Required to unset limit for focused process
 focus_unset_limit(){
 	local local_end_of_msg='on focus event'
 	# Unfreeze process if it has been frozen
