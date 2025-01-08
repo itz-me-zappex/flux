@@ -33,6 +33,7 @@ build(){
 		unfreeze_process.sh
 		unset_cpu_limit.sh
 		unset_fps_limit.sh
+		unset_sched_idle.sh
 		validate_config_keys.sh
 		validate_config.sh
 		validate_log.sh
