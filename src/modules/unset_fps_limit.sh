@@ -2,18 +2,20 @@
 unset_fps_limit(){
 	local local_temp_fps_limited_pid \
 	local_temp_fps_limited_section \
-	local_fps_limited_sections_array
+	local_fps_limited_sections_array \
+	local_fps_limit_bgprocess_pid
+	# Simplify access to PID of background process with delayed setting of FPS limit
+	local_fps_limit_bgprocess_pid="${fps_limit_bgprocess_pid_map["$passed_section"]}"
 	# Check for existence of FPS limit background process
-	if check_pid_existence "${fps_limit_bgprocess_pid_map["$passed_section"]}"; then
-		# Terminate background process
-		if ! kill "${fps_limit_bgprocess_pid_map["$passed_section"]}" > /dev/null 2>&1; then
-			# Avoid printing this message if delay is not specified
-			if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
+	if check_pid_existence "$local_fps_limit_bgprocess_pid"; then
+		# Attempt to terminate background process
+		kill "$local_fps_limit_bgprocess_pid" > /dev/null 2>&1
+		# Print message if delay is not zero
+		if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
+			# Define message depending by 'kill' exit code
+			if (( $? > 0 )); then
 				message --warning "Unable to cancel delayed for ${config_key_delay_map["$passed_section"]} second(s) FPS unlimiting of section '$passed_section'!"
-			fi
-		else
-			# Avoid printing this message if delay is not specified
-			if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
+			else
 				message --info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) FPS unlimiting of section '$passed_section' has been cancelled $passed_end_of_msg."
 			fi
 		fi
