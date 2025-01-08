@@ -38,22 +38,32 @@ actions_on_exit(){
 		if check_pid_existence "${set_sched_idle_bgprocess_pid_map["$local_temp_idle_process_pid"]}"; then
 			kill "${set_sched_idle_bgprocess_pid_map["$local_temp_idle_process_pid"]}"
 		elif check_pid_existence "$local_temp_idle_process_pid"; then
-			# Define option depending by previous scheduling policy
-			case "${sched_previous_policy_map["$local_temp_idle_process_pid"]}" in
-			'SCHED_FIFO' )
-				local_policy_option='--fifo'
-			;;
-			'SCHED_RR' )
-				local_policy_option='--rr'
-			;;
-			'SCHED_OTHER' )
-				local_policy_option='--other'
-			;;
-			'SCHED_BATCH' )
-				local_policy_option='--batch'
-			esac
-			# Restore scheduling policy and priority for process
-			chrt "$local_policy_option" --pid "${sched_previous_priority_map["$local_temp_idle_process_pid"]}" "$local_temp_idle_process_pid"
+			# Define how to restore scheduling policy depending by whether that is deadline or not
+			if [[ "${sched_previous_policy_map["$local_temp_idle_process_pid"]}" != 'SCHED_DEADLINE' ]]; then
+				# Define option depending by scheduling policy
+				case "${sched_previous_policy_map["$local_temp_idle_process_pid"]}" in
+				'SCHED_FIFO' )
+					local_policy_option='--fifo'
+				;;
+				'SCHED_RR' )
+					local_policy_option='--rr'
+				;;
+				'SCHED_OTHER' )
+					local_policy_option='--other'
+				;;
+				'SCHED_BATCH' )
+					local_policy_option='--batch'
+				esac
+				# Restore scheduling policy and priority for process
+				chrt "$local_policy_option" --pid "${sched_previous_priority_map["$local_temp_idle_process_pid"]}" "$local_temp_idle_process_pid" > /dev/null 2>&1
+			else
+				# Restore deadline scheduling policy and its parameters for process
+				chrt --deadline \
+				--sched-runtime "${sched_previous_runtime_map["$local_temp_idle_process_pid"]}" \
+				--sched-deadline "${sched_previous_deadline_map["$local_temp_idle_process_pid"]}" \
+				--sched-period "${sched_previous_period_map["$local_temp_idle_process_pid"]}" \
+				--pid 0 "$local_temp_idle_process_pid" > /dev/null 2>&1
+			fi
 		fi
 	done
 	# Execute command from 'lazy-exec-unfocus' if matching section for focused window is found and command is specified
