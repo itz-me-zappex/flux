@@ -67,7 +67,7 @@ is_fps_limited_section_map \
 fps_limit_bgprocess_pid_map \
 fps_limited_section_map \
 is_sched_idle_map \
-set_sched_idle_bgprocess_pid_map
+sched_idle_bgprocess_pid_map
 
 # Declare associative arrays to store info about requested limits
 declare -A request_freeze_map \
