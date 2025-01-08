@@ -1,11 +1,14 @@
 # Required to terminate freeze background process or unfreeze process if window becomes focused or terminated
 unfreeze_process(){
 	local local_temp_frozen_process_pid \
-	local_frozen_processes_pids_array
+	local_frozen_processes_pids_array \
+	local_freeze_bgprocess_pid
+	# Simplify access to PID of freeze background process
+	local_freeze_bgprocess_pid="${freeze_bgprocess_pid_map["$passed_process_pid"]}"
 	# Check for existence of freeze background process
-	if check_pid_existence "${freeze_bgprocess_pid_map["$passed_process_pid"]}"; then
+	if check_pid_existence "$local_freeze_bgprocess_pid"; then
 		# Attempt to terminate background process
-		kill "${freeze_bgprocess_pid_map["$passed_process_pid"]}" > /dev/null 2>&1
+		kill "$local_freeze_bgprocess_pid" > /dev/null 2>&1
 		# Print message if delay is not zero
 		if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
 			# Define message depending by 'kill' exit code
