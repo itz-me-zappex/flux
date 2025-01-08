@@ -1,7 +1,6 @@
 # Required to terminate background process with delayed setting of 'SCHED_IDLE' or restore scheduling policy for process if window becomes focused or terminated
 unset_sched_idle(){
 	local local_sched_idle_bgprocess_pid \
-	local_print_delay_message \
 	local_policy_option \
 	local_policy_name \
 	local_temp_idle_pid \
@@ -11,21 +10,15 @@ unset_sched_idle(){
 	# Check for existence of background process with delayed setting of 'SCHED_IDLE'
 	if check_pid_existence "$local_sched_idle_bgprocess_pid"; then
 		# Attempt to terminate background process
-		if ! kill "$local_sched_idle_bgprocess_pid" > /dev/null 2>&1; then
-			local_print_delay_message='warning'
-		else
-			local_print_delay_message='info'
-		fi
+		kill "$local_sched_idle_bgprocess_pid" > /dev/null 2>&1
 		# Print message if delay is not zero
 		if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
-			# Define message depending by exit code of 'kill' command
-			case "$local_print_delay_message" in
-			'warning' )
+			# Define message depending by 'kill' exit code
+			if (( $? > 0 )); then
 				message --warning "Unable to cancel delayed for $local_config_delay second(s) delayed setting of idle scheduling policy for process '$passed_process_name' with PID $passed_process_pid!"
-			;;
-			'info' )
+			else
 				message --info "Delayed for $local_config_delay second(s) setting of idle scheduling policy for process $passed_process_name' with PID $passed_process_pid has been cancelled $passed_end_of_msg."
-			esac
+			fi
 		fi
 	else
 		# Define option and scheduling policy name depending by scheduling policy
