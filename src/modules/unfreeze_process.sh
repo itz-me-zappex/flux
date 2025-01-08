@@ -36,6 +36,6 @@ unfreeze_process(){
 	# Store updated info into array
 	frozen_processes_pids_array=("${local_frozen_processes_pids_array[@]}")
 	# Unset details about freezing
-	is_frozen_pid_map["$passed_process_pid"]=''
-	freeze_bgprocess_pid_map["$passed_process_pid"]=''
+	unset is_frozen_pid_map["$passed_process_pid"] \
+	freeze_bgprocess_pid_map["$passed_process_pid"]
 }

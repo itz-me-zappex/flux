@@ -65,18 +65,18 @@ handle_terminated_windows(){
 			fi
 			# Unset limit request
 			if [[ -n "${request_freeze_map["$local_terminated_process_pid"]}" ]]; then
-				request_freeze_map["$local_terminated_process_pid"]=''
+				unset request_freeze_map["$local_terminated_process_pid"]
 				message --info "Freezing of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window termination."
 			elif [[ -n "${request_cpu_limit_map["$local_terminated_process_pid"]}" ]]; then
-				request_cpu_limit_map["$local_terminated_process_pid"]=''
+				unset request_cpu_limit_map["$local_terminated_process_pid"]
 				message --info "CPU limiting of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window termination."
 			elif [[ -n "$local_terminated_section" && -n "${request_fps_limit_map["$local_terminated_section"]}" ]]; then
-				request_fps_limit_map["$local_terminated_section"]=''
+				unset request_fps_limit_map["$local_terminated_section"]
 				message --info "FPS limiting of section '$local_terminated_section' has been cancelled due to termination of matching window(s)."
 			fi
 			# Unset 'SCHED_IDLE' request
 			if [[ -n "${request_sched_idle_map["$local_terminated_process_pid"]}" ]]; then
-				request_sched_idle_map["$local_terminated_process_pid"]=''
+				unset request_sched_idle_map["$local_terminated_process_pid"]
 				message --info "Changing scheduling policy to idle for process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window termination."
 			fi
 		fi
@@ -84,19 +84,19 @@ handle_terminated_windows(){
 		if [[ "${cache_event_type_map["$local_temp_terminated_window_id"]}" == 'bad' ]]; then
 			# Unset only event type for bad window, otherwise bash will fail
 			message --verbose "Cached info about bad window with ID $local_temp_terminated_window_id has been removed as it has been terminated."
-			cache_event_type_map["$local_temp_terminated_window_id"]=''
+			unset cache_event_type_map["$local_temp_terminated_window_id"]
 		elif [[ "${cache_event_type_map["$local_temp_terminated_window_id"]}" == 'good' ]]; then
 			# Unset data in cache related to terminated window
 			message --verbose "Cached info about window with ID $local_temp_terminated_window_id and process '$local_terminated_process_name' with PID ${cache_process_pid_map["$local_temp_terminated_window_id"]} has been removed as it has been terminated."
-			cache_mismatch_map["$local_terminated_process_pid"]=''
-			cache_section_map["$local_terminated_process_pid"]=''
-			cache_event_type_map["$local_temp_terminated_window_id"]=''
-			cache_process_pid_map["$local_temp_terminated_window_id"]=''
-			cache_process_name_map["$local_temp_terminated_window_id"]=''
-			cache_process_executable_map["$local_temp_terminated_window_id"]=''
-			cache_process_owner_map["$local_temp_terminated_window_id"]=''
-			cache_process_command_map["$local_temp_terminated_window_id"]=''
-			cache_process_owner_username_map["$local_temp_terminated_window_id"]=''
+			unset cache_mismatch_map["$local_terminated_process_pid"] \
+			cache_section_map["$local_terminated_process_pid"] \
+			cache_event_type_map["$local_temp_terminated_window_id"] \
+			cache_process_pid_map["$local_temp_terminated_window_id"] \
+			cache_process_name_map["$local_temp_terminated_window_id"] \
+			cache_process_executable_map["$local_temp_terminated_window_id"] \
+			cache_process_owner_map["$local_temp_terminated_window_id"] \
+			cache_process_command_map["$local_temp_terminated_window_id"] \
+			cache_process_owner_username_map["$local_temp_terminated_window_id"]
 		fi
 	done
 }

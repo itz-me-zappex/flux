@@ -34,7 +34,7 @@ unset_fps_limit(){
 	# Forget that process(es) matching with current section have been FPS limited previously
 	for local_temp_fps_limited_pid in "${!fps_limited_section_map[@]}"; do
 		if [[ "${fps_limited_section_map["$local_temp_fps_limited_pid"]}" == "$passed_section" ]]; then
-			fps_limited_section_map["$local_temp_fps_limited_pid"]=''
+			unset fps_limited_section_map["$local_temp_fps_limited_pid"]
 		fi
 	done
 	# Remove section from array
@@ -47,6 +47,6 @@ unset_fps_limit(){
 	# Store updated info into array
 	fps_limited_sections_array=("${local_fps_limited_sections_array[@]}")
 	# Unset details about FPS limiting
-	is_fps_limited_section_map["$passed_section"]=''
-	fps_limit_bgprocess_pid_map["$passed_section"]=''
+	unset is_fps_limited_section_map["$passed_section"] \
+	fps_limit_bgprocess_pid_map["$passed_section"]
 }

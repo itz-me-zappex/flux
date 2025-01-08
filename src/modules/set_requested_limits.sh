@@ -26,7 +26,7 @@ set_requested_limits(){
 			# Check for request existence to apply one of limits
 			if [[ -n "${request_freeze_map["$local_process_pid"]}" ]]; then
 				# Unset request as it becomes useless
-				request_freeze_map["$local_process_pid"]=''
+				unset request_freeze_map["$local_process_pid"]
 				# Freeze process
 				passed_section="$local_section" \
 				passed_process_name="$local_process_name" \
@@ -40,7 +40,7 @@ set_requested_limits(){
 				frozen_processes_pids_array+=("$local_process_pid")
 			elif [[ -n "${request_cpu_limit_map["$local_process_pid"]}" ]]; then
 				# Unset request as it becomes useless
-				request_cpu_limit_map["$local_process_pid"]=''
+				unset request_cpu_limit_map["$local_process_pid"]
 				# Apply CPU limit
 				passed_section="$local_section" \
 				passed_process_name="$local_process_name" \
@@ -54,7 +54,7 @@ set_requested_limits(){
 				is_cpu_limited_pid_map["$local_process_pid"]='1'
 			elif [[ -n "$local_section" && -n "${request_fps_limit_map["$local_section"]}" ]]; then
 				# Unset request as it becomes useless
-				request_fps_limit_map["$local_section"]=''
+				unset request_fps_limit_map["$local_section"]
 				# Set FPS limit
 				passed_section="$local_section" \
 				passed_process_pid="$local_process_pid" \
@@ -69,7 +69,7 @@ set_requested_limits(){
 			# Check for 'SCHED_IDLE' scheduling policy request
 			if [[ -n "${request_sched_idle_map["$local_process_pid"]}" ]]; then
 				# Unset as it becomes useless
-				request_sched_idle_map["$local_process_pid"]=''
+				unset request_sched_idle_map["$local_process_pid"]
 				# Remember scheduling policy and priority before change it
 				local_sched_info="$(chrt --pid "$local_process_pid")"
 				# Read output of 'chrt' tool line-by-line and remember scheduling policy with priority of process to restore it on daemon exit or window focus event
@@ -137,11 +137,11 @@ set_requested_limits(){
 				fi
 				# Unset info about scheduling policy if changing it to idle is cancelled
 				if [[ -n "$local_idle_cancelled" ]]; then
-					sched_previous_policy_map["$local_process_pid"]=''
-					sched_previous_priority_map["$local_process_pid"]=''
-					sched_previous_runtime_map["$local_process_pid"]=''
-					sched_previous_deadline_map["$local_process_pid"]=''
-					sched_previous_period_map["$local_process_pid"]=''
+					unset sched_previous_policy_map["$local_process_pid"] \
+					sched_previous_priority_map["$local_process_pid"] \
+					sched_previous_runtime_map["$local_process_pid"] \
+					sched_previous_deadline_map["$local_process_pid"] \
+					sched_previous_period_map["$local_process_pid"]
 				fi
 			fi
 		fi
