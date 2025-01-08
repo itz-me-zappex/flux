@@ -35,8 +35,8 @@ actions_on_exit(){
 	# Restore scheduling policies
 	for local_temp_idle_process_pid in "${idle_processes_pids_array[@]}"; do
 		# Check for existence of either delayed setting of idle scheduling policy for process or target process
-		if check_pid_existence "${set_sched_idle_bgprocess_pid_map["$local_temp_idle_process_pid"]}"; then
-			kill "${set_sched_idle_bgprocess_pid_map["$local_temp_idle_process_pid"]}"
+		if check_pid_existence "${sched_idle_bgprocess_pid_map["$local_temp_idle_process_pid"]}"; then
+			kill "${sched_idle_bgprocess_pid_map["$local_temp_idle_process_pid"]}"
 		elif check_pid_existence "$local_temp_idle_process_pid"; then
 			# Define how to restore scheduling policy depending by whether that is deadline or not
 			if [[ "${sched_previous_policy_map["$local_temp_idle_process_pid"]}" != 'SCHED_DEADLINE' ]]; then
