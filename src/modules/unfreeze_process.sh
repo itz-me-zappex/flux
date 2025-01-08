@@ -5,14 +5,13 @@ unfreeze_process(){
 	# Check for existence of freeze background process
 	if check_pid_existence "${freeze_bgprocess_pid_map["$passed_process_pid"]}"; then
 		# Attempt to terminate background process
-		if ! kill "${freeze_bgprocess_pid_map["$passed_process_pid"]}" > /dev/null 2>&1; then
-			# Avoid printing this message if delay is not specified
-			if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
+		kill "${freeze_bgprocess_pid_map["$passed_process_pid"]}" > /dev/null 2>&1
+		# Print message if delay is not zero
+		if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
+			# Define message depending by 'kill' exit code
+			if (( $? > 0 )); then
 				message --warning "Unable to cancel delayed for ${config_key_delay_map["$passed_section"]} second(s) freezing of process '$passed_process_name' with PID $passed_process_pid!"
-			fi
-		else
-			# Avoid printing this message if delay is not specified
-			if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
+			else
 				message --info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) freezing of process $passed_process_name' with PID $passed_process_pid has been cancelled $passed_end_of_msg."
 			fi
 		fi
