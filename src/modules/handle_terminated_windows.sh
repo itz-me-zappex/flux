@@ -1,6 +1,8 @@
 # Required to unset CPU/FPS limit for terminated windows
 unset_terminated_limits(){
 	local local_terminated_process_pid \
+	local_terminated_section \
+	local_terminated_process_name \
 	local_temp_terminated_window_id \
 	local_existing_process_pid \
 	local_temp_existing_window_id \
@@ -9,36 +11,40 @@ unset_terminated_limits(){
 	for local_temp_terminated_window_id in $local_terminated_window_ids; do
 		# Skip window ID if that is bad event or info about it does not exist in cache
 		if [[ -n "${cache_event_type_map["$local_temp_terminated_window_id"]}" && "${cache_event_type_map["$local_temp_terminated_window_id"]}" != 'bad' ]]; then
-			# Obtain PID of terminated process using cache, required to check and unset FPS limit
+			# Simplify access to PID of cached window info
 			local_terminated_process_pid="${cache_process_pid_map["$local_temp_terminated_window_id"]}"
+			# Simplify access to matching section of cached window info
+			local_terminated_section="${cache_section_map["$local_terminated_process_pid"]}"
+			# Simplify access to process name of cached window info
+			local_terminated_process_name="${cache_process_name_map["$local_temp_terminated_window_id"]}"
 			# Do not do anything if window is not frozen
-			if [[ -n "${is_frozen_pid_map["${cache_process_pid_map["$local_temp_terminated_window_id"]}"]}" ]]; then
+			if [[ -n "${is_frozen_pid_map["$local_terminated_process_pid"]}" ]]; then
 				# Unfreeze process
-				passed_process_pid="${cache_process_pid_map["$local_temp_terminated_window_id"]}" \
-				passed_section="${cache_section_map["$local_terminated_process_pid"]}" \
-				passed_process_name="${cache_process_name_map["$local_temp_terminated_window_id"]}" \
+				passed_process_pid="$local_terminated_process_pid" \
+				passed_section="$local_terminated_section" \
+				passed_process_name="$local_terminated_process_name" \
 				passed_end_of_msg='due to window termination' \
 				unfreeze_process
-			elif [[ -n "${is_cpu_limited_pid_map["${cache_process_pid_map["$local_temp_terminated_window_id"]}"]}" ]]; then # Do not do anything if window is not CPU limited
+			elif [[ -n "${is_cpu_limited_pid_map["$local_terminated_process_pid"]}" ]]; then # Do not do anything if window is not CPU limited
 				# Unset CPU limit
-				passed_process_pid="${cache_process_pid_map["$local_temp_terminated_window_id"]}" \
-				passed_process_name="${cache_process_name_map["$local_temp_terminated_window_id"]}" \
+				passed_process_pid="$local_terminated_process_pid" \
+				passed_process_name="$local_terminated_process_name" \
 				passed_signal='-SIGUSR2' \
 				unset_cpu_limit
-			elif [[ -n "${cache_section_map["$local_terminated_process_pid"]}" && -n "${is_fps_limited_section_map["${cache_section_map["$local_terminated_process_pid"]}"]}" ]]; then # Do not do anything if window is not FPS limited
+			elif [[ -n "$local_terminated_section" && -n "${is_fps_limited_section_map["$local_terminated_section"]}" ]]; then # Do not do anything if window is not FPS limited
 				# Do not remove FPS limit if one of existing windows matches with the same section
 				for local_temp_existing_window_id in $local_existing_window_ids; do
-					# Obtain PID of terminated process using cache
+					# Simplify access to PID of terminated process using cache
 					local_existing_process_pid="${cache_process_pid_map["$local_temp_existing_window_id"]}"
 					# Mark to not unset FPS limit if there is another window which matches with same section
-					if [[ "${cache_section_map["$local_existing_process_pid"]}" == "${cache_section_map["$local_terminated_process_pid"]}" ]]; then
+					if [[ "${cache_section_map["$local_existing_process_pid"]}" == "$local_terminated_section" ]]; then
 						local_found='1'
 						break
 					fi
 				done
 				# Unset FPS limit if there is no any matching windows except target
 				if [[ -z "$local_found" ]]; then
-					passed_section="${cache_section_map["$local_terminated_process_pid"]}" \
+					passed_section="$local_terminated_section" \
 					passed_end_of_msg='due to matching window(s) termination' \
 					unset_fps_limit
 				fi
@@ -51,7 +57,8 @@ unset_terminated_limits(){
 cache_collect_garbage(){
 	local local_temp_terminated_window_id \
 	local_terminated_process_pid \
-	local_terminated_section
+	local_terminated_section \
+	local_terminated_process_name
 	# Remove cached info about terminated windows
 	for local_temp_terminated_window_id in $local_terminated_window_ids; do
 		# Check for event type before unset cache
@@ -64,6 +71,8 @@ cache_collect_garbage(){
 			local_terminated_process_pid="${cache_process_pid_map["$local_temp_terminated_window_id"]}"
 			# Simplify access to matching section of cached window info
 			local_terminated_section="${cache_section_map["$local_terminated_process_pid"]}"
+			# Simplify access to process name of cached window info
+			local_terminated_process_name="${cache_process_name_map["$local_temp_terminated_window_id"]}"
 			# Unset limit request
 			if [[ -n "${request_freeze_map["$local_terminated_process_pid"]}" ]]; then
 				request_freeze_map["$local_terminated_process_pid"]=''
