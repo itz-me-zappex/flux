@@ -31,11 +31,8 @@ cmdline_get(){
 
 # Required to validate X11 session
 x11_session_check(){
-	# Return an error if $DISPLAY does not match with `:[number]` and `:[number].[number]`
-	# Or if $XDG_SESSION_TYPE is not equal to 'x11' (e.g. 'tty', 'wayland' etc.)
-	if [[ ! "$DISPLAY" =~ ^\:[0-9]+(\.[0-9]+)?$ || "$XDG_SESSION_TYPE" != 'x11' ]]; then
-		return 1
-	elif ! xprop -root > /dev/null 2>&1; then # Return an error if 'xprop' unable to obtain info about session
+	# Return an error if 'xprop' unable to obtain info about X server
+	if ! xprop -root > /dev/null 2>&1; then
 		return 1
 	fi
 }
