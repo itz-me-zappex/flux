@@ -65,7 +65,6 @@ is_cpu_limited_pid_map \
 cpulimit_bgprocess_pid_map \
 is_fps_limited_section_map \
 fps_limit_bgprocess_pid_map \
-fps_limited_section_map \
 is_sched_idle_map \
 sched_idle_bgprocess_pid_map
 

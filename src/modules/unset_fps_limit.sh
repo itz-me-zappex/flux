@@ -31,12 +31,6 @@ unset_fps_limit(){
 			message --info "Config key 'fps_limit' in MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been changed to '${config_key_fps_focus_map["$passed_section"]}' $passed_end_of_msg."
 		fi
 	fi
-	# Forget that process(es) matching with current section have been FPS limited previously
-	for local_temp_fps_limited_pid in "${!fps_limited_section_map[@]}"; do
-		if [[ "${fps_limited_section_map["$local_temp_fps_limited_pid"]}" == "$passed_section" ]]; then
-			unset fps_limited_section_map["$local_temp_fps_limited_pid"]
-		fi
-	done
 	# Remove section from array
 	for local_temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
 		# Skip FPS unlimited section as I want remove it from array
