@@ -164,16 +164,22 @@ parse_config(){
 						fi
 					;;
 					minimize* )
-						# Exit with an error if value is not boolean
-						if ! check_bool "$local_config_value"; then
-							message --error "Value '$local_config_value' specified in key 'minimize' in section '$local_section' in '$config' config file is not boolean!"
+						# Exit with an error if 'xdotool' is not installed
+						if ! type xdotool > /dev/null 2>&1; then
+							message --error "Config key 'minimize' found in section '$local_section' in '$config' config file depends on 'xdotool' tool which is not installed!"
 							exit 1
 						else
-							# Simplify value
-							if check_true "$local_config_value"; then
-								config_key_minimize_map["$local_section"]='1'
+							# Exit with an error if value is not boolean
+							if ! check_bool "$local_config_value"; then
+								message --error "Value '$local_config_value' specified in key 'minimize' in section '$local_section' in '$config' config file is not boolean!"
+								exit 1
 							else
-								config_key_minimize_map["$local_section"]='0'
+								# Simplify value
+								if check_true "$local_config_value"; then
+									config_key_minimize_map["$local_section"]='1'
+								else
+									config_key_minimize_map["$local_section"]='0'
+								fi
 							fi
 						fi
 					esac
