@@ -31,5 +31,9 @@ unfocus_request_limit(){
 				message --warning "Idle scheduling policy will not be set for process '$previous_process_name' with PID $previous_process_pid because CPU limit equal to zero!"
 			fi
 		fi
+		# Request window minimization if specified in config
+		if [[ "${config_key_minimize_map["$previous_section"]}" == '1' ]]; then
+			request_minimize_map["$previous_process_pid"]='1'
+		fi
 	fi
 }
