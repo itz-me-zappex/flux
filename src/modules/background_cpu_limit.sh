@@ -8,8 +8,9 @@ background_cpu_limit(){
 		sleep "${config_key_delay_map["$passed_section"]}" &
 		# Remember PID of 'sleep' process sent to background to make daemon able print message about cancelling CPU limit and terminate 'sleep' process on SIGINT/SIGTERM signal
 		local_sleep_pid="$!"
-		# Terminate 'sleep' process quietly on daemon termination
-		trap 'kill "$local_sleep_pid" > /dev/null 2>&1' SIGINT SIGTERM
+		# Terminate 'sleep' process and print relevant message on daemon termination
+		trap 'message --info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to daemon termination." ; \
+		kill "$local_sleep_pid" > /dev/null 2>&1' SIGINT SIGTERM
 		# Terminate 'sleep' process on focus event and print relevant message
 		trap 'message --info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled on focus event." ; \
 		kill "$local_sleep_pid" > /dev/null 2>&1 ; \
@@ -29,8 +30,9 @@ background_cpu_limit(){
 		local_cpulimit_pid="$!"
 		# Enforce 'SCHED_BATCH' to improve interval stability between interrupts
 		chrt --batch --pid 0 "$local_cpulimit_pid" > /dev/null 2>&1
-		# Terminate 'cpulimit' process quietly on daemon termination
-		trap 'kill "$local_cpulimit_pid" > /dev/null 2>&1' SIGINT SIGTERM
+		# Terminate 'cpulimit' process and print relevant message on daemon termination
+		trap 'message --info "Process '"'$passed_process_name'"' with PID $passed_process_pid has been CPU unlimited due to daemon termination." ; \
+		kill "$local_cpulimit_pid" > /dev/null 2>&1' SIGINT SIGTERM
 		# Terminate 'cpulimit' process on focus event and print relevant message
 		trap 'message --info "Process '"'$passed_process_name'"' with PID $passed_process_pid has been CPU unlimited on focus event." ; \
 		kill "$local_cpulimit_pid" > /dev/null 2>&1 ; \
