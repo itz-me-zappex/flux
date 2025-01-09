@@ -5,7 +5,7 @@ unfocus_request_limit(){
 		# Request limits to be applied on 'check_requests' internal event (from 'event_source()')
 		if [[ "${config_key_cpu_limit_map["$previous_section"]}" == '0' ]]; then
 			# Request freezing of process if it is not limited
-			if [[ -z "${is_frozen_pid_map["$previous_process_pid"]}" ]]; then
+			if [[ -z "${freeze_applied_map["$previous_process_pid"]}" ]]; then
 				request_freeze_map["$previous_process_pid"]='1'
 			fi
 		elif (( "${config_key_cpu_limit_map["$previous_section"]}" > 0 )); then

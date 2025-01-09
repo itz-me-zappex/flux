@@ -35,7 +35,7 @@ set_requested_limits(){
 				# Associate PID of background process with PID of process to interrupt it in case focus event appears earlier than delay ends
 				freeze_bgprocess_pid_map["$local_process_pid"]="$!"
 				# Mark process as frozen
-				is_frozen_pid_map["$local_process_pid"]='1'
+				freeze_applied_map["$local_process_pid"]='1'
 				# Store PID to array to unfreeze process in case daemon termination
 				frozen_processes_pids_array+=("$local_process_pid")
 			elif [[ -n "${request_cpu_limit_map["$local_process_pid"]}" ]]; then

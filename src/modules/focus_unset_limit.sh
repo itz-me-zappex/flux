@@ -2,7 +2,7 @@
 focus_unset_limit(){
 	local local_end_of_msg='on focus event'
 	# Unfreeze process if it has been frozen
-	if [[ -n "${is_frozen_pid_map["$process_pid"]}" ]]; then
+	if [[ -n "${freeze_applied_map["$process_pid"]}" ]]; then
 		passed_process_pid="$process_pid" \
 		passed_section="$section" \
 		passed_process_name="$process_name" \

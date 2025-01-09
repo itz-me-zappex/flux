@@ -26,7 +26,7 @@ handle_terminated_windows(){
 			# Simplify access to process name of cached window info
 			local_terminated_process_name="${cache_process_name_map["$local_temp_terminated_window_id"]}"
 			# Unset applied limits
-			if [[ -n "${is_frozen_pid_map["$local_terminated_process_pid"]}" ]]; then # Unfreeze process if frozen
+			if [[ -n "${freeze_applied_map["$local_terminated_process_pid"]}" ]]; then # Unfreeze process if frozen
 				passed_process_pid="$local_terminated_process_pid" \
 				passed_section="$local_terminated_section" \
 				passed_process_name="$local_terminated_process_name" \
