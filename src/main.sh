@@ -60,7 +60,7 @@ unset -f validate_config_keys
 
 # Declare associative arrays to store info about applied limits
 declare -A freeze_applied_map \
-freeze_bgprocess_pid_map \
+background_freeze_pid_map \
 is_cpu_limited_pid_map \
 cpulimit_bgprocess_pid_map \
 is_fps_limited_section_map \

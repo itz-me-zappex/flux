@@ -8,9 +8,9 @@ actions_on_exit(){
 	# Unfreeze processes
 	for local_temp_frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
 		# Check for existence of either delayed freezing background process or target process
-		if check_pid_existence "${freeze_bgprocess_pid_map["$local_temp_frozen_process_pid"]}"; then
+		if check_pid_existence "${background_freeze_pid_map["$local_temp_frozen_process_pid"]}"; then
 			# Terminate background process if exists
-			kill "${freeze_bgprocess_pid_map["$local_temp_frozen_process_pid"]}" > /dev/null 2>&1
+			kill "${background_freeze_pid_map["$local_temp_frozen_process_pid"]}" > /dev/null 2>&1
 		elif check_pid_existence "$local_temp_frozen_process_pid"; then
 			# Unfreeze process
 			kill -CONT "$local_temp_frozen_process_pid" > /dev/null 2>&1

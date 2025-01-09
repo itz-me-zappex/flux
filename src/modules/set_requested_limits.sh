@@ -33,7 +33,7 @@ set_requested_limits(){
 				passed_process_pid="$local_process_pid" \
 				background_freeze &
 				# Associate PID of background process with PID of process to interrupt it in case focus event appears earlier than delay ends
-				freeze_bgprocess_pid_map["$local_process_pid"]="$!"
+				background_freeze_pid_map["$local_process_pid"]="$!"
 				# Mark process as frozen
 				freeze_applied_map["$local_process_pid"]='1'
 				# Store PID to array to unfreeze process in case daemon termination

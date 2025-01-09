@@ -4,7 +4,7 @@ unfreeze_process(){
 	local_frozen_processes_pids_array \
 	local_freeze_bgprocess_pid
 	# Simplify access to PID of freeze background process
-	local_freeze_bgprocess_pid="${freeze_bgprocess_pid_map["$passed_process_pid"]}"
+	local_freeze_bgprocess_pid="${background_freeze_pid_map["$passed_process_pid"]}"
 	# Check for existence of freeze background process
 	if check_pid_existence "$local_freeze_bgprocess_pid"; then
 		# Attempt to terminate background process
@@ -37,5 +37,5 @@ unfreeze_process(){
 	frozen_processes_pids_array=("${local_frozen_processes_pids_array[@]}")
 	# Unset details about freezing
 	unset freeze_applied_map["$passed_process_pid"] \
-	freeze_bgprocess_pid_map["$passed_process_pid"]
+	background_freeze_pid_map["$passed_process_pid"]
 }
