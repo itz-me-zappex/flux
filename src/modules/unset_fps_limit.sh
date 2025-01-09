@@ -5,7 +5,7 @@ unset_fps_limit(){
 	local_fps_limited_sections_array \
 	local_fps_limit_bgprocess_pid
 	# Simplify access to PID of background process with delayed setting of FPS limit
-	local_fps_limit_bgprocess_pid="${fps_limit_bgprocess_pid_map["$passed_section"]}"
+	local_fps_limit_bgprocess_pid="${background_fps_limit_pid_map["$passed_section"]}"
 	# Check for existence of FPS limit background process
 	if check_pid_existence "$local_fps_limit_bgprocess_pid"; then
 		# Attempt to terminate background process
@@ -42,5 +42,5 @@ unset_fps_limit(){
 	fps_limited_sections_array=("${local_fps_limited_sections_array[@]}")
 	# Unset details about FPS limiting
 	unset fps_limit_applied_map["$passed_section"] \
-	fps_limit_bgprocess_pid_map["$passed_section"]
+	background_fps_limit_pid_map["$passed_section"]
 }

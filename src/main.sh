@@ -64,7 +64,7 @@ background_freeze_pid_map \
 cpu_limit_applied_map \
 background_cpu_limit_pid_map \
 fps_limit_applied_map \
-fps_limit_bgprocess_pid_map \
+background_fps_limit_pid_map \
 is_sched_idle_map \
 sched_idle_bgprocess_pid_map
 

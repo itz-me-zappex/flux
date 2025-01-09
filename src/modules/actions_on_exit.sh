@@ -26,8 +26,8 @@ actions_on_exit(){
 	# Unset FPS limits
 	for local_temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
 		# Terminate process with delayed setting of FPS limit if exists
-		if check_pid_existence "${fps_limit_bgprocess_pid_map["$local_temp_fps_limited_section"]}"; then
-			kill "${fps_limit_bgprocess_pid_map["$local_temp_fps_limited_section"]}" > /dev/null 2>&1
+		if check_pid_existence "${background_fps_limit_pid_map["$local_temp_fps_limited_section"]}"; then
+			kill "${background_fps_limit_pid_map["$local_temp_fps_limited_section"]}" > /dev/null 2>&1
 		fi
 		# Set FPS from 'fps-focus' key to unset limit
 		mangohud_fps_set "${config_key_mangohud_config_map["$local_temp_fps_limited_section"]}" "${config_key_mangohud_source_config_map["$local_temp_fps_limited_section"]}" "${config_key_fps_focus_map["$local_temp_fps_limited_section"]}" > /dev/null 2>&1
