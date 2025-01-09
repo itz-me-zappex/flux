@@ -28,7 +28,7 @@ parse_config(){
 				local_section="${local_temp_config_line/\[/}"
 				local_section="${local_section/%\]/}"
 				sections_array+=("$local_section")
-			elif [[ "${local_temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|(lazy-)?exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus|idle)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
+			elif [[ "${local_temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|(lazy-)?exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus|idle|minimize)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
 				# Remove key name and equal symbol
 				local_config_value="${local_temp_config_line/*=/}"
 				# Remove all spaces before and after string, internal shell parameter expansion required to get spaces supposed to be removed
@@ -155,11 +155,25 @@ parse_config(){
 							message --error "Value '$local_config_value' specified in key 'idle' in section '$local_section' in '$config' config file is not boolean!"
 							exit 1
 						else
-							# Simplify value as it is boolean
+							# Simplify value
 							if check_true "$local_config_value"; then
 								config_key_idle_map["$local_section"]='1'
 							else
 								config_key_idle_map["$local_section"]='0'
+							fi
+						fi
+					;;
+					minimize* )
+						# Exit with an error if value is not boolean
+						if ! check_bool "$local_config_value"; then
+							message --error "Value '$local_config_value' specified in key 'minimize' in section '$local_section' in '$config' config file is not boolean!"
+							exit 1
+						else
+							# Simplify value
+							if check_true "$local_config_value"; then
+								config_key_minimize_map["$local_section"]='1'
+							else
+								config_key_minimize_map["$local_section"]='0'
 							fi
 						fi
 					esac
