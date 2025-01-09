@@ -24,7 +24,7 @@ unfocus_request_limit(){
 			# Do not request idle scheduling policy if CPU limit specified to zero because that is useless as process will not consume neither GPU nor CPU time
 			if (( "${config_key_cpu_limit_map["$previous_section"]}" > 0 )) || [[ "${config_key_cpu_limit_map["$previous_section"]}" == '-1' ]]; then
 				# Request idle scheduling policy if it is not set already
-				if [[ -z "${is_sched_idle_map["$previous_process_pid"]}" ]]; then
+				if [[ -z "${sched_idle_applied_map["$previous_process_pid"]}" ]]; then
 					request_sched_idle_map["$previous_process_pid"]='1'
 				fi
 			else

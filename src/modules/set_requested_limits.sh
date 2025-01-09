@@ -128,7 +128,7 @@ set_requested_limits(){
 					# Associate PID of background process with PID of process to interrupt it on focus event
 					sched_idle_bgprocess_pid_map["$local_process_pid"]="$!"
 					# Mark process as idle
-					is_sched_idle_map["$local_process_pid"]='1'
+					sched_idle_applied_map["$local_process_pid"]='1'
 					# Store PID to array to restore scheduling policy of process in case daemon termination
 					idle_processes_pids_array+=("$local_process_pid")
 				else

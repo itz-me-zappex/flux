@@ -56,7 +56,7 @@ handle_terminated_windows(){
 				fi
 			fi
 			# Restore scheduling policy if was changed
-			if [[ -n "${is_sched_idle_map["$local_terminated_process_pid"]}" ]]; then
+			if [[ -n "${sched_idle_applied_map["$local_terminated_process_pid"]}" ]]; then
 				passed_process_pid="$local_terminated_process_pid" \
 				passed_section="$local_terminated_section" \
 				passed_process_name="$local_terminated_process_name" \

@@ -21,7 +21,7 @@ focus_unset_limit(){
 		unset_fps_limit
 	fi
 	# Restore scheduling policy for process if it has been changed to idle
-	if [[ -n "${is_sched_idle_map["$process_pid"]}" ]]; then
+	if [[ -n "${sched_idle_applied_map["$process_pid"]}" ]]; then
 		passed_process_pid="$process_pid" \
 		passed_section="$section" \
 		passed_process_name="$process_name" \

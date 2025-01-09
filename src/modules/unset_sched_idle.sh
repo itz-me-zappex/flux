@@ -75,7 +75,7 @@ unset_sched_idle(){
 		sched_previous_runtime_map["$passed_process_pid"] \
 		sched_previous_deadline_map["$passed_process_pid"] \
 		sched_previous_period_map["$passed_process_pid"] \
-		is_sched_idle_map["$passed_process_pid"] \
+		sched_idle_applied_map["$passed_process_pid"] \
 		sched_idle_bgprocess_pid_map["$passed_process_pid"]
 	fi
 }
