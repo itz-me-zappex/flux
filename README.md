@@ -51,37 +51,37 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 
 - Required: `bash` `util-linux` `cpulimit` `coreutils` `xorg-xprop` `xorg-xwininfo`
   
-- Optional: `mangohud` `lib32-mangohud` `libnotify`
+- Optional: `mangohud` `lib32-mangohud` `libnotify` `xdotool`
 
 ### Debian and dereatives
   
 - Required: `bash` `cpulimit` `coreutils` `x11-utils`
 
-- Optional: `mangohud` `mangohud:i386` `libnotify-bin`
+- Optional: `mangohud` `mangohud:i386` `libnotify-bin` `xdotool`
 
 ### Void Linux and dereatives
 
 - Required: `bash` `util-linux` `cpulimit` `coreutils` `xprop` `xwininfo`
 
-- Optional: `MangoHud` `MangoHud-32bit` `libnotify`
+- Optional: `MangoHud` `MangoHud-32bit` `libnotify` `xdotool`
 
 ### Fedora and dereatives
 
 - Required: `bash` `util-linux` `cpulimit` `coreutils` `xprop` `xwininfo`
 
-- Optional: `mangohud` `mangohud.i686` `libnotify`
+- Optional: `mangohud` `mangohud.i686` `libnotify` `xdotool`
 
 ### OpenSUSE Tumbleweed and dereatives
 
 - Required: `bash` `util-linux` `cpulimit` `coreutils` `xprop` `xwininfo`
 
-- Optional: `mangohud` `mangohud-32bit` `libnotify4`
+- Optional: `mangohud` `mangohud-32bit` `libnotify4` `xdotool`
 
 ### Gentoo and dereatives
 
 - Required: `app-shells/bash` `sys-apps/util-linux` `app-admin/cpulimit` `sys-apps/coreutils` `x11-apps/xprop` `x11-apps/xwininfo`
 
-- Optional: [`mangohud (is not packaged)`](https://github.com/flightlessmango/MangoHud) `x11-libs/libnotify`
+- Optional: `x11-libs/libnotify` `x11-misc/xdotool` [`mangohud (is not packaged)`](https://github.com/flightlessmango/MangoHud)
 
 Dependencies for other distributions will be added soon.
 
@@ -207,6 +207,7 @@ A simple INI is used for configuration.
 | `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`, cannot be equal to `0` as that means no limit. |
 | `fps-focus` | FPS to set on focus or list of comma-separated integers (e.g. `30,60,120`, used in MangoHud as FPS limits you can switch between using built-in keybinding), requires `fps-unfocus`, defaults to `0` (i.e. no limit). |
 | `idle` | Boolean, set `SCHED_IDLE` scheduling policy for process on unfocus event. Daemon requires realtime privileges or root rights to change scheduling policy for processes with `SCHED_RR` or `SCHED_FIFO` to `SCHED_IDLE` and restore it on focus event respecively, and only root rights to restore `SCHED_DEADLINE` with its parameters, changing/restoring `SCHED_OTHER` and `SCHED_BATCH` scheduling policies do not require neither root nor realtime privileges. |
+| `minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`, requires `xdotool` installed on system. |
 
 ### Config path
 - Daemon searches for following configuration files by priority:
