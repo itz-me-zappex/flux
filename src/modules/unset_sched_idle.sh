@@ -1,16 +1,16 @@
 # Required to terminate background process with delayed setting of 'SCHED_IDLE' or restore scheduling policy for process if window becomes focused or terminated
 unset_sched_idle(){
-	local local_sched_idle_bgprocess_pid \
+	local local_background_sched_idle_pid \
 	local_policy_option \
 	local_policy_name \
 	local_temp_idle_pid \
 	local_idle_processes_pids_array
 	# Simplify access to PID of background process with delayed setting of 'SCHED_IDLE'
-	local_sched_idle_bgprocess_pid="${background_sched_idle_pid_map["$passed_process_pid"]}"
+	local_background_sched_idle_pid="${background_sched_idle_pid_map["$passed_process_pid"]}"
 	# Check for existence of background process with delayed setting of 'SCHED_IDLE'
-	if check_pid_existence "$local_sched_idle_bgprocess_pid"; then
+	if check_pid_existence "$local_background_sched_idle_pid"; then
 		# Attempt to terminate background process
-		kill "$local_sched_idle_bgprocess_pid" > /dev/null 2>&1
+		kill "$local_background_sched_idle_pid" > /dev/null 2>&1
 		# Print message if delay is not zero
 		if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
 			# Define message depending by 'kill' exit code

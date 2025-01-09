@@ -1,7 +1,7 @@
 # Required to unset limits and run command from 'lazy-exec-unfocus' config key on SIGTERM or SIGINT signal
 actions_on_exit(){
 	local local_temp_frozen_process_pid \
-	local_temp_cpulimit_bgprocess_pid \
+	local_temp_background_cpu_limit_pid \
 	local_temp_fps_limited_section \
 	local_temp_idle_process_pid \
 	local_policy_option
@@ -17,10 +17,10 @@ actions_on_exit(){
 		fi
 	done
 	# Unset CPU limits
-	for local_temp_cpulimit_bgprocess_pid in "${cpulimit_bgprocesses_pids_array[@]}"; do
+	for local_temp_background_cpu_limit_pid in "${background_cpu_limit_pids_array[@]}"; do
 		# Terminate 'cpulimit' process which has been started by daemon if exists
-		if check_pid_existence "$local_temp_cpulimit_bgprocess_pid"; then
-			kill "$local_temp_cpulimit_bgprocess_pid" > /dev/null 2>&1
+		if check_pid_existence "$local_temp_background_cpu_limit_pid"; then
+			kill "$local_temp_background_cpu_limit_pid" > /dev/null 2>&1
 		fi
 	done
 	# Unset FPS limits
