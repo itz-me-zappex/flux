@@ -49,7 +49,7 @@ set_requested_limits(){
 				# Store PID of background process to array to interrupt it in case daemon exit
 				cpulimit_bgprocesses_pids_array+=("$!")
 				# Associate PID of background process with PID of process to interrupt it on focus event
-				cpulimit_bgprocess_pid_map["$local_process_pid"]="$!"
+				background_cpu_limit_pid_map["$local_process_pid"]="$!"
 				# Mark process as CPU limited
 				cpu_limit_applied_map["$local_process_pid"]='1'
 			elif [[ -n "$local_section" && -n "${request_fps_limit_map["$local_section"]}" ]]; then
