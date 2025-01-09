@@ -1,3 +1,4 @@
+# TODO: Rewrite this garbage from scratch and forget it as nigthmare.
 # Required to unset limits and run command from 'lazy-exec-unfocus' config key on SIGTERM or SIGINT signal
 actions_on_exit(){
 	local local_temp_frozen_process_pid \
