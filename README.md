@@ -89,7 +89,7 @@ Dependencies for other distributions will be added soon.
 ### Manual installation using release tarball
 You can use this method if there is no package build script for your distro. Make sure you have installed dependencies as described above before continue.
 ```bash
-flux_version='1.16' # set latest version as I update it here every release
+flux_version='1.17' # set latest version as I update it here every release
 ```
 ```bash
 mkdir 'flux' && cd 'flux' # create and change build directory
@@ -116,7 +116,7 @@ sudo install -Dm 755 'flux' '/usr/local/bin/flux' # install daemon to '/usr/loca
 ### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
 ``` bash
-flux_version='1.16' # set latest version as I update it here every release
+flux_version='1.17' # set latest version as I update it here every release
 ```
 ```bash
 mkdir 'flux' && cd 'flux' # create and change build directory
@@ -130,7 +130,7 @@ makepkg -sric # build a package and install it
 
 ### Debian and dereatives
 ```bash
-flux_version='1.16' # set latest version as I update it here every release
+flux_version='1.17' # set latest version as I update it here every release
 ```
 ```bash
 mkdir 'flux' && cd 'flux' # create and change build directory
@@ -206,7 +206,7 @@ A simple INI is used for configuration.
 | `mangohud-config` | Path to MangoHud config which should be changed (target), required if you want change FPS limits and requires `fps-unfocus`. Make sure you created specified config, at least just keep it blank, otherwise MangoHud will not be able to load new config on fly and daemon will throw warnings related to config absence. Do not use the same config for multiple sections! |
 | `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`, cannot be equal to `0` as that means no limit. |
 | `fps-focus` | FPS to set on focus or list of comma-separated integers (e.g. `30,60,120`, used in MangoHud as FPS limits you can switch between using built-in keybinding), requires `fps-unfocus`, defaults to `0` (i.e. no limit). |
-| `idle` | Set `SCHED_IDLE` scheduling policy for process on unfocus event. Daemon requires realtime privileges or root rights to change scheduling policy for processes with `SCHED_RR` or `SCHED_FIFO` to `SCHED_IDLE` and restore it on focus event respecively, and only root rights to restore `SCHED_DEADLINE` with its parameters, changing/restoring `SCHED_OTHER` and `SCHED_BATCH` scheduling policies do not require neither root nor realtime privileges. |
+| `idle` | Boolean, set `SCHED_IDLE` scheduling policy for process on unfocus event. Daemon requires realtime privileges or root rights to change scheduling policy for processes with `SCHED_RR` or `SCHED_FIFO` to `SCHED_IDLE` and restore it on focus event respecively, and only root rights to restore `SCHED_DEADLINE` with its parameters, changing/restoring `SCHED_OTHER` and `SCHED_BATCH` scheduling policies do not require neither root nor realtime privileges. |
 
 ### Config path
 - Daemon searches for following configuration files by priority:
