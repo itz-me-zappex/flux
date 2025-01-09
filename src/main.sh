@@ -66,7 +66,7 @@ background_cpu_limit_pid_map \
 fps_limit_applied_map \
 background_fps_limit_pid_map \
 sched_idle_applied_map \
-sched_idle_bgprocess_pid_map
+background_sched_idle_pid_map
 
 # Declare associative arrays to store info about requested limits
 declare -A request_freeze_map \

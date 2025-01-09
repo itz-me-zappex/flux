@@ -6,7 +6,7 @@ unset_sched_idle(){
 	local_temp_idle_pid \
 	local_idle_processes_pids_array
 	# Simplify access to PID of background process with delayed setting of 'SCHED_IDLE'
-	local_sched_idle_bgprocess_pid="${sched_idle_bgprocess_pid_map["$passed_process_pid"]}"
+	local_sched_idle_bgprocess_pid="${background_sched_idle_pid_map["$passed_process_pid"]}"
 	# Check for existence of background process with delayed setting of 'SCHED_IDLE'
 	if check_pid_existence "$local_sched_idle_bgprocess_pid"; then
 		# Attempt to terminate background process
@@ -76,6 +76,6 @@ unset_sched_idle(){
 		sched_previous_deadline_map["$passed_process_pid"] \
 		sched_previous_period_map["$passed_process_pid"] \
 		sched_idle_applied_map["$passed_process_pid"] \
-		sched_idle_bgprocess_pid_map["$passed_process_pid"]
+		background_sched_idle_pid_map["$passed_process_pid"]
 	fi
 }
