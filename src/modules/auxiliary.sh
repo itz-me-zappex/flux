@@ -89,3 +89,13 @@ get_realpath(){
 	# Output will be stored to variable which calls this function from '$(…)'
 	realpath -m "${local_relative_path/'~'/"$HOME"}"
 }
+
+# Required to check if value is boolean or nor
+check_bool(){
+	local local_value="$1"
+	if [[ "${local_value,,}" =~ ^('true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0')$ ]]; then
+		return 0
+	else
+		return 1
+	fi
+}
