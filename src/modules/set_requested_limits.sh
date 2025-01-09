@@ -114,10 +114,10 @@ set_requested_limits(){
 				fi
 				# Print warning if daemon has insufficient rights to set realtime/deadline scheduling policy, otherwise - change it to idle not set already
 				if [[ "$sched_realtime_is_supported" == '0' && "${sched_previous_policy_map["$local_process_pid"]}" =~ ^('SCHED_RR'|'SCHED_FIFO')$ ]]; then
-					message --warning "Daemon has insufficient rights to restore realtime scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle cancelled!"
+					message --warning "Daemon has insufficient rights to restore realtime scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle on unfocus event cancelled!"
 					local_idle_cancelled='1'
 				elif [[ "$UID" != '0' && "${sched_previous_policy_map["$local_process_pid"]}" == 'SCHED_DEADLINE' ]]; then
-					message --warning "Daemon has insufficient rights to restore deadline scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle cancelled!"
+					message --warning "Daemon has insufficient rights to restore deadline scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle on unfocus event cancelled!"
 					local_idle_cancelled='1'
 				elif [[ "${sched_previous_policy_map["$local_process_pid"]}" != 'SCHED_IDLE' ]]; then # Do not do anything if scheduling policy already idle
 					# Change scheduling policy to 'SCHED_IDLE'
@@ -132,7 +132,7 @@ set_requested_limits(){
 					# Store PID to array to restore scheduling policy of process in case daemon termination
 					idle_processes_pids_array+=("$local_process_pid")
 				else
-					message --info "Process '$local_process_name' with PID $local_process_pid already has scheduling policy set to idle, changing it to idle cancelled."
+					message --info "Process '$local_process_name' with PID $local_process_pid already has scheduling policy set to idle, changing it to idle on unfocus event cancelled."
 					local_idle_cancelled='1'
 				fi
 				# Unset info about scheduling policy if changing it to idle is cancelled
@@ -143,6 +143,17 @@ set_requested_limits(){
 					sched_previous_deadline_map["$local_process_pid"] \
 					sched_previous_period_map["$local_process_pid"]
 				fi
+			fi
+			# Minimize window if requested
+			if [[ -n "${request_minimize_map["$local_process_pid"]}" ]]; then
+				# Attempt to minimize window using xdotool, window ID should be converted to numeric value from hexadecimal
+				if ! xdotool windowminimize $(("$local_temp_window_id")) > /dev/null 2>&1; then
+					message --warning "Unable to forcefully minimize window '$local_temp_window_id' of process '$local_process_name' with PID $local_process_pid on unfocus event!"
+				else
+					message --info "Window '$local_temp_window_id' of process '$local_process_name' with PID $local_process_pid has been forcefully minimized on unfocus event."
+				fi
+				# Unset as it becomes useless
+				unset request_minimize_map["$local_process_pid"]
 			fi
 		fi
 	done
