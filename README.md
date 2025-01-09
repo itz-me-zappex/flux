@@ -196,7 +196,7 @@ A simple INI is used for configuration.
 | `executable` | Path to binary of process, required if neither `name` nor `command` is specified. |
 | `owner` | Effective UID of process or username (login), optional identifier. |
 | `cpu-limit` | CPU limit between `0%` and `100%`, defaults to `-1%` what means no CPU limit, `%` symbol is optional. |
-| `delay` | Delay in seconds before applying CPU/FPS limit. Optional, defaults to `0`, supports values with floating point. |
+| `delay` | Delay in seconds before applying CPU/FPS limit or setting `SCHED_IDLE`. Optional, defaults to `0`, supports values with floating point. |
 | `exec-focus` | Command to execute on focus event, command runs via bash and will not be killed on daemon exit, output is hidden to avoid mess in output of daemon. |
 | `exec-unfocus` | Command to execute on unfocus event, command runs via bash and will not be killed on daemon exit, output is hidden to avoid mess in output of daemon. |
 | `lazy-exec-focus` | Same as `exec-focus`, but command will not run when processing opened windows if `--hot` is specified. |
@@ -206,6 +206,7 @@ A simple INI is used for configuration.
 | `mangohud-config` | Path to MangoHud config which should be changed (target), required if you want change FPS limits and requires `fps-unfocus`. Make sure you created specified config, at least just keep it blank, otherwise MangoHud will not be able to load new config on fly and daemon will throw warnings related to config absence. Do not use the same config for multiple sections! |
 | `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`, cannot be equal to `0` as that means no limit. |
 | `fps-focus` | FPS to set on focus or list of comma-separated integers (e.g. `30,60,120`, used in MangoHud as FPS limits you can switch between using built-in keybinding), requires `fps-unfocus`, defaults to `0` (i.e. no limit). |
+| `idle` | Set `SCHED_IDLE` scheduling policy for process on unfocus event. Daemon requires realtime privileges or root rights to change scheduling policy for processes with `SCHED_RR` or `SCHED_FIFO` to `SCHED_IDLE` and restore it on focus event respecively, and only root rights to restore `SCHED_DEADLINE` with its parameters, changing/restoring `SCHED_OTHER` and `SCHED_BATCH` scheduling policies do not require neither root nor realtime privileges. |
 
 ### Config path
 - Daemon searches for following configuration files by priority:
