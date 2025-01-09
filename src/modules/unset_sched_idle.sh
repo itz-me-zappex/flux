@@ -25,22 +25,22 @@ unset_sched_idle(){
 		case "${sched_previous_policy_map["$passed_process_pid"]}" in
 		'SCHED_FIFO' )
 			local_policy_option='--fifo'
-			local_policy_name='FIFO (first in first out)'
+			local_policy_name="'FIFO' (first in first out)"
 		;;
 		'SCHED_RR' )
 			local_policy_option='--rr'
-			local_policy_name='RR (round robin)'
+			local_policy_name="'RR' (round robin)"
 		;;
 		'SCHED_OTHER' )
 			local_policy_option='--other'
-			local_policy_name='other'
+			local_policy_name="'other'"
 		;;
 		'SCHED_BATCH' )
 			local_policy_option='--batch'
-			local_policy_name='batch'
+			local_policy_name="'batch'"
 		;;
 		'SCHED_DEADLINE' ) # Setting option unneeded because command for deadline differs greatly
-			local_policy_name='deadline'
+			local_policy_name="'deadline'"
 		esac
 		# Define how to restore scheduling policy depending by whether that is deadline or not
 		if [[ "${sched_previous_policy_map["$passed_process_pid"]}" == 'SCHED_DEADLINE' ]]; then
