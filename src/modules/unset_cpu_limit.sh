@@ -16,6 +16,6 @@ unset_cpu_limit(){
 	# Store updated info into array
 	cpulimit_bgprocesses_pids_array=("${local_cpulimit_bgprocesses_pids_array[@]}")
 	# Unset details about CPU limiting
-	unset is_cpu_limited_pid_map["$passed_process_pid"] \
+	unset cpu_limit_applied_map["$passed_process_pid"] \
 	cpulimit_bgprocess_pid_map["$passed_process_pid"]
 }

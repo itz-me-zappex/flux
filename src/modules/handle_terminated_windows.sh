@@ -32,7 +32,7 @@ handle_terminated_windows(){
 				passed_process_name="$local_terminated_process_name" \
 				passed_end_of_msg='due to window termination' \
 				unfreeze_process
-			elif [[ -n "${is_cpu_limited_pid_map["$local_terminated_process_pid"]}" ]]; then # # Unset CPU limit if limited
+			elif [[ -n "${cpu_limit_applied_map["$local_terminated_process_pid"]}" ]]; then # # Unset CPU limit if limited
 				passed_process_pid="$local_terminated_process_pid" \
 				passed_process_name="$local_terminated_process_name" \
 				passed_signal='-SIGUSR2' \

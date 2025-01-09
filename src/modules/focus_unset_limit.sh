@@ -8,7 +8,7 @@ focus_unset_limit(){
 		passed_process_name="$process_name" \
 		passed_end_of_msg="$local_end_of_msg" \
 		unfreeze_process
-	elif [[ -n "${is_cpu_limited_pid_map["$process_pid"]}" ]]; then # Unset CPU limit if has been applied
+	elif [[ -n "${cpu_limit_applied_map["$process_pid"]}" ]]; then # Unset CPU limit if has been applied
 		# Unset CPU limit
 		passed_process_pid="$process_pid" \
 		passed_process_name="$process_name" \

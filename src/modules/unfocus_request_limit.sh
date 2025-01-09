@@ -10,7 +10,7 @@ unfocus_request_limit(){
 			fi
 		elif (( "${config_key_cpu_limit_map["$previous_section"]}" > 0 )); then
 			# Request CPU limit for process if it is not limited
-			if [[ -z "${is_cpu_limited_pid_map["$previous_process_pid"]}" ]]; then
+			if [[ -z "${cpu_limit_applied_map["$previous_process_pid"]}" ]]; then
 				request_cpu_limit_map["$previous_process_pid"]='1'
 			fi
 		elif [[ -n "${config_key_fps_unfocus_map["$previous_section"]}" ]]; then

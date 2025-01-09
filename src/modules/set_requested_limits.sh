@@ -51,7 +51,7 @@ set_requested_limits(){
 				# Associate PID of background process with PID of process to interrupt it on focus event
 				cpulimit_bgprocess_pid_map["$local_process_pid"]="$!"
 				# Mark process as CPU limited
-				is_cpu_limited_pid_map["$local_process_pid"]='1'
+				cpu_limit_applied_map["$local_process_pid"]='1'
 			elif [[ -n "$local_section" && -n "${request_fps_limit_map["$local_section"]}" ]]; then
 				# Unset request as it becomes useless
 				unset request_fps_limit_map["$local_section"]
