@@ -99,3 +99,13 @@ check_bool(){
 		return 1
 	fi
 }
+
+# Required to check if boolean value is true
+check_true(){
+	local local_value="$1"
+	if [[ "${local_value,,}" =~ ^('true'|'t'|'yes'|'y'|'1')$ ]]; then
+		return 0
+	else
+		return 1
+	fi
+}
