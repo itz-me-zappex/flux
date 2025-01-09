@@ -151,12 +151,12 @@ parse_config(){
 					;;
 					idle* )
 						# Exit with an error if value is not boolean
-						if [[ ! "${local_config_value,,}" =~ ^('true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0')$ ]]; then
+						if ! check_bool "$local_config_value"; then
 							message --error "Value '$local_config_value' specified in key 'idle' in section '$local_section' in '$config' config file is not boolean!"
 							exit 1
 						else
 							# Simplify value as it is boolean
-							if [[ "${local_config_value,,}" =~ ^('true'|'t'|'yes'|'y'|'1')$ ]]; then
+							if check_true "$local_config_value"; then
 								config_key_idle_map["$local_section"]='1'
 							else
 								config_key_idle_map["$local_section"]='0'
