@@ -37,7 +37,7 @@ handle_terminated_windows(){
 				passed_process_name="$local_terminated_process_name" \
 				passed_signal='-SIGUSR2' \
 				unset_cpu_limit
-			elif [[ -n "$local_terminated_section" && -n "${is_fps_limited_section_map["$local_terminated_section"]}" ]]; then # Unset FPS limit if limited
+			elif [[ -n "$local_terminated_section" && -n "${fps_limit_applied_map["$local_terminated_section"]}" ]]; then # Unset FPS limit if limited
 				# Do not remove FPS limit if one of existing windows matches with the same section
 				for local_temp_existing_window_id in $local_existing_window_ids; do
 					# Simplify access to PID of terminated process using cache

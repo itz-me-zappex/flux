@@ -62,7 +62,7 @@ set_requested_limits(){
 				# Associate PID of background process with section to interrupt in case focus event appears earlier than delay ends
 				fps_limit_bgprocess_pid_map["$local_section"]="$!"
 				# Mark section as FPS limited, required to check FPS limit existence on focus event
-				is_fps_limited_section_map["$local_section"]='1'
+				fps_limit_applied_map["$local_section"]='1'
 				# Store section to array, required to unset FPS limits on daemon termination
 				fps_limited_sections_array+=("$local_section")
 			fi

@@ -41,6 +41,6 @@ unset_fps_limit(){
 	# Store updated info into array
 	fps_limited_sections_array=("${local_fps_limited_sections_array[@]}")
 	# Unset details about FPS limiting
-	unset is_fps_limited_section_map["$passed_section"] \
+	unset fps_limit_applied_map["$passed_section"] \
 	fps_limit_bgprocess_pid_map["$passed_section"]
 }
