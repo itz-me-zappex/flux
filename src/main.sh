@@ -47,7 +47,8 @@ config_key_mangohud_source_config_map \
 config_key_mangohud_config_map \
 config_key_fps_unfocus_map \
 config_key_fps_focus_map \
-config_key_idle_map
+config_key_idle_map \
+config_key_minimize_map
 
 # Config parsing
 parse_config
