@@ -44,8 +44,6 @@ set_requested_limits(){
 				passed_process_name="$local_process_name" \
 				passed_process_pid="$local_process_pid" \
 				background_cpu_limit &
-				# Store PID of background process to array to interrupt it in case daemon exit
-				background_cpu_limit_pids_array+=("$!")
 				# Associate PID of background process with PID of process to interrupt it on focus event
 				background_cpu_limit_pid_map["$local_process_pid"]="$!"
 				# Mark process as CPU limited
