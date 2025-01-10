@@ -376,7 +376,7 @@ Now you can easily grab templates from focused windows to use them in config by 
 - I try to avoid using external tools in favor of bashisms to reduce CPU usage by daemon and speed up code.
 
 ### Why not just use Gamescope to set FPS limit on unfocus?
-- You can use it if you like, my project is aimed at X11 and systems without Wayland support, as well as non-interference with application/game window and user input unlike Gamescope does, so you have no need to execute app/game using wrapper, just configure daemon and have fun.
+- You can use it if you like, my project is aimed at X11 and systems without Wayland support, as well as at non-interference with application/game window and user input unlike Gamescope does, so you have no need to execute app/game using wrapper, just configure daemon and have fun.
 
 ### What about Wayland support?
 - That is impossible, there is no any unified way to read window related events (focus, unfocus, closing etc.) and obtain PIDs from windows on Wayland.
