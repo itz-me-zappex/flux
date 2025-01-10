@@ -29,6 +29,7 @@ build(){
 		message.sh
 		parse_config.sh
 		parse_options.sh
+		print_template.sh
 		set_requested_limits.sh
 		unfocus_request_limit.sh
 		unfreeze_process.sh
