@@ -63,7 +63,7 @@ parse_options(){
 				echo "name = '"$process_name"'
 executable = '"$process_executable"'
 command = '"$process_command"'
-owner = "$process_owner"
+owner = '"$process_owner_username"'
 "
 				exit 0
 			else
