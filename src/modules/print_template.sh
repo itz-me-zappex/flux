@@ -11,7 +11,7 @@ print_template(){
 		# Check for failure related to X server check
 		if [[ -n "$fail" ]]; then
 			# Exit with an error if something wrong with X server
-			message --error "Unable to get info about focused window, something is wrong with X11 session!"
+			message --error "Unable to get info about focused window, something is wrong with X11 session or window manager is EMHW incompatible!"
 			exit 1
 		else
 			# Get output of 'xprop' tool containing window ID
@@ -23,7 +23,7 @@ print_template(){
 	--pick | -p )
 		# Exit with an error if something wrong with X server
 		if [[ -n "$fail" ]]; then
-			message --error "Unable to trigger window picker, something is wrong with X11 session!"
+			message --error "Unable to trigger window picker, something is wrong with X11 session or window manager is EMHW incompatible!"
 			exit 1
 		else
 			# Get output of 'xwininfo' tool containing window ID
