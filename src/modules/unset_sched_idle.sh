@@ -3,8 +3,6 @@ unset_sched_idle(){
 	local local_background_sched_idle_pid \
 	local_policy_option \
 	local_policy_name \
-	local_temp_idle_pid \
-	local_idle_processes_pids_array \
 	local_config_delay
 	# Simplify access to PID of background process with delayed setting of 'SCHED_IDLE'
 	local_background_sched_idle_pid="${background_sched_idle_pid_map["$passed_process_pid"]}"
@@ -63,15 +61,6 @@ unset_sched_idle(){
 		else
 			message --info "Scheduling policy $local_policy_name has been restored for process '$passed_process_name' with PID $passed_process_pid $passed_end_of_msg."
 		fi
-		# Remove process PID from array
-		for local_temp_idle_pid in "${idle_processes_pids_array[@]}"; do
-			# Skip current PID as I want remove it from array
-			if [[ "$local_temp_idle_pid" != "$passed_process_pid" ]]; then
-				local_idle_processes_pids_array+=("$local_temp_idle_pid")
-			fi
-		done
-		# Store updated info info array
-		idle_processes_pids_array=("${local_idle_processes_pids_array[@]}")
 		# Unset details about previous and applied idle cheduling policies
 		unset sched_previous_policy_map["$passed_process_pid"] \
 		sched_previous_priority_map["$passed_process_pid"] \

@@ -123,8 +123,6 @@ set_requested_limits(){
 					background_sched_idle_pid_map["$local_process_pid"]="$!"
 					# Mark process as idle
 					sched_idle_applied_map["$local_process_pid"]='1'
-					# Store PID to array to restore scheduling policy of process in case daemon termination
-					idle_processes_pids_array+=("$local_process_pid")
 				else
 					message --info "Process '$local_process_name' with PID $local_process_pid already has scheduling policy set to idle, changing it to idle on unfocus event cancelled."
 					local_idle_cancelled='1'
