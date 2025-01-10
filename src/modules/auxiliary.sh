@@ -31,8 +31,9 @@ cmdline_get(){
 
 # Required to validate X11 session
 x11_session_check(){
-	# Return an error if 'xprop' unable to obtain info about X server
-	if ! xprop -root > /dev/null 2>&1; then
+	local local_xprop_output
+	# Return an error if 'xprop' unable to obtain info about X11 session or window manager is not compatible with EMHW
+	if ! local_xprop_output="$(xprop -root _NET_SUPPORTED)" || [[ "$local_xprop_output" == '_NET_SUPPORTED:  no such atom on any window.' ]]; then
 		return 1
 	fi
 }
