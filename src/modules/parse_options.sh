@@ -38,7 +38,7 @@ parse_options(){
 			--pick | -p )
 				# Exit with an error if something wrong with X server
 				if [[ -n "$fail" ]]; then
-					message --error "Unable to call window picker, something is wrong with X11 session!"
+					message --error "Unable to trigger window picker, something is wrong with X11 session!"
 					exit 1
 				else
 					# Get output of 'xwininfo' tool containing window ID
