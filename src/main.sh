@@ -97,7 +97,7 @@ sched_previous_period_map
 # Exit with an error if that is not a X11 session
 if ! x11_session_check; then
 	# Exit with an error if X11 session is invalid
-	message --error "Unable to start daemon, something is wrong with X11 session!"
+	message --error "Unable to start daemon, something is wrong with X11 session or window manager is EMHW incompatible!"
 	exit 1
 else
 	# Will not be used anymore
