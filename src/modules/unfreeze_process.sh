@@ -1,8 +1,6 @@
 # Required to terminate freeze background process or unfreeze process if window becomes focused or terminated
 unfreeze_process(){
-	local local_temp_frozen_process_pid \
-	local_frozen_processes_pids_array \
-	local_background_freeze_pid
+	local local_background_freeze_pid
 	# Simplify access to PID of freeze background process
 	local_background_freeze_pid="${background_freeze_pid_map["$passed_process_pid"]}"
 	# Check for existence of freeze background process
@@ -28,15 +26,6 @@ unfreeze_process(){
 			message --info "Process '$passed_process_name' with PID $passed_process_pid has been unfrozen $passed_end_of_msg."
 		fi
 	fi
-	# Remove PID from array
-	for local_temp_frozen_process_pid in "${frozen_processes_pids_array[@]}"; do
-		# Skip current PID as I want remove it from array
-		if [[ "$local_temp_frozen_process_pid" != "$passed_process_pid" ]]; then
-			local_frozen_processes_pids_array+=("$local_temp_frozen_process_pid")
-		fi
-	done
-	# Store updated info into array
-	frozen_processes_pids_array=("${local_frozen_processes_pids_array[@]}")
 	# Unset details about freezing
 	unset freeze_applied_map["$passed_process_pid"] \
 	background_freeze_pid_map["$passed_process_pid"]

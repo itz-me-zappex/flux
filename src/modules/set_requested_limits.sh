@@ -36,8 +36,6 @@ set_requested_limits(){
 				background_freeze_pid_map["$local_process_pid"]="$!"
 				# Mark process as frozen
 				freeze_applied_map["$local_process_pid"]='1'
-				# Store PID to array to unfreeze process in case daemon termination
-				frozen_processes_pids_array+=("$local_process_pid")
 			elif [[ -n "${request_cpu_limit_map["$local_process_pid"]}" ]]; then
 				# Unset request as it becomes useless
 				unset request_cpu_limit_map["$local_process_pid"]
