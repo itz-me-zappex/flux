@@ -231,7 +231,7 @@ Tip: Use `--focus` or `--pick` option to obtain info about process in usable for
 
 #### Long examples
 ```ini
-; Example using freezing as that is singleplayer game
+; Freeze singleplayer game on unfocus and disable/enable compositor on unfocus and focus respectively
 [The Witcher 3: Wild Hunt]
 name = witcher3.exe
 executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wine64-preloader
@@ -241,7 +241,7 @@ cpu-limit = 0%
 lazy-exec-focus = killall picom
 lazy-exec-unfocus = picom
 
-; Example using FPS limit as that is online game and I use MangoHud
+; Set FPS limit to 5 on unfocus and restore it to 60 on focus, unmute and mute on focus and unfocus respectively, minimize on unfocus as game supports only borderless windowed mode and reduce priority
 [Forza Horizon 4]
 name = ForzaHorizon4.exe
 executable = /run/media/zappex/WD-BLUE/Games/Steam/steamapps/common/Proton 9.0 (Beta)/files/bin/wine64-preloader
@@ -251,49 +251,47 @@ mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
 mangohud-source-config = ~/.config/MangoHud/MangoHud.conf
 fps-unfocus = 5
 fps-focus = 60
-lazy-exec-focus = killall picom
-lazy-exec-unfocus = picom
 exec-focus = wpctl set-mute -p $FLUX_PROCESS_PID 0
 exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1
+idle = true
+minimize = true
 
-; Example using CPU limit as game does not consume GPU resources when minimized but still uses CPU and requires network connection to download levels and music
+; Reduce CPU usage when unfocused to make game able download music and assets and reduce priority
 [Geometry Dash]
 name = GeometryDash.exe
 executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wine64-preloader
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\Geometry Dash\GeometryDash.exe 
 owner = zappex
 cpu-limit = 2%
-lazy-exec-focus = killall picom
-lazy-exec-unfocus = picom
+idle = true
 ```
 
 #### Short examples
 ```ini
-; Example using freezing as that is singleplayer game
+; Freeze singleplayer game on unfocus and disable/enable compositor on unfocus and focus respectively
 [The Witcher 3: Wild Hunt]
 name = witcher3.exe
 cpu-limit = 0%
 lazy-exec-focus = killall picom
 lazy-exec-unfocus = picom
 
-; Example using FPS limit as that is online game and I use MangoHud
+; Set FPS limit to 5 on unfocus and restore it to 60 on focus, unmute and mute on focus and unfocus respectively, minimize on unfocus as game supports only borderless windowed mode and reduce priority
 [Forza Horizon 4]
 name = ForzaHorizon4.exe
 mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
 mangohud-source-config = ~/.config/MangoHud/MangoHud.conf
 fps-unfocus = 5
 fps-focus = 60
-lazy-exec-focus = killall picom
-lazy-exec-unfocus = picom
 exec-focus = wpctl set-mute -p $FLUX_PROCESS_PID 0
 exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1
+idle = true
+minimize = true
 
-; Example using CPU limit as game does not consume GPU resources when minimized but still uses CPU and requires network connection to download levels and music
+; Reduce CPU usage when unfocused to make game able download music and assets and reduce priority
 [Geometry Dash]
 name = GeometryDash.exe
 cpu-limit = 2%
-lazy-exec-focus = killall picom
-lazy-exec-unfocus = picom
+idle = true
 ```
 
 ### Environment variables passed to commands
