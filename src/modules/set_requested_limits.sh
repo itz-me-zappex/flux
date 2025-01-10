@@ -138,14 +138,13 @@ set_requested_limits(){
 			fi
 			# Minimize window if requested
 			if [[ -n "${request_minimize_map["$local_process_pid"]}" ]]; then
-				# Attempt to minimize window using xdotool, window ID should be converted to numeric value from hexadecimal
-				if ! xdotool windowminimize $(("$local_temp_window_id")) > /dev/null 2>&1; then
-					message --warning "Unable to forcefully minimize window '$local_temp_window_id' of process '$local_process_name' with PID $local_process_pid on unfocus event!"
-				else
-					message --info "Window '$local_temp_window_id' of process '$local_process_name' with PID $local_process_pid has been forcefully minimized on unfocus event."
-				fi
 				# Unset as it becomes useless
 				unset request_minimize_map["$local_process_pid"]
+				# Minimize window
+				passed_window_id="$local_temp_window_id" \
+				passed_process_name="$local_process_name" \
+				passed_process_pid="$local_process_pid" \
+				background_minimize &
 			fi
 		fi
 	done
