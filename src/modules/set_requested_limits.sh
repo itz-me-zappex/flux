@@ -59,8 +59,6 @@ set_requested_limits(){
 				background_fps_limit_pid_map["$local_section"]="$!"
 				# Mark section as FPS limited, required to check FPS limit existence on focus event
 				fps_limit_applied_map["$local_section"]='1'
-				# Store section to array, required to unset FPS limits on daemon termination
-				fps_limited_sections_array+=("$local_section")
 			fi
 			# Check for 'SCHED_IDLE' scheduling policy request
 			if [[ -n "${request_sched_idle_map["$local_process_pid"]}" ]]; then

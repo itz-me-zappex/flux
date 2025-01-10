@@ -1,9 +1,6 @@
 # Required to terminate FPS limit background process or unset FPS limit if window becomes focused or terminated
 unset_fps_limit(){
-	local local_temp_fps_limited_pid \
-	local_temp_fps_limited_section \
-	local_fps_limited_sections_array \
-	local_background_fps_limit_pid \
+	local local_background_fps_limit_pid \
 	local_config_delay
 	# Simplify access to PID of background process with delayed setting of FPS limit
 	local_background_fps_limit_pid="${background_fps_limit_pid_map["$passed_section"]}"
@@ -34,15 +31,6 @@ unset_fps_limit(){
 			message --info "Config key 'fps_limit' in MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been changed to '${config_key_fps_focus_map["$passed_section"]}' $passed_end_of_msg."
 		fi
 	fi
-	# Remove section from array
-	for local_temp_fps_limited_section in "${fps_limited_sections_array[@]}"; do
-		# Skip FPS unlimited section as I want remove it from array
-		if [[ "$local_temp_fps_limited_section" != "$passed_section" ]]; then
-			local_fps_limited_sections_array+=("$local_temp_fps_limited_section")
-		fi
-	done
-	# Store updated info into array
-	fps_limited_sections_array=("${local_fps_limited_sections_array[@]}")
 	# Unset details about FPS limiting
 	unset fps_limit_applied_map["$passed_section"] \
 	background_fps_limit_pid_map["$passed_section"]
