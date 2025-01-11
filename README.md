@@ -116,14 +116,11 @@ sudo make install # install daemon to '/usr/local', set PREFIX variable to chang
 
 ### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
-``` bash
-flux_version='1.19' # set latest version as I update it here every release
-```
 ```bash
 mkdir 'flux' && cd 'flux' # create and change build directory
 ```
 ```bash
-wget "https://github.com/itz-me-zappex/flux/releases/download/v${flux_version}/PKGBUILD" # download PKGBUILD
+wget "https://raw.githubusercontent.com/itz-me-zappex/flux/refs/heads/main/PKGBUILD" # download PKGBUILD
 ```
 ```bash
 makepkg -sric # build a package and install it
