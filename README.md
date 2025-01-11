@@ -93,7 +93,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 ### Manual installation using release tarball
 You can use this method if there is no package build script for your distro. Make sure you have installed dependencies as described above before continue.
 ```bash
-flux_version='1.18.2' # set latest version as I update it here every release
+flux_version='1.19' # set latest version as I update it here every release
 ```
 ```bash
 mkdir 'flux' && cd 'flux' # create and change build directory
@@ -117,7 +117,7 @@ sudo make install # install daemon to '/usr/local', set PREFIX variable to chang
 ### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
 ``` bash
-flux_version='1.18.2' # set latest version as I update it here every release
+flux_version='1.19' # set latest version as I update it here every release
 ```
 ```bash
 mkdir 'flux' && cd 'flux' # create and change build directory
