@@ -21,7 +21,7 @@ get_process_info(){
 		# Get process info from cache
 		passed_window_id="$window_id" cache_get_process_info
 		message --verbose "Cache has been used to obtain info about window with ID $window_id and process '$process_name' with PID $process_pid."
-	elif [[ -z "${cache_process_pid_map["$window_id"]}" ]]; then # Get process info from procfs if not cached
+	else
 		# Obtain output with process PID using window ID
 		if ! process_pid="$("$get_window_pid_path" "$window_id")"; then
 			process_pid=''
@@ -105,7 +105,5 @@ get_process_info(){
 		else
 			return 1
 		fi
-	else
-		return 1
 	fi
 }
