@@ -23,12 +23,9 @@ get_process_info(){
 		message --verbose "Cache has been used to obtain info about window with ID $window_id and process '$process_name' with PID $process_pid."
 	elif [[ -z "${cache_event_type_map["$window_id"]}" ]]; then # Get process info from procfs if not cached
 		# Obtain output with process PID using window ID
-		if ! process_pid="$(xprop -id "$window_id" _NET_WM_PID 2>/dev/null)" || [[ "$process_pid" == '_NET_WM_PID:  not found.' ]]; then
+		if ! process_pid="$("$get_window_pid_path" "$window_id")"; then
 			cache_event_type_map["$window_id"]='bad'
 			process_pid=''
-		else
-			# Extract PID from output
-			process_pid="${process_pid/*= /}" # Remove everything before including '= '
 		fi
 		# Extract info about process if that is not bad event
 		if [[ "${cache_event_type_map["$window_id"]}" != 'bad' ]]; then
