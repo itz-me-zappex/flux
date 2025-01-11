@@ -16,19 +16,18 @@ get_process_info(){
 	local_matching_window_id \
 	local_temp_cached_window_id \
 	local_temp_passwd_line
-	# Use cache with window info if exists and is not bad
-	if [[ "${cache_event_type_map["$window_id"]}" == 'good' ]]; then
+	# Use cache with window info if exists
+	if [[ -n "${cache_process_pid_map["$window_id"]}" ]]; then
 		# Get process info from cache
 		passed_window_id="$window_id" cache_get_process_info
 		message --verbose "Cache has been used to obtain info about window with ID $window_id and process '$process_name' with PID $process_pid."
-	elif [[ -z "${cache_event_type_map["$window_id"]}" ]]; then # Get process info from procfs if not cached
+	elif [[ -z "${cache_process_pid_map["$window_id"]}" ]]; then # Get process info from procfs if not cached
 		# Obtain output with process PID using window ID
 		if ! process_pid="$("$get_window_pid_path" "$window_id")"; then
-			cache_event_type_map["$window_id"]='bad'
 			process_pid=''
 		fi
-		# Extract info about process if that is not bad event
-		if [[ "${cache_event_type_map["$window_id"]}" != 'bad' ]]; then
+		# Extract info about process if PID has been obtained successfully
+		if [[ -n "$process_pid" ]]; then
 			# Attempt to find cache with info about the same process
 			for local_temp_cached_window_id in "${!cache_process_pid_map[@]}"; do
 				# Compare parent PID with PID of process
@@ -97,7 +96,6 @@ get_process_info(){
 				done < '/etc/passwd'
 			fi
 			# Associate info about window and process with cache-related associative arrays to use it next time
-			cache_event_type_map["$window_id"]='good'
 			cache_process_pid_map["$window_id"]="$process_pid"
 			cache_process_name_map["$window_id"]="$process_name"
 			cache_process_executable_map["$window_id"]="$process_executable"
