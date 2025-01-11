@@ -101,13 +101,10 @@ tar -xvf "v${flux_version}.tar.gz" # extract it
 cd "flux-${flux_version}" # change directory to extracted archive
 ```
 ```bash
-chmod +x 'build.sh' # make build script executable
+make # build
 ```
 ```bash
-./build.sh # build 'flux' executable
-```
-```bash
-sudo install -Dm 755 'flux' '/usr/local/bin/flux' # install daemon to '/usr/local/bin'
+sudo make install # install daemon to '/usr/local', set PREFIX variable to change it
 ```
 
 ### Arch Linux and dereatives
