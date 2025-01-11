@@ -1,5 +1,5 @@
 pkgname='flux'
-pkgver='1.19'
+pkgver='1.19.1'
 pkgrel='1'
 pkgdesc='A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused windows and run commands on focus and unfocus events.'
 arch=('any')
