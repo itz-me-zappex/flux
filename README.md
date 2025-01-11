@@ -90,38 +90,48 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 ## Installation
 ### Manual installation using release tarball
 You can use this method if there is no package build script for your distro. Make sure you have installed dependencies as described above before continue.
+
+#### Download latest release with source
 ```bash
-flux_version='1.19' # set latest version as I update it here every release
+wget -qO- "https://api.github.com/repos/itz-me-zappex/flux/releases/latest" | grep '"tarball_url":' | cut -d '"' -f 4 | xargs wget -O flux.tar.gz
 ```
+
+#### Extract archive and change directory
 ```bash
-mkdir 'flux' && cd 'flux' # create and change build directory
+tar -xvf flux.tar.gz --one-top-level=flux --strip-components=1 && cd "flux"
 ```
+
+#### Build daemon
 ```bash
-wget "https://github.com/itz-me-zappex/flux/archive/refs/tags/v${flux_version}.tar.gz" # download archive with release
+make
 ```
+
+#### Install daemon to `/usr/local`
 ```bash
-tar -xvf "v${flux_version}.tar.gz" # extract it
+sudo make install
 ```
+
+#### Or you may want to change prefix e.g.
 ```bash
-cd "flux-${flux_version}" # change directory to extracted archive
-```
-```bash
-make # build
-```
-```bash
-sudo make install # install daemon to '/usr/local', set PREFIX variable to change it
+PREFIX="~/.local" make install
 ```
 
 ### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
+
+#### Create and change build directory
 ```bash
-mkdir 'flux' && cd 'flux' # create and change build directory
+mkdir 'flux' && cd 'flux'
 ```
+
+#### Download PKGBUILD from Git repo
 ```bash
-wget "https://raw.githubusercontent.com/itz-me-zappex/flux/refs/heads/main/PKGBUILD" # download PKGBUILD
+wget "https://raw.githubusercontent.com/itz-me-zappex/flux/refs/heads/main/PKGBUILD"
 ```
+
+#### Build and install package
 ```bash
-makepkg -sric # build a package and install it
+makepkg -sric
 ```
 
 ## Usage
