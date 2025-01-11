@@ -129,26 +129,6 @@ wget "https://github.com/itz-me-zappex/flux/releases/download/v${flux_version}/P
 makepkg -sric # build a package and install it
 ```
 
-### Debian and dereatives
-```bash
-flux_version='1.18.2' # set latest version as I update it here every release
-```
-```bash
-mkdir 'flux' && cd 'flux' # create and change build directory
-```
-```bash
-wget "https://github.com/itz-me-zappex/flux/releases/download/v${flux_version}/build-deb.sh" # download build script
-```
-```bash
-chmod +x 'build-deb.sh' # make it executable
-```
-```bash
-./build-deb.sh # build a package
-```
-```bash
-sudo dpkg -i "flux-v${flux_version}.deb" ; sudo apt install -f # install a package
-```
-
 ## Usage
 ### List of available options
 ```
