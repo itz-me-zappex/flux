@@ -45,7 +45,6 @@ executable = '"$process_executable"'
 command = '"$process_command"'
 owner = '"$process_owner_username"'
 "
-		exit 0
 	;;
 	* )
 		# Print error message depending by exit code
@@ -59,6 +58,6 @@ owner = '"$process_owner_username"'
 		'3' )
 			message --error "Daemon has insufficient rights to interact with process '$process_name' with PID $process_pid!"
 		esac
-		exit 1
+		return 1
 	esac
 }
