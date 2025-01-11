@@ -16,7 +16,11 @@ parse_options(){
 		;;
 		--focus | -f | --pick | -p )
 			# Print template for config file using info about focused/picked window and exit
-			print_template "$1"
+			if print_template "$1"; then
+				exit 0
+			else
+				exit 1
+			fi
 		;;
 		--help | -h | --usage | -u )
 			echo "Usage: flux [OPTIONS]
