@@ -10,6 +10,19 @@ prefix_warning='[!]'
 # Set default timestamp format for logger
 timestamp_format='[%Y-%m-%dT%H:%M:%S%z]'
 
+# Find path to `get_window_pid` C++ module
+get_window_pid_path="$(get_realpath "$0")"
+case "$get_window_pid_path" in
+*'/bin/'* )
+	echo "${get_window_pid_path/%'/bin/'*/'/lib/flux/get_window_pid'}"
+	# Replace '/bin/<executable>' with path to 'get_window_pid' module
+	get_window_pid_path="${get_window_pid_path/%'/bin/'*/'/lib/flux/get_window_pid'}"
+;;
+* )
+	# Replace executable name with 'get_window_pid'
+	get_window_pid_path="${get_window_pid_path%/*}/get_window_pid"
+esac
+
 # Options parsing and forget cmdline options
 parse_options "$@" && shift "${#@}"
 unset -f parse_options \
