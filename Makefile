@@ -38,8 +38,8 @@ clean:
 # make install
 install:
 	@mkdir -p $(PREFIX)/{bin,lib/flux}
-	@install -Dm 755 $(OUTPUT_PATH)/* $(PREFIX)/lib/flux/
-	@ln -s $(PREFIX)/lib/flux/flux $(PREFIX)/bin/flux
+	@install -Dm 755 $(OUTPUT_PATH)/get_window_pid $(PREFIX)/lib/flux/get_window_pid
+	@install -Dm 755 $(OUTPUT_PATH)/flux $(PREFIX)/bin/flux
 
 # make uninstall
 uninstall:
