@@ -171,16 +171,9 @@ else
 		* )
 			# Set window ID variable if event does not match with statements above
 			window_id="$event"
-			# Get process info using window ID if ID is not '0x0'
-			case "$window_id" in
-			'0x0' )
-				message --verbose "Bad event with window ID 0x0 appeared, getting process info skipped."
-			;;
-			* )
-				# Attempt to obtain info about process using window ID
-				get_process_info
-				get_process_info_exit_code="$?"
-			esac
+			# Attempt to obtain info about process using window ID
+			get_process_info
+			get_process_info_exit_code="$?"
 			# Request CPU/FPS limit for unfocused process if it matches with section
 			unfocus_request_limit
 			# Actions depending by exit code of 'get_process_info()'
