@@ -43,17 +43,17 @@ get_process_info(){
 				passed_window_id="$local_matching_window_id" cache_get_process_info
 				message --verbose "Cache of parent window with ID $local_matching_window_id has been used to obtain info about window with ID $window_id and process '$process_name' with PID $process_pid."
 			else
-				# Get executable path of process, fails if daemon has insufficient rights to interact with process by sending SIGSTOP/SIGCONT signals
-				if check_ro "/proc/$process_pid/exe"; then
-					process_executable="$(readlink "/proc/$process_pid/exe")"
-				else
-					return 3
-				fi
 				# Get name of process
 				if check_ro "/proc/$process_pid/comm"; then
 					process_name="$(<"/proc/$process_pid/comm")"
 				else
 					return 2
+				fi
+				# Get executable path of process, fails if daemon has insufficient rights to read symlink and interact with process respectively.
+				if check_ro "/proc/$process_pid/exe"; then
+					process_executable="$(readlink "/proc/$process_pid/exe")"
+				else
+					return 3
 				fi
 				# Get effective UID of process
 				if check_ro "/proc/$process_pid/status"; then
