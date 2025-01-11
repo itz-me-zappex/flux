@@ -28,7 +28,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 - [Tips and tricks](#tips-and-tricks)
   - [Keybinding to obtain template from focused window for config](#keybinding-to-obtain-template-from-focused-window-for-config)
   - [Apply changes in config file](#apply-changes-in-config-file)
-  - [Mute audio for unfocused window (Pipewire/Wireplumber)](#mute-audio-for-unfocused-window-pipewirewireplumber)
+  - [Mute process audio on unfocus (Pipewire & Wireplumber)](#mute-process-audio-on-unfocus-pipewire--wireplumber)
   - [Types of limits and which you should use](#types-of-limits-and-which-you-should-use)
 - [Possible questions](#possible-questions)
   - [How does that daemon work?](#how-does-that-daemon-work)
@@ -42,8 +42,8 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
   - [Why did you write it in Bash?](#why-did-you-write-it-in-bash)
 
 ## Known issues
-- Freezing online games (setting `cpu-limit` to `0%`) causes disconnects from matches, just use less aggressive CPU limit to allow game to send/receive packets.
-- Stuttery audio in game if CPU limit is very aggressive, as `cpulimit` tool interrupts process, that should be expected.
+- Freezing online/multiplayer games by setting `cpu-limit` to `0%` causes disconnects. Use less aggressive CPU limit to allow game to send/receive packets.
+- Stuttery audio in game if CPU limit is pretty aggressive, that should be expected because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. If you use Pipewire with Wireplumber, you may want to mute window as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
 - Unsetting of applied limits for all windows when Cinnamon DE restarts, `xprop` tool which is used to read X11 events prints multiple events meaning that windows terminating one by one until `_NET_CLIENT_LIST_STACKING(WINDOW): window id #` line becomes blank, because of that daemon does not see difference between real window termination and buggy event. Note: added workaround to restore limits after Cinnamon restart.
 
 ## Dependencies
@@ -316,8 +316,8 @@ Now you can easily grab templates from focused windows to use them in config by 
 ### Apply changes in config file
 - Daemon does not support config parsing on a fly, but there is workaround you can use. Create keybinding for command like `killall flux ; flux --hot` which restarts daemon, use this keybinding if you done with config file editing.
 
-### Mute audio for unfocused window (Pipewire/Wireplumber)
-- If you use Pipewire with Wireplumber, you may want to add `exec-focus = wpctl set-mute -p $FLUX_PROCESS_PID 0` and `exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1` lines to section responsible for game. No idea about neither Pulseaudio nor pure Alsa setups, that is why I can not just add `mute` config key.
+### Mute process audio on unfocus (Pipewire & Wireplumber)
+- Add `exec-focus = wpctl set-mute -p $FLUX_PROCESS_PID 0` and `exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1` lines to section responsible for game. No idea about neither Pulseaudio nor pure Alsa setups, that is why I can not just add `mute` config key.
 
 ### Types of limits and which you should use
 - FPS limits recommended for online and multiplayer games and if you do not mind to use MangoHud.
