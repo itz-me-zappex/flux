@@ -17,8 +17,8 @@ handle_terminated_windows(){
 	local_existing_window_ids="${event/*'existing: '/}" # Remove everything including type name of list with window IDs
 	# Unset limits for terminated windows
 	for local_temp_terminated_window_id in $local_terminated_window_ids; do
-		# Skip window ID if that is bad event or info about it does not exist in cache
-		if [[ -n "${cache_event_type_map["$local_temp_terminated_window_id"]}" && "${cache_event_type_map["$local_temp_terminated_window_id"]}" != 'bad' ]]; then
+		# Skip window ID if info about it does not exist in cache
+		if [[ -n "${cache_process_pid_map["$local_temp_terminated_window_id"]}" ]]; then
 			# Simplify access to PID of cached window info
 			local_terminated_process_pid="${cache_process_pid_map["$local_temp_terminated_window_id"]}"
 			# Simplify access to matching section of cached window info
@@ -79,18 +79,10 @@ handle_terminated_windows(){
 				unset request_sched_idle_map["$local_terminated_process_pid"]
 				message --info "Changing scheduling policy to idle for process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window termination."
 			fi
-		fi
-		# Check for event type before unset cache
-		if [[ "${cache_event_type_map["$local_temp_terminated_window_id"]}" == 'bad' ]]; then
-			# Unset only event type for bad window, otherwise bash will fail
-			message --verbose "Cached info about bad window with ID $local_temp_terminated_window_id has been removed as it has been terminated."
-			unset cache_event_type_map["$local_temp_terminated_window_id"]
-		elif [[ "${cache_event_type_map["$local_temp_terminated_window_id"]}" == 'good' ]]; then
 			# Unset data in cache related to terminated window
 			message --verbose "Cached info about window with ID $local_temp_terminated_window_id and process '$local_terminated_process_name' with PID ${cache_process_pid_map["$local_temp_terminated_window_id"]} has been removed as it has been terminated."
 			unset cache_mismatch_map["$local_terminated_process_pid"] \
 			cache_section_map["$local_terminated_process_pid"] \
-			cache_event_type_map["$local_temp_terminated_window_id"] \
 			cache_process_pid_map["$local_temp_terminated_window_id"] \
 			cache_process_name_map["$local_temp_terminated_window_id"] \
 			cache_process_executable_map["$local_temp_terminated_window_id"] \
