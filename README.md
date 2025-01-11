@@ -46,41 +46,43 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 ## Dependencies
 ### Arch Linux and dereatives
 
-- Required: `bash` `util-linux` `cpulimit` `coreutils` `xorg-xprop` `xorg-xwininfo`
+- Required: `bash` `util-linux` `cpulimit` `coreutils` `xorg-xprop` `xorg-xwininfo` `libxres` `libx11`
   
 - Optional: `mangohud` `lib32-mangohud` `libnotify` `xdotool`
 
+- Build: `libxres` `libx11` `make` `gcc`
+
 ### Debian and dereatives
   
-- Required: `bash` `cpulimit` `coreutils` `x11-utils`
+- Required: `bash` `cpulimit` `coreutils` `x11-utils` `libxres1` `libx11-6`
 
 - Optional: `mangohud` `mangohud:i386` `libnotify-bin` `xdotool`
 
+- Build: `libxres-dev` `libx11-dev` `make` `g++`
+
 ### Void Linux and dereatives
 
-- Required: `bash` `util-linux` `cpulimit` `coreutils` `xprop` `xwininfo`
+- Required: `bash` `util-linux` `cpulimit` `coreutils` `xprop` `xwininfo` `libXres` `libX11`
 
 - Optional: `MangoHud` `MangoHud-32bit` `libnotify` `xdotool`
 
+- Build: `libXres-devel` `libX11-devel` `make` `gcc`
+
 ### Fedora and dereatives
 
-- Required: `bash` `util-linux` `cpulimit` `coreutils` `xprop` `xwininfo`
+- Required: `bash` `util-linux` `cpulimit` `coreutils` `xprop` `xwininfo` `libXres` `libX11`
 
 - Optional: `mangohud` `mangohud.i686` `libnotify` `xdotool`
 
+- Build: `libXres-devel` `libX11-devel` `make` `gcc`
+
 ### OpenSUSE Tumbleweed and dereatives
 
-- Required: `bash` `util-linux` `cpulimit` `coreutils` `xprop` `xwininfo`
+- Required: `bash` `util-linux` `cpulimit` `coreutils` `xprop` `xwininfo` `libXRes1` `libX11-6`
 
 - Optional: `mangohud` `mangohud-32bit` `libnotify4` `xdotool`
 
-### Gentoo and dereatives
-
-- Required: `app-shells/bash` `sys-apps/util-linux` `app-admin/cpulimit` `sys-apps/coreutils` `x11-apps/xprop` `x11-apps/xwininfo`
-
-- Optional: `x11-libs/libnotify` `x11-misc/xdotool` [`mangohud (is not packaged)`](https://github.com/flightlessmango/MangoHud)
-
-Dependencies for other distributions will be added soon.
+- Build: `libXres-devel` `libX11-devel` `make` `gcc`
 
 ## Installation
 ### Manual installation using release tarball
