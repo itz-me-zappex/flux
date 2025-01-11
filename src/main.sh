@@ -191,13 +191,13 @@ else
 				# Print message depending by exit code of 'get_process_info()'
 				case "$get_process_info_exit_code" in
 				'1' )
-					message --warning "Bad window with ID $window_id appeared, unable to obtain process info!"
+					message --warning "Unable to obtain process PID of window ID $window_id! Probably window has been terminated before check."
 				;;
 				'2' )
-					message --warning "Unable to obtain info about process with PID $process_pid!"
+					message --warning "Unable to obtain info about process with PID $process_pid! Probably process has been terminated during check."
 				;;
 				'3' )
-					message --warning "Daemon does not have sufficient rights to get info about process with PID $process_pid!"
+					message --warning "Daemon has insufficient rights to interact with process '$process_name' with PID $process_pid!"
 				esac
 			esac
 			# Execute command on unfocus event if specified in config
