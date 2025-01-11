@@ -36,5 +36,6 @@ build(){
 }
 
 package(){
+	cd "${srcdir}/${pkgname}-${pkgver}"
 	PREFIX="${pkgdir}/usr" make install
 }
