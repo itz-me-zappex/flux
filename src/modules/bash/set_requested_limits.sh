@@ -15,8 +15,8 @@ set_requested_limits(){
 	local_window_ids="${event/'check_requests: '/}"
 	# Apply requested limits to existing windows
 	for local_temp_window_id in $local_window_ids; do
-		# Skip cycle if window has bad event type of not at all
-		if [[ -n "${cache_event_type_map["$local_temp_window_id"]}" && "${cache_event_type_map["$local_temp_window_id"]}" != 'bad' ]]; then
+		# Skip cycle if info about window is not cached
+		if [[ -n "${cache_process_pid_map["$local_temp_window_id"]}" ]]; then
 			# Simplify access to PID of cached window info
 			local_process_pid="${cache_process_pid_map["$local_temp_window_id"]}"
 			# Simplify access to matching section of cached window info
