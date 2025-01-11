@@ -89,8 +89,7 @@ request_sched_idle_map \
 request_minimize_map
 
 # Declare associative arrays to store info about windows to avoid obtaining it every time to speed up code and reduce CPU-usage
-declare -A cache_event_type_map \
-cache_process_pid_map \
+declare -A cache_process_pid_map \
 cache_process_name_map \
 cache_process_executable_map \
 cache_process_owner_map \
