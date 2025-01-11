@@ -14,7 +14,6 @@ timestamp_format='[%Y-%m-%dT%H:%M:%S%z]'
 get_window_pid_path="$(get_realpath "$0")"
 case "$get_window_pid_path" in
 *'/bin/'* )
-	echo "${get_window_pid_path/%'/bin/'*/'/lib/flux/get_window_pid'}"
 	# Replace '/bin/<executable>' with path to 'get_window_pid' module
 	get_window_pid_path="${get_window_pid_path/%'/bin/'*/'/lib/flux/get_window_pid'}"
 ;;
