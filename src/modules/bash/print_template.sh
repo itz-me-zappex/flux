@@ -35,16 +35,30 @@ print_template(){
 			unset temp_xwininfo_output_line
 		fi
 	esac
-	# Get process info and print it in compatible with config way
-	if get_process_info; then
+	# Attempt to obtain process info
+	get_process_info
+	# Print template if possible, otherwise exit with an error
+	case "$?" in
+	'0' )
 		echo "name = '"$process_name"'
 executable = '"$process_executable"'
 command = '"$process_command"'
 owner = '"$process_owner_username"'
 "
 		exit 0
-	else
-		message --error "Unable to create template for window with ID $window_id as it does not report its PID!"
+	;;
+	* )
+		# Print error message depending by exit code
+		case "$?" in
+		'1' )
+			message --error "Unable to obtain process PID of window ID $window_id! Probably window has been terminated before check."
+		;;
+		'2' )
+			message --error "Unable to obtain info about process with PID $process_pid! Probably process has been terminated during check."
+		;;
+		'3' )
+			message --error "Daemon has insufficient rights to interact with process '$process_name' with PID $process_pid!"
+		esac
 		exit 1
-	fi
+	esac
 }
