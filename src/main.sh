@@ -173,8 +173,7 @@ else
 			# Request CPU/FPS limit for unfocused process if it matches with section
 			unfocus_request_limit
 			# Actions depending by exit code of 'get_process_info()'
-			case "$get_process_info_exit_code" in
-			'0' )
+			if (( get_process_info_exit_code == 0 )); then
 				# Find matching section for process in config
 				if find_matching_section; then
 					# Unset CPU/FPS limit for focused process if it has been limited on unfocus
@@ -182,25 +181,13 @@ else
 					# Execute command on focus event if specified in config
 					exec_focus
 				fi
-			;;
-			* )
-				# Print message depending by exit code of 'get_process_info()'
-				case "$get_process_info_exit_code" in
-				'1' )
-					message --warning "Unable to obtain process PID of window ID $window_id! Probably window has been terminated before check."
-				;;
-				'2' )
-					message --warning "Unable to obtain info about process with PID $process_pid! Probably process has been terminated during check."
-				;;
-				'3' )
-					message --warning "Daemon has insufficient rights to interact with process '$process_name' with PID $process_pid!"
-				esac
-			esac
+			else
+				message --warning "Unable to obtain info about process with PID $process_pid! Probably process has been terminated during check."
+			fi
 			# Execute command on unfocus event if specified in config
 			exec_unfocus
 			# Define what to do with info about previous window depending by exit code (overwrite or unset)
-			case "$get_process_info_exit_code" in
-			'0' )
+			if (( get_process_info_exit_code == 0 )); then
 				# Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
 				previous_window_id="$window_id"
 				previous_process_pid="$process_pid"
@@ -208,8 +195,7 @@ else
 				previous_process_owner="$process_owner"
 				previous_process_command="$process_command"
 				previous_section="$section"
-			;;
-			* )
+			else
 				# Forget info about previous window/process because it is not changed
 				unset previous_window_id \
 				previous_process_pid \
@@ -217,7 +203,7 @@ else
 				previous_process_owner \
 				previous_process_command \
 				previous_section
-			esac
+			fi
 			unset get_process_info_exit_code
 			# Unset info about process to avoid using it by an accident
 			unset window_id \
