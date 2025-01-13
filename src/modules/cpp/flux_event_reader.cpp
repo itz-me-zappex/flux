@@ -12,9 +12,8 @@
 		4.3) It may lie from time to time, because it is set by app manually.
 
 	Always prints three events every time '_NET_ACTIVE_WINDOW' and '_NET_CLIENT_LIST_STACKING' properties change (in hardcoded order):
-	1) Hexadecimal focused window ID.
-	2) Process PID of focused window.
-	3) Hexadecimal list of opened window IDs.
+	1) Info about focused window in '<WID>=<PID>' format.
+	2) List with info about opened windows in '<WID>=<PID>' format.
 */
 
 #include <iostream>
@@ -88,6 +87,8 @@ int main(){
 	// Current and previous opened window IDs list
 	string opened_window_ids;
 	string previous_opened_window_ids;
+	// Single opened window ID
+	Window opened_window_id;
 	// Connect to X server
 	Display *display = XOpenDisplay(nullptr);
 	if (!display){
@@ -115,10 +116,20 @@ int main(){
 			if (previous_active_window_id != active_window_id || previous_opened_window_ids != opened_window_ids){
 				// Get active window process PID
 				get_process_pid(display, active_window_id, process_pid);
-				// Print current atoms state and focused window PID
-				cout << "0x" << hex << active_window_id << dec << endl;
-				cout << process_pid << endl;
-				cout << opened_window_ids << endl;
+				// Print info about focused window in '<WID>=<PID>' format
+				cout << "0x" << hex << active_window_id << dec << "=" << process_pid << endl;
+				// Print info about opened windows in '<WID>=<PID>' format on single line
+				istringstream opened_window_ids_stream(opened_window_ids);
+				string opened_window_id_str;
+				while (opened_window_ids_stream >> opened_window_id_str){
+					// Convert string into acceptable for 'Window' format
+					stringstream opened_window_id_stream(opened_window_id_str);
+					opened_window_id_stream >> hex >> opened_window_id;
+					// Get PID using window ID and print info about window
+					get_process_pid(display, opened_window_id, process_pid);
+					cout << "0x" << hex << opened_window_id << dec << "=" << process_pid << " ";
+				}
+				cout << endl;
 				// Remember current atoms state to compare those on next event
 				previous_active_window_id = active_window_id;
 				previous_opened_window_ids = opened_window_ids;
