@@ -36,7 +36,6 @@ find_matching_section(){
 					break
 				fi
 				unset local_name_match \
-				local_executable_match \
 				local_owner_match \
 				local_command_match
 			done

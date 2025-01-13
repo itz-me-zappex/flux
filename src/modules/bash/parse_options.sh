@@ -14,27 +14,17 @@ parse_options(){
 				config="$(get_realpath "$config")"
 			fi
 		;;
-		--focus | -f | --pick | -p )
-			# Print template for config file using info about focused/picked window and exit
-			if print_template "$1"; then
-				exit 0
-			else
-				exit 1
-			fi
-		;;
 		--help | -h | --usage | -u )
 			echo "Usage: flux [OPTIONS]
 
 Options and values:
   -c, --config <path>        Specify path to config file
                              (default: \$XDG_CONFIG_HOME/flux.ini; \$HOME/.config/flux.ini; /etc/flux.ini)
-  -f, --focused              Display info about focused window in compatible with config way and exit
   -h, --help                 Display this help and exit
   -H, --hot                  Apply actions to already unfocused windows before handling events
   -l, --log <path>           Store messages to specified file
   -L, --log-overwrite        Recreate log file before start, use only with '--log'
   -n, --notifications        Display messages as notifications
-  -p, --pick                 Display info about picked window in usable for config file way and exit
   -q, --quiet                Display errors and warnings only
   -T, --timestamp-format     Set timestamp format, use only with '--timestamps' (default: [%Y-%m-%dT%H:%M:%S%z])
   -t, --timestamps           Add timestamps to messages
