@@ -26,7 +26,7 @@ build:
 	@echo >> "$(FLUX_PATH)"
 	@cat src/main.sh >> "$(FLUX_PATH)"
 	@chmod +x "$(FLUX_PATH)"
-	@$(CXX) $(CXXFLAGS) -o $(OUTPUT_PATH)/get_window_pid $(CPP_MODULES_PATH)/get_window_pid.cpp -lX11 -lXext -lXRes
+	@$(CXX) $(CXXFLAGS) -o $(OUTPUT_PATH)/flux_event_reader $(CPP_MODULES_PATH)/flux_event_reader.cpp -lX11 -lXext -lXRes
 
 # Build daemon if option is not specified
 all: build
@@ -38,7 +38,7 @@ clean:
 # Install daemon to prefix if 'install' option is passed
 install:
 	@mkdir -p $(PREFIX)/{bin,lib/flux}
-	@install -Dm 755 $(OUTPUT_PATH)/get_window_pid $(PREFIX)/lib/flux/get_window_pid
+	@install -Dm 755 $(OUTPUT_PATH)/flux_event_reader $(PREFIX)/lib/flux/flux_event_reader
 	@install -Dm 755 $(OUTPUT_PATH)/flux $(PREFIX)/bin/flux
 
 # Uninstall daemon from prefix if 'uninstall' option is passed
