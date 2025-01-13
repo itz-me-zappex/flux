@@ -52,7 +52,7 @@ void get_process_pid(Display *display, Window window_id, pid_t &process_pid){
 }
 
 // Get list of opened window from '_NET_CLIENT_LIST_STACKING' atom
-void get_opened_windows(Display *display, Window root, string &opened_window_ids){
+void get_opened_windows(Display *display, Window root, string &opened_window_ids_str){
 	// Contains list of opened windows
 	Atom net_client_list_stacking = XInternAtom(display, "_NET_CLIENT_LIST_STACKING", False);
 	// Store info here
@@ -73,7 +73,7 @@ void get_opened_windows(Display *display, Window root, string &opened_window_ids
 			local_opened_windows << " ";
 		}
 	}
-	opened_window_ids = local_opened_windows.str();
+	opened_window_ids_str = local_opened_windows.str();
 	XFree(data);
 }
 
@@ -85,10 +85,11 @@ int main(){
 	// Window process PID
 	pid_t process_pid;
 	// Current and previous opened window IDs list
-	string opened_window_ids;
-	string previous_opened_window_ids;
+	string opened_window_ids_str;
+	string previous_opened_window_ids_str;
 	// Single opened window ID
 	Window opened_window_id;
+	string opened_window_id_str;
 	// Connect to X server
 	Display *display = XOpenDisplay(nullptr);
 	if (!display){
@@ -102,6 +103,29 @@ int main(){
 	XSelectInput(display, root, PropertyChangeMask);
 	// Store events here
 	XEvent event;
+	// Get active window ID
+	get_active_window(display, root, active_window_id);
+	// Get list of opened windows
+	get_opened_windows(display, root, opened_window_ids_str);
+	// Get active window process PID
+	get_process_pid(display, active_window_id, process_pid);
+	// Print info about focused window in '<WID>=<PID>' format
+	cout << "0x" << hex << active_window_id << dec << "=" << process_pid << endl;
+	// Print info about opened windows in '<WID>=<PID>' format on single line
+	istringstream opened_window_ids_stream(opened_window_ids_str);
+	while (opened_window_ids_stream >> opened_window_id_str){
+		// Convert string into acceptable for 'Window' format
+		stringstream opened_window_id_stream(opened_window_id_str);
+		opened_window_id_stream >> hex >> opened_window_id;
+		// Get PID using window ID
+		get_process_pid(display, opened_window_id, process_pid);
+		// Print info about window
+		cout << "0x" << hex << opened_window_id << dec << "=" << process_pid << " ";
+	}
+	cout << endl;
+	// Remember current atoms state to compare those on next event
+	previous_active_window_id = active_window_id;
+	previous_opened_window_ids_str = opened_window_ids_str;
 	// Handle events
 	while (true){
 		// Get event
@@ -111,28 +135,28 @@ int main(){
 			// Get active window ID
 			get_active_window(display, root, active_window_id);
 			// Get list of opened windows
-			get_opened_windows(display, root, opened_window_ids);
+			get_opened_windows(display, root, opened_window_ids_str);
 			// Continue only if at least one atom has been changed
-			if (previous_active_window_id != active_window_id || previous_opened_window_ids != opened_window_ids){
+			if (previous_active_window_id != active_window_id || previous_opened_window_ids_str != opened_window_ids_str){
 				// Get active window process PID
 				get_process_pid(display, active_window_id, process_pid);
 				// Print info about focused window in '<WID>=<PID>' format
 				cout << "0x" << hex << active_window_id << dec << "=" << process_pid << endl;
 				// Print info about opened windows in '<WID>=<PID>' format on single line
-				istringstream opened_window_ids_stream(opened_window_ids);
-				string opened_window_id_str;
+				istringstream opened_window_ids_stream(opened_window_ids_str);
 				while (opened_window_ids_stream >> opened_window_id_str){
 					// Convert string into acceptable for 'Window' format
 					stringstream opened_window_id_stream(opened_window_id_str);
 					opened_window_id_stream >> hex >> opened_window_id;
-					// Get PID using window ID and print info about window
+					// Get PID using window ID
 					get_process_pid(display, opened_window_id, process_pid);
+					// Print info about window
 					cout << "0x" << hex << opened_window_id << dec << "=" << process_pid << " ";
 				}
 				cout << endl;
 				// Remember current atoms state to compare those on next event
 				previous_active_window_id = active_window_id;
-				previous_opened_window_ids = opened_window_ids;
+				previous_opened_window_ids_str = opened_window_ids_str;
 			}
 		}
 	}
