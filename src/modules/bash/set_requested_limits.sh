@@ -10,7 +10,8 @@ set_requested_limits(){
 	local_deadline_parameters \
 	local_temp_deadline_parameter \
 	local_count \
-	local_idle_cancelled
+	local_idle_cancelled \
+	local_process_owner
 	# Get list of existing windows
 	local_window_ids="${event/'check_requests: '/}"
 	# Apply requested limits to existing windows
@@ -23,6 +24,33 @@ set_requested_limits(){
 			local_section="${cache_section_map["$local_process_pid"]}"
 			# Simplify access to process name of cached window info
 			local_process_name="${cache_process_name_map["$local_temp_window_id"]}"
+			# Simplify access to process owner UID of cached window info
+			local_process_owner="${cache_process_owner_map["$local_temp_window_id"]}"
+			# Minimize window if requested
+			if [[ -n "${request_minimize_map["$local_process_pid"]}" ]]; then
+				# Unset as it becomes useless
+				unset request_minimize_map["$local_process_pid"]
+				# Minimize window
+				passed_window_id="$local_temp_window_id" \
+				passed_process_name="$local_process_name" \
+				passed_process_pid="$local_process_pid" \
+				background_minimize &
+			fi
+			# Return an error if daemon has insufficient rights to apply limit (except FPS limit, that does not require interaction with process)
+			if [[ "$local_process_owner" != "$UID" && "$UID" != '0' ]]; then
+				# Check for limit requests which are requiring sufficient rights
+				if [[ -n "${request_freeze_map["$local_process_pid"]}" ||
+							-n "${request_cpu_limit_map["$local_process_pid"]}" ||
+							-n "${request_sched_idle_map["$local_process_pid"]}" ]]; then
+					# Decline requests
+					unset request_freeze_map["$local_process_pid"] \
+					request_cpu_limit_map["$local_process_pid"] \
+					request_fps_limit_map["$local_section"] \
+					request_sched_idle_map["$local_process_pid"]
+					message --warning "Daemon has insufficient rights to apply limit for process '$local_process_name' with PID '$local_process_pid'!"
+					return 1
+				fi
+			fi
 			# Check for request existence to apply one of limits
 			if [[ -n "${request_freeze_map["$local_process_pid"]}" ]]; then
 				# Unset request as it becomes useless
@@ -135,16 +163,6 @@ set_requested_limits(){
 					sched_previous_deadline_map["$local_process_pid"] \
 					sched_previous_period_map["$local_process_pid"]
 				fi
-			fi
-			# Minimize window if requested
-			if [[ -n "${request_minimize_map["$local_process_pid"]}" ]]; then
-				# Unset as it becomes useless
-				unset request_minimize_map["$local_process_pid"]
-				# Minimize window
-				passed_window_id="$local_temp_window_id" \
-				passed_process_name="$local_process_name" \
-				passed_process_pid="$local_process_pid" \
-				background_minimize &
 			fi
 		fi
 	done
