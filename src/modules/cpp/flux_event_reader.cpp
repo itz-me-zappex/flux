@@ -8,22 +8,21 @@ using namespace std;
 
 /*
 	Written as small replacement for 'xprop -root -spy _NET_ACTIVE_WINDOW _NET_CLIENT_LIST_STACKING' which aims at following:
-	1) Ignoring repeating events or at least hiding them.
-	2) Obtaining and printing info in specific order unlike 'xprop', which gets events from X11 (those are random ordered) and "throws" them.
-	3) Simplifying integration with this daemon or any other project.
-	4) Speeding up and reducing CPU usage of daemon by:
-		4.1) Obtaining PID of focused window process directly in C++ code instead of calling external binary.
-		4.2) Solving issue with repeating events completely, because listener checks for actual events being changed, not passed by X server ones.
-		4.3) Taking away need to check events in daemon calling 'xprop' tool again to get state "dump" of current '_NET_ACTIVE_WINDOW' and '_NET_CLIENT_LIST_STACKING' atoms.
-	5) Obtaining PID using XRes extension instead of relying on '_NET_WM_PID' atom because:
-		5.1) It is not accessible in some windows.
-		5.2) Reports wrong PID when app runs in sandbox with PID namespaces (e.g. Firejail)
-		5.3) It may lie from time to time, because it is set by app manually.
+	1) Obtaining and printing info in specific order unlike 'xprop', which gets events from X11 (those are random ordered) and "throws" them.
+	2) Simplifying integration with this daemon or any other project.
+	3) Speeding up and reducing CPU usage of daemon by:
+		3.1) Obtaining PID of focused window process directly in C++ code instead of calling external binary.
+		3.2) Solving issue with repeating events completely, because listener checks for actual events being changed, not passed by X server ones.
+		3.3) Taking away need to check events in daemon calling 'xprop' tool again to get state "dump" of current '_NET_ACTIVE_WINDOW' and '_NET_CLIENT_LIST_STACKING' atoms.
+	4) Obtaining PID using XRes extension instead of relying on '_NET_WM_PID' atom because:
+		4.1) It is not accessible in some windows.
+		4.2) Reports wrong PID when app runs in sandbox with PID namespaces (e.g. Firejail)
+		4.3) It may lie from time to time, because it is set by app manually.
 
 	Always prints three events every time '_NET_ACTIVE_WINDOW' and '_NET_CLIENT_LIST_STACKING' properties change (in hardcoded order):
-	1) Decimal focused window ID.
+	1) Hexadecimal focused window ID.
 	2) Process PID of focused window.
-	3) List of opened window IDs.
+	3) Hexadecimal list of opened window IDs.
 */
 
 // Obtain active window ID
