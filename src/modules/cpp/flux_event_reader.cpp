@@ -26,16 +26,16 @@
 using namespace std;
 
 // Obtain active window ID
-void get_active_window(Display *display, Window root, Window &active_window){
+void get_active_window(Display *display, Window root, Window &active_window_id){
 	int revert;
-	XGetInputFocus(display, &active_window, &revert);
+	XGetInputFocus(display, &active_window_id, &revert);
 }
 
-// Obtain active window process PID
-void get_process_pid(Display *display, Window active_window, pid_t &active_window_pid){
+// Obtain window process PID
+void get_process_pid(Display *display, Window window_id, pid_t &process_pid){
 	// Ask for PID only
 	XResClientIdSpec client_spec;
-	client_spec.client = active_window;
+	client_spec.client = window_id;
 	client_spec.mask = XRES_CLIENT_ID_PID_MASK;
 	// Store IDs count here, expected to have 'long' type
 	long ids_count;
@@ -45,15 +45,15 @@ void get_process_pid(Display *display, Window active_window, pid_t &active_windo
 	XResQueryClientIds(display, 1, &client_spec, &ids_count, &client_ids);
 	// Go through all PIDs and break loop if non-zero value appears
 	for (long i = 0; i < ids_count; i++){
-		active_window_pid = XResGetClientPid(&client_ids[i]);
-		if (active_window > 0){
+		process_pid = XResGetClientPid(&client_ids[i]);
+		if (window_id > 0){
 			break;
 		}
 	}
 }
 
 // Get list of opened window from '_NET_CLIENT_LIST_STACKING' atom
-void get_opened_windows(Display *display, Window root, string &opened_windows){
+void get_opened_windows(Display *display, Window root, string &opened_window_ids){
 	// Contains list of opened windows
 	Atom net_client_list_stacking = XInternAtom(display, "_NET_CLIENT_LIST_STACKING", False);
 	// Store info here
@@ -74,21 +74,21 @@ void get_opened_windows(Display *display, Window root, string &opened_windows){
 			local_opened_windows << " ";
 		}
 	}
-	opened_windows = local_opened_windows.str();
+	opened_window_ids = local_opened_windows.str();
 	XFree(data);
 }
 
 // Listen and handle events
 int main(){
-	// Store window ID here
-	Window active_window;
-	Window previous_active_window;
-	// Store active window process PID here
-	pid_t active_window_pid;
-	// Store opened window IDs list here
-	string opened_windows;
-	string previous_opened_windows;
-	// Attempt to connect to X server
+	// Current and previous window ID
+	Window active_window_id;
+	Window previous_active_window_id;
+	// Window process PID
+	pid_t process_pid;
+	// Current and previous opened window IDs list
+	string opened_window_ids;
+	string previous_opened_window_ids;
+	// Connect to X server
 	Display *display = XOpenDisplay(nullptr);
 	if (!display){
 		return 1;
@@ -108,19 +108,20 @@ int main(){
 		// Wait for property to change
 		if (event.type == PropertyNotify){
 			// Get active window ID
-			get_active_window(display, root, active_window);
+			get_active_window(display, root, active_window_id);
 			// Get list of opened windows
-			get_opened_windows(display, root, opened_windows);
+			get_opened_windows(display, root, opened_window_ids);
 			// Continue only if at least one atom has been changed
-			if (previous_active_window != active_window || previous_opened_windows != opened_windows){
+			if (previous_active_window_id != active_window_id || previous_opened_window_ids != opened_window_ids){
 				// Get active window process PID
-				get_process_pid(display, active_window, active_window_pid);
-				cout << "0x" << hex << active_window << dec << endl;
-				cout << active_window_pid << endl;
-				cout << opened_windows << endl;
+				get_process_pid(display, active_window_id, process_pid);
+				// Print current atoms state and focused window PID
+				cout << "0x" << hex << active_window_id << dec << endl;
+				cout << process_pid << endl;
+				cout << opened_window_ids << endl;
 				// Remember current atoms state to compare those on next event
-				previous_active_window = active_window;
-				previous_opened_windows = opened_windows;
+				previous_active_window_id = active_window_id;
+				previous_opened_window_ids = opened_window_ids;
 			}
 		}
 	}
