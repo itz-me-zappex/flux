@@ -1,11 +1,3 @@
-#include <iostream>
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/extensions/XRes.h>
-#include <sstream>
-
-using namespace std;
-
 /*
 	Written as small replacement for 'xprop -root -spy _NET_ACTIVE_WINDOW _NET_CLIENT_LIST_STACKING' which aims at following:
 	1) Obtaining and printing info in specific order unlike 'xprop', which gets events from X11 (those are random ordered) and "throws" them.
@@ -24,6 +16,14 @@ using namespace std;
 	2) Process PID of focused window.
 	3) Hexadecimal list of opened window IDs.
 */
+
+#include <iostream>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <X11/extensions/XRes.h>
+#include <sstream>
+
+using namespace std;
 
 // Obtain active window ID
 void get_active_window(Display *display, Window root, Window &active_window){
