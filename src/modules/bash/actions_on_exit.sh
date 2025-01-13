@@ -52,7 +52,6 @@ actions_on_exit(){
 		FLUX_WINDOW_ID="$previous_window_id" \
 		FLUX_PROCESS_PID="$previous_process_pid" \
 		FLUX_PROCESS_NAME="$previous_process_name" \
-		FLUX_PROCESS_EXECUTABLE="$previous_process_executable" \
 		FLUX_PROCESS_OWNER="$previous_process_owner" \
 		FLUX_PROCESS_COMMAND="$previous_process_command" \
 		passed_command_type='lazy' \

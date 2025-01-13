@@ -3,8 +3,8 @@ validate_config_keys(){
 	local local_temp_section
 	# Check values in sections and exit with an error if something is wrong or set default values in some keys if is not specified
 	for local_temp_section in "${sections_array[@]}"; do
-		# Exit with an error if neither identifier 'name' nor 'executable' nor 'command' is specified
-		if [[ -z "${config_key_name_map["$local_temp_section"]}" && -z "${config_key_executable_map["$local_temp_section"]}" && -z "${config_key_command_map["$local_temp_section"]}" ]]; then
+		# Exit with an error if neither identifier 'name' nor 'command' is specified
+		if [[ -z "${config_key_name_map["$local_temp_section"]}" && -z "${config_key_command_map["$local_temp_section"]}" ]]; then
 			message --error "At least one process identifier required in section '$local_temp_section' in '$config' config file!"
 			exit 1
 		fi

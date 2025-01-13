@@ -4,13 +4,11 @@ exec_focus(){
 	export FLUX_WINDOW_ID="$window_id" \
 	FLUX_PROCESS_PID="$process_pid" \
 	FLUX_PROCESS_NAME="$process_name" \
-	FLUX_PROCESS_EXECUTABLE="$process_executable" \
 	FLUX_PROCESS_OWNER="$process_owner" \
 	FLUX_PROCESS_COMMAND="$process_command" \
 	FLUX_PREV_WINDOW_ID="$previous_window_id" \
 	FLUX_PREV_PROCESS_PID="$previous_process_pid" \
 	FLUX_PREV_PROCESS_NAME="$previous_process_name" \
-	FLUX_PREV_PROCESS_EXECUTABLE="$previous_process_executable" \
 	FLUX_PREV_PROCESS_OWNER="$previous_process_owner" \
 	FLUX_PREV_PROCESS_COMMAND="$previous_process_command"
 	# Execute command from 'exec-focus' key if it has been specified
@@ -33,13 +31,11 @@ exec_focus(){
 	unset FLUX_WINDOW_ID \
 	FLUX_PROCESS_PID \
 	FLUX_PROCESS_NAME \
-	FLUX_PROCESS_EXECUTABLE \
 	FLUX_PROCESS_OWNER \
 	FLUX_PROCESS_COMMAND \
 	FLUX_PREV_WINDOW_ID \
 	FLUX_PREV_PROCESS_PID \
 	FLUX_PREV_PROCESS_NAME \
-	FLUX_PREV_PROCESS_EXECUTABLE \
 	FLUX_PREV_PROCESS_OWNER \
 	FLUX_PREV_PROCESS_COMMAND
 }

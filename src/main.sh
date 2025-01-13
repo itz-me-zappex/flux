@@ -46,7 +46,6 @@ unset -f calculate_max_limit
 
 # Create associative arrays to store values from config
 declare -A config_key_name_map \
-config_key_executable_map \
 config_key_owner_map \
 config_key_cpu_limit_map \
 config_key_delay_map \
@@ -91,7 +90,6 @@ request_minimize_map
 # Declare associative arrays to store info about windows to avoid obtaining it every time to speed up code and reduce CPU-usage
 declare -A cache_process_pid_map \
 cache_process_name_map \
-cache_process_executable_map \
 cache_process_owner_map \
 cache_process_command_map \
 cache_section_map \
@@ -156,14 +154,12 @@ else
 			unset window_id \
 			process_pid \
 			process_name \
-			process_executable \
 			process_owner \
 			process_command \
 			section \
 			previous_window_id \
 			previous_process_pid \
 			previous_process_name \
-			previous_process_executable \
 			previous_process_owner \
 			previous_process_command \
 			previous_section
@@ -209,7 +205,6 @@ else
 				previous_window_id="$window_id"
 				previous_process_pid="$process_pid"
 				previous_process_name="$process_name"
-				previous_process_executable="$process_executable"
 				previous_process_owner="$process_owner"
 				previous_process_command="$process_command"
 				previous_section="$section"
@@ -219,7 +214,6 @@ else
 				unset previous_window_id \
 				previous_process_pid \
 				previous_process_name \
-				previous_process_executable \
 				previous_process_owner \
 				previous_process_command \
 				previous_section
@@ -229,7 +223,6 @@ else
 			unset window_id \
 			process_pid \
 			process_name \
-			process_executable \
 			process_owner \
 			process_command \
 			section

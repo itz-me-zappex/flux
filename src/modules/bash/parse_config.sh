@@ -28,7 +28,7 @@ parse_config(){
 				local_section="${local_temp_config_line/\[/}"
 				local_section="${local_section/%\]/}"
 				sections_array+=("$local_section")
-			elif [[ "${local_temp_config_line,,}" =~ ^(name|executable|owner|cpu-limit|delay|(lazy-)?exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus|idle|minimize)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
+			elif [[ "${local_temp_config_line,,}" =~ ^(name|owner|cpu-limit|delay|(lazy-)?exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus|idle|minimize)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
 				# Remove key name and equal symbol
 				local_config_value="${local_temp_config_line/*=/}"
 				# Remove all spaces before and after string, internal shell parameter expansion required to get spaces supposed to be removed
@@ -51,11 +51,6 @@ parse_config(){
 					case "${local_temp_config_line,,}" in
 					name* )
 						config_key_name_map["$local_section"]="$local_config_value"
-					;;
-					executable* )
-						# Get absolute path to executable
-						local_config_value="$(get_realpath "$local_config_value")"
-						config_key_executable_map["$local_section"]="$local_config_value"
 					;;
 					owner* )
 						config_key_owner_map["$local_section"]="$local_config_value"

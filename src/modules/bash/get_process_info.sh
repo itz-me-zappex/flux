@@ -2,7 +2,6 @@
 cache_get_process_info(){
 	process_pid="${cache_process_pid_map["$passed_window_id"]}"
 	process_name="${cache_process_name_map["$passed_window_id"]}"
-	process_executable="${cache_process_executable_map["$passed_window_id"]}"
 	process_owner="${cache_process_owner_map["$passed_window_id"]}"
 	process_command="${cache_process_command_map["$passed_window_id"]}"
 	process_owner_username="${cache_process_owner_username_map["$passed_window_id"]}"
@@ -49,12 +48,6 @@ get_process_info(){
 				else
 					return 2
 				fi
-				# Get executable path of process, fails if daemon has insufficient rights to read symlink and interact with process respectively.
-				if check_ro "/proc/$process_pid/exe"; then
-					process_executable="$(readlink "/proc/$process_pid/exe")"
-				else
-					return 3
-				fi
 				# Get effective UID of process
 				if check_ro "/proc/$process_pid/status"; then
 					while read -r local_temp_status_line; do
@@ -98,7 +91,6 @@ get_process_info(){
 			# Associate info about window and process with cache-related associative arrays to use it next time
 			cache_process_pid_map["$window_id"]="$process_pid"
 			cache_process_name_map["$window_id"]="$process_name"
-			cache_process_executable_map["$window_id"]="$process_executable"
 			cache_process_owner_map["$window_id"]="$process_owner"
 			cache_process_command_map["$window_id"]="$process_command"
 			cache_process_owner_username_map["$window_id"]="$process_owner_username"

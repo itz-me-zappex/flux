@@ -2,7 +2,6 @@
 find_matching_section(){
 	local local_temp_section \
 	local_name_match \
-	local_executable_match \
 	local_owner_match \
 	local_command_match
 	# Find matching section if was not found previously and store it to cache
@@ -22,10 +21,6 @@ find_matching_section(){
 						local_name_match='1'
 					fi
 				fi
-				# Compare process executable path with specified in section
-				if [[ -z "${config_key_executable_map["$local_temp_section"]}" || "${config_key_executable_map["$local_temp_section"]}" == "$process_executable" ]]; then
-					local_executable_match='1'
-				fi
 				# Compare UID of process with specified in section
 				if [[ -z "${config_key_owner_map["$local_temp_section"]}" || "${config_key_owner_map["$local_temp_section"]}" == "$process_owner" || "${config_key_owner_map["$local_temp_section"]}" == "$process_owner_username" ]]; then
 					local_owner_match='1'
@@ -35,7 +30,7 @@ find_matching_section(){
 					local_command_match='1'
 				fi
 				# Mark as matching if all identifiers containing non-zero value
-				if [[ -n "$local_name_match" && -n "$local_executable_match" && -n "$local_owner_match" && -n "$local_command_match" ]]; then
+				if [[ -n "$local_name_match" && -n "$local_owner_match" && -n "$local_command_match" ]]; then
 					section="$local_temp_section"
 					cache_section_map["$process_pid"]="$local_temp_section"
 					break

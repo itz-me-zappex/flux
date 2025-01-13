@@ -85,7 +85,6 @@ handle_terminated_windows(){
 			cache_section_map["$local_terminated_process_pid"] \
 			cache_process_pid_map["$local_temp_terminated_window_id"] \
 			cache_process_name_map["$local_temp_terminated_window_id"] \
-			cache_process_executable_map["$local_temp_terminated_window_id"] \
 			cache_process_owner_map["$local_temp_terminated_window_id"] \
 			cache_process_command_map["$local_temp_terminated_window_id"] \
 			cache_process_owner_username_map["$local_temp_terminated_window_id"]

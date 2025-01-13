@@ -41,7 +41,6 @@ print_template(){
 	case "$?" in
 	'0' )
 		echo "name = '"$process_name"'
-executable = '"$process_executable"'
 command = '"$process_command"'
 owner = '"$process_owner_username"'
 "
