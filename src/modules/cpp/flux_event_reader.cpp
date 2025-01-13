@@ -85,7 +85,6 @@ int main(){
 	Window previous_active_window;
 	// Store active window process PID here
 	pid_t active_window_pid;
-	pid_t previous_active_window_pid;
 	// Store opened window IDs list here
 	string opened_windows;
 	string previous_opened_windows;
@@ -110,22 +109,17 @@ int main(){
 		if (event.type == PropertyNotify){
 			// Get active window ID
 			get_active_window(display, root, active_window);
-			// Get active window process PID
-			get_process_pid(display, active_window, active_window_pid);
 			// Get list of opened windows
 			get_opened_windows(display, root, opened_windows);
-			// Continue only if at least one type has been changed
-			if (
-					previous_active_window != active_window ||
-					previous_active_window_pid != active_window_pid ||
-					previous_opened_windows != opened_windows
-				){
+			// Continue only if at least one atom has been changed
+			if (previous_active_window != active_window || previous_opened_windows != opened_windows){
+				// Get active window process PID
+				get_process_pid(display, active_window, active_window_pid);
 				cout << "0x" << hex << active_window << dec << endl;
 				cout << active_window_pid << endl;
 				cout << opened_windows << endl;
-				// Remember current state to compare it on next event
+				// Remember current atoms state to compare those on next event
 				previous_active_window = active_window;
-				previous_active_window_pid = active_window_pid;
 				previous_opened_windows = opened_windows;
 			}
 		}
