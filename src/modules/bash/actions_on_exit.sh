@@ -65,5 +65,5 @@ actions_on_exit(){
 		message --warning "Unable to remove lock file '$lock_file' which prevents multiple instances from running!"
 	fi
 	# Wait a bit to avoid printing message about daemon termination earlier than messages from 'background_*()' appear
-	sleep 0.1
+	internal_sleep 0.1
 }
