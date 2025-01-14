@@ -4,14 +4,14 @@
 	2) Simplifying integration with this daemon or any other project.
 	3) Speeding up and reducing CPU usage of daemon by:
 		3.1) Obtaining PID of focused window process directly in C++ code instead of calling external binary.
-		3.2) Solving issue with repeating events completely, because listener checks for actual events being changed, not passed by X server ones.
+		3.2) Solving issue with repeating events completely, because event reader checks for atoms being changed, not events passed by X server.
 		3.3) Taking away need to check events in daemon calling 'xprop' tool again to get state "dump" of current '_NET_ACTIVE_WINDOW' and '_NET_CLIENT_LIST_STACKING' atoms.
 	4) Obtaining PID using XRes extension instead of relying on '_NET_WM_PID' atom because:
 		4.1) It is not accessible in some windows.
 		4.2) Reports wrong PID when app runs in sandbox with PID namespaces (e.g. Firejail)
-		4.3) It may lie from time to time, because it is set by app manually.
+		4.3) It may lie, because this atom is set by app itself.
 
-	Always prints three events every time '_NET_ACTIVE_WINDOW' and '_NET_CLIENT_LIST_STACKING' properties change (in hardcoded order):
+	Always prints two events every time '_NET_ACTIVE_WINDOW' and '_NET_CLIENT_LIST_STACKING' properties change (in hardcoded order):
 	1) Info about focused window in '<WID>=<PID>' format.
 	2) List with info about opened windows in '<WID>=<PID>' format.
 */
