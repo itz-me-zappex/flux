@@ -6,11 +6,11 @@ CXX ?= g++
 PREFIX ?= /usr/local
 
 # Set path to bash modules
-BASH_MODULES_PATH = $(PWD)/src/modules/bash
-CPP_MODULES_PATH = $(PWD)/src/modules/cpp
+BASH_MODULES_PATH = $(shell pwd)/src/modules/bash
+CPP_MODULES_PATH = $(shell pwd)/src/modules/cpp
 
 # Set output directory
-OUTPUT_PATH = $(PWD)/out
+OUTPUT_PATH = $(shell pwd)/out
 
 # Set path to 'flux' executable
 FLUX_PATH = $(OUTPUT_PATH)/flux
