@@ -29,15 +29,6 @@ cmdline_get(){
 	esac
 }
 
-# Required to validate X11 session
-x11_session_check(){
-	local local_xprop_output
-	# Return an error if 'xprop' unable to obtain info about X11 session or window manager is not compatible with EMHW
-	if ! local_xprop_output="$(xprop -root _NET_SUPPORTED)" || [[ "$local_xprop_output" == '_NET_SUPPORTED:  no such atom on any window.' ]]; then
-		return 1
-	fi
-}
-
 # Requred to check process existence
 check_pid_existence(){
 	local local_pid="$1"
