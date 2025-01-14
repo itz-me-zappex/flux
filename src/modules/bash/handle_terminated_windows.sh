@@ -1,22 +1,33 @@
 # Required to unset limits for terminated windows and remove info about them from cache
 handle_terminated_windows(){
-	local local_terminated_window_ids \
-	local_terminated_window_ids \
-	local_existing_window_ids \
+	local local_terminated_windows \
+	local_terminated_window_ids_array \
+	local_existing_windows \
+	local_existing_window_ids_array \
 	local_terminated_process_pid \
 	local_terminated_section \
 	local_terminated_process_name \
 	local_temp_terminated_window_id \
 	local_existing_process_pid \
 	local_temp_existing_window_id \
-	local_found
+	local_found \
+	local_temp_terminated_window \
+	local_temp_existing_window
 	# Obtain list of terminated window IDs
-	local_terminated_window_ids="${event/'terminated: '/}" # Remove everything before including type name of list with window IDs
-	local_terminated_window_ids="${local_terminated_window_ids/'; existing: '*/}" # Remove list of existing window IDs
+	local_terminated_windows="${event/'terminated: '/}" # Remove everything before including type name of list with window IDs
+	local_terminated_windows="${local_terminated_windows/' ; existing: '*/}" # Remove list of existing window IDs
 	# Obtain list of existing window IDs
-	local_existing_window_ids="${event/*'existing: '/}" # Remove everything including type name of list with window IDs
+	local_existing_windows="${event/*'existing: '/}" # Remove everything including type name of list with window IDs
+	# Remove PIDs from list of terminated windows
+	for local_temp_terminated_window in $local_terminated_windows; do
+		local_terminated_window_ids_array+=("${local_temp_terminated_window/'='*/}")
+	done
+	# Remove PIDs from list of existing windows
+	for local_temp_existing_window in $local_terminated_windows; do
+		local_existing_window_ids_array+=("${local_temp_existing_window/'='*/}")
+	done
 	# Unset limits for terminated windows
-	for local_temp_terminated_window_id in $local_terminated_window_ids; do
+	for local_temp_terminated_window_id in "${local_terminated_window_ids_array[@]}"; do
 		# Skip window ID if info about it does not exist in cache
 		if [[ -n "${cache_process_pid_map["$local_temp_terminated_window_id"]}" ]]; then
 			# Simplify access to PID of cached window info
@@ -39,7 +50,7 @@ handle_terminated_windows(){
 				unset_cpu_limit
 			elif [[ -n "$local_terminated_section" && -n "${fps_limit_applied_map["$local_terminated_section"]}" ]]; then # Unset FPS limit if limited
 				# Do not remove FPS limit if one of existing windows matches with the same section
-				for local_temp_existing_window_id in $local_existing_window_ids; do
+				for local_temp_existing_window_id in "${local_existing_window_ids_array[@]}"; do
 					# Simplify access to PID of terminated process using cache
 					local_existing_process_pid="${cache_process_pid_map["$local_temp_existing_window_id"]}"
 					# Mark to not unset FPS limit if there is another window which matches with same section
