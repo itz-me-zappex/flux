@@ -15,8 +15,8 @@ OUTPUT_PATH = $(PWD)/out
 # Set path to 'flux' executable
 FLUX_PATH = $(OUTPUT_PATH)/flux
 
-# Build script
-build:
+# Build daemon if option is not specified
+all:
 	@mkdir -p "$(OUTPUT_PATH)"
 	@echo '#!/usr/bin/bash' > $(FLUX_PATH)
 	@for module in "$(BASH_MODULES_PATH)"/*.sh; do \
@@ -27,9 +27,6 @@ build:
 	@cat src/main.sh >> "$(FLUX_PATH)"
 	@chmod +x "$(FLUX_PATH)"
 	@$(CXX) $(CXXFLAGS) -o $(OUTPUT_PATH)/flux_event_reader $(CPP_MODULES_PATH)/flux_event_reader.cpp -lX11 -lXext -lXRes
-
-# Build daemon if option is not specified
-all: build
 
 # Remove build result if 'clean' option is passed
 clean:
