@@ -1,25 +1,19 @@
 # Required to set CPU limit using 'cpulimit' tool on unfocus event, runs in background via '&'
 background_cpu_limit(){
-	local local_cpulimit_pid \
-	local_sleep_pid
+	local local_cpulimit_pid
 	# Wait before set limit and notify user if delay is specified
 	if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
 		message --verbose "Process '$passed_process_name' with PID $passed_process_pid will be CPU limited after ${config_key_delay_map["$passed_section"]} second(s) on unfocus event."
-		sleep "${config_key_delay_map["$passed_section"]}" &
-		# Remember PID of 'sleep' process sent to background to make daemon able print message about cancelling CPU limit and terminate 'sleep' process on SIGINT/SIGTERM signal
-		local_sleep_pid="$!"
-		# Terminate 'sleep' process and print relevant message on daemon termination
+		# Print relevant message on daemon termination and stop this subprocess
 		trap 'message --info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to daemon termination." ; \
-		kill "$local_sleep_pid" > /dev/null 2>&1' SIGINT SIGTERM
-		# Terminate 'sleep' process on focus event and print relevant message
+		exit 0' SIGINT SIGTERM
+		# Print relevant message on focus event and stop this subprocess
 		trap 'message --info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled on focus event." ; \
-		kill "$local_sleep_pid" > /dev/null 2>&1 ; \
-		return 0' SIGUSR1
-		# Terminate 'sleep' process on termination of target process and print relevant message
+		exit 0' SIGUSR1
+		# Print relevant message on target process termination and stop this subprocess
 		trap 'message --info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to window termination." ; \
-		kill "$local_sleep_pid" > /dev/null 2>&1 ; \
-		return 0' SIGUSR2
-		wait "$local_sleep_pid"
+		exit 0' SIGUSR2
+		internal_sleep "${config_key_delay_map["$passed_section"]}"
 	fi
 	# Check for process existence before set CPU limit
 	if check_pid_existence "$passed_process_pid"; then
