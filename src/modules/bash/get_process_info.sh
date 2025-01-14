@@ -61,11 +61,11 @@ get_process_info(){
 			else
 				return 1
 			fi
-			# Get command of process and replace '\0' (used as separator between options) with spaces
+			# Get command of process
 			if check_ro "/proc/$process_pid/cmdline"; then
-				process_command="$(tr '\0' ' ' < "/proc/$process_pid/cmdline")"
-				# Remove last space because '\0' which is replaced with space is last symbol too
-				process_command="${process_command/%\ /}"
+				# Read file ignoring '\0' and those are replaced with spaces automatically because of arrays nature :D
+				mapfile -d '' process_command < "/proc/$process_pid/cmdline"
+				process_command="${process_command[*]}"
 			else
 				return 1
 			fi
