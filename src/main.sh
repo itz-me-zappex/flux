@@ -165,8 +165,10 @@ else
 			previous_section
 		;;
 		* )
-			# Set window ID variable if event does not match with statements above
-			window_id="$event"
+			# Get window ID
+			window_id="${event/'='*/}"
+			# Get process PID of focused window
+			process_pid="${event/*'='/}"
 			# Attempt to obtain info about process using window ID
 			get_process_info
 			get_process_info_exit_code="$?"
