@@ -49,43 +49,43 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 ## Dependencies
 ### Arch Linux and dereatives
 
-- Required: `bash` `util-linux` `cpulimit` `coreutils` `libxres` `libx11`
+- Required: `bash` `util-linux` `cpulimit` `coreutils` `libxres` `libx11` `libxext` `xorgproto`
   
 - Optional: `mangohud` `lib32-mangohud` `libnotify` `xdotool`
 
-- Build: `libxres` `libx11` `make` `gcc`
+- Build: `libxres` `libx11` `libxext` `xorgproto` `make` `gcc`
 
 ### Debian and dereatives
   
-- Required: `bash` `cpulimit` `coreutils` `libxres1` `libx11-6`
+- Required: `bash` `cpulimit` `coreutils` `libxres1` `libx11-6` `libxext6` `libXext`
 
 - Optional: `mangohud` `mangohud:i386` `libnotify-bin` `xdotool`
 
-- Build: `libxres-dev` `libx11-dev` `make` `g++`
+- Build: `libxres-dev` `libx11-dev` `libxext-dev` `libXext-devel` `x11proto-dev` `make` `g++`
 
 ### Void Linux and dereatives
 
-- Required: `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11`
+- Required: `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext` `xorgproto`
 
 - Optional: `MangoHud` `MangoHud-32bit` `libnotify` `xdotool`
 
-- Build: `libXres-devel` `libX11-devel` `make` `gcc`
+- Build: `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto` `make` `gcc`
 
 ### Fedora and dereatives
 
-- Required: `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11`
+- Required: `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext`
 
 - Optional: `mangohud` `mangohud.i686` `libnotify` `xdotool`
 
-- Build: `libXres-devel` `libX11-devel` `make` `gcc`
+- Build: `libXres-devel` `libX11-devel` `libXext-devel` `xorg-x11-proto-devel` `make` `gcc`
 
 ### OpenSUSE Tumbleweed and dereatives
 
-- Required: `bash` `util-linux` `cpulimit` `coreutils` `libXRes1` `libX11-6`
+- Required: `bash` `util-linux` `cpulimit` `coreutils` `libXRes1` `libX11-6` `libXext6`
 
 - Optional: `mangohud` `mangohud-32bit` `libnotify4` `xdotool`
 
-- Build: `libXres-devel` `libX11-devel` `make` `gcc`
+- Build: `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto-devel` `make` `gcc`
 
 ## Installation
 ### Manual installation using release tarball
