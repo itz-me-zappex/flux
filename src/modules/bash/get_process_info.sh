@@ -1,6 +1,5 @@
 # Required to get process info from cache
 cache_get_process_info(){
-	process_pid="${cache_process_pid_map["$passed_window_id"]}"
 	process_name="${cache_process_name_map["$passed_window_id"]}"
 	process_owner="${cache_process_owner_map["$passed_window_id"]}"
 	process_command="${cache_process_command_map["$passed_window_id"]}"
