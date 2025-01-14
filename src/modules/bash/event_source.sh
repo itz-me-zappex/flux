@@ -44,24 +44,25 @@ on_hot(){
 # Required to handle events from 'xprop' and print internal events
 xprop_reader(){
 	local local_event \
-	local_previous_event \
-	local_xprop_output \
-	local_previous_xprop_output \
-	local_temp_xprop_output_line \
-	local_active_window \
-	local_windows_list \
-	local_restart \
+	local_focused_window \
+	local_opened_windows \
+	local_events_count='0' \
 	local_temp_window \
-	local_previous_windows_list \
-	local_temp_previous_window \
-	local_previous_net_active_window \
-	local_previous_net_client_list_stacking
-	# Read output of 'xprop' line by line in realtime
+	local_previous_opened_windows \
+	local_terminated_windows_array
+	# Start event reading
 	while read -r local_event; do
-		# Do not do anything if event repeats
-		if [[ "$local_previous_event" != "$local_event" ]]; then
+		(( local_events_count++ ))
+		# Collect events
+		if (( local_events_count == 1 )); then
+			local_focused_window="$local_event"
+		else
+			local_opened_windows="$local_event"
+		fi
+		# Do nothing if that is not 2nd event
+		if (( local_events_count == 2 )); then
 			# Break loop if list of windows appears blank
-			if [[ "$local_event" == '_NET_CLIENT_LIST_STACKING(WINDOW): window id #' ]]; then
+			if [[ -z "$local_event" ]]; then
 				# Print event to prepare daemon for restart
 				echo 'restart'
 				# Set '--hot' to apply limits again as those have been unset because of X11 events nature
@@ -71,64 +72,29 @@ xprop_reader(){
 				# Break loop
 				break
 			fi
-			# Get output of 'xprop' because events obtained in spy mode kinda buggy, e.g. it may print events in incorrect order and that breaks algorithm
-			local_xprop_output="$(xprop -root _NET_ACTIVE_WINDOW _NET_CLIENT_LIST_STACKING)"
-			# Do not do anything if output of 'xprop' repeats
-			if [[ "$local_previous_xprop_output" != "$local_xprop_output" ]]; then
-				# Read output of 'xprop' line by line
-				while read -r local_temp_xprop_output_line; do
-					# Define actions depending by event type
-					case "$local_temp_xprop_output_line" in
-					'_NET_ACTIVE_WINDOW'* )
-						# Do not do anything if event repeats
-						if [[ "$local_previous_net_active_window" != "$local_temp_xprop_output_line" ]]; then
-							# Remove everything before window ID itself
-							local_active_window="${local_temp_xprop_output_line/* \# /}"
-							# Remove everything after window ID, on XFCE4 for example this line contains '0x0' after comma
-							local_active_window="${local_active_window/,*/}"
-							# Print window ID as event
-							echo "$local_active_window"
-							# Remember event to compare it with next one and skip it if repeats
-							local_previous_net_active_window="$local_temp_xprop_output_line"
-						fi
-					;;
-					'_NET_CLIENT_LIST_STACKING'* )
-						# Remove everything before window IDs
-						local_windows_list="${local_temp_xprop_output_line/*\# /}"
-						# Remove commas which are used as separators
-						local_windows_list="${local_windows_list//\,/}"
-						# Do not do anything if event repeats
-						if [[ "$local_previous_net_client_list_stacking" != "$local_temp_xprop_output_line" ]]; then
-							# Find terminated window IDs and store to array
-							for local_temp_previous_window in $local_previous_windows_list; do
-								# Skip existing window ID
-								if [[ " $local_windows_list " != *" $local_temp_previous_window "* ]]; then
-									local_terminated_windows+="$local_temp_previous_window "
-								fi
-							done
-							unset local_temp_previous_window
-							# Print list of terminated and existing windows as event if terminated windows have been detected
-							if [[ -n "$local_terminated_windows" ]]; then
-								echo "terminated: $local_terminated_windows; existing: $local_windows_list"
-								unset local_terminated_windows
-							fi
-							# Remember event to compare it with next one and skip it if repeats
-							local_previous_net_client_list_stacking="$local_temp_xprop_output_line"
-						fi
-						# Send event with list of window IDs to check limit requests
-						echo "check_requests: $local_windows_list"
-						# Remember list of windows to use it for detection of terminated windows on next cycle
-						local_previous_windows_list="$local_windows_list"
-					esac
-				done <<< "$local_xprop_output"
-				unset local_temp_xprop_output_line
-				# Remember output of 'xprop' to skip action if output repeats on next cycle
-				local_previous_xprop_output="$local_xprop_output"
+			# Print info about focused window as event
+			echo "$local_focused_window"
+			# Find terminated windows and store those to an array
+			for local_temp_window in $local_previous_opened_windows; do
+				# Skip existing window id
+				if [[ " $local_opened_windows " != *" $local_temp_window "* ]]; then
+					local_terminated_windows_array+=("$local_temp_window")
+				fi
+			done
+			unset local_temp_window
+			# Print list of existing and terminated windows as event
+			if [[ -n "${local_terminated_windows_array[@]}" ]]; then
+				echo "terminated: ${local_terminated_windows_array} ; existing: $local_opened_windows"
+				unset local_terminated_windows_array
 			fi
-			# Remember 'xprop' event from spy mode to skip event if it repeats on next cycle
-			local_previous_event="$local_event"
+			# Remember opened windows to find terminated windows on next event
+			local_previous_opened_windows="$local_opened_windows"
+			# Print event with opened windows list as event to check requested limits
+			echo "check_requests: $local_opened_windows"
+			# Reset events count
+			local_events_count='0'
 		fi
-	done < <(xprop -root -spy _NET_ACTIVE_WINDOW _NET_CLIENT_LIST_STACKING 2>/dev/null)
+	done < <("$flux_event_reader" 2>/dev/null)
 	# Check for why loop has been breaked
 	if [[ -z "$local_restart" ]]; then
 		return 1
