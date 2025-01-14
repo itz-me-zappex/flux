@@ -9,7 +9,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
   - [Void Linux and dereatives](#void-linux-and-dereatives)
   - [Fedora and dereatives](#fedora-and-dereatives)
   - [OpenSUSE Tumbleweed and dereatives](#opensuse-tumbleweed-and-dereatives)
-- [Installation](#installation)
+- [Building and installation](#building-and-installation)
   - [Manual installation using release tarball](#manual-installation-using-release-tarball)
   - [Arch Linux and dereatives](#arch-linux-and-dereatives-1)
 - [Usage](#usage)
@@ -87,7 +87,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 
 - Build: `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto-devel` `make` `gcc`
 
-## Installation
+## Building and installation
 ### Manual installation using release tarball
 You can use this method if there is no package build script for your distro. Make sure you have installed dependencies as described above before continue.
 
