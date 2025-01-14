@@ -25,22 +25,28 @@ check_windows(){
 # Required to get list of opened windows and print window IDs line by line if '--hot' option is specified
 # To make daemon apply limits to them and run commands from 'exec-focus' and 'exec-unfocus' config keys
 on_hot(){
-	local local_stacking_windows \
+	local local_event \
+	local_events_count='0' \
 	local_focused_window \
-	local_temp_stacking_window
+	local_opened_windows \
+	local_temp_window
 	# Do not do anything if '--hot' option is not specified
 	if [[ -n "$hot" ]]; then
-		# Extract opened window IDs
-		local_stacking_windows="$(xprop -root _NET_CLIENT_LIST_STACKING 2>/dev/null)"
-		local_stacking_windows="${local_stacking_windows/* \# /}" # Remove everything before including '#'
-		local_stacking_windows="${local_stacking_windows//\,/}" # Remove commas
-		# Extract focused window ID
-		local_focused_window="$(xprop -root _NET_ACTIVE_WINDOW 2>/dev/null)"
-		local_focused_window="${local_focused_window/* \# /}" # Remove everything before including '#'
-		# Print window IDs, but skip currently focused window as it should appear as first event when 'xprop_reader()' starts
-		for local_temp_stacking_window in $local_stacking_windows; do
-			if [[ "$local_temp_stacking_window" != "$local_focused_window" ]]; then
-				echo "$local_temp_stacking_window"
+		# Get focused and opened windows
+		while read -r local_event; do
+			(( local_events_count++ ))
+			# Collect events
+			if (( local_events_count == 1 )); then
+				local_focused_window="$local_event"
+			elif (( local_events_count == 2 )); then
+				local_opened_windows="$local_event"
+				break
+			fi
+		done < <("$flux_event_reader" 2>/dev/null)
+		# Print opened windows info except focused one
+		for local_temp_window in $local_opened_windows; do
+			if [[ "$local_temp_window" != "$local_focused_window" ]]; then
+				echo "$local_temp_window"
 			fi
 		done
 	fi
