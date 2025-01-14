@@ -38,7 +38,7 @@ on_hot(){
 			# Collect events
 			if (( local_events_count == 1 )); then
 				local_focused_window="$local_event"
-			elif (( local_events_count == 2 )); then
+			else
 				local_opened_windows="$local_event"
 				break
 			fi
@@ -70,44 +70,42 @@ event_reader(){
 		# Collect events
 		if (( local_events_count == 1 )); then
 			local_focused_window="$local_event"
+			continue
 		else
 			local_opened_windows="$local_event"
 		fi
-		# Do nothing if that is not 2nd event
-		if (( local_events_count == 2 )); then
-			# Break loop if list of windows appears blank
-			if [[ -z "$local_event" ]]; then
-				# Print event to prepare daemon for restart
-				echo 'restart'
-				# Set '--hot' to apply limits again as those have been unset because of X11 events nature
-				hot='1'
-				# Mark required to avoid loop breakage misunderstood as event reader crash
-				local_restart='1'
-				# Break loop
-				break
-			fi
-			# Print info about focused window as event
-			echo "$local_focused_window"
-			# Find terminated windows and store those to an array
-			for local_temp_window in $local_previous_opened_windows; do
-				# Skip existing window id
-				if [[ " $local_opened_windows " != *" $local_temp_window "* ]]; then
-					local_terminated_windows_array+=("$local_temp_window")
-				fi
-			done
-			unset local_temp_window
-			# Print list of existing and terminated windows as event
-			if [[ -n "${local_terminated_windows_array[@]}" ]]; then
-				echo "terminated: ${local_terminated_windows_array[@]} ; existing: $local_opened_windows"
-				unset local_terminated_windows_array
-			fi
-			# Remember opened windows to find terminated windows on next event
-			local_previous_opened_windows="$local_opened_windows"
-			# Print event with opened windows list as event to check requested limits
-			echo "check_requests: $local_opened_windows"
-			# Reset events count
-			local_events_count='0'
+		# Break loop if list of windows appears blank
+		if [[ -z "$local_event" ]]; then
+			# Print event to prepare daemon for restart
+			echo 'restart'
+			# Set '--hot' to apply limits again as those have been unset because of X11 events nature
+			hot='1'
+			# Mark required to avoid loop breakage misunderstood as event reader crash
+			local_restart='1'
+			# Break loop
+			break
 		fi
+		# Print info about focused window as event
+		echo "$local_focused_window"
+		# Find terminated windows and store those to an array
+		for local_temp_window in $local_previous_opened_windows; do
+			# Skip existing window id
+			if [[ " $local_opened_windows " != *" $local_temp_window "* ]]; then
+				local_terminated_windows_array+=("$local_temp_window")
+			fi
+		done
+		unset local_temp_window
+		# Print list of existing and terminated windows as event
+		if [[ -n "${local_terminated_windows_array[@]}" ]]; then
+			echo "terminated: ${local_terminated_windows_array[@]} ; existing: $local_opened_windows"
+			unset local_terminated_windows_array
+		fi
+		# Remember opened windows to find terminated windows on next event
+		local_previous_opened_windows="$local_opened_windows"
+		# Print event with opened windows list as event to check requested limits
+		echo "check_requests: $local_opened_windows"
+		# Reset events count
+		local_events_count='0'
 	done < <("$flux_event_reader" 2>/dev/null)
 	# Check for why loop has been breaked
 	if [[ -z "$local_restart" ]]; then
