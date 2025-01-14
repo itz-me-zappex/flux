@@ -98,7 +98,7 @@ event_reader(){
 			unset local_temp_window
 			# Print list of existing and terminated windows as event
 			if [[ -n "${local_terminated_windows_array[@]}" ]]; then
-				echo "terminated: ${local_terminated_windows_array} ; existing: $local_opened_windows"
+				echo "terminated: ${local_terminated_windows_array[@]} ; existing: $local_opened_windows"
 				unset local_terminated_windows_array
 			fi
 			# Remember opened windows to find terminated windows on next event
