@@ -41,7 +41,7 @@ on_hot(){
 	unset hot
 }
 
-# Required to handle events from 'xprop' and print internal events
+# Required to convert raw events into internal
 event_reader(){
 	local local_event \
 	local_focused_window \
@@ -67,7 +67,7 @@ event_reader(){
 				echo 'restart'
 				# Set '--hot' to apply limits again as those have been unset because of X11 events nature
 				hot='1'
-				# Mark required to avoid loop breakage misunderstood as 'xprop' crash
+				# Mark required to avoid loop breakage misunderstood as event reader crash
 				local_restart='1'
 				# Break loop
 				break
@@ -112,9 +112,9 @@ event_source(){
 		unset first_cycle
 		# Print opened window IDs if '--hot' is specified
 		on_hot
-		# Handle events from 'xprop' tool
+		# Handle events
 		if ! event_reader; then
-			message --warning "Process 'xprop' required to read X11 events has been terminated!"
+			message --warning "Event reader has been terminated!"
 			echo 'error'
 			break
 		fi
