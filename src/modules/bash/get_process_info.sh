@@ -81,7 +81,7 @@ get_process_info(){
 				fi
 			done < '/etc/passwd'
 		fi
-		# Associate info about window and process with cache-related associative arrays to use it next time
+		# Store process info to cache to speed up its obtainance on next focus event and to use it implitly using only window ID
 		cache_process_pid_map["$window_id"]="$process_pid"
 		cache_process_name_map["$window_id"]="$process_name"
 		cache_process_owner_map["$window_id"]="$process_owner"
