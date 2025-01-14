@@ -44,12 +44,12 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 ## Known issues
 - Freezing online/multiplayer games by setting `cpu-limit` to `0%` causes disconnects. Use less aggressive CPU limit to allow game to send/receive packets.
 - Stuttery audio in game if CPU limit is pretty aggressive, that should be expected because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. If you use Pipewire with Wireplumber, you may want to mute window as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
-- Unsetting of applied limits for all windows when Cinnamon DE restarts, `xprop` tool which is used to read X11 events prints multiple events meaning that windows terminating one by one until `_NET_CLIENT_LIST_STACKING(WINDOW): window id #` line becomes blank, because of that daemon does not see difference between real window termination and buggy event. Note: added workaround to restore limits after Cinnamon restart.
+- Unsetting of applied limits for all windows when window manager restarts, X server behaves crazy and reports that opened windows (in `_NET_CLIENT_LIST_STACKING` atom) are terminating one by one until atom becomes blank, because of that daemon does not see difference between real window termination and buggy event. Note: added workaround to restore limits after window manager restart by enabling `--hot` option internally.
 
 ## Dependencies
 ### Arch Linux and dereatives
 
-- Required: `bash` `util-linux` `cpulimit` `coreutils` `xorg-xprop` `xorg-xwininfo` `libxres` `libx11`
+- Required: `bash` `util-linux` `cpulimit` `coreutils` `libxres` `libx11`
   
 - Optional: `mangohud` `lib32-mangohud` `libnotify` `xdotool`
 
@@ -57,7 +57,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 
 ### Debian and dereatives
   
-- Required: `bash` `cpulimit` `coreutils` `x11-utils` `libxres1` `libx11-6`
+- Required: `bash` `cpulimit` `coreutils` `libxres1` `libx11-6`
 
 - Optional: `mangohud` `mangohud:i386` `libnotify-bin` `xdotool`
 
@@ -65,7 +65,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 
 ### Void Linux and dereatives
 
-- Required: `bash` `util-linux` `cpulimit` `coreutils` `xprop` `xwininfo` `libXres` `libX11`
+- Required: `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11`
 
 - Optional: `MangoHud` `MangoHud-32bit` `libnotify` `xdotool`
 
@@ -73,7 +73,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 
 ### Fedora and dereatives
 
-- Required: `bash` `util-linux` `cpulimit` `coreutils` `xprop` `xwininfo` `libXres` `libX11`
+- Required: `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11`
 
 - Optional: `mangohud` `mangohud.i686` `libnotify` `xdotool`
 
@@ -81,7 +81,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 
 ### OpenSUSE Tumbleweed and dereatives
 
-- Required: `bash` `util-linux` `cpulimit` `coreutils` `xprop` `xwininfo` `libXRes1` `libX11-6`
+- Required: `bash` `util-linux` `cpulimit` `coreutils` `libXRes1` `libX11-6`
 
 - Optional: `mangohud` `mangohud-32bit` `libnotify4` `xdotool`
 
@@ -326,13 +326,13 @@ Now you can easily grab templates from focused windows to use them in config by 
 
 ## Possible questions
 ### How does that daemon work?
-- Daemon listens `xprop` which runs with `-root -spy` options to track `_NET_ACTIVE_WINDOW` and `_NET_CLIENT_LIST_STACKING` events, using window IDs it obtains PIDs, then reads info about processes from files in `/proc/<PID>` to compare it with identifiers in config file and if matching section appears, then it does specified in config file actions.
+- Daemon listens changes in `_NET_ACTIVE_WINDOW` and `_NET_CLIENT_LIST_STACKING` atoms, obtains window IDs and using those obtains PIDs, then reads info about processes from files in `/proc/<PID>` to compare it with identifiers in config file and if matching section appears, then it does specified in config file actions.
 
 ### Does that daemon reduce performance?
 - Daemon uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time and just chills out when you doing stuff in single window. Performance loss should not be noticeable even on weak systems.
 
 ### Which DE/WM/GPU daemon supports?
-- Daemon compatible with all EMHW-compatible X11 window managers (and desktop environments respectively) and does not depend on neither GPU nor driver version as it relies on X11 event system.
+- Daemon compatible with all X11 window managers (and desktop environments respectively) and does not depend on neither GPU nor driver version as it relies on X11 event system.
 
 ### May I get banned in game because of this daemon?
 - Nowadays, anti-cheats are pure garbage, developed by freaks without balls, and you may get banned even for a wrong click or sudden mouse movement, I am not even talking about bans because of broken libs provided with games by developers themselves. But daemon by its nature should not trigger anticheat, anyway, I am not responsible for your actions, so - use it carefully and do not write me if you get banned.
