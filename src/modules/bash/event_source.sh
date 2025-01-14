@@ -42,7 +42,7 @@ on_hot(){
 }
 
 # Required to handle events from 'xprop' and print internal events
-xprop_reader(){
+event_reader(){
 	local local_event \
 	local_focused_window \
 	local_opened_windows \
@@ -113,7 +113,7 @@ event_source(){
 		# Print opened window IDs if '--hot' is specified
 		on_hot
 		# Handle events from 'xprop' tool
-		if ! xprop_reader; then
+		if ! event_reader; then
 			message --warning "Process 'xprop' required to read X11 events has been terminated!"
 			echo 'error'
 			break
