@@ -1,7 +1,7 @@
 # Required to set CPU/FPS limits for requested windows
 set_requested_limits(){
 	local local_temp_window_id \
-	local_window_ids \
+	local_windows \
 	local_process_pid \
 	local_section \
 	local_process_name \
@@ -11,11 +11,17 @@ set_requested_limits(){
 	local_temp_deadline_parameter \
 	local_count \
 	local_idle_cancelled \
-	local_process_owner
+	local_process_owner \
+	local_temp_window \
+	local_window_ids_array
 	# Get list of existing windows
-	local_window_ids="${event/'check_requests: '/}"
+	local_windows="${event/'check_requests: '/}"
+	# Remove PIDs from list of existing windows
+	for local_temp_window in $local_windows; do
+		local_window_ids_array+=("${local_temp_window/'='*/}")
+	done
 	# Apply requested limits to existing windows
-	for local_temp_window_id in $local_window_ids; do
+	for local_temp_window_id in "${local_window_ids_array[@]}"; do
 		# Skip cycle if info about window is not cached
 		if [[ -n "${cache_process_pid_map["$local_temp_window_id"]}" ]]; then
 			# Simplify access to PID of cached window info
