@@ -1,16 +1,24 @@
 # Required to check for window(s) existence
 check_windows(){
-	local local_temp_windows_list
-	# Check for existence of opened windows, if list appears blank, then wait for window(s) appearance
-	if [[ -z "$first_cycle" || "$(xprop -root _NET_CLIENT_LIST_STACKING)" != '_NET_CLIENT_LIST_STACKING(WINDOW): window id # 0x'* ]]; then
+	local local_event \
+	local_events_count='0'
+	# Do nothing if that is first cycle
+	if [[ -z "$first_cycle" ]]; then
 		message --warning "Opened windows were not found, waiting for their appearance…"
 		# Wait for windows appearance
-		while read -r local_temp_windows_list; do
-			# Break loop if list with window IDs is not blank
-			if [[ "$local_temp_windows_list" != '_NET_CLIENT_LIST_STACKING(WINDOW): window id #' ]]; then
-				break
+		while read -r local_event; do
+			(( local_events_count++ ))
+			# Check windows list
+			if (( local_events_count == 2 )); then
+				# Break loop if list with opened windows is not blank
+				if [[ -n "$local_event" ]]; then
+					break
+				else
+					# Reset events count
+					local_events_count='0'
+				fi
 			fi
-		done < <(xprop -root -spy _NET_CLIENT_LIST_STACKING)
+		done < <("$flux_event_reader" 2>/dev/null)
 	fi
 }
 
