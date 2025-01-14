@@ -142,13 +142,11 @@ Usage: flux [OPTIONS]
 Options and values:
   -c, --config <path>        Specify path to config file
                              (default: $XDG_CONFIG_HOME/flux.ini; $HOME/.config/flux.ini; /etc/flux.ini)
-  -f, --focused              Display info about focused window in compatible with config way and exit
   -h, --help                 Display this help and exit
   -H, --hot                  Apply actions to already unfocused windows before handling events
   -l, --log <path>           Store messages to specified file
   -L, --log-overwrite        Recreate log file before start, use only with '--log'
   -n, --notifications        Display messages as notifications
-  -p, --pick                 Display info about picked window in usable for config file way and exit
   -q, --quiet                Display errors and warnings only
   -T, --timestamp-format     Set timestamp format, use only with '--timestamps' (default: [%Y-%m-%dT%H:%M:%S%z])
   -t, --timestamps           Add timestamps to messages
@@ -178,8 +176,7 @@ A simple INI is used for configuration.
 ### Available keys and description
 | Key               | Description |
 |-------------------|-------------|
-| `name` | Name of process, required if neither `executable` nor `command` is specified. Daemon uses soft match for processes with names which have length 15 symbols, i.e. stripped. |
-| `executable` | Path to binary of process, required if neither `name` nor `command` is specified. |
+| `name` | Name of process, required if `command` is not specified. Daemon uses soft match for processes with names which have length 15 symbols, i.e. stripped. |
 | `owner` | Effective UID of process or username (login), optional identifier. |
 | `cpu-limit` | CPU limit between `0%` and `100%`, `%` symbol is optional. Defaults to `-1%` (i.e. no CPU limit). |
 | `delay` | Delay in seconds before applying CPU/FPS limit or setting `SCHED_IDLE`. Defaults to `0`, supports values with floating point. |
@@ -187,7 +184,7 @@ A simple INI is used for configuration.
 | `exec-unfocus` | Command to execute on unfocus event, command runs via bash and will not be killed on daemon exit, output is hidden to avoid mess in output of daemon. |
 | `lazy-exec-focus` | Same as `exec-focus`, but command will not run when processing opened windows if `--hot` is specified. |
 | `lazy-exec-unfocus` | Same as `exec-unfocus`, but command will not run when processing opened windows if `--hot` is specified and will be executed on daemon termination if focused window matches with section where this key and command specified. |
-| `command` | Command which is used to start process, required if neither `name` nor `executable` is specified. |
+| `command` | Command which is used to start process, required if `name` is not specified. |
 | `mangohud-source-config` | Path to MangoHud config which should be used as a base before apply FPS limit in `mangohud-config`, if not specified, then target behaves as source. Useful if you not looking for duplicate MangoHud config for multiple games. |
 | `mangohud-config` | Path to MangoHud config which should be changed (target), required if you want change FPS limits and requires `fps-unfocus`. Make sure you created specified config, at least just keep it blank, otherwise MangoHud will not be able to load new config on fly and daemon will throw warnings related to config absence. Do not use the same config for multiple sections! |
 | `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`, cannot be equal to `0` as that means no limit. |
@@ -223,7 +220,6 @@ Tip: Use `--focus` or `--pick` option to obtain info about process in usable for
 ; Freeze singleplayer game on unfocus and disable/enable compositor on unfocus and focus respectively
 [The Witcher 3: Wild Hunt]
 name = witcher3.exe
-executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wine64-preloader
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\The Witcher 3\bin\x64\witcher3.exe 
 owner = zappex
 cpu-limit = 0%
@@ -233,7 +229,6 @@ lazy-exec-unfocus = picom
 ; Set FPS limit to 5 on unfocus and restore it to 60 on focus, unmute and mute on focus and unfocus respectively, minimize on unfocus as game supports only borderless windowed mode and reduce priority
 [Forza Horizon 4]
 name = ForzaHorizon4.exe
-executable = /run/media/zappex/WD-BLUE/Games/Steam/steamapps/common/Proton 9.0 (Beta)/files/bin/wine64-preloader
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\ForzaHorizon4\ForzaHorizon4.exe 
 owner = zappex
 mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
@@ -248,7 +243,6 @@ minimize = true
 ; Reduce CPU usage when unfocused to make game able download music and assets and reduce priority
 [Geometry Dash]
 name = GeometryDash.exe
-executable = /home/zappex/.local/share/Steam/steamapps/common/Proton 8.0/dist/bin/wine64-preloader
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\Geometry Dash\GeometryDash.exe 
 owner = zappex
 cpu-limit = 2%
@@ -292,13 +286,11 @@ Note: You may want to use these variables in commands and scripts which running 
 | `FLUX_WINDOW_ID` | Hexadecimal ID of focused window |
 | `FLUX_PROCESS_PID` | Process PID of focused window |
 | `FLUX_PROCESS_NAME` | Process name of focused window |
-| `FLUX_PROCESS_EXECUTABLE` | Path to process executable of focused window |
 | `FLUX_PROCESS_OWNER` | Effective process UID of focused window |
 | `FLUX_PROCESS_COMMAND` | Command used to run process of focused window |
 | `FLUX_PREV_WINDOW_ID` | Hexadecimal ID of unfocused window |
 | `FLUX_PREV_PROCESS_PID` | Process PID of unfocused window |
 | `FLUX_PREV_PROCESS_NAME` | Process name of unfocused window |
-| `FLUX_PREV_PROCESS_EXECUTABLE` | Path to process executable of unfocused window |
 | `FLUX_PREV_PROCESS_OWNER` | Effective process UID of unfocused window |
 | `FLUX_PREV_PROCESS_COMMAND` | Command used to run process of unfocused window |
 
@@ -308,13 +300,11 @@ Note: You may want to use these variables in commands and scripts which running 
 | `FLUX_WINDOW_ID` | Hexadecimal ID of unfocused window |
 | `FLUX_PROCESS_PID` | Process PID of unfocused window |
 | `FLUX_PROCESS_NAME` | Process name of unfocused window |
-| `FLUX_PROCESS_EXECUTABLE` | Path to process executable of unfocused window |
 | `FLUX_PROCESS_OWNER` | Effective process UID of unfocused window |
 | `FLUX_PROCESS_COMMAND` | Command used to run process of unfocused window |
 | `FLUX_NEW_WINDOW_ID` | Hexadecimal ID of focused window |
 | `FLUX_NEW_PROCESS_PID` | Process PID of focused window |
 | `FLUX_NEW_PROCESS_NAME` | Process name of focused window |
-| `FLUX_NEW_PROCESS_EXECUTABLE` | Path to process executable of focused window |
 | `FLUX_NEW_PROCESS_OWNER` | Effective process UID of focused window |
 | `FLUX_NEW_PROCESS_COMMAND` | Command used to run process of focused window |
 
