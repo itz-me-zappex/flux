@@ -80,14 +80,16 @@ void get_opened_windows(Display *display, Window root, string &opened_window_ids
 }
 
 // Check for WM restart
-bool check_wm_restart(Display* display, Window root){
+bool check_wm_restart(Display* display, Window root, Window &previous_owner){
+	// Get "WM_S0" atom
 	Atom wm_s0 = XInternAtom(display, "WM_S0", False);
+	// Get "WM_S0" owner
 	Window owner = XGetSelectionOwner(display, wm_s0);
-
-	static Window last_owner = None;
-	bool restarted = (last_owner != None && owner != last_owner);
-	last_owner = owner;
-
+	// Return 'true' if owner has been changed as that means WM restart
+	bool restarted = (previous_owner != None && owner != previous_owner);
+	// Remember owner to compare it next time
+	previous_owner = owner;
+	// True or false
 	return restarted;
 }
 
@@ -111,6 +113,8 @@ int main(){
 	string opened_window_id_str;
 	// Set bad window ID (hexadecimal '0x1')
 	Window bad_window_id = 1;
+	// Remember last owner of window to detect WM restart
+	Window previous_owner = None;
 	// Connect to X server
 	Display *display = XOpenDisplay(nullptr);
 	if (!display){
@@ -158,7 +162,7 @@ int main(){
 			// Get active window ID
 			get_active_window(display, root, active_window_id);
 			// Skip events if WM has been restarted
-			if (check_wm_restart(display, root) || active_window_id == bad_window_id){
+			if (check_wm_restart(display, root, previous_owner) || active_window_id == bad_window_id){
 				sleep(1000);
 				continue;
 			}
