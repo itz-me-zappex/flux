@@ -17,9 +17,9 @@ background_cpu_limit(){
 	fi
 	# Check for process existence before set CPU limit
 	if check_pid_existence "$passed_process_pid"; then
-		message --info "Process '$passed_process_name' with PID $passed_process_pid has been CPU limited to $(( ${config_key_cpu_limit_map["$passed_section"]} / cpu_threads ))% on unfocus event."
+		message --info "Process '$passed_process_name' with PID $passed_process_pid has been CPU limited to ${config_key_cpu_limit_map["$passed_section"]}% on unfocus event."
 		# Set CPU limit by running 'cpulimit' in background
-		cpulimit --lazy --limit="${config_key_cpu_limit_map["$passed_section"]}" --pid="$passed_process_pid" > /dev/null 2>&1 &
+		cpulimit --lazy --limit="$(( "${config_key_cpu_limit_map["$passed_section"]}" * cpu_threads ))" --pid="$passed_process_pid" > /dev/null 2>&1 &
 		# Remember PID of 'cpulimit' sent into background to make daemon able print message about unset of CPU limit and terminate 'cpulimit' process on SIGINT/SIGTERM signal
 		local_cpulimit_pid="$!"
 		# Enforce 'SCHED_BATCH' to improve interval stability between interrupts
