@@ -12,21 +12,24 @@ CPP_MODULES_PATH = $(shell pwd)/src/modules/cpp
 # Set output directory
 OUTPUT_PATH = $(shell pwd)/out
 
-# Set path to 'flux' executable
-FLUX_PATH = $(OUTPUT_PATH)/flux
+# Set path to built 'flux' executable
+FLUX_OUTPUT_PATH = $(OUTPUT_PATH)/flux
+
+# Set path to compiled 'flux-event-reader' binary
+FLUX_EVENT_READER_OUTPUT_PATH = $(OUTPUT_PATH)/flux-event-reader
 
 # Build daemon if option is not specified
 all:
 	@mkdir -p "$(OUTPUT_PATH)"
-	@echo '#!/usr/bin/bash' > $(FLUX_PATH)
+	@echo '#!/usr/bin/bash' > $(FLUX_OUTPUT_PATH)
 	@for module in "$(BASH_MODULES_PATH)"/*.sh; do \
-		echo >> "$(FLUX_PATH)"; \
-		cat $$module >> "$(FLUX_PATH)"; \
+		echo >> "$(FLUX_OUTPUT_PATH)"; \
+		cat $$module >> "$(FLUX_OUTPUT_PATH)"; \
 	done
-	@echo >> "$(FLUX_PATH)"
-	@cat src/main.sh >> "$(FLUX_PATH)"
-	@chmod +x "$(FLUX_PATH)"
-	@$(CXX) $(CXXFLAGS) -o $(OUTPUT_PATH)/flux_event_reader $(CPP_MODULES_PATH)/flux_event_reader.cpp -lX11 -lXext -lXRes
+	@echo >> "$(FLUX_OUTPUT_PATH)"
+	@cat src/main.sh >> "$(FLUX_OUTPUT_PATH)"
+	@chmod +x "$(FLUX_OUTPUT_PATH)"
+	@$(CXX) $(CXXFLAGS) -o $(FLUX_EVENT_READER_OUTPUT_PATH) $(CPP_MODULES_PATH)/flux_event_reader.cpp -lX11 -lXext -lXRes
 
 # Remove build result if 'clean' option is passed
 clean:
@@ -35,8 +38,8 @@ clean:
 # Install daemon to prefix if 'install' option is passed
 install:
 	@mkdir -p $(PREFIX)/{bin,lib/flux}
-	@install -Dm 755 $(OUTPUT_PATH)/flux_event_reader $(PREFIX)/lib/flux/flux_event_reader
-	@install -Dm 755 $(OUTPUT_PATH)/flux $(PREFIX)/bin/flux
+	@install -Dm 755 $(FLUX_EVENT_READER_OUTPUT_PATH) $(PREFIX)/lib/flux/
+	@install -Dm 755 $(FLUX_OUTPUT_PATH) $(PREFIX)/bin/
 
 # Uninstall daemon from prefix if 'uninstall' option is passed
 uninstall:
