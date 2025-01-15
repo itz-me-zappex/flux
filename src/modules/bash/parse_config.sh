@@ -186,4 +186,5 @@ parse_config(){
 			fi
 		fi
 	done < "$config"
+	unset max_cpu_limit
 }
