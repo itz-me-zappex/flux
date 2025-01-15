@@ -10,16 +10,16 @@ prefix_warning='[!]'
 # Set default timestamp format for logger
 timestamp_format='[%Y-%m-%dT%H:%M:%S%z]'
 
-# Find path to `flux_event_reader` binary depending by main executable path
+# Find path to `flux-event-reader` binary depending by main executable path
 flux_event_reader="$(get_realpath "$0")"
 case "$flux_event_reader" in
 *'/bin/'* )
 	# Replace '/bin/<executable>' with path to 'flux_event_reader' binary
-	flux_event_reader="${flux_event_reader/%'/bin/'*/'/lib/flux/flux_event_reader'}"
+	flux_event_reader="${flux_event_reader/%'/bin/'*/'/lib/flux/flux-event-reader'}"
 ;;
 * )
 	# Replace executable name with 'flux_event_reader' binary
-	flux_event_reader="${flux_event_reader%/*}/flux_event_reader"
+	flux_event_reader="${flux_event_reader%/*}/flux-event-reader"
 esac
 
 # Options parsing and forget cmdline options
