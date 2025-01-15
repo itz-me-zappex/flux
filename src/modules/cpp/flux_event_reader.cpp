@@ -157,13 +157,13 @@ int main(){
 			sleep(35);
 			// Get active window ID
 			get_active_window(display, root, active_window_id);
-			// Get list of opened windows
-			get_opened_windows(display, root, opened_window_ids_str);
 			// Skip events if WM has been restarted
 			if (check_wm_restart(display, root) || active_window_id == bad_window_id){
 				sleep(1000);
 				continue;
 			}
+			// Get list of opened windows
+			get_opened_windows(display, root, opened_window_ids_str);
 			// Continue only if at least one atom has been changed
 			if (previous_active_window_id != active_window_id || previous_opened_window_ids_str != opened_window_ids_str){
 				// Get active window process PID
