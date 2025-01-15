@@ -91,6 +91,11 @@ bool check_wm_restart(Display* display, Window root){
 	return restarted;
 }
 
+// Simplify sleeping
+void sleep(int ms){
+	this_thread::sleep_for(chrono::milliseconds(ms));
+}
+
 // Listen and handle events
 int main(){
 	// Current and previous window ID
@@ -148,13 +153,15 @@ int main(){
 		XNextEvent(display, &event);
 		// Wait for property to change
 		if (event.type == PropertyNotify){
+			// Delay before get atoms state to avoid false positives on Cinnamon DE restart, lowest possible which fixes an issue
+			sleep(35);
 			// Get active window ID
 			get_active_window(display, root, active_window_id);
 			// Get list of opened windows
 			get_opened_windows(display, root, opened_window_ids_str);
 			// Skip events if WM has been restarted
 			if (check_wm_restart(display, root) || active_window_id == bad_window_id){
-				this_thread::sleep_for(chrono::milliseconds(1000));
+				sleep(1000);
 				continue;
 			}
 			// Continue only if at least one atom has been changed
