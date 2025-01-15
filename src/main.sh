@@ -76,9 +76,7 @@ sched_previous_period_map
 parse_options "$@" && shift "${#@}"
 unset -f parse_options \
 option_repeat_check \
-cmdline_get \
-check_bool \
-check_true
+cmdline_get
 
 # Options validation
 validate_options
@@ -99,7 +97,9 @@ unset -f calculate_max_limit
 # Config parsing
 parse_config
 unset -f parse_config \
-get_realpath
+get_realpath \
+check_bool \
+check_true
 
 # Config keys validation
 validate_config_keys
