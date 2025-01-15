@@ -158,12 +158,12 @@ int main(){
 		// Wait for property to change
 		if (event.type == PropertyNotify){
 			// Delay before get atoms state to avoid false positives on Cinnamon DE restart, lowest possible which fixes an issue
-			sleep(35);
+			sleep(30);
 			// Get active window ID
 			get_active_window(display, root, active_window_id);
 			// Skip events if WM has been restarted
 			if (check_wm_restart(display, root, previous_owner) || active_window_id == bad_window_id){
-				sleep(1000);
+				sleep(250);
 				continue;
 			}
 			// Get list of opened windows
