@@ -72,10 +72,6 @@ event_reader(){
 		# Reset events count
 		local_events_count='0'
 	done < <("$flux_event_reader" 2>/dev/null)
-	# Check for why loop has been breaked
-	if [[ -z "$local_restart" ]]; then
-		return 1
-	fi
 }
 
 # Required to send events to 'flux' which reads events from this function
@@ -83,9 +79,8 @@ event_source(){
 	# Print opened window IDs as events if '--hot' is specified
 	on_hot
 	# Handle events
-	if ! event_reader; then
-		message --warning "Event reader has been terminated!"
-		echo 'error'
-		break
-	fi
+	event_reader
+	# If function exited, then event reader has been terminated either because of killing it or segfault
+	message --warning "Event reader has been terminated!"
+	echo 'error'
 }
