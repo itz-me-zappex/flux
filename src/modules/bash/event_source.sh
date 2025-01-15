@@ -35,6 +35,7 @@ on_hot(){
 event_reader(){
 	local local_event \
 	local_focused_window \
+	local_previous_focused_window \
 	local_opened_windows \
 	local_events_count='0' \
 	local_temp_window \
@@ -50,8 +51,12 @@ event_reader(){
 		else
 			local_opened_windows="$local_event"
 		fi
-		# Print info about focused window as event
-		echo "$local_focused_window"
+		# Print info about focused window as event if it does not repeat
+		if [[ "$local_previous_focused_window" != "$local_focused_window" ]]; then
+			echo "$local_focused_window"
+			# Remember focused window to skip printing if as event if repeats
+			local_previous_focused_window="$local_focused_window"
+		fi
 		# Find terminated windows and store those to an array
 		for local_temp_window in $local_previous_opened_windows; do
 			# Skip existing window id
