@@ -3,6 +3,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 
 ## Navigation
 - [Known issues](#known-issues)
+- [Features](#features)
 - [Dependencies](#dependencies)
   - [Arch Linux and dereatives](#arch-linux-and-dereatives)
   - [Debian and dereatives](#debian-and-dereatives)
@@ -44,6 +45,21 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 ## Known issues
 - Freezing online/multiplayer games by setting `cpu-limit` to `0%` causes disconnects. Use less aggressive CPU limit to allow game to send/receive packets.
 - Stuttery audio in unfocused game if CPU limit is pretty aggressive, that should be expected because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. If you use Pipewire with Wireplumber, you may want to mute process as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
+
+## Features
+- Freezing process on unfocus and unfreezing on focus
+- CPU limiting on unfocus and unlimiting on focus
+- FPS limiting on unfocus and unlimiting on focus (through MangoHud)
+- Reducing process priority on unfocus and restoring it on focus
+- Minimizing window on unfocus (useful for borderless windows only)
+- Command/scripts execution on focus and unfocus events to make user able extend daemon functionality
+- Configurable logging
+- Notifications support
+- Multiple identifiers you can set to avoid false positives
+- Does not require user interaction
+- Easy INI config
+- Ability to interact with window and process info obtained in daemon in commands/scripts specified in `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` using passed environment variables by daemon
+- Very low CPU usage
 
 ## Dependencies
 ### Arch Linux and dereatives
