@@ -22,28 +22,6 @@ case "$flux_event_reader" in
 	flux_event_reader="${flux_event_reader%/*}/flux-event-reader"
 esac
 
-# Options parsing and forget cmdline options
-parse_options "$@" && shift "${#@}"
-unset -f parse_options \
-option_repeat_check \
-cmdline_get
-
-# Options validation
-validate_options
-unset -f validate_options
-
-# Config validation
-validate_config
-unset -f validate_config
-
-# Log validation
-validate_log
-unset -f validate_log
-
-# Calculation of maximum CPU limit
-calculate_max_limit
-unset -f calculate_max_limit
-
 # Create associative arrays to store values from config
 declare -A config_key_name_map \
 config_key_owner_map \
@@ -60,15 +38,6 @@ config_key_fps_unfocus_map \
 config_key_fps_focus_map \
 config_key_idle_map \
 config_key_minimize_map
-
-# Config parsing
-parse_config
-unset -f parse_config \
-get_realpath
-
-# Config keys validation
-validate_config_keys
-unset -f validate_config_keys
 
 # Declare associative arrays to store info about applied limits
 declare -A freeze_applied_map \
@@ -102,6 +71,37 @@ sched_previous_priority_map \
 sched_previous_runtime_map \
 sched_previous_deadline_map \
 sched_previous_period_map
+
+# Options parsing and forget cmdline options
+parse_options "$@" && shift "${#@}"
+unset -f parse_options \
+option_repeat_check \
+cmdline_get
+
+# Options validation
+validate_options
+unset -f validate_options
+
+# Config validation
+validate_config
+unset -f validate_config
+
+# Log validation
+validate_log
+unset -f validate_log
+
+# Calculation of maximum CPU limit
+calculate_max_limit
+unset -f calculate_max_limit
+
+# Config parsing
+parse_config
+unset -f parse_config \
+get_realpath
+
+# Config keys validation
+validate_config_keys
+unset -f validate_config_keys
 
 # Exit with an error if X11 session is invalid
 if [[ "$XDG_SESSION_TYPE" != 'x11' || ! "$DISPLAY" =~ ^:[0-9](\.[0-9]+)?$ ]]; then
