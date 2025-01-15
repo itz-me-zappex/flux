@@ -18,7 +18,6 @@ get_process_info(){
 	if [[ -n "${cache_process_pid_map["$window_id"]}" ]]; then
 		# Get process info from cache
 		passed_window_id="$window_id" cache_get_process_info
-		message --verbose "Cache has been used to obtain info about window with ID $window_id and process '$process_name' with PID $process_pid."
 	else
 		# Attempt to find cache with info about the same process
 		for local_temp_cached_window_id in "${!cache_process_pid_map[@]}"; do
@@ -33,7 +32,6 @@ get_process_info(){
 		if [[ -n "$local_matching_window_id" ]]; then
 			# Get process info using cache of parent window
 			passed_window_id="$local_matching_window_id" cache_get_process_info
-			message --verbose "Cache of parent window with ID $local_matching_window_id has been used to obtain info about window with ID $window_id and process '$process_name' with PID $process_pid."
 		else
 			# Get name of process
 			if check_ro "/proc/$process_pid/comm"; then
@@ -69,7 +67,6 @@ get_process_info(){
 			else
 				return 1
 			fi
-			message --verbose "Obtained info about window with ID $window_id and process '$process_name' with PID $process_pid has been cached."
 		fi
 		# Obtain username from '/etc/passwd' file using UID of process
 		if check_ro '/etc/passwd'; then
