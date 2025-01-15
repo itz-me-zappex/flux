@@ -228,8 +228,6 @@ As INI is not standartized, I should mention all supported features here.
   - Anything else that unmentioned here.
 
 ### Configuration example
-Tip: Use `--focus` or `--pick` option to obtain info about process in usable for configuration way from focused window or by picking window respectively.
-
 #### Long examples
 ```ini
 ; Freeze singleplayer game on unfocus and disable/enable compositor on unfocus and focus respectively
@@ -324,10 +322,6 @@ Note: You may want to use these variables in commands and scripts which running 
 | `FLUX_NEW_PROCESS_COMMAND` | Command used to run process of focused window |
 
 ## Tips and tricks
-### Keybinding to obtain template from focused window for config
-- Install `xclip` tool and create keybinding with `flux --focus | xclip -selection clipboard` command.
-Now you can easily grab templates from focused windows to use them in config by pasting content using `Ctrl`+`V`.
-
 ### Apply changes in config file
 - Daemon does not support config parsing on a fly, but there is workaround you can use. Create keybinding for command like `killall flux ; flux --hot` which restarts daemon, use this keybinding if you done with config file editing.
 
