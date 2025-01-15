@@ -177,7 +177,7 @@ A simple INI is used for configuration.
 |-------------------|-------------|
 | `name` | Name of process, required if `command` is not specified. Daemon uses soft match for processes with names which have length 15 symbols, i.e. stripped. |
 | `owner` | Effective UID of process or username (login), optional identifier. |
-| `cpu-limit` | CPU limit between `0%` and `100%`, `%` symbol is optional. Defaults to `-1%` (i.e. no CPU limit). |
+| `cpu-limit` | CPU limit between `0%` and `100%` on unfocus, `%` symbol is optional. Defaults to `-1%` (i.e. no CPU limit). |
 | `delay` | Delay in seconds before applying CPU/FPS limit or setting `SCHED_IDLE`. Defaults to `0`, supports values with floating point. |
 | `exec-focus` | Command to execute on focus event, command runs via bash and will not be killed on daemon exit, output is hidden to avoid mess in output of daemon. |
 | `exec-unfocus` | Command to execute on unfocus event, command runs via bash and will not be killed on daemon exit, output is hidden to avoid mess in output of daemon. |
