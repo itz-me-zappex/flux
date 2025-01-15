@@ -60,6 +60,9 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 - Easy INI config
 - Ability to interact with window and process info obtained in daemon in commands/scripts specified in `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` using passed environment variables by daemon
 - Very low CPU usage
+- Ability to interact with processes running in sandboxing with PID namespaces (e.g. using Firejail)
+- Stability, meaning that daemon survives a whole DE/WM restart (not relogin) and continues work without issues
+- Supports all X11 DEs/WMs and does not rely on neither GPU nor its driver
 
 ## Dependencies
 ### Arch Linux and dereatives
