@@ -144,24 +144,6 @@ while read -r event; do
 		# Apply CPU/FPS limits for process which have been requested to be limited
 		set_requested_limits
 	;;
-	'restart' )
-		# Prepare daemon to reapply limits on 'event_source()' restart event which appears if list of window IDs becomes blank
-		hot='1'
-		unset hot_is_unset
-		# Unset info about processes to avoid using it by accident
-		unset window_id \
-		process_pid \
-		process_name \
-		process_owner \
-		process_command \
-		section \
-		previous_window_id \
-		previous_process_pid \
-		previous_process_name \
-		previous_process_owner \
-		previous_process_command \
-		previous_section
-	;;
 	* )
 		# Get window ID
 		window_id="${event/'='*/}"
