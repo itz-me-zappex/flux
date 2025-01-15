@@ -21,6 +21,8 @@
 #include <X11/Xatom.h>
 #include <X11/extensions/XRes.h>
 #include <sstream>
+#include <chrono>
+#include <thread>
 
 using namespace std;
 
@@ -77,6 +79,18 @@ void get_opened_windows(Display *display, Window root, string &opened_window_ids
 	XFree(data);
 }
 
+// Check for WM restart
+bool check_wm_restart(Display* display, Window root){
+	Atom wm_s0 = XInternAtom(display, "WM_S0", False);
+	Window owner = XGetSelectionOwner(display, wm_s0);
+
+	static Window last_owner = None;
+	bool restarted = (last_owner != None && owner != last_owner);
+	last_owner = owner;
+
+	return restarted;
+}
+
 // Listen and handle events
 int main(){
 	// Current and previous window ID
@@ -90,6 +104,8 @@ int main(){
 	// Single opened window ID
 	Window opened_window_id;
 	string opened_window_id_str;
+	// Set bad window ID (hexadecimal '0x1')
+	Window bad_window_id = 1;
 	// Connect to X server
 	Display *display = XOpenDisplay(nullptr);
 	if (!display){
@@ -136,6 +152,11 @@ int main(){
 			get_active_window(display, root, active_window_id);
 			// Get list of opened windows
 			get_opened_windows(display, root, opened_window_ids_str);
+			// Skip events if WM has been restarted
+			if (check_wm_restart(display, root) || active_window_id == bad_window_id){
+				this_thread::sleep_for(chrono::milliseconds(1000));
+				continue;
+			}
 			// Continue only if at least one atom has been changed
 			if (previous_active_window_id != active_window_id || previous_opened_window_ids_str != opened_window_ids_str){
 				// Get active window process PID
