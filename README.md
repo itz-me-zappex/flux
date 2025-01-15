@@ -43,8 +43,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 
 ## Known issues
 - Freezing online/multiplayer games by setting `cpu-limit` to `0%` causes disconnects. Use less aggressive CPU limit to allow game to send/receive packets.
-- Stuttery audio in game if CPU limit is pretty aggressive, that should be expected because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. If you use Pipewire with Wireplumber, you may want to mute window as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
-- Unsetting of applied limits for all windows when window manager restarts, X server behaves crazy and reports that opened windows (in `_NET_CLIENT_LIST_STACKING` atom) are terminating one by one until atom becomes blank, because of that daemon does not see difference between real window termination and buggy event. Note: added workaround to restore limits after window manager restart by enabling `--hot` option internally.
+- Stuttery audio in unfocused game if CPU limit is pretty aggressive, that should be expected because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. If you use Pipewire with Wireplumber, you may want to mute window as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
 
 ## Dependencies
 ### Arch Linux and dereatives
