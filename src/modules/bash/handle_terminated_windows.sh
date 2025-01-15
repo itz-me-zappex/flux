@@ -91,7 +91,6 @@ handle_terminated_windows(){
 				message --info "Changing scheduling policy to idle for process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window termination."
 			fi
 			# Unset data in cache related to terminated window
-			message --verbose "Cached info about window with ID $local_temp_terminated_window_id and process '$local_terminated_process_name' with PID ${cache_process_pid_map["$local_temp_terminated_window_id"]} has been removed as it has been terminated."
 			unset cache_mismatch_map["$local_terminated_process_pid"] \
 			cache_section_map["$local_terminated_process_pid"] \
 			cache_process_pid_map["$local_temp_terminated_window_id"] \
