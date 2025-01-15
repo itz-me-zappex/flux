@@ -30,7 +30,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
   - [Apply changes in config file](#apply-changes-in-config-file)
   - [Mute process audio on unfocus (Pipewire & Wireplumber)](#mute-process-audio-on-unfocus-pipewire--wireplumber)
   - [Types of limits and which you should use](#types-of-limits-and-which-you-should-use)
-  - [Support for `SCHED_RR` and `SCHED_FIFO` without running daemon as root](#support-for-schedrr-and-schedfifo-without-running-daemon-as-root)
+  - [Support for restoring `SCHED_RR` and `SCHED_FIFO` scheduling policies without running daemon as root](#support-for-restoring-sched_rr-and-sched_fifo-scheduling-policies-without-running-daemon-as-root)
 - [Possible questions](#possible-questions)
   - [How does that daemon work?](#how-does-that-daemon-work)
   - [Does that daemon reduce performance?](#does-that-daemon-reduce-performance)
