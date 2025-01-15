@@ -56,16 +56,11 @@ parse_config(){
 						config_key_owner_map["$local_section"]="$local_config_value"
 					;;
 					cpu-limit* )
-						# Exit with an error if CPU limit is specified incorrectly, 1st regexp - any number with optional '%' symbol, 2nd - '-1' or '-1%'
-						if [[ "$local_config_value" =~ ^[0-9]+(\%)?$ || "$local_config_value" =~ ^('-1'|'-1%')$ ]] && (( "${local_config_value/%\%/}" * cpu_threads <= max_cpu_limit )); then
-							# Regexp means '-1' or '-1%'
-							if [[ "$local_config_value" =~ ^('-1'|'-1%')$ ]]; then
-								config_key_cpu_limit_map["$local_section"]="${local_config_value/%\%/}"
-							else
-								config_key_cpu_limit_map["$local_section"]="$(( "${local_config_value/%\%/}" * cpu_threads ))"
-							fi
+						# Exit with an error if CPU limit is specified incorrectly or greater than maximum allowed, regexp - any number with optional '%' symbol
+						if [[ "$local_config_value" =~ ^[0-9]+(\%)?$ ]] && (( "${local_config_value/%\%/}" * cpu_threads <= max_cpu_limit )); then
+							config_key_cpu_limit_map["$local_section"]="${local_config_value/%\%/}"
 						else
-							message --error "Value '$local_config_value' in key 'cpulimit' in section '$local_section' is invalid in '$config' config file! Allowed values are 0-100%."
+							message --error "Value '$local_config_value' in key 'cpulimit' in section '$local_section' is invalid in '$config' config file! Allowed values are between 0 and 100."
 							exit 1
 						fi
 					;;
