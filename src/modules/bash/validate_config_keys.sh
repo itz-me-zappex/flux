@@ -14,7 +14,7 @@ validate_config_keys(){
 			exit 1
 		fi
 		# Exit with an error if MangoHud FPS limit is specified along with CPU limit
-		if [[ -n "${config_key_fps_unfocus_map["$local_temp_section"]}" && -n "${config_key_cpu_limit_map["$local_temp_section"]}" && "${config_key_cpu_limit_map["$local_temp_section"]}" != '-1' ]]; then
+		if [[ -n "${config_key_fps_unfocus_map["$local_temp_section"]}" && -n "${config_key_cpu_limit_map["$local_temp_section"]}" && "${config_key_cpu_limit_map["$local_temp_section"]}" != '100' ]]; then
 			message --error "Do not use FPS limit along with CPU limit in section '$local_temp_section' in '$config' config file!"
 			exit 1
 		fi
@@ -37,9 +37,9 @@ validate_config_keys(){
 		if [[ -n "${config_key_fps_unfocus_map["$local_temp_section"]}" && -z "${config_key_fps_focus_map["$local_temp_section"]}" ]]; then
 			config_key_fps_focus_map["$local_temp_section"]='0'
 		fi
-		# Set CPU limit to '-1' (none) if it is not specified
+		# Set CPU limit to '100' (none) if it is not specified
 		if [[ -z "${config_key_cpu_limit_map["$local_temp_section"]}" ]]; then
-			config_key_cpu_limit_map["$local_temp_section"]='-1'
+			config_key_cpu_limit_map["$local_temp_section"]='100'
 		fi
 		# Set 'delay' to '0' if it is not specified
 		if [[ -z "${config_key_delay_map["$local_temp_section"]}" ]]; then
