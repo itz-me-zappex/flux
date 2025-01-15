@@ -76,7 +76,9 @@ sched_previous_period_map
 parse_options "$@" && shift "${#@}"
 unset -f parse_options \
 option_repeat_check \
-cmdline_get
+cmdline_get \
+check_bool \
+check_true
 
 # Options validation
 validate_options
