@@ -112,6 +112,7 @@ fi
 # Preparation for event reading
 daemon_prepare
 unset -f daemon_prepare
+
 # Read events
 while read -r event; do
 	# These functions are not needed anymore since reading from 'event_source()' subprocess has been started
