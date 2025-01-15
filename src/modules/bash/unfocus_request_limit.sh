@@ -8,7 +8,7 @@ unfocus_request_limit(){
 			if [[ -z "${freeze_applied_map["$previous_process_pid"]}" ]]; then
 				request_freeze_map["$previous_process_pid"]='1'
 			fi
-		elif (( "${config_key_cpu_limit_map["$previous_section"]}" > 0 )); then
+		elif (( "${config_key_cpu_limit_map["$previous_section"]}" < 100 )); then
 			# Request CPU limit for process if it is not limited
 			if [[ -z "${cpu_limit_applied_map["$previous_process_pid"]}" ]]; then
 				request_cpu_limit_map["$previous_process_pid"]='1'
