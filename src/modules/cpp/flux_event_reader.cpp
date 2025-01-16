@@ -157,8 +157,6 @@ int main(){
 		XNextEvent(display, &event);
 		// Wait for property to change
 		if (event.type == PropertyNotify){
-			// Delay before get atoms state to avoid false positives on Cinnamon DE restart, lowest possible which fixes an issue
-			sleep(30);
 			// Get active window ID
 			get_active_window(display, root, active_window_id);
 			// Skip events if WM has been restarted
