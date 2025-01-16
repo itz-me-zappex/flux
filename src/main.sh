@@ -147,6 +147,8 @@ while read -r raw_event; do
 	fi
 	# Skip event if focused process PID is Cinnamon (this workaround needed to handle buggy events created during Cinnamon restart)
 	if [[ "$(<"/proc/${focused_window/*'='}/comm")" == 'cinnamon' ]]; then
+		unset focused_window \
+		unset opened_windows
 		continue
 	fi
 	# Add info about focused window to array as event if it does not repeat
