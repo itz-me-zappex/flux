@@ -44,7 +44,7 @@ install:
 # Uninstall daemon from prefix if 'uninstall' option is passed
 uninstall:
 	@rm -rf $(PREFIX)/lib/flux
-	@unlink $(PREFIX)/bin/flux
+	@rm $(PREFIX)/bin/flux
 
 # Define sections as Makefile options
 .PHONY: all clean install uninstall
