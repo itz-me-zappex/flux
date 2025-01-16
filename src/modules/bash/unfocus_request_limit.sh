@@ -27,8 +27,6 @@ unfocus_request_limit(){
 				if [[ -z "${sched_idle_applied_map["$previous_process_pid"]}" ]]; then
 					request_sched_idle_map["$previous_process_pid"]='1'
 				fi
-			else
-				message --warning "Idle scheduling policy will not be set for process '$previous_process_name' with PID $previous_process_pid because CPU limit equal to zero!"
 			fi
 		fi
 		# Request window minimization if specified in config
