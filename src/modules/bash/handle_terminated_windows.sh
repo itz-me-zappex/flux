@@ -42,11 +42,13 @@ handle_terminated_windows(){
 				passed_section="$local_terminated_section" \
 				passed_process_name="$local_terminated_process_name" \
 				passed_end_of_msg='due to window termination' \
+				passed_window_id="$local_temp_terminated_window_id" \
 				unfreeze_process
 			elif [[ -n "${cpu_limit_applied_map["$local_terminated_process_pid"]}" ]]; then # # Unset CPU limit if limited
 				passed_process_pid="$local_terminated_process_pid" \
 				passed_process_name="$local_terminated_process_name" \
 				passed_signal='-SIGUSR2' \
+				passed_window_id="$local_temp_terminated_window_id" \
 				unset_cpu_limit
 			elif [[ -n "$local_terminated_section" && -n "${fps_limit_applied_map["$local_terminated_section"]}" ]]; then # Unset FPS limit if limited
 				# Do not remove FPS limit if one of existing windows matches with the same section
@@ -63,6 +65,7 @@ handle_terminated_windows(){
 				if [[ -z "$local_found" ]]; then
 					passed_section="$local_terminated_section" \
 					passed_end_of_msg='due to matching window(s) termination' \
+					passed_window_id="$local_temp_terminated_window_id" \
 					unset_fps_limit
 				fi
 			fi
@@ -72,6 +75,7 @@ handle_terminated_windows(){
 				passed_section="$local_terminated_section" \
 				passed_process_name="$local_terminated_process_name" \
 				passed_end_of_msg='due to window termination' \
+				passed_window_id="$local_temp_terminated_window_id" \
 				unset_sched_idle
 			fi
 			# Unset limit request
