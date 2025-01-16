@@ -161,7 +161,7 @@ int main(){
 			get_active_window(display, root, active_window_id);
 			// Skip events if WM has been restarted
 			if (check_wm_restart(display, root, previous_owner) || active_window_id == bad_window_id){
-				sleep(250);
+				sleep(1000);
 				continue;
 			}
 			// Get list of opened windows
