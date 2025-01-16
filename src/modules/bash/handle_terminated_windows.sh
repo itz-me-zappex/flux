@@ -41,7 +41,7 @@ handle_terminated_windows(){
 				passed_process_pid="$local_terminated_process_pid" \
 				passed_section="$local_terminated_section" \
 				passed_process_name="$local_terminated_process_name" \
-				passed_end_of_msg='due to window termination' \
+				passed_end_of_msg="due to window $local_temp_terminated_window_id termination" \
 				unfreeze_process
 			elif [[ -n "${cpu_limit_applied_map["$local_terminated_process_pid"]}" ]]; then # # Unset CPU limit if limited
 				passed_process_pid="$local_terminated_process_pid" \
@@ -62,7 +62,7 @@ handle_terminated_windows(){
 				# Unset FPS limit if there is no any matching windows except target
 				if [[ -z "$local_found" ]]; then
 					passed_section="$local_terminated_section" \
-					passed_end_of_msg='due to matching window(s) termination' \
+					passed_end_of_msg="due to window $local_temp_terminated_window_id termination" \
 					unset_fps_limit
 				fi
 			fi
@@ -71,16 +71,16 @@ handle_terminated_windows(){
 				passed_process_pid="$local_terminated_process_pid" \
 				passed_section="$local_terminated_section" \
 				passed_process_name="$local_terminated_process_name" \
-				passed_end_of_msg='due to window termination' \
+				passed_end_of_msg="due to window $local_temp_terminated_window_id termination" \
 				unset_sched_idle
 			fi
 			# Unset limit request
 			if [[ -n "${request_freeze_map["$local_terminated_process_pid"]}" ]]; then
 				unset request_freeze_map["$local_terminated_process_pid"]
-				message --info "Freezing of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window termination."
+				message --info "Freezing of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id termination."
 			elif [[ -n "${request_cpu_limit_map["$local_terminated_process_pid"]}" ]]; then
 				unset request_cpu_limit_map["$local_terminated_process_pid"]
-				message --info "CPU limiting of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window termination."
+				message --info "CPU limiting of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id termination."
 			elif [[ -n "$local_terminated_section" && -n "${request_fps_limit_map["$local_terminated_section"]}" ]]; then
 				unset request_fps_limit_map["$local_terminated_section"]
 				message --info "FPS limiting of section '$local_terminated_section' has been cancelled due to termination of matching window(s)."
@@ -88,7 +88,7 @@ handle_terminated_windows(){
 			# Unset 'SCHED_IDLE' request
 			if [[ -n "${request_sched_idle_map["$local_terminated_process_pid"]}" ]]; then
 				unset request_sched_idle_map["$local_terminated_process_pid"]
-				message --info "Changing scheduling policy to idle for process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window termination."
+				message --info "Changing scheduling policy to idle for process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id termination."
 			fi
 			# Print message about window termination
 			message --verbose "Window $local_temp_terminated_window_id of process $local_terminated_process_name with PID $local_terminated_process_pid has been terminated."
