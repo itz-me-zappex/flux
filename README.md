@@ -47,19 +47,15 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 - Stuttery audio in unfocused game if CPU limit is pretty aggressive, that should be expected because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. If you use Pipewire with Wireplumber, you may want to mute process as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
 
 ## Features
-- Freezing process on unfocus and unfreezing on focus
-- CPU limiting on unfocus and unlimiting on focus
-- FPS limiting on unfocus and unlimiting on focus (through MangoHud)
+- CPU and FPS (using MangoHud) limiting process on unfocus and unlimiting on focus
 - Reducing process priority on unfocus and restoring it on focus
-- Minimizing window on unfocus (useful for borderless windows only)
-- Command/scripts execution on focus and unfocus events to make user able extend daemon functionality
+- Minimizing window on unfocus using xdotool (useful for borderless windows only)
+- Commands/scripts execution on focus and unfocus events to make user able extend daemon functionality
 - Configurable logging
 - Notifications support
 - Multiple identifiers you can set to avoid false positives
-- Does not require user interaction
 - Easy INI config
-- Ability to interact with window and process info obtained in daemon in commands/scripts specified in `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` using passed environment variables by daemon
-- Very low CPU usage
+- Ability to use window and process info obtained by daemon itself using automatically passed environment variables in commands/scripts specified in `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys
 - Ability to interact with processes running in sandboxing with PID namespaces (e.g. using Firejail)
 - Stability, meaning that daemon survives a whole DE/WM restart (not relogin) and continues work without issues
 - Supports all X11 DEs/WMs and does not rely on neither GPU nor its driver
