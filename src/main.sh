@@ -125,8 +125,13 @@ while read -r raw_event; do
 	if (( events_count == 1 )); then
 		focused_window="$raw_event"
 		continue
-	else
+	elif (( events_count == 2 )); then
 		opened_windows="$raw_event"
+	elif (( events_count == 3 )); then # Workaround to skip buggy event on Cinnamon restart
+		continue
+	elif (( events_count == 4 )); then # Workaround to skip buggy event on Cinnamon restart
+		events_count='0'
+		continue
 	fi
 	# Do nothing if '--hot' is not specified
 	if [[ -n "$hot" ]]; then
@@ -139,6 +144,10 @@ while read -r raw_event; do
 		unset temp_window
 		# Add event to unset '--hot'
 		events_array+=('unset_hot')
+	fi
+	# Skip event if focused process PID is Cinnamon (this workaround needed to handle buggy events created during Cinnamon restart)
+	if [[ "$(<"/proc/${focused_window/*'='}/comm")" == 'cinnamon' ]]; then
+		continue
 	fi
 	# Add info about focused window to array as event if it does not repeat
 	# Also skip window IDs if those are different just because of last character (e.g. 0x3800242 != 0x3800243)
