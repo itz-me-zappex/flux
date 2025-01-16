@@ -50,9 +50,9 @@ find_matching_section(){
 	fi
 	# Print message about section match
 	if [[ -n "$section" ]]; then
-		message --verbose "Process '$process_name' with PID $process_pid matches with section '$section'."
+		message --verbose "Window $window_id of process '$process_name' with PID $process_pid matches with section '$section'."
 	else
-		message --verbose "Process '$process_name' with PID $process_pid does not match with any section."
+		message --verbose "Window $window_id of process '$process_name' with PID $process_pid does not match with any section."
 		return 1
 	fi
 }
