@@ -229,7 +229,7 @@ As INI is not standartized, I should mention all supported features here.
 ### Configuration example
 #### Long examples
 ```ini
-; Freeze singleplayer game on unfocus and disable/enable compositor on unfocus and focus respectively
+; Freeze on unfocus and disable/enable compositor on focus and unfocus respectively
 [The Witcher 3: Wild Hunt]
 name = witcher3.exe
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\The Witcher 3\bin\x64\witcher3.exe 
@@ -263,7 +263,7 @@ idle = true
 
 #### Short examples
 ```ini
-; Freeze singleplayer game on unfocus and disable/enable compositor on unfocus and focus respectively
+; Freeze on unfocus and disable/enable compositor on focus and unfocus respectively
 [The Witcher 3: Wild Hunt]
 name = witcher3.exe
 cpu-limit = 0%
