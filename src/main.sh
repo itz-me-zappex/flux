@@ -133,11 +133,15 @@ while read -r raw_event; do
 		events_count='0'
 		continue
 	fi
+	# Obtain focused window ID to simplify repeat detection
+	focused_window_id="${focused_window/'='*/}"
 	# Do nothing if '--hot' is not specified
 	if [[ -n "$hot" ]]; then
 		# Add opened windows info except focused one to array as events to apply actions to already opened windows
 		for temp_window in $opened_windows; do
-			if [[ "$temp_window" != "$focused_window" ]]; then
+			# Remove PID from opened window ID
+			# Remove last character from focused window ID to try match it as exactly the same as opened one if their IDs e.g. 0x3800242 and 0x3800243
+			if [[ "${temp_window/'='*/}" != "${focused_window_id%?}"* ]]; then
 				events_array+=("$temp_window")
 			fi
 		done
@@ -150,9 +154,7 @@ while read -r raw_event; do
 		continue
 	fi
 	# Add info about focused window to array as event if it does not repeat
-	# Also skip window IDs if those are different just because of last character (e.g. 0x3800242 != 0x3800243)
-	# These window IDs appearing on Cinnamon if I open app from panel and/or if run app from command runner
-	focused_window_id="${focused_window/'='*/}"
+	# Remove last character from focused window ID to try match as repeat IDs e.g. 0x3800242 and 0x3800243
 	if [[ "$previous_focused_window_id" != "${focused_window_id%?}"* ]]; then
 		events_array+=("$focused_window")
 		# Remember focused window ID to skip adding it to array as event if repeats
