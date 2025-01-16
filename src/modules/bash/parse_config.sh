@@ -67,8 +67,7 @@ parse_config(){
 					delay* )
 						# Exit with an error if value is neither an integer nor a float (that is what regexp means)
 						if [[ "$local_config_value" =~ ^[0-9]+((\.|\,)[0-9]+)?$ ]]; then
-							# Replace comma with dot because comma breaks 'internal_sleep()' which uses 'read -t <time> < /dev/tty'
-							config_key_delay_map["$local_section"]="${local_config_value/','/'.'}"
+							config_key_delay_map["$local_section"]="$local_config_value"
 						else
 							message --error "Value '$local_config_value' in key 'delay' in section '$local_section' is neither integer nor float in '$config' config file!"
 							exit 1

@@ -1,7 +1,7 @@
 # Required to minimize window on unfocus event
 background_minimize(){
 	# Wait a bit to make sure that window is really unfocused
-	internal_sleep 0.1
+	sleep 0.1
 	# Compare focused window ID with passed one
 	if [[ "$(xdotool getactivewindow)" != "$(($passed_window_id))" ]]; then
 		# Attempt to minimize window using xdotool, window ID should be converted to numeric value from hexadecimal

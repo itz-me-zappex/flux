@@ -101,8 +101,3 @@ check_true(){
 		return 1
 	fi
 }
-
-# Required to sleep without calling external 'sleep' binary, more accurate as it does not spend time on execution and does not spawn separate process, but does not work as expected when running in background, used only if possible
-internal_sleep(){
-	read -t "$1" < /dev/tty
-}

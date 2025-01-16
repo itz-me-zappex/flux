@@ -13,7 +13,7 @@ background_cpu_limit(){
 		# Print relevant message on target process termination and stop this subprocess
 		trap 'message --info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to window termination." ; \
 		exit 0' SIGUSR2
-		internal_sleep "${config_key_delay_map["$passed_section"]}"
+		sleep "${config_key_delay_map["$passed_section"]}"
 	fi
 	# Check for process existence before set CPU limit
 	if check_pid_existence "$passed_process_pid"; then

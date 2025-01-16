@@ -3,7 +3,7 @@ background_sched_idle(){
 	# Wait before change scheduling policy and notify user if delay is specified
 	if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
 		message --verbose "Scheduling policy of process '$passed_process_name' with PID $passed_process_pid will be changed to 'idle' after ${config_key_delay_map["$passed_section"]} second(s) on unfocus event."
-		internal_sleep "${config_key_delay_map["$passed_section"]}"
+		sleep "${config_key_delay_map["$passed_section"]}"
 	fi
 	# Check for process existence before changing scheduling policy
 	if check_pid_existence "$passed_process_pid"; then
