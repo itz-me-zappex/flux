@@ -141,28 +141,34 @@ while read -r raw_event; do
 		events_array+=('unset_hot')
 	fi
 	# Add info about focused window to array as event if it does not repeat
-	if [[ "$previous_focused_window" != "$focused_window" ]]; then
+	# Also skip window IDs if those are different just because of last character (e.g. 0x3800242 != 0x3800243)
+	# These window IDs appearing on Cinnamon if I open app from panel and/or if run app from command runner
+	focused_window_id="${focused_window/'='*/}"
+	if [[ "$previous_focused_window_id" != "${focused_window_id%?}"* ]]; then
 		events_array+=("$focused_window")
-		# Remember focused window to skip printing if as event if repeats
-		previous_focused_window="$focused_window"
+		# Remember focused window ID to skip adding it to array as event if repeats
+		previous_focused_window_id="${focused_window/'='*/}"
 	fi
-	# Find terminated windows and store those to an array
-	for temp_window in $previous_opened_windows; do
-		# Skip existing window ID
-		if [[ " $opened_windows " != *" $temp_window "* ]]; then
-			terminated_windows_array+=("$temp_window")
+	# Do nothing if list of opened windows repeats
+	if [[ "$previous_opened_windows" != "$opened_windows" ]]; then
+		# Find terminated windows and store those to an array
+		for temp_window in $previous_opened_windows; do
+			# Skip existing window ID
+			if [[ " $opened_windows " != *" $temp_window "* ]]; then
+				terminated_windows_array+=("$temp_window")
+			fi
+		done
+		unset temp_window
+		# Add list of existing and terminated windows to array as events
+		if [[ -n "${terminated_windows_array[@]}" ]]; then
+			events_array+=("terminated: ${terminated_windows_array[@]} ; existing: $opened_windows")
+			unset terminated_windows_array
 		fi
-	done
-	unset temp_window
-	# Add list of existing and terminated windows to array as events
-	if [[ -n "${terminated_windows_array[@]}" ]]; then
-		events_array+=("terminated: ${terminated_windows_array[@]} ; existing: $opened_windows")
-		unset terminated_windows_array
+		# Add opened windows list as event to array to check requested limits
+		events_array+=("check_requests: $opened_windows")
+		# Remember opened windows to find terminated windows on next event
+		previous_opened_windows="$opened_windows"
 	fi
-	# Remember opened windows to find terminated windows on next event
-	previous_opened_windows="$opened_windows"
-	# Add opened windows list as event to array to check requested limits
-	events_array+=("check_requests: $opened_windows")
 	# Reset events count
 	events_count='0'
 	# Handle events
