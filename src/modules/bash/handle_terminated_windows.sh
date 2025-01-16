@@ -24,7 +24,7 @@ handle_terminated_windows(){
 		local_terminated_window_ids_array+=("${local_temp_terminated_window/'='*/}")
 	done
 	# Remove PIDs from list of existing windows
-	for local_temp_existing_window in $local_terminated_windows; do
+	for local_temp_existing_window in $local_existing_windows; do
 		local_existing_window_ids_array+=("${local_temp_existing_window/'='*/}")
 	done
 	# Unset limits for terminated windows
