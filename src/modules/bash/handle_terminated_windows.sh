@@ -12,7 +12,8 @@ handle_terminated_windows(){
 	local_temp_existing_window_id \
 	local_found \
 	local_temp_terminated_window \
-	local_temp_existing_window
+	local_temp_existing_window \
+	local_end_of_msg
 	# Obtain list of terminated window IDs
 	local_terminated_windows="${event/'terminated: '/}" # Remove everything before including type name of list with window IDs
 	local_terminated_windows="${local_terminated_windows/' ; existing: '*/}" # Remove list of existing window IDs
@@ -36,12 +37,14 @@ handle_terminated_windows(){
 			local_terminated_section="${cache_section_map["$local_terminated_process_pid"]}"
 			# Simplify access to process name of cached window info
 			local_terminated_process_name="${cache_process_name_map["$local_temp_terminated_window_id"]}"
+			# Set end of message with actual window ID to not duplicate it
+			local_end_of_msg="$local_end_of_msg"
 			# Unset applied limits
 			if [[ -n "${freeze_applied_map["$local_terminated_process_pid"]}" ]]; then # Unfreeze process if frozen
 				passed_process_pid="$local_terminated_process_pid" \
 				passed_section="$local_terminated_section" \
 				passed_process_name="$local_terminated_process_name" \
-				passed_end_of_msg="due to window $local_temp_terminated_window_id termination" \
+				passed_end_of_msg="$local_end_of_msg" \
 				unfreeze_process
 			elif [[ -n "${cpu_limit_applied_map["$local_terminated_process_pid"]}" ]]; then # # Unset CPU limit if limited
 				passed_process_pid="$local_terminated_process_pid" \
@@ -62,7 +65,7 @@ handle_terminated_windows(){
 				# Unset FPS limit if there is no any matching windows except target
 				if [[ -z "$local_found" ]]; then
 					passed_section="$local_terminated_section" \
-					passed_end_of_msg="due to window $local_temp_terminated_window_id termination" \
+					passed_end_of_msg="$local_end_of_msg" \
 					unset_fps_limit
 				fi
 			fi
@@ -71,7 +74,7 @@ handle_terminated_windows(){
 				passed_process_pid="$local_terminated_process_pid" \
 				passed_section="$local_terminated_section" \
 				passed_process_name="$local_terminated_process_name" \
-				passed_end_of_msg="due to window $local_temp_terminated_window_id termination" \
+				passed_end_of_msg="$local_end_of_msg" \
 				unset_sched_idle
 			fi
 			# Unset limit request
