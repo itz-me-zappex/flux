@@ -156,7 +156,7 @@ while read -r raw_event; do
 	if [[ "$previous_focused_window_id" != "${focused_window_id%?}"* ]]; then
 		events_array+=("$focused_window")
 		# Remember focused window ID to skip adding it to array as event if repeats
-		previous_focused_window_id="${focused_window/'='*/}"
+		previous_focused_window_id="$focused_window_id"
 	fi
 	# Find terminated windows and store those to an array
 	for temp_window in $previous_opened_windows; do
