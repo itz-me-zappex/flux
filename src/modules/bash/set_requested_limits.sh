@@ -65,6 +65,7 @@ set_requested_limits(){
 				passed_section="$local_section" \
 				passed_process_name="$local_process_name" \
 				passed_process_pid="$local_process_pid" \
+				passed_window_id="$local_temp_window_id" \
 				background_freeze &
 				# Associate PID of background process with PID of process to interrupt it in case focus event appears earlier than delay ends
 				background_freeze_pid_map["$local_process_pid"]="$!"
@@ -77,6 +78,7 @@ set_requested_limits(){
 				passed_section="$local_section" \
 				passed_process_name="$local_process_name" \
 				passed_process_pid="$local_process_pid" \
+				passed_window_id="$local_temp_window_id" \
 				background_cpu_limit &
 				# Associate PID of background process with PID of process to interrupt it on focus event
 				background_cpu_limit_pid_map["$local_process_pid"]="$!"
@@ -88,6 +90,7 @@ set_requested_limits(){
 				# Set FPS limit
 				passed_section="$local_section" \
 				passed_process_pid="$local_process_pid" \
+				passed_window_id="$local_temp_window_id" \
 				background_fps_limit &
 				# Associate PID of background process with section to interrupt in case focus event appears earlier than delay ends
 				background_fps_limit_pid_map["$local_section"]="$!"
@@ -152,6 +155,7 @@ set_requested_limits(){
 					passed_section="$local_section" \
 					passed_process_name="$local_process_name" \
 					passed_process_pid="$local_process_pid" \
+					passed_window_id="$local_temp_window_id" \
 					background_sched_idle &
 					# Associate PID of background process with PID of process to interrupt it on focus event
 					background_sched_idle_pid_map["$local_process_pid"]="$!"
