@@ -16,7 +16,7 @@ unset_sched_idle(){
 		if [[ "$local_config_delay" != '0' ]]; then
 			# Define message depending by 'kill' exit code
 			if (( $? > 0 )); then
-				message --warning "Unable to cancel delayed for $local_config_delay second(s) delayed setting of idle scheduling policy for process '$passed_process_name' with PID $passed_process_pid!"
+				message --warning "Unable to cancel delayed for $local_config_delay second(s) delayed setting of idle scheduling policy for process '$passed_process_name' with PID $passed_process_pid $passed_end_of_msg!"
 			else
 				message --info "Delayed for $local_config_delay second(s) setting of idle scheduling policy for process $passed_process_name' with PID $passed_process_pid has been cancelled $passed_end_of_msg."
 			fi
