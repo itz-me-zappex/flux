@@ -115,87 +115,133 @@ fi
 daemon_prepare
 unset -f daemon_prepare
 
-# Read events
-while read -r event; do
-	# These functions are not needed anymore since reading from 'event_source()' subprocess has been started
-	# And I can not unset them before start of 'event_source()'
-	if [[ -z "$event_source_is_unset" ]]; then
-		unset -f check_windows \
-		on_hot \
-		event_source
-		event_source_is_unset='1'
+# Set initial events count
+events_count='0'
+
+# Read events from 'flux-event-reader' binary
+while read -r raw_event; do
+	(( events_count++ ))
+	# Collect events
+	if (( events_count == 1 )); then
+		focused_window="$raw_event"
+		continue
+	else
+		opened_windows="$raw_event"
 	fi
-	# Apply actions depending by event type
-	case "$event" in
-	'error' )
-		# Exit with an error in case 'error' event appears
-		actions_on_exit
-		message --error "Flux has been terminated unexpectedly!"
-		exit 1
-	;;
-	'unset_hot' )
-		# Unset '--hot' as it becomes useless from this moment
-		unset hot
-		# Needed to make commands from 'lazy-exec-unfocus' keys work properly, 'exec_unfocus()' skips execution 'lazy-exec-unfocus' first time and increases value to '2'
-		hot_is_unset='1'
-	;;
-	'terminated'* )
-		# Unset CPU/FPS limits for terminated windows and remove info about them from cache
-		handle_terminated_windows
-	;;
-	'check_requests'* )
-		# Apply CPU/FPS limits for process which have been requested to be limited
-		set_requested_limits
-	;;
-	* )
-		# Get window ID
-		window_id="${event/'='*/}"
-		# Get process PID of focused window
-		process_pid="${event/*'='/}"
-		# Attempt to obtain info about process using window ID
-		get_process_info
-		get_process_info_exit_code="$?"
-		# Request CPU/FPS limit for unfocused process if it matches with section
-		unfocus_request_limit
-		# Actions depending by exit code of 'get_process_info()'
-		if (( get_process_info_exit_code == 0 )); then
-			# Find matching section for process in config
-			if find_matching_section; then
-				# Unset CPU/FPS limit for focused process if it has been limited on unfocus
-				focus_unset_limit
-				# Execute command on focus event if specified in config
-				exec_focus
+	# Do nothing if '--hot' is not specified
+	if [[ -n "$hot" ]]; then
+		# Add opened windows info except focused one to array as events to apply actions to already opened windows
+		for temp_window in $opened_windows; do
+			if [[ "$temp_window" != "$focused_window" ]]; then
+				events_array+=("$temp_window")
 			fi
-		else
-			message --warning "Unable to obtain info about process with PID $process_pid! Probably process has been terminated during check."
+		done
+		unset temp_window
+		# Add event to unset '--hot'
+		events_array+=('unset_hot')
+	fi
+	# Add info about focused window to array as event if it does not repeat
+	if [[ "$previous_focused_window" != "$focused_window" ]]; then
+		events_array+=("$focused_window")
+		# Remember focused window to skip printing if as event if repeats
+		previous_focused_window="$focused_window"
+	fi
+	# Find terminated windows and store those to an array
+	for temp_window in $previous_opened_windows; do
+		# Skip existing window ID
+		if [[ " $opened_windows " != *" $temp_window "* ]]; then
+			terminated_windows_array+=("$temp_window")
 		fi
-		# Execute command on unfocus event if specified in config
-		exec_unfocus
-		# Define what to do with info about previous window depending by exit code (overwrite or unset)
-		if (( get_process_info_exit_code == 0 )); then
-			# Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
-			previous_window_id="$window_id"
-			previous_process_pid="$process_pid"
-			previous_process_name="$process_name"
-			previous_process_owner="$process_owner"
-			previous_process_command="$process_command"
-			previous_section="$section"
-		else
-			# Forget info about previous window/process because it is not changed
-			unset previous_window_id \
-			previous_process_pid \
-			previous_process_name \
-			previous_process_owner \
-			previous_process_command \
-			previous_section
-		fi
-		unset get_process_info_exit_code
-		# Unset info about process to avoid using it by an accident
-		unset window_id \
-		process_pid \
-		process_name \
-		process_owner \
-		process_command \
-		section
-	esac
-done < <(event_source)
+	done
+	unset temp_window
+	# Add list of existing and terminated windows to array as events
+	if [[ -n "${terminated_windows_array[@]}" ]]; then
+		events_array+=("terminated: ${terminated_windows_array[@]} ; existing: $opened_windows")
+		unset terminated_windows_array
+	fi
+	# Remember opened windows to find terminated windows on next event
+	previous_opened_windows="$opened_windows"
+	# Add opened windows list as event to array to check requested limits
+	events_array+=("check_requests: $opened_windows")
+	# Reset events count
+	events_count='0'
+	# Handle events
+	for event in "${events_array[@]}"; do
+		# Apply actions depending by event type
+		case "$event" in
+		'unset_hot' )
+			# Unset '--hot' as it becomes useless from this moment
+			unset hot
+			# Needed to make commands from 'lazy-exec-unfocus' keys work properly, 'exec_unfocus()' skips execution 'lazy-exec-unfocus' first time and increases value to '2'
+			hot_is_unset='1'
+		;;
+		'terminated'* )
+			# Unset CPU/FPS limits for terminated windows and remove info about them from cache
+			handle_terminated_windows
+		;;
+		'check_requests'* )
+			# Apply CPU/FPS limits for process which have been requested to be limited
+			set_requested_limits
+		;;
+		* )
+			# Get window ID
+			window_id="${event/'='*/}"
+			# Get process PID of focused window
+			process_pid="${event/*'='/}"
+			# Attempt to obtain info about process using window ID
+			get_process_info
+			get_process_info_exit_code="$?"
+			# Request CPU/FPS limit for unfocused process if it matches with section
+			unfocus_request_limit
+			# Actions depending by exit code of 'get_process_info()'
+			if (( get_process_info_exit_code == 0 )); then
+				# Find matching section for process in config
+				if find_matching_section; then
+					# Unset CPU/FPS limit for focused process if it has been limited on unfocus
+					focus_unset_limit
+					# Execute command on focus event if specified in config
+					exec_focus
+				fi
+			else
+				message --warning "Unable to obtain info about process with PID $process_pid! Probably process has been terminated during check."
+			fi
+			# Execute command on unfocus event if specified in config
+			exec_unfocus
+			# Define what to do with info about previous window depending by exit code (overwrite or unset)
+			if (( get_process_info_exit_code == 0 )); then
+				# Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
+				previous_window_id="$window_id"
+				previous_process_pid="$process_pid"
+				previous_process_name="$process_name"
+				previous_process_owner="$process_owner"
+				previous_process_command="$process_command"
+				previous_section="$section"
+			else
+				# Forget info about previous window/process because it is not changed
+				unset previous_window_id \
+				previous_process_pid \
+				previous_process_name \
+				previous_process_owner \
+				previous_process_command \
+				previous_section
+			fi
+			unset get_process_info_exit_code
+			# Unset info about process to avoid using it by an accident
+			unset window_id \
+			process_pid \
+			process_name \
+			process_owner \
+			process_command \
+			section
+		esac
+	done
+	# Unset events
+	unset events_array
+done < <("$flux_event_reader" 2>/dev/null)
+
+# Exit with an error if loop has been broken and daemon did not exit with SIGINT/SIGTERM signal
+# That means that event reader has been terminated because of actions from outside or because of segfault
+message --warning "Event reader has been terminated!"
+actions_on_exit
+message --error "Flux has been terminated unexpectedly!"
+exit 1
