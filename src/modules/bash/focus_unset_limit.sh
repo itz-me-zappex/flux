@@ -1,6 +1,6 @@
 # Required to unset limit for focused process
 focus_unset_limit(){
-	local local_end_of_msg='on focus event'
+	local local_end_of_msg="due to window $window_id focus event"
 	# Define type of limit which should be unset
 	if [[ -n "${freeze_applied_map["$process_pid"]}" ]]; then
 		# Unfreeze process if has been frozen
