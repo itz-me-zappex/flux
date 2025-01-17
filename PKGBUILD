@@ -20,7 +20,7 @@ depends=(
 	'coreutils'
 	'libxres'
 	'libx11'
-	'lixext'
+	'libxext'
 	'xorgproto'
 )
 optdepends=(
