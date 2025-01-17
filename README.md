@@ -1,5 +1,5 @@
 ## flux
-A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused windows and run commands on focus and unfocus events.
+Advanced daemon for X11 desktops and window managers, designed to automatically limit FPS/CPU usage of unfocused windows and run commands on focus and unfocus events. Written in Bash and C++.
 
 ## Navigation
 - [Known issues](#known-issues)
