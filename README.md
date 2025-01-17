@@ -47,7 +47,7 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 - Stuttery audio in unfocused game if CPU limit is pretty aggressive, that should be expected because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. If you use Pipewire with Wireplumber, you may want to mute process as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
 
 ## Features
-- CPU and FPS (using MangoHud) limiting process on unfocus and unlimiting on focus
+- CPU and FPS limiting process on unfocus and unlimiting on focus (FPS limiting requires game running using MangoHud with already existing config file)
 - Reducing process priority on unfocus and restoring it on focus
 - Minimizing window on unfocus using xdotool (useful for borderless windows only)
 - Commands/scripts execution on focus and unfocus events to make user able extend daemon functionality
@@ -55,9 +55,9 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 - Notifications support
 - Multiple identifiers you can set to avoid false positives
 - Easy INI config
-- Ability to use window and process info obtained by daemon itself using automatically passed environment variables in commands/scripts specified in `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys
-- Ability to interact with processes running in sandboxing with PID namespaces (e.g. using Firejail)
-- Stability, meaning that daemon survives a whole DE/WM restart (not relogin) and continues work without issues
+- Ability to use window and process info through environment variables which daemon passes to scripts/commands in `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys
+- Works with processes running in sandbox with PID namespaces (e.g. Firejail)
+- Survives a whole DE/WM restart (not relogin) and continues work without issues
 - Supports all X11 DEs/WMs and does not rely on neither GPU nor its driver
 
 ## Dependencies
