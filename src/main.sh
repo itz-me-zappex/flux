@@ -214,7 +214,11 @@ while read -r raw_event; do
 					exec_focus
 				fi
 			else
-				message --warning "Unable to obtain info about process with PID $process_pid! Probably process has been terminated during check."
+				if (( get_process_info_exit_code == 1 )); then
+					message --warning "Unable to obtain info about process with PID $process_pid! Probably process has been terminated during check."
+				elif (( get_process_info_exit_code == 2 )); then
+					message --warning "Unable to obtain owner username of process $process_name with PID $process_pid!"
+				fi
 			fi
 			# Execute command on unfocus event if specified in config
 			exec_unfocus
