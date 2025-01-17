@@ -105,12 +105,6 @@ check_true
 validate_config_keys
 unset -f validate_config_keys
 
-# Exit with an error if X11 session is invalid
-if [[ "$XDG_SESSION_TYPE" != 'x11' || ! "$DISPLAY" =~ ^:[0-9](\.[0-9]+)?$ ]]; then
-	message --error "Unable to start daemon, something is wrong with X11 session!"
-	exit 1
-fi
-
 # Preparation for event reading
 daemon_prepare
 unset -f daemon_prepare
