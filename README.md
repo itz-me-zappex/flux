@@ -137,6 +137,11 @@ Make sure you have installed `base-devel` package before continue.
 mkdir 'flux' && cd 'flux'
 ```
 
+#### Install `cpulimit` dependency from AUR
+```bash
+git clone https://aur.archlinux.org/cpulimit.git && cd cpulimit && makepkg -sric && cd ..
+```
+
 #### Download PKGBUILD from Git repo
 ```bash
 wget "https://raw.githubusercontent.com/itz-me-zappex/flux/refs/heads/main/PKGBUILD"
