@@ -34,7 +34,6 @@ A daemon for X11 designed to automatically limit FPS or CPU usage of unfocused w
 - [Possible questions](#possible-questions)
   - [How does that daemon work?](#how-does-that-daemon-work)
   - [Does that daemon reduce performance?](#does-that-daemon-reduce-performance)
-  - [Which DE/WM/GPU daemon supports?](#which-dewmgpu-daemon-supports)
   - [May I get banned in game because of this daemon?](#may-i-get-banned-in-game-because-of-this-daemon)
   - [Why was that daemon developed?](#why-was-that-daemon-developed)
   - [Why is code so complicated?](#why-is-code-so-complicated)
@@ -351,9 +350,6 @@ user - rtprio 99
 
 ### Does that daemon reduce performance?
 - Daemon uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time and just chills out when you doing stuff in single window. Performance loss should not be noticeable even on weak systems.
-
-### Which DE/WM/GPU daemon supports?
-- Daemon compatible with all X11 window managers (and desktop environments respectively) and does not depend on neither GPU nor driver version as it relies on X11 event system.
 
 ### May I get banned in game because of this daemon?
 - Nowadays, anti-cheats are pure garbage, developed by freaks without balls, and you may get banned even for a wrong click or sudden mouse movement, I am not even talking about bans because of broken libs provided with games by developers themselves. But daemon by its nature should not trigger anticheat, anyway, I am not responsible for your actions, so - use it carefully and do not write me if you get banned.
