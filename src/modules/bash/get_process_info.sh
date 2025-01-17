@@ -1,4 +1,4 @@
-# Required to get process info from cache
+# Required to get process info from cache using window ID
 cache_get_process_info(){
 	process_name="${cache_process_name_map["$passed_window_id"]}"
 	process_owner="${cache_process_owner_map["$passed_window_id"]}"
@@ -6,7 +6,7 @@ cache_get_process_info(){
 	process_owner_username="${cache_process_owner_username_map["$passed_window_id"]}"
 }
 
-# Required to get process info using window ID
+# Required to get process info using PID
 get_process_info(){
 	local local_temp_status_line \
 	local_column_count='0' \
@@ -68,7 +68,7 @@ get_process_info(){
 				return 1
 			fi
 		fi
-		# Obtain username from '/etc/passwd' file using UID of process
+		# Obtain process owner username from '/etc/passwd' file using UID of process
 		if check_ro '/etc/passwd'; then
 			while read -r local_temp_passwd_line; do
 				# Do not do anything if it does not match with pattern and UID of process
@@ -77,8 +77,10 @@ get_process_info(){
 					break
 				fi
 			done < '/etc/passwd'
+		else
+			return 2
 		fi
-		# Store process info to cache to speed up its obtainance on next focus event and to use it implitly using only window ID
+		# Store process info to cache to speed up its obtainance on next focus event and to use it implicitly using only window ID
 		cache_process_pid_map["$window_id"]="$process_pid"
 		cache_process_name_map["$window_id"]="$process_name"
 		cache_process_owner_map["$window_id"]="$process_owner"
