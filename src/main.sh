@@ -145,8 +145,8 @@ while read -r raw_event; do
 		# Add event to unset '--hot'
 		events_array+=('unset_hot')
 	fi
-	# Skip event if focused process PID is Cinnamon (this workaround needed to handle buggy events created during Cinnamon restart)
-	if [[ "$(<"/proc/${focused_window/*'='}/comm")" == 'cinnamon' ]]; then
+	# Skip event if list of opened windows is blank and focused process PID is Cinnamon (this workaround needed to handle buggy events created during Cinnamon restart)
+	if [[ -z "$opened_windows" && "$(<"/proc/${focused_window/*'='}/comm")" == 'cinnamon' ]]; then
 		unset focused_window \
 		unset opened_windows
 		continue
