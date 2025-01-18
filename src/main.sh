@@ -139,8 +139,11 @@ while read -r raw_event; do
 		# Add event to unset '--hot'
 		events_array+=('unset_hot')
 	fi
-	# Skip event if focused process PID is Cinnamon (this workaround needed to handle buggy events created during Cinnamon restart)
-	if [[ "$(<"/proc/${focused_window/*'='}/comm")" == 'cinnamon' ]]; then
+	# Workaround for Cinnamon desktop
+	# Needed to skip buggy events created during Cinnamon restart to prevent unsetting applied limits due to blank '_NET_CLIENT_LIST_STACKING' atom
+	# 'sudo' does not unset '$XDG_CURRENT_DESKTOP', so workaround will work even if daemon runs as root
+	# Skip event if focused process PID is Cinnamon
+	if [[ "$XDG_CURRENT_DESKTOP" == "X-Cinnamon" && "$(<"/proc/${focused_window/*'='}/comm")" == 'cinnamon' ]]; then
 		unset focused_window \
 		unset opened_windows
 		continue
