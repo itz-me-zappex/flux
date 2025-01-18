@@ -70,11 +70,11 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 
 ### Debian and dereatives
   
-- Required: `bash` `cpulimit` `coreutils` `libxres1` `libx11-6` `libxext6` `libXext`
+- Required: `bash` `cpulimit` `coreutils` `libxres1` `libx11-6` `libxext6`
 
 - Optional: `mangohud` `mangohud:i386` `libnotify-bin` `xdotool`
 
-- Build: `libxres-dev` `libx11-dev` `libxext-dev` `libXext-devel` `x11proto-dev` `make` `g++`
+- Build: `libxres-dev` `libx11-dev` `libxext-dev` `x11proto-dev` `make` `g++`
 
 ### Void Linux and dereatives
 
@@ -90,7 +90,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 
 - Optional: `mangohud` `mangohud.i686` `libnotify` `xdotool`
 
-- Build: `libXres-devel` `libX11-devel` `libXext-devel` `xorg-x11-proto-devel` `make` `gcc`
+- Build: `libXres-devel` `libX11-devel` `libXext-devel` `xorg-x11-proto-devel` `make` `gcc-c++`
 
 ### OpenSUSE Tumbleweed and dereatives
 
