@@ -65,13 +65,13 @@ exec_on_event(){
 	# Run command separately from daemon in background
 	passed_section='' \
 	passed_event_command='' \
-	passed_event='' \
+	passed_end_of_msg='' \
 	nohup setsid bash -c "$passed_event_command" > /dev/null 2>&1 &
 	# Notify user about execution
 	if [[ "$passed_command_type" == 'default' ]]; then
-		message --info "Command '$(bash -c "echo \"$passed_event_command\"")' from section '$passed_section' has been executed $passed_event."
+		message --info "Command '$(bash -c "echo \"$passed_event_command\"")' from section '$passed_section' has been executed $passed_end_of_msg."
 	elif [[ "$passed_command_type" == 'lazy' ]]; then
-		message --info "Lazy command '$(bash -c "echo \"$passed_event_command\"")' from section '$passed_section' has been executed $passed_event."
+		message --info "Lazy command '$(bash -c "echo \"$passed_event_command\"")' from section '$passed_section' has been executed $passed_end_of_msg."
 	fi
 }
 
