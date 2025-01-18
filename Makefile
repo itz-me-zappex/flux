@@ -37,7 +37,8 @@ clean:
 
 # Install daemon to prefix if 'install' option is passed
 install:
-	@mkdir -p $(PREFIX)/{bin,lib/flux}
+	@mkdir -p $(PREFIX)/bin
+	@mkdir -p $(PREFIX)/lib/flux
 	@install -Dm 755 $(FLUX_EVENT_READER_OUTPUT_PATH) $(PREFIX)/lib/flux/
 	@install -Dm 755 $(FLUX_OUTPUT_PATH) $(PREFIX)/bin/
 
