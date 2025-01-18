@@ -1,5 +1,8 @@
 # Required to execute command from 'exec-focus' and 'lazy-exec-focus' config keys
 exec_focus(){
+	local local_end_of_msg
+	# Set end of message to not repeat it in code
+	local_end_of_msg="due to window $window_id focus event"
 	# Export environment variables to interact with them using commands/scripts in 'exec-focus' and 'lazy-exec-focus' config keys
 	export FLUX_WINDOW_ID="$window_id" \
 	FLUX_PROCESS_PID="$process_pid" \
@@ -16,7 +19,7 @@ exec_focus(){
 		passed_command_type='default' \
 		passed_section="$section" \
 		passed_event_command="${config_key_exec_focus_map["$section"]}" \
-		passed_event='on focus event' \
+		passed_end_of_msg="$local_end_of_msg" \
 		exec_on_event
 	fi
 	# Execute command from 'lazy-exec-focus' key if it has been specified and if '--hot' has been unset by daemon after processing opened windows
@@ -24,7 +27,7 @@ exec_focus(){
 		passed_command_type='lazy' \
 		passed_section="$section" \
 		passed_event_command="${config_key_lazy_exec_focus_map["$section"]}" \
-		passed_event='on focus event' \
+		passed_end_of_msg="$local_end_of_msg" \
 		exec_on_event
 	fi
 	# Unset exported variables
