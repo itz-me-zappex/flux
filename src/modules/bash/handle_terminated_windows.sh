@@ -13,7 +13,8 @@ handle_terminated_windows(){
 	local_found \
 	local_temp_terminated_window \
 	local_temp_existing_window \
-	local_end_of_msg
+	local_end_of_msg \
+	local_temp_cached_pid
 	# Obtain list of terminated window IDs
 	local_terminated_windows="${event/'terminated: '/}" # Remove everything before including type name of list with window IDs
 	local_terminated_windows="${local_terminated_windows/' ; existing: '*/}" # Remove list of existing window IDs
@@ -67,6 +68,8 @@ handle_terminated_windows(){
 					passed_section="$local_terminated_section" \
 					passed_end_of_msg="$local_end_of_msg" \
 					unset_fps_limit
+				else
+					unset local_found
 				fi
 			fi
 			# Restore scheduling policy if was changed
@@ -96,14 +99,27 @@ handle_terminated_windows(){
 				unset request_sched_idle_map["$local_terminated_process_pid"]
 				message --verbose "Changing scheduling policy to idle for process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id termination."
 			fi
-			# Unset data in cache related to terminated window
+			# Remove data related to terminated window from cache
 			unset cache_mismatch_map["$local_terminated_process_pid"] \
-			cache_section_map["$local_terminated_process_pid"] \
 			cache_process_pid_map["$local_temp_terminated_window_id"] \
 			cache_process_name_map["$local_temp_terminated_window_id"] \
 			cache_process_owner_map["$local_temp_terminated_window_id"] \
 			cache_process_command_map["$local_temp_terminated_window_id"] \
 			cache_process_owner_username_map["$local_temp_terminated_window_id"]
+			# Check for windows of the same process PID
+			for local_temp_cached_pid in "${cache_process_pid_map[@]}"; do
+				# Mark to avoid unset of matching section if that is not last window of process
+				if [[ "$local_temp_cached_pid" == "$local_terminated_process_pid" ]]; then
+					local_found='1'
+					break
+				fi
+			done
+			# Remove matching section associated with PID if there is no other window processes with the same PID
+			if [[ -z "$local_found" ]]; then
+				unset cache_section_map["$local_terminated_process_pid"]
+			else
+				unset local_found
+			fi
 		fi
 	done
 }
