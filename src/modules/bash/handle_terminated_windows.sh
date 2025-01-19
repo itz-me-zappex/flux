@@ -80,13 +80,13 @@ handle_terminated_windows(){
 			# Unset limit request
 			if [[ -n "${request_freeze_map["$local_terminated_process_pid"]}" ]]; then
 				unset request_freeze_map["$local_terminated_process_pid"]
-				message --info "Freezing of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id termination."
+				message --verbose "Freezing of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id termination."
 			elif [[ -n "${request_cpu_limit_map["$local_terminated_process_pid"]}" ]]; then
 				unset request_cpu_limit_map["$local_terminated_process_pid"]
-				message --info "CPU limiting of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id termination."
+				message --verbose "CPU limiting of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id termination."
 			elif [[ -n "$local_terminated_section" && -n "${request_fps_limit_map["$local_terminated_section"]}" ]]; then
 				unset request_fps_limit_map["$local_terminated_section"]
-				message --info "FPS limiting of section '$local_terminated_section' has been cancelled due to termination of matching window(s)."
+				message --verbose "FPS limiting of section '$local_terminated_section' has been cancelled due to termination of matching window(s)."
 			elif [[ -z "${request_sched_idle_map["$local_terminated_process_pid"]}" ]]; then
 				# Print verbose message about window termination if there is no limits specified for it in config file
 				message --verbose "Window $local_temp_terminated_window_id of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been terminated."
@@ -94,7 +94,7 @@ handle_terminated_windows(){
 			# Unset 'SCHED_IDLE' request
 			if [[ -n "${request_sched_idle_map["$local_terminated_process_pid"]}" ]]; then
 				unset request_sched_idle_map["$local_terminated_process_pid"]
-				message --info "Changing scheduling policy to idle for process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id termination."
+				message --verbose "Changing scheduling policy to idle for process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id termination."
 			fi
 			# Unset data in cache related to terminated window
 			unset cache_mismatch_map["$local_terminated_process_pid"] \
