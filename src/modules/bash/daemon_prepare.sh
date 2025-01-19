@@ -45,8 +45,6 @@ daemon_prepare(){
 		allow_notifications='1'
 		unset notifications
 	fi
-	# Print message about daemon start to make it easier to understand when it has been started in log file and to print notification if responding option is specified
-	message --info "Flux has been started."
 	# Unset CPU and FPS limits on SIGTERM or SIGINT signals and print message about daemon termination
 	trap 'actions_on_exit ; message --info "Flux has been terminated successfully." ; exit 0' SIGTERM SIGINT
 	# Ignore USR signals to avoid output below as those are used in 'background_cpulimit()'
