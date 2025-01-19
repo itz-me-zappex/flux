@@ -127,6 +127,10 @@ while read -r raw_event; do
 		events_count='0'
 		continue
 	fi
+	# Remember that daemon received events to print proper message on event reading tool termination
+	if [[ -z "$display_has_been_opened" ]]; then
+		display_has_been_opened='1'
+	fi
 	# Do nothing if '--hot' is not specified
 	if [[ -n "$hot" ]]; then
 		# Add opened windows info except focused one to array as events to apply actions to already opened windows
@@ -251,9 +255,12 @@ while read -r raw_event; do
 	unset events_array
 done < <("$flux_event_reader" 2>/dev/null)
 
-# Exit with an error if loop has been broken and daemon did not exit with SIGINT/SIGTERM signal
-# That means that event reader has been terminated because of actions from outside or because of segfault
-message --warning "Event reader has been terminated!"
-actions_on_exit
-message --error "Flux has been terminated unexpectedly!"
+# Exit with an error if loop has been broken and daemon did not exit because of 'SIGTERM' or 'SIGINT'
+if [[ -n "$display_has_been_opened" ]]; then
+	message --warning "Event reader has been terminated!"
+	actions_on_exit
+	message --error "Flux has been terminated unexpectedly!"
+else
+	message --error "Unable to open display!"
+fi
 exit 1
