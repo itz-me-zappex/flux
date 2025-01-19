@@ -1,24 +1,27 @@
 # Required to set CPU limit using 'cpulimit' tool on unfocus event, runs in background via '&'
 background_cpu_limit(){
 	local local_cpulimit_pid \
-	local_sleep_pid
+	local_sleep_pid \
+	local_delay
+	# Simplify access to delay specified in config
+	local_delay="${config_key_delay_map["$passed_section"]}"
 	# Wait before set limit and notify user if delay is specified
-	if [[ "${config_key_delay_map["$passed_section"]}" != '0' ]]; then
-		message --verbose "Process '$passed_process_name' with PID $passed_process_pid will be CPU limited after ${config_key_delay_map["$passed_section"]} second(s) due to window $passed_window_id unfocus event."
+	if [[ "$local_delay" != '0' ]]; then
+		message --verbose "Process '$passed_process_name' with PID $passed_process_pid will be CPU limited after $local_delay second(s) due to window $passed_window_id unfocus event."
 		# Run in background to make subprocess interruptable
-		sleep "${config_key_delay_map["$passed_section"]}" &
+		sleep "$local_delay" &
 		# Remember PID of 'sleep' to terminate it if needed
 		local_sleep_pid="$!"
 		# Print relevant message on daemon termination and stop this subprocess
-		trap 'message --info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to daemon termination." ; \
+		trap 'message --info "Delayed for $local_delay second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to daemon termination." ; \
 		kill "$local_sleep_pid"; \
 		exit 0' SIGINT SIGTERM
 		# Print relevant message on focus event and stop this subprocess
-		trap 'message --info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to window $passed_window_id focus event." ; \
+		trap 'message --info "Delayed for $local_delay second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to window $passed_window_id focus event." ; \
 		kill "$local_sleep_pid"; \
 		exit 0' SIGUSR1
 		# Print relevant message on target process termination and stop this subprocess
-		trap 'message --info "Delayed for ${config_key_delay_map["$passed_section"]} second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to window $passed_window_id termination." ; \
+		trap 'message --info "Delayed for $local_delay second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to window $passed_window_id termination." ; \
 		kill "$local_sleep_pid"; \
 		exit 0' SIGUSR2
 		# Wait for 'sleep' termination
@@ -26,7 +29,12 @@ background_cpu_limit(){
 	fi
 	# Check for process existence before set CPU limit
 	if check_pid_existence "$passed_process_pid"; then
-		message --info "Process '$passed_process_name' with PID $passed_process_pid has been CPU limited to ${config_key_cpu_limit_map["$passed_section"]}% due to window $passed_window_id unfocus event."
+		# Define message depending by whether delay is specified or not
+		if [[ "$local_delay" == '0' ]]; then
+			message --info "Process '$passed_process_name' with PID $passed_process_pid has been CPU limited to ${config_key_cpu_limit_map["$passed_section"]}% due to window $passed_window_id unfocus event."
+		else
+			message --info "Process '$passed_process_name' with PID $passed_process_pid has been CPU limited to ${config_key_cpu_limit_map["$passed_section"]}% due to window $passed_window_id unfocus event after $local_delay second(s)."
+		fi
 		# Run in background to make subprocess interruptable
 		cpulimit --lazy --limit="$(( "${config_key_cpu_limit_map["$passed_section"]}" * cpu_threads ))" --pid="$passed_process_pid" > /dev/null 2>&1 &
 		# Remember PID of 'cpulimit' to terminate it if needed
