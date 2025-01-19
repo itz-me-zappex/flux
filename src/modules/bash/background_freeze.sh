@@ -15,7 +15,7 @@ background_freeze(){
 			message --warning "Process '$passed_process_name' with PID $passed_process_pid cannot be frozen due to window $passed_window_id unfocus event!"
 		else
 			# Define message depending by whether delay is specified or not
-			if [[ "$local_delay" != '0' ]]; then
+			if [[ "$local_delay" == '0' ]]; then
 				message --info "Process '$passed_process_name' with PID $passed_process_pid has been frozen due to window $passed_window_id unfocus event."
 			else
 				message --info "Process '$passed_process_name' with PID $passed_process_pid has been frozen due to window $passed_window_id unfocus event after $local_delay second(s)."
