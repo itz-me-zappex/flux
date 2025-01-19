@@ -13,7 +13,8 @@ set_requested_limits(){
 	local_idle_cancelled \
 	local_process_owner \
 	local_temp_window \
-	local_window_ids_array
+	local_window_ids_array \
+	local_test_sleep_pid
 	# Get list of existing windows
 	local_windows="${event/'check_requests: '/}"
 	# Remove PIDs from list of existing windows
@@ -143,12 +144,27 @@ set_requested_limits(){
 						sched_realtime_is_supported='1'
 					fi
 				fi
+				# Attempt to change scheduling policy to idle and restore it to check whether daemon can restore it on focus or not
+				if [[ -z "$sched_change_is_supported" ]]; then
+					sleep 999 &
+					local_test_sleep_pid="$!"
+					chrt --idle --pid 0 "$local_test_sleep_pid" > /dev/null 2>&1
+					if ! chrt --other --pid 0 "$local_test_sleep_pid" > /dev/null 2>&1; then
+						sched_change_is_supported='0'
+					else
+						sched_change_is_supported='1'
+					fi
+					kill "$local_test_sleep_pid" > /dev/null 2>&1
+				fi
 				# Print warning if daemon has insufficient rights to set realtime/deadline scheduling policy, otherwise - change it to idle not set already
 				if [[ "$sched_realtime_is_supported" == '0' && "${sched_previous_policy_map["$local_process_pid"]}" =~ ^('SCHED_RR'|'SCHED_FIFO')$ ]]; then
-					message --warning "Daemon has insufficient rights to restore realtime scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle on unfocus event cancelled!"
+					message --warning "Daemon has insufficient rights to restore realtime scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle due to window $local_temp_window_id unfocus event cancelled!"
 					local_idle_cancelled='1'
 				elif [[ "$UID" != '0' && "${sched_previous_policy_map["$local_process_pid"]}" == 'SCHED_DEADLINE' ]]; then
-					message --warning "Daemon has insufficient rights to restore deadline scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle on unfocus event cancelled!"
+					message --warning "Daemon has insufficient rights to restore deadline scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle due to window $local_temp_window_id unfocus event cancelled!"
+					local_idle_cancelled='1'
+				elif [[ "$sched_change_is_supported" == '0' ]]; then
+					message --warning "Daemon has insufficient rights to restore scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle due to window $local_temp_window_id unfocus event cancelled!"
 					local_idle_cancelled='1'
 				elif [[ "${sched_previous_policy_map["$local_process_pid"]}" != 'SCHED_IDLE' ]]; then # Do not do anything if scheduling policy already idle
 					# Change scheduling policy to 'SCHED_IDLE'
