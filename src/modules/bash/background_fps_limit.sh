@@ -13,7 +13,7 @@ background_fps_limit(){
 		# Attempt to change 'fps_limit' in specified MangoHud config file
 		if mangohud_fps_set "${config_key_mangohud_config_map["$passed_section"]}" "${config_key_mangohud_source_config_map["$passed_section"]}" "${config_key_fps_unfocus_map["$passed_section"]}"; then
 			# Define message depending by whether delay is specified or not
-			if [[ "$local_delay" != '0' ]]; then
+			if [[ "$local_delay" == '0' ]]; then
 				message --info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS due to window $passed_window_id unfocus event."
 			else
 				message --info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS due to window $passed_window_id unfocus event after $local_delay second(s)."
