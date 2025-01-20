@@ -14,11 +14,11 @@ timestamp_format='[%Y-%m-%dT%H:%M:%S%z]'
 flux_event_reader="$(get_realpath "$0")"
 case "$flux_event_reader" in
 *'/bin/'* )
-	# Replace '/bin/<executable>' with path to 'flux_event_reader' binary
+	# Replace '/bin/<executable>' with path to 'flux-event-reader' binary
 	flux_event_reader="${flux_event_reader/%'/bin/'*/'/lib/flux/flux-event-reader'}"
 ;;
 * )
-	# Replace executable name with 'flux_event_reader' binary
+	# Replace executable name with 'flux-event-reader' binary
 	flux_event_reader="${flux_event_reader%/*}/flux-event-reader"
 esac
 
