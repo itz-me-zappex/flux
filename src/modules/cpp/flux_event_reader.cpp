@@ -121,8 +121,6 @@ int main(){
 	// Single opened window ID
 	Window opened_window_id;
 	string opened_window_id_str;
-	// Set bad window ID (hexadecimal '0x1')
-	Window bad_window_id = 1;
 	// Remember last owner of window to detect WM restart
 	Window previous_owner = None;
 	// Needed to simulate event to obtain and print atoms state immediately after start
@@ -154,14 +152,18 @@ int main(){
 			}
 			// Get active window ID
 			get_active_window(display, root, active_window_id);
+			// Skip event if focused window has '0x0' ID
+			if (active_window_id == 0){
+				continue;
+			}
 			// Skip events if WM has been restarted
-			if (check_wm_restart(display, root, previous_owner) || active_window_id == bad_window_id){
+			if (check_wm_restart(display, root, previous_owner) || active_window_id == 1){
 				sleep(1000);
 				continue;
 			}
 			// Get list of opened windows
 			get_opened_windows(display, root, opened_window_ids_str);
-			// Continue only if at least one atom has been changed
+			// Continue only if at least one atom has been changed and that is not '0x0' focused window ID
 			if (previous_active_window_id != active_window_id || previous_opened_window_ids_str != opened_window_ids_str){
 				// Get active window process PID
 				get_process_pid(display, active_window_id, process_pid);
