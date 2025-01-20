@@ -1,7 +1,6 @@
 # Required to unset limits for terminated windows and remove info about them from cache
 handle_closure(){
-	local local_terminated_windows \
-	local_terminated_window_ids_array \
+	local local_terminated_window_ids_array \
 	local_existing_windows \
 	local_existing_window_ids_array \
 	local_terminated_process_pid \
@@ -11,22 +10,22 @@ handle_closure(){
 	local_existing_process_pid \
 	local_temp_existing_window_id \
 	local_found \
-	local_temp_terminated_window \
 	local_temp_existing_window \
 	local_end_of_msg \
-	local_temp_cached_pid
-	# Obtain list of terminated window IDs
-	local_terminated_windows="${event/'terminated: '/}" # Remove everything before including type name of list with window IDs
-	local_terminated_windows="${local_terminated_windows/' ; existing: '*/}" # Remove list of existing window IDs
+	local_temp_cached_pid \
+	local_temp_window_id
 	# Obtain list of existing window IDs
-	local_existing_windows="${event/*'existing: '/}" # Remove everything including type name of list with window IDs
-	# Remove PIDs from list of terminated windows
-	for local_temp_terminated_window in $local_terminated_windows; do
-		local_terminated_window_ids_array+=("${local_temp_terminated_window/'='*/}")
-	done
+	local_existing_windows="${event/'windows_list: '/}" # Remove everything including type name of list with window IDs
 	# Remove PIDs from list of existing windows
 	for local_temp_existing_window in $local_existing_windows; do
 		local_existing_window_ids_array+=("${local_temp_existing_window/'='*/}")
+	done
+	# Obtain list of terminated windows and remove PIDs
+	for local_temp_window_id in "${!cache_process_pid_map[@]}"; do
+		# Add window ID to array with terminated windows if it does not exist in '_NET_CLIENT_LIST_STACKING'
+		if [[ " ${local_existing_window_ids_array[*]} " != *" $local_temp_window_id "* ]]; then
+			local_terminated_window_ids_array+=("$local_temp_window_id")
+		fi
 	done
 	# Unset limits for terminated windows
 	for local_temp_terminated_window_id in "${local_terminated_window_ids_array[@]}"; do
