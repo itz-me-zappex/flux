@@ -163,7 +163,7 @@ int main(){
 			}
 			// Get list of opened windows
 			get_opened_windows(display, root, opened_window_ids_str);
-			// Continue only if at least one atom has been changed and that is not '0x0' focused window ID
+			// Continue only if at least one atom has been changed
 			if (previous_active_window_id != active_window_id || previous_opened_window_ids_str != opened_window_ids_str){
 				// Get active window process PID
 				get_process_pid(display, active_window_id, process_pid);
