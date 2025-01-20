@@ -28,8 +28,18 @@ using namespace std;
 
 // Obtain active window ID
 void get_active_window(Display *display, Window root, Window &active_window_id){
-	int revert;
-	XGetInputFocus(display, &active_window_id, &revert);
+	// Contains focused window ID
+	Atom net_active_window = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
+	// Store info here
+	unsigned char *data = nullptr;
+	unsigned long windows_count, bytes_after;
+	Atom type;
+	int format;
+	// Get active window
+	XGetWindowProperty(display, root, net_active_window, 0, ~0, False, XA_WINDOW, &type, &format, &windows_count, &bytes_after, &data);
+	// Pass window ID outside
+	active_window_id = *(Window *)data;
+	XFree(data);
 }
 
 // Obtain window process PID
