@@ -162,8 +162,6 @@ while read -r raw_event; do
 	fi
 	# Add opened windows list as event to array to find terminated windows and check requests
 	events_array+=("windows_list: $opened_windows")
-	# Remember opened windows to find terminated windows on next event
-	previous_opened_windows="$opened_windows"
 	# Reset events count
 	events_count='0'
 	# Handle events
