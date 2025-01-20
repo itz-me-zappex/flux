@@ -1,5 +1,5 @@
 # Required to set CPU/FPS limits for requested windows
-set_requested_limits(){
+handle_requests(){
 	local local_temp_window_id \
 	local_windows \
 	local_process_pid \
