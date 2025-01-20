@@ -245,7 +245,7 @@ done < <("$flux_event_reader" 2>/dev/null)
 # Exit with an error if loop has been broken and daemon did not exit because of 'SIGTERM' or 'SIGINT'
 if [[ -n "$display_has_been_opened" ]]; then
 	message --warning "Event reader has been terminated!"
-	actions_on_exit
+	safe_exit
 	message --error "Flux has been terminated unexpectedly!"
 else
 	message --error "Unable to open display, something is wrong with X11 session!"
