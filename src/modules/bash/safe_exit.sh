@@ -5,8 +5,8 @@ safe_exit(){
 	local_process_pid \
 	local_section \
 	local_process_name
-	# Define reason of unsetting limit to be displayed in messages
-	local_end_of_msg="due to daemon termination"
+	# Specify end of message passed to functions
+	local_end_of_msg='due to daemon termination'
 	# Get list of all cached windows
 	for local_temp_window_id in "${!cache_process_pid_map[@]}"; do
 		# Simplify access to process PID
@@ -30,7 +30,7 @@ safe_exit(){
 			passed_signal='-SIGTERM' \
 			unset_cpu_limit
 		elif [[ -n "$local_section" && -n "${config_key_mangohud_config_map["$local_section"]}" ]]; then
-			# Unset FPS limit or update target config
+			# Unset FPS limit
 			passed_section="$local_section" \
 			passed_end_of_msg="$local_end_of_msg" \
 			unset_fps_limit
@@ -64,6 +64,6 @@ safe_exit(){
 	if [[ -f "$lock_file" ]] && ! rm "$lock_file" > /dev/null 2>&1; then
 		message --warning "Unable to remove lock file '$lock_file' which prevents multiple instances from running!"
 	fi
-	# Wait a bit to avoid printing message about daemon termination earlier than messages from 'background_*()' appear
+	# Wait a bit to avoid printing message about daemon termination earlier than messages from background functions appear
 	sleep 0.1
 }
