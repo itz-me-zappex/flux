@@ -46,7 +46,7 @@ daemon_prepare(){
 		unset notifications
 	fi
 	# Unset CPU and FPS limits on SIGTERM or SIGINT signals and print message about daemon termination
-	trap 'actions_on_exit ; message --info "Flux has been terminated successfully." ; exit 0' SIGTERM SIGINT
+	trap 'safe_exit ; message --info "Flux has been terminated successfully." ; exit 0' SIGTERM SIGINT
 	# Ignore USR signals to avoid output below as those are used in 'background_cpulimit()'
 	# ('X' - path to 'flux', 'Y' - line, 'Z' - PID of 'background_cpulimit')
 	# X: line Y: Z User defined signal 2   background_cpulimit
