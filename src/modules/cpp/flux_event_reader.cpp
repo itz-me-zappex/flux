@@ -26,7 +26,13 @@
 
 using namespace std;
 
-// Obtain active window ID
+// Obtain active window ID using 'XGetInputFocus', used in case 'get_active_window()' returns '0x0' to check if that is buggy event or window manager ID
+void get_active_window_legacy(Display *display, Window root, Window &active_window_id){
+	int revert;
+	XGetInputFocus(display, &active_window_id, &revert);
+}
+
+// Obtain active window ID using '_NET_ACTIVE_WINDOW' atom
 void get_active_window(Display *display, Window root, Window &active_window_id){
 	// Contains focused window ID
 	Atom net_active_window = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
@@ -108,6 +114,22 @@ void sleep(int ms){
 	this_thread::sleep_for(chrono::milliseconds(ms));
 }
 
+// Get '_NET_SUPPORTING_WM_CHECK' window ID
+void get_wm_id(Display* display, Window root, Window &wm_id){
+	// Contains WM window ID
+	Atom net_wm_supporting_check = XInternAtom(display, "_NET_SUPPORTING_WM_CHECK", False);
+	// Store info here
+	unsigned char *data = nullptr;
+	unsigned long windows_count, bytes_after;
+	Atom type;
+	int format;
+	// Get WM window ID
+	XGetWindowProperty(display, root, net_wm_supporting_check, 0, ~0, False, XA_WINDOW, &type, &format, &windows_count, &bytes_after, &data);
+	// Pass WM window ID outside
+	wm_id = *(Window *)data;
+	XFree(data);
+}
+
 // Listen and handle events
 int main(){
 	// Current and previous window ID
@@ -123,6 +145,8 @@ int main(){
 	string opened_window_id_str;
 	// Remember last owner of window to detect WM restart
 	Window previous_owner = None;
+	// Window ID of window manager
+	Window wm_id;
 	// Needed to simulate event to obtain and print atoms state immediately after start
 	bool fake_first_event = true;
 	// Connect to X server
@@ -152,9 +176,14 @@ int main(){
 			}
 			// Get active window ID
 			get_active_window(display, root, active_window_id);
-			// Skip event if focused window has '0x0' ID
+			// Get window ID using 'XGetInputFocus()' and compare it with WM window ID if '_NET_ACTIVE_WINDOW' returns '0x0'
 			if (active_window_id == 0){
-				continue;
+				get_active_window_legacy(display, root, active_window_id);
+				get_wm_id(display, root, wm_id);
+				// Skip event if that is invalid event
+				if (active_window_id != wm_id){
+					continue;
+				}
 			}
 			// Skip events if WM has been restarted
 			if (check_wm_restart(display, root, previous_owner) || active_window_id == 1){
