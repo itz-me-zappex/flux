@@ -180,7 +180,7 @@ while read -r raw_event; do
 			# Unset CPU/FPS limits for terminated windows and remove info about them from cache
 			handle_closure
 			# Apply CPU/FPS limits for process which have been requested to be limited
-			set_requested_limits
+			handle_requests
 		;;
 		* )
 			# Get window ID
