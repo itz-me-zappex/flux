@@ -186,7 +186,7 @@ int main(){
 				}
 			}
 			// Skip events if WM has been restarted
-			if (check_wm_restart(display, root, previous_owner) || active_window_id == 1){
+			if (check_wm_restart(display, root, previous_owner)){
 				sleep(1000);
 				continue;
 			}
