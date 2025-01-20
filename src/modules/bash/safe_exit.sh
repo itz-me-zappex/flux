@@ -1,5 +1,5 @@
 # Required to unset applied limits for windows on SIGTERM/SIGINT signal
-actions_on_exit(){
+safe_exit(){
 	local local_end_of_msg \
 	local_temp_window_id \
 	local_process_pid \
