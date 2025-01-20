@@ -1,5 +1,5 @@
 # Required to unset limits for terminated windows and remove info about them from cache
-handle_terminated_windows(){
+handle_closure(){
 	local local_terminated_windows \
 	local_terminated_window_ids_array \
 	local_existing_windows \
