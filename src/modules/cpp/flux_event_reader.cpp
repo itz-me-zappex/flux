@@ -117,14 +117,14 @@ void sleep(int ms){
 // Get '_NET_SUPPORTING_WM_CHECK' window ID
 void get_wm_id(Display* display, Window root, Window &wm_id){
 	// Contains WM window ID
-	Atom net_wm_supporting_check = XInternAtom(display, "_NET_SUPPORTING_WM_CHECK", False);
+	Atom net_supporting_wm_check = XInternAtom(display, "_NET_SUPPORTING_WM_CHECK", False);
 	// Store info here
 	unsigned char *data = nullptr;
 	unsigned long windows_count, bytes_after;
 	Atom type;
 	int format;
 	// Get WM window ID
-	XGetWindowProperty(display, root, net_wm_supporting_check, 0, ~0, False, XA_WINDOW, &type, &format, &windows_count, &bytes_after, &data);
+	XGetWindowProperty(display, root, net_supporting_wm_check, 0, ~0, False, XA_WINDOW, &type, &format, &windows_count, &bytes_after, &data);
 	// Pass WM window ID outside
 	wm_id = *(Window *)data;
 	XFree(data);
