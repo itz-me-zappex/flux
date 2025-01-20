@@ -149,7 +149,7 @@ while read -r raw_event; do
 	# Needed to skip buggy events created during Cinnamon restart to prevent unsetting applied limits due to blank '_NET_CLIENT_LIST_STACKING' atom
 	# 'sudo' does not unset '$XDG_CURRENT_DESKTOP', so workaround will work even if daemon runs as root
 	# Skip event if focused process PID is Cinnamon
-	if [[ "$XDG_CURRENT_DESKTOP" == "X-Cinnamon" && "$(<"/proc/${focused_window/*'='}/comm")" == 'cinnamon' ]]; then
+	if [[ "$XDG_CURRENT_DESKTOP" == 'X-Cinnamon' && "$(<"/proc/${focused_window/*'='}/comm")" == 'cinnamon' ]]; then
 		unset focused_window \
 		unset opened_windows
 		continue
