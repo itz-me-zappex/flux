@@ -16,7 +16,7 @@ set_requested_limits(){
 	local_window_ids_array \
 	local_test_sleep_pid
 	# Get list of existing windows
-	local_windows="${event/'check_requests: '/}"
+	local_windows="${event/'windows_list: '/}"
 	# Remove PIDs from list of existing windows
 	for local_temp_window in $local_windows; do
 		local_window_ids_array+=("${local_temp_window/'='*/}")
