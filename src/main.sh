@@ -248,6 +248,6 @@ if [[ -n "$display_has_been_opened" ]]; then
 	actions_on_exit
 	message --error "Flux has been terminated unexpectedly!"
 else
-	message --error "Unable to open display!"
+	message --error "Unable to open display, something is wrong with X11 session!"
 fi
 exit 1
