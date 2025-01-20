@@ -160,21 +160,8 @@ while read -r raw_event; do
 		# Remember focused window ID to skip adding it to array as event if repeats
 		previous_focused_window="$focused_window"
 	fi
-	# Find terminated windows and store those to an array
-	for temp_window in $previous_opened_windows; do
-		# Skip existing window ID
-		if [[ " $opened_windows " != *" $temp_window "* ]]; then
-			terminated_windows_array+=("$temp_window")
-		fi
-	done
-	unset temp_window
-	# Add list of existing and terminated windows to array as events
-	if [[ -n "${terminated_windows_array[@]}" ]]; then
-		events_array+=("terminated: ${terminated_windows_array[@]} ; existing: $opened_windows")
-		unset terminated_windows_array
-	fi
 	# Add opened windows list as event to array to check requested limits
-	events_array+=("check_requests: $opened_windows")
+	events_array+=("windows_list: $opened_windows")
 	# Remember opened windows to find terminated windows on next event
 	previous_opened_windows="$opened_windows"
 	# Reset events count
@@ -189,11 +176,9 @@ while read -r raw_event; do
 			# Needed to make commands from 'lazy-exec-unfocus' keys work properly, 'exec_unfocus()' skips execution 'lazy-exec-unfocus' first time and increases value to '2'
 			hot_is_unset='1'
 		;;
-		'terminated'* )
+		'windows_list'* )
 			# Unset CPU/FPS limits for terminated windows and remove info about them from cache
 			handle_closure
-		;;
-		'check_requests'* )
 			# Apply CPU/FPS limits for process which have been requested to be limited
 			set_requested_limits
 		;;
