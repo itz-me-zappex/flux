@@ -191,7 +191,7 @@ while read -r raw_event; do
 		;;
 		'terminated'* )
 			# Unset CPU/FPS limits for terminated windows and remove info about them from cache
-			handle_terminated_windows
+			handle_closure
 		;;
 		'check_requests'* )
 			# Apply CPU/FPS limits for process which have been requested to be limited
