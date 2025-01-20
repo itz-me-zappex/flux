@@ -160,7 +160,7 @@ while read -r raw_event; do
 		# Remember focused window ID to skip adding it to array as event if repeats
 		previous_focused_window="$focused_window"
 	fi
-	# Add opened windows list as event to array to check requested limits
+	# Add opened windows list as event to array to find terminated windows and check requests
 	events_array+=("windows_list: $opened_windows")
 	# Remember opened windows to find terminated windows on next event
 	previous_opened_windows="$opened_windows"
