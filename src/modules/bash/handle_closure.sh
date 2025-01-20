@@ -38,7 +38,7 @@ handle_closure(){
 			# Simplify access to process name of cached window info
 			local_terminated_process_name="${cache_process_name_map["$local_temp_terminated_window_id"]}"
 			# Set end of message with actual window ID to not duplicate it
-			local_end_of_msg="$local_end_of_msg"
+			local_end_of_msg="due to window $local_temp_window_id termination"
 			# Unset applied limits
 			if [[ -n "${freeze_applied_map["$local_terminated_process_pid"]}" ]]; then # Unfreeze process if frozen
 				passed_process_pid="$local_terminated_process_pid" \
