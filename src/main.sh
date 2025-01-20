@@ -121,11 +121,6 @@ while read -r raw_event; do
 		continue
 	elif (( events_count == 2 )); then
 		opened_windows="$raw_event"
-	elif (( events_count == 3 )); then # Workaround to skip buggy event on Cinnamon restart
-		continue
-	elif (( events_count == 4 )); then # Workaround to skip buggy event on Cinnamon restart
-		events_count='0'
-		continue
 	fi
 	# Remember that daemon received events to print proper message on event reading tool termination
 	# And to print message about daemon start
@@ -144,15 +139,6 @@ while read -r raw_event; do
 		unset temp_window
 		# Add event to unset '--hot'
 		events_array+=('unset_hot')
-	fi
-	# Workaround for Cinnamon desktop
-	# Needed to skip buggy events created during Cinnamon restart to prevent unsetting applied limits due to blank '_NET_CLIENT_LIST_STACKING' atom
-	# 'sudo' does not unset '$XDG_CURRENT_DESKTOP', so workaround will work even if daemon runs as root
-	# Skip event if focused process PID is Cinnamon
-	if [[ "$XDG_CURRENT_DESKTOP" == 'X-Cinnamon' && "$(<"/proc/${focused_window/*'='}/comm")" == 'cinnamon' ]]; then
-		unset focused_window \
-		unset opened_windows
-		continue
 	fi
 	# Add info about focused window to array as event if it does not repeat
 	if [[ "$previous_focused_window" != "$focused_window" ]]; then
