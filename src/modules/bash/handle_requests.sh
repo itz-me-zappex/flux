@@ -42,6 +42,8 @@ handle_requests(){
 				passed_process_name="$local_process_name" \
 				passed_process_pid="$local_process_pid" \
 				background_minimize &
+				# Associate PID of background process with PID of process to interrupt it in case focus event appears earlier than hardcoded 100ms delay ends
+				background_minimize_pid_map["$local_process_pid"]="$!"
 			fi
 			# Return an error if daemon has insufficient rights to apply limit (except FPS limit, that does not require interaction with process)
 			if [[ "$local_process_owner" != "$UID" && "$UID" != '0' ]]; then
