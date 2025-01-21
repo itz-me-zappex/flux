@@ -115,7 +115,7 @@ void sleep(int ms){
 }
 
 // Get '_NET_SUPPORTING_WM_CHECK' window ID
-void get_wm_id(Display* display, Window root, Window &wm_id){
+int get_wm_id(Display* display, Window root, Window &wm_id){
 	// Contains WM window ID
 	Atom net_supporting_wm_check = XInternAtom(display, "_NET_SUPPORTING_WM_CHECK", False);
 	// Store info here
@@ -124,10 +124,16 @@ void get_wm_id(Display* display, Window root, Window &wm_id){
 	Atom type;
 	int format;
 	// Get WM window ID
-	XGetWindowProperty(display, root, net_supporting_wm_check, 0, ~0, False, XA_WINDOW, &type, &format, &windows_count, &bytes_after, &data);
+	int status = XGetWindowProperty(display, root, net_supporting_wm_check, 0, ~0, False, XA_WINDOW, &type, &format, &windows_count, &bytes_after, &data);
 	// Pass WM window ID outside
-	wm_id = *(Window *)data;
-	XFree(data);
+	if (status == Success && data != nullptr){
+		wm_id = *(Window *)data;
+		XFree(data);
+	} else{
+		XFree(data);
+		return 1;
+	}
+	return 0;
 }
 
 // Listen and handle events
@@ -156,6 +162,10 @@ int main(){
 	}
 	// Get root window
 	Window root = DefaultRootWindow(display);
+	// Check for WM existence before continue
+	if (get_wm_id(display, root, wm_id) == 1){
+		return 1;
+	}
 	// Listen '_NET_ACTIVE_WINDOW' and '_NET_CLIENT_LIST_STACKING' atoms infinitely (until SIGTERM/SIGINT of course)
 	Atom net_active_window = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
 	Atom net_client_list_stacking = XInternAtom(display, "_NET_CLIENT_LIST_STACKING", False);
