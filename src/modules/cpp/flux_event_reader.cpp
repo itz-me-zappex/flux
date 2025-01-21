@@ -170,6 +170,11 @@ int main(){
 		}
 		// Wait for property to change
 		if (fake_first_event || event.type == PropertyNotify){
+			// Skip events if WM has been restarted
+			if (check_wm_restart(display, root, previous_owner)){
+				sleep(1000);
+				continue;
+			}
 			// Unset trigger
 			if (fake_first_event){
 				fake_first_event = false;
@@ -184,11 +189,6 @@ int main(){
 				if (active_window_id != wm_id){
 					continue;
 				}
-			}
-			// Skip events if WM has been restarted
-			if (check_wm_restart(display, root, previous_owner)){
-				sleep(1000);
-				continue;
 			}
 			// Get list of opened windows
 			get_opened_windows(display, root, opened_window_ids_str);
