@@ -31,6 +31,7 @@ focus_unset_limit(){
 	fi
 	# Terminate background process with minimization
 	if [[ -n "${background_minimize_pid_map["$process_pid"]}" ]]; then
+		passed_window_id="$window_id" \
 		passed_process_pid="$process_pid" \
 		passed_section="$section" \
 		passed_process_name="$process_name" \

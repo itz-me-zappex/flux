@@ -81,6 +81,7 @@ handle_closure(){
 			fi
 			# Terminate background process with minimization
 			if [[ -n "${background_minimize_pid_map["$local_terminated_process_pid"]}" ]]; then
+				passed_window_id="$local_temp_terminated_window_id" \
 				passed_process_pid="$local_terminated_process_pid" \
 				passed_section="$local_terminated_section" \
 				passed_process_name="$local_terminated_process_name" \
