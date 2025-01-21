@@ -109,11 +109,6 @@ bool check_wm_restart(Display* display, Window root, Window &previous_owner){
 	return restarted;
 }
 
-// Simplify sleeping
-void sleep(int ms){
-	this_thread::sleep_for(chrono::milliseconds(ms));
-}
-
 // Get '_NET_SUPPORTING_WM_CHECK' window ID
 int get_wm_id(Display* display, Window root, Window &wm_id){
 	// Contains WM window ID
@@ -155,6 +150,10 @@ int main(){
 	Window wm_id;
 	// Needed to simulate event to obtain and print atoms state immediately after start
 	bool fake_first_event = true;
+	// Needed to set time before which events should be skipped on WM restart
+	auto wm_restart_wait_for = chrono::steady_clock::now();
+	// Needed to trigger skipping
+	bool wm_restart_wait = false;
 	// Connect to X server
 	Display *display = XOpenDisplay(nullptr);
 	if (!display){
@@ -180,9 +179,18 @@ int main(){
 		}
 		// Wait for property to change
 		if (fake_first_event || event.type == PropertyNotify){
-			// Skip events if WM has been restarted
+			// Skip events for 1 second after WM restart
+			if (wm_restart_wait){
+				if (chrono::steady_clock::now() <= wm_restart_wait_for){
+				}	else{
+					wm_restart_wait = false;
+				}
+				continue;
+			}
+			// Skip events during 1 second if WM has been restarted
 			if (check_wm_restart(display, root, previous_owner)){
-				sleep(1000);
+				wm_restart_wait_for = chrono::steady_clock::now() + chrono::seconds(1);
+				wm_restart_wait = true;
 				continue;
 			}
 			// Unset trigger
