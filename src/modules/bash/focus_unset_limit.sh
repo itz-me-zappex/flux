@@ -29,4 +29,12 @@ focus_unset_limit(){
 		passed_end_of_msg="$local_end_of_msg" \
 		unset_sched_idle
 	fi
+	# Terminate background process with minimization
+	if [[ -n "${background_minimize_pid_map["$process_pid"]}" ]]; then
+		passed_process_pid="$process_pid" \
+		passed_section="$section" \
+		passed_process_name="$process_name" \
+		passed_end_of_msg="$local_end_of_msg" \
+		cancel_minimization
+	fi
 }
