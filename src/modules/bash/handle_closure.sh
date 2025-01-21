@@ -79,6 +79,14 @@ handle_closure(){
 				passed_end_of_msg="$local_end_of_msg" \
 				unset_sched_idle
 			fi
+			# Terminate background process with minimization
+			if [[ -n "${background_minimize_pid_map["$local_terminated_process_pid"]}" ]]; then
+				passed_process_pid="$local_terminated_process_pid" \
+				passed_section="$local_terminated_section" \
+				passed_process_name="$local_terminated_process_name" \
+				passed_end_of_msg="$local_end_of_msg" \
+				cancel_minimization
+			fi
 			# Unset limit request
 			if [[ -n "${request_freeze_map["$local_terminated_process_pid"]}" ]]; then
 				unset request_freeze_map["$local_terminated_process_pid"]
