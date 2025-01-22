@@ -182,7 +182,7 @@ int main(){
 			// Skip events for 1 second after WM restart
 			if (wm_restart_wait){
 				if (chrono::steady_clock::now() <= wm_restart_wait_for){
-				}	else{
+				} else{
 					wm_restart_wait = false;
 				}
 				continue;
