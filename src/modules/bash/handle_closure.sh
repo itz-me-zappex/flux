@@ -38,7 +38,7 @@ handle_closure(){
 			# Simplify access to process name of cached window info
 			local_terminated_process_name="${cache_process_name_map["$local_temp_terminated_window_id"]}"
 			# Set end of message with actual window ID to not duplicate it
-			local_end_of_msg="due to window $local_temp_window_id termination"
+			local_end_of_msg="due to window $local_temp_window_id closure"
 			# Unset applied limits
 			if [[ -n "${freeze_applied_map["$local_terminated_process_pid"]}" ]]; then # Unfreeze process if frozen
 				passed_process_pid="$local_terminated_process_pid" \
@@ -85,19 +85,19 @@ handle_closure(){
 				passed_process_pid="$local_terminated_process_pid" \
 				passed_section="$local_terminated_section" \
 				passed_process_name="$local_terminated_process_name" \
-				passed_end_of_msg="due to window termination" \
+				passed_end_of_msg="due to window closure" \
 				cancel_minimization
 			fi
 			# Unset limit request
 			if [[ -n "${request_freeze_map["$local_terminated_process_pid"]}" ]]; then
 				unset request_freeze_map["$local_terminated_process_pid"]
-				message --verbose "Freezing of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id termination."
+				message --verbose "Freezing of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id closure."
 			elif [[ -n "${request_cpu_limit_map["$local_terminated_process_pid"]}" ]]; then
 				unset request_cpu_limit_map["$local_terminated_process_pid"]
-				message --verbose "CPU limiting of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id termination."
+				message --verbose "CPU limiting of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id closure."
 			elif [[ -n "$local_terminated_section" && -n "${request_fps_limit_map["$local_terminated_section"]}" ]]; then
 				unset request_fps_limit_map["$local_terminated_section"]
-				message --verbose "FPS limiting of section '$local_terminated_section' has been cancelled due to window $local_temp_terminated_window_id termination."
+				message --verbose "FPS limiting of section '$local_terminated_section' has been cancelled due to window $local_temp_terminated_window_id closure."
 			elif [[ -z "${request_sched_idle_map["$local_terminated_process_pid"]}" &&
 							-z "${request_minimize_map["$local_terminated_process_pid"]}" ]]; then
 				# Print verbose message about window termination if there is no limits specified for it in config file
@@ -106,11 +106,11 @@ handle_closure(){
 			# Unset 'SCHED_IDLE' request
 			if [[ -n "${request_sched_idle_map["$local_terminated_process_pid"]}" ]]; then
 				unset request_sched_idle_map["$local_terminated_process_pid"]
-				message --verbose "Changing scheduling policy to idle for process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id termination."
+				message --verbose "Changing scheduling policy to idle for process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id closure."
 			fi
 			# Unset window minimization request
 			if [[ -n "${request_minimize_map["$local_terminated_process_pid"]}" ]]; then
-				message --verbose "Window $local_temp_window_id minimization of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window termination."
+				message --verbose "Window $local_temp_window_id minimization of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window closure."
 			fi
 			# Remove data related to terminated window from cache
 			unset cache_process_pid_map["$local_temp_terminated_window_id"] \
