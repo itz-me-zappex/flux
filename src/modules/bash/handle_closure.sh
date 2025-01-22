@@ -13,7 +13,9 @@ handle_closure(){
 	local_temp_existing_window \
 	local_end_of_msg \
 	local_temp_cached_pid \
-	local_temp_window_id
+	local_temp_window_id \
+	local_terminated_process_owner \
+	local_terminated_process_command
 	# Obtain list of existing window IDs
 	local_existing_windows="${event/'windows_list: '/}" # Remove everything including type name of list with window IDs
 	# Remove PIDs from list of existing windows
@@ -37,6 +39,10 @@ handle_closure(){
 			local_terminated_section="${cache_section_map["$local_terminated_process_pid"]}"
 			# Simplify access to process name of cached window info
 			local_terminated_process_name="${cache_process_name_map["$local_temp_terminated_window_id"]}"
+			# Simplify access to process owner of cached window info
+			local_terminated_process_owner="${cache_process_owner_map["$local_temp_terminated_window_id"]}"
+			# Simplify access to process command of cached window info
+			local_terminated_process_command="${cache_process_command_map["$local_temp_terminated_window_id"]}"
 			# Set end of message with actual window ID to not duplicate it
 			local_end_of_msg="due to window $local_temp_window_id closure"
 			# Unset applied limits
@@ -88,6 +94,17 @@ handle_closure(){
 				passed_end_of_msg="due to window closure" \
 				cancel_minimization
 			fi
+			# Execute unfocus event command
+			if [[ -n "${request_exec_unfocus_general_map["$local_terminated_process_pid"]}" ]]; then
+				passed_window_id="$local_temp_terminated_window_id" \
+				passed_process_pid="$local_terminated_process_pid" \
+				passed_section="$local_terminated_section" \
+				passed_process_name="$local_terminated_process_name" \
+				passed_process_owner="$local_terminated_process_owner" \
+				passed_process_command="$local_terminated_process_command" \
+				passed_end_of_msg="$local_end_of_msg" \
+				exec_unfocus
+			fi
 			# Unset limit request
 			if [[ -n "${request_freeze_map["$local_terminated_process_pid"]}" ]]; then
 				unset request_freeze_map["$local_terminated_process_pid"]
@@ -98,8 +115,7 @@ handle_closure(){
 			elif [[ -n "$local_terminated_section" && -n "${request_fps_limit_map["$local_terminated_section"]}" ]]; then
 				unset request_fps_limit_map["$local_terminated_section"]
 				message --verbose "FPS limiting of section '$local_terminated_section' has been cancelled due to window $local_temp_terminated_window_id closure."
-			elif [[ -z "${request_sched_idle_map["$local_terminated_process_pid"]}" &&
-							-z "${request_minimize_map["$local_terminated_process_pid"]}" ]]; then
+			elif [[ -z "${request_sched_idle_map["$local_terminated_process_pid"]}" && -z "${request_minimize_map["$local_terminated_process_pid"]}" ]]; then
 				# Print verbose message about window termination if there is no limits specified for it in config file
 				message --verbose "Window $local_temp_terminated_window_id of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been terminated."
 			fi
