@@ -30,7 +30,6 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [Apply changes in config file](#apply-changes-in-config-file)
   - [Mute process audio on unfocus (Pipewire & Wireplumber)](#mute-process-audio-on-unfocus-pipewire--wireplumber)
   - [Types of limits and which you should use](#types-of-limits-and-which-you-should-use)
-  - [Support for restoring `SCHED_RR` and `SCHED_FIFO` scheduling policies without running daemon as root](#support-for-restoring-sched_rr-and-sched_fifo-scheduling-policies-without-running-daemon-as-root)
 - [Possible questions](#possible-questions)
   - [How does that daemon work?](#how-does-that-daemon-work)
   - [Does that daemon reduce performance?](#does-that-daemon-reduce-performance)
@@ -119,12 +118,12 @@ tar -xvf flux.tar.gz --one-top-level=flux --strip-components=1 && cd "flux"
 make
 ```
 
-#### Install daemon to `/usr/local`
+#### Install daemon to `/usr/local`, bypass limitations related to changing scheduling policies and create `flux` group
 ```bash
-sudo make install
+sudo make install install-rtptio install-group && sudo usermod -aG flux $USER
 ```
 
-#### Or you may want to change prefix e.g.
+#### Or you may want to change prefix e.g. in case you want install it locally
 ```bash
 PREFIX="~/.local" make install
 ```
@@ -150,6 +149,11 @@ wget "https://raw.githubusercontent.com/itz-me-zappex/flux/refs/heads/main/PKGBU
 #### Build and install package
 ```bash
 makepkg -sric
+```
+
+#### Add user to `flux` group to bypass limitations related to changing scheduling policies
+```bash
+sudo usermod -aG flux $USER
 ```
 
 ## Usage
@@ -207,7 +211,7 @@ A simple INI is used for configuration.
 | `mangohud-config` | Path to MangoHud config which should be changed (target), required if you want change FPS limits and requires `fps-unfocus`. Make sure you created specified config, at least just keep it blank, otherwise MangoHud will not be able to load new config on fly and daemon will throw warnings related to config absence. Do not use the same config for multiple sections! |
 | `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`, cannot be equal to `0` as that means no limit. |
 | `fps-focus` | FPS to set on focus or list of comma-separated integers (e.g. `30,60,120`, used in MangoHud as FPS limits you can switch between using built-in keybinding), requires `fps-unfocus`. Defaults to `0` (i.e. no limit). |
-| `idle` | Boolean, set `SCHED_IDLE` scheduling policy for process on unfocus event to greatly reduce its priority. Daemon requires realtime privileges or root rights to restore `SCHED_RR`/`SCHED_FIFO` and only root rights to restore `SCHED_DEADLINE` scheduling policy (if daemon does not have sufficient rights to restore these scheduling policies, it will print warning and it will not be changed), restoring `SCHED_OTHER` and `SCHED_BATCH` scheduling policies do not require neither root nor realtime privileges. Defaults to `false`.|
+| `idle` | Boolean, set `SCHED_IDLE` scheduling policy for process on unfocus event to greatly reduce its priority. Daemon should run as `@flux` to be able restore `SCHED_RR`/`SCHED_FIFO`/`SCHED_OTHER`/`SCHED_BATCH` scheduling policy and only as root to restore `SCHED_DEADLINE` scheduling policy (if daemon does not have sufficient rights to restore these scheduling policies, it will print warning and will not change anything). Defaults to `false`.|
 | `minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`, requires `xdotool` installed on system. Defaults to `false`. |
 
 ### Config path
@@ -335,19 +339,6 @@ Note: You may want to use these variables in commands and scripts which running 
 - FPS limits recommended for online and multiplayer games and if you do not mind to use MangoHud.
 - CPU limits greater than zero recommended for online and multiplayer games in case you do not use MangoHud, but you should be ready for stuttery audio, because `cpulimit` tool interrupts process with `SIGSTOP` and `SIGCONT` signals.
 - CPU limit equal to zero recommended for singleplayer games or online games in offline mode, this method freezes game completely to make it just hang in RAM without using any CPU or GPU resources.
-
-### Support for restoring `SCHED_RR` and `SCHED_FIFO` scheduling policies without running daemon as root
-- You need make your user able to set these scheduling policies to processes by creating following file:
-```
-# Replace "user" with your login username in config name
-# /etc/security/limits.d/max-rtprio-user.conf
-
-# Reboot your system to apply changes, relogin will not help in this case
-
-# Replace "user" with your login username
-#<domain> <type> <item> <value>
-user - rtprio 99
-```
 
 ## Possible questions
 ### How does that daemon work?
