@@ -5,12 +5,18 @@ CXX ?= g++
 # Configure installation path
 PREFIX ?= /usr/local
 
+# Set current directory
+PWD ?= $(shell pwd)
+
+# Set path to source code
+SRC_PATH = $(PWD)/src
+
 # Set path to bash modules
-BASH_MODULES_PATH = $(shell pwd)/src/modules/bash
-CPP_MODULES_PATH = $(shell pwd)/src/modules/cpp
+BASH_MODULES_PATH = $(SRC_PATH)/modules/bash
+CPP_MODULES_PATH = $(SRC_PATH)/src/modules/cpp
 
 # Set output directory
-OUTPUT_PATH = $(shell pwd)/out
+OUTPUT_PATH = $(PWD)/out
 
 # Set path to built 'flux' executable
 FLUX_OUTPUT_PATH = $(OUTPUT_PATH)/flux
@@ -19,7 +25,7 @@ FLUX_OUTPUT_PATH = $(OUTPUT_PATH)/flux
 FLUX_EVENT_READER_OUTPUT_PATH = $(OUTPUT_PATH)/flux-event-reader
 
 # Set path to limits.conf
-FLUX_LIMITS_CONF_OUTPUT_PATH = $(shell pwd)/src/10-flux-rtprio.conf
+FLUX_LIMITS_CONF_OUTPUT_PATH = $(OUTPUT_PATH)/10-flux-rtprio.conf
 
 # Build daemon if option is not specified
 all:
@@ -33,7 +39,7 @@ all:
 	cat src/main.sh >> "$(FLUX_OUTPUT_PATH)"
 	chmod +x "$(FLUX_OUTPUT_PATH)"
 	$(CXX) $(CXXFLAGS) -o $(FLUX_EVENT_READER_OUTPUT_PATH) $(CPP_MODULES_PATH)/flux_event_reader.cpp -lX11 -lXext -lXRes
-	cp $(FLUX_LIMITS_CONF_OUTPUT_PATH) $(OUTPUT_PATH)/
+	cp $(SRC_PATH)/10-flux-rtprio.conf $(FLUX_LIMITS_CONF_OUTPUT_PATH)
 
 # Remove build result if 'clean' option is passed
 clean:
