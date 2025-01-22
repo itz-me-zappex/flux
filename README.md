@@ -120,7 +120,7 @@ make
 
 #### Install daemon to `/usr/local`, bypass limitations related to changing scheduling policies and create `flux` group
 ```bash
-sudo make install install-rtptio install-group && sudo usermod -aG flux $USER
+sudo make install install-rtprio install-group && sudo usermod -aG flux $USER
 ```
 
 #### Or you may want to change prefix e.g. in case you want install it locally
