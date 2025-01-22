@@ -1,9 +1,15 @@
 post_install(){
 	groupadd -r flux
-	echo " Group 'flux' has been created, you may want to add your user here by 'sudo usermod -aG flux <username>' to bypass scheduling policy changing restrictions."
+	echo "Group 'flux' has been created, you may want to add your user here by 'sudo usermod -aG flux <username>' to bypass scheduling policy changing restrictions."
+}
+
+post_upgrade(){
+	if ! grep -E "^flux:" /etc/group; then
+		post_install
+	fi
 }
 
 post_remove(){
 	groupdel flux
-	echo " Group 'flux' has been removed, you may want to remove your user from it by 'sudo gpasswd -d <username> flux'."
+	echo "Group 'flux' has been removed, you may want to remove your user from it by 'sudo gpasswd -d <username> flux'."
 }
