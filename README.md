@@ -105,12 +105,12 @@ You can use this method if there is no package build script for your distro. Mak
 
 #### Download latest release with source
 ```bash
-wget -qO- "https://api.github.com/repos/itz-me-zappex/flux/releases/latest" | grep '"tarball_url":' | cut -d '"' -f 4 | xargs wget -O flux.tar.gz
+wget -qO- 'https://api.github.com/repos/itz-me-zappex/flux/releases/latest' | grep '"tarball_url":' | cut -d '"' -f 4 | xargs wget -O flux.tar.gz
 ```
 
 #### Extract archive and change directory
 ```bash
-tar -xvf flux.tar.gz --one-top-level=flux --strip-components=1 && cd "flux"
+tar -xvf flux.tar.gz --one-top-level=flux --strip-components=1 && cd 'flux'
 ```
 
 #### Build daemon
@@ -138,12 +138,12 @@ mkdir 'flux' && cd 'flux'
 
 #### Install `cpulimit` dependency from AUR
 ```bash
-git clone https://aur.archlinux.org/cpulimit.git && cd cpulimit && makepkg -sric && cd ..
+git clone 'https://aur.archlinux.org/cpulimit.git' && cd 'cpulimit' && makepkg -sric && cd ..
 ```
 
 #### Download PKGBUILD from Git repo
 ```bash
-wget "https://raw.githubusercontent.com/itz-me-zappex/flux/refs/heads/main/PKGBUILD"
+wget 'https://raw.githubusercontent.com/itz-me-zappex/flux/refs/heads/main/PKGBUILD' && wget 'https://raw.githubusercontent.com/itz-me-zappex/flux/refs/heads/main/create-group.install'
 ```
 
 #### Build and install package
