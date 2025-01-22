@@ -85,7 +85,7 @@ handle_closure(){
 				passed_process_pid="$local_terminated_process_pid" \
 				passed_section="$local_terminated_section" \
 				passed_process_name="$local_terminated_process_name" \
-				passed_end_of_msg="$local_end_of_msg" \
+				passed_end_of_msg="due to window termination" \
 				cancel_minimization
 			fi
 			# Unset limit request
