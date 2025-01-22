@@ -52,12 +52,12 @@ install:
 	install -Dm 755 $(FLUX_EVENT_READER_OUTPUT_PATH) $(PREFIX)/lib/flux/
 	install -Dm 755 $(FLUX_OUTPUT_PATH) $(PREFIX)/bin/
 
-# Install limits config if 'install-rtprio' option is passed
-install-rtprio:
+# Install limits config if 'install-bypass' option is passed
+install-bypass:
 	install -Dm 644 $(FLUX_LIMITS_CONF_OUTPUT_PATH) /etc/security/limits.d/
 
-# Create 'flux' group if 'install-group' option is passed
-install-group:
+# Create 'flux' group if 'create-group' option is passed
+create-group:
 	groupadd -r flux
 
 # Uninstall daemon from prefix if 'uninstall' option is passed
@@ -65,13 +65,13 @@ uninstall:
 	rm -rf $(PREFIX)/lib/flux
 	rm $(PREFIX)/bin/flux
 
-# Remove limits config if 'uninstall-rtprio' option is passed
-uninstall-rtprio:
+# Remove limits config if 'uninstall-bypass' option is passed
+uninstall-bypass:
 	rm /etc/security/limits.d/10-flux.conf
 
-# Remove 'flux' group if 'uninstall-group' option is passed
-uninstall-group:
+# Remove 'flux' group if 'remove-group' option is passed
+remove-group:
 	groupdel flux
 
 # Define sections as Makefile options
-.PHONY: all clean install install-rtprio install-group uninstall uninstall-rtprio uninstall-group
+.PHONY: all clean install install-bypass create-group uninstall uninstall-bypass remove-group
