@@ -12,6 +12,7 @@ handle_requests(){
 	local_count \
 	local_idle_cancelled \
 	local_process_owner \
+	local_process_owner_username \
 	local_temp_window \
 	local_window_ids_array \
 	local_test_sleep_pid \
@@ -34,6 +35,8 @@ handle_requests(){
 			local_process_name="${cache_process_name_map["$local_temp_window_id"]}"
 			# Simplify access to process owner UID of cached window info
 			local_process_owner="${cache_process_owner_map["$local_temp_window_id"]}"
+			# Simplify access to process owner username UID of cached window info
+			local_process_owner_username="${cache_process_owner_username_map["$local_temp_window_id"]}"
 			# Simplify access to process command of cached window info
 			local_process_command="${cache_process_command_map["$local_temp_window_id"]}"
 			# Minimize window if requested
@@ -204,6 +207,7 @@ handle_requests(){
 				passed_section="$local_section" \
 				passed_process_name="$local_process_name" \
 				passed_process_owner="$local_process_owner" \
+				passed_process_owner_username="$local_process_owner_username" \
 				passed_process_command="$local_process_command" \
 				passed_end_of_msg="due to window $local_temp_window_id unfocus event" \
 				exec_unfocus
