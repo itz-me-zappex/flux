@@ -110,6 +110,7 @@ You can use this method if there is no package build script for your distro. Mak
 ### Make options
 | Option | Description |
 |--------|-------------|
+| `clean` | Remove `out/` in repository directory and all files created there after `make`. |
 | `install` | Install daemon to prefix, can be changed using `$PREFIX`, defaults to `/usr/local`. |
 | `install-rtprio` | Install `10-flux.conf` config to `/etc/security/limits.d` to bypass scheduling policy changing restrictions for users in `flux` group |
 | `install-group` | Create `flux` group |
