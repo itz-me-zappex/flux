@@ -112,11 +112,11 @@ You can use this method if there is no package build script for your distro. Mak
 |--------|-------------|
 | `clean` | Remove `out/` in repository directory and all files created there after `make`. |
 | `install` | Install daemon to prefix, can be changed using `$PREFIX`, defaults to `/usr/local`. |
-| `install-rtprio` | Install `10-flux.conf` config to `/etc/security/limits.d` to bypass scheduling policy changing restrictions for users in `flux` group |
-| `install-group` | Create `flux` group |
+| `install-bypass` | Install `10-flux.conf` config to `/etc/security/limits.d` to bypass scheduling policy changing restrictions for users in `flux` group |
+| `create-group` | Create `flux` group to which you can add users. |
 | `uninstall` | Remove `bin/flux` and `lib/flux/` from prefix, can be changed using `$PREFIX`, defaults to `/usr/local`. |
-| `uninstall-rtprio` | Remove `10-flux.conf` config from `/etc/security/limits.d`. |
-| `uninstall-group` | Remove `flux` group from system. |
+| `uninstall-bypass` | Remove `10-flux.conf` config from `/etc/security/limits.d`. |
+| `remove-group` | Remove `flux` group from system. |
 
 #### Download latest release with source
 ```bash
@@ -135,7 +135,7 @@ make
 
 #### Install daemon to `/usr/local`, bypass limitations related to changing scheduling policies and create `flux` group
 ```bash
-sudo make install install-rtprio install-group && sudo usermod -aG flux $USER
+sudo make install install-bypass create-group && sudo usermod -aG flux $USER
 ```
 
 #### Or you may want to change prefix e.g. in case you want install it locally
