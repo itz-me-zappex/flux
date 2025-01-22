@@ -14,7 +14,8 @@ handle_requests(){
 	local_process_owner \
 	local_temp_window \
 	local_window_ids_array \
-	local_test_sleep_pid
+	local_test_sleep_pid \
+	local_process_command
 	# Get list of existing windows
 	local_windows="${event/'windows_list: '/}"
 	# Remove PIDs from list of existing windows
@@ -33,6 +34,8 @@ handle_requests(){
 			local_process_name="${cache_process_name_map["$local_temp_window_id"]}"
 			# Simplify access to process owner UID of cached window info
 			local_process_owner="${cache_process_owner_map["$local_temp_window_id"]}"
+			# Simplify access to process command of cached window info
+			local_process_command="${cache_process_command_map["$local_temp_window_id"]}"
 			# Minimize window if requested
 			if [[ -n "${request_minimize_map["$local_process_pid"]}" ]]; then
 				# Unset as it becomes useless
@@ -193,6 +196,18 @@ handle_requests(){
 					sched_previous_deadline_map["$local_process_pid"] \
 					sched_previous_period_map["$local_process_pid"]
 				fi
+			fi
+			# Execute unfocus event command
+			if [[ -n "${request_exec_unfocus_general_map["$local_process_pid"]}" ]]; then
+				passed_window_id="$local_temp_window_id" \
+				passed_process_pid="$local_process_pid" \
+				passed_section="$local_section" \
+				passed_process_name="$local_process_name" \
+				passed_process_owner="$local_process_owner" \
+				passed_process_command="$local_process_command" \
+				passed_end_of_msg="due to window $local_temp_window_id unfocus event" \
+				exec_unfocus
+				unset request_exec_unfocus_general_map["$local_process_pid"]
 			fi
 		fi
 	done
