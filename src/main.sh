@@ -169,6 +169,13 @@ while read -r raw_event; do
 			handle_requests
 		;;
 		* )
+			# Unset info about process to avoid using it by an accident
+			unset window_id \
+			process_pid \
+			process_name \
+			process_owner \
+			process_command \
+			section
 			# Get window ID
 			window_id="${event/'='*/}"
 			# Get process PID of focused window
@@ -213,13 +220,6 @@ while read -r raw_event; do
 				previous_section
 			fi
 			unset get_process_info_exit_code
-			# Unset info about process to avoid using it by an accident
-			unset window_id \
-			process_pid \
-			process_name \
-			process_owner \
-			process_command \
-			section
 		esac
 	done
 	# Unset events
