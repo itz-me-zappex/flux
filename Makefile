@@ -52,14 +52,14 @@ install:
 	install -Dm 755 $(FLUX_EVENT_READER_OUTPUT_PATH) $(PREFIX)/lib/flux/
 	install -Dm 755 $(FLUX_OUTPUT_PATH) $(PREFIX)/bin/
 
+# Install limits config if 'install-rtprio' option is passed
+install-rtprio:
+	install -Dm 644 $(FLUX_LIMITS_CONF_OUTPUT_PATH) /etc/security/limits.d/
+
 # Uninstall daemon from prefix if 'uninstall' option is passed
 uninstall:
 	rm -rf $(PREFIX)/lib/flux
 	rm $(PREFIX)/bin/flux
-
-# Install limits config if 'install-rtprio' option is passed
-install-rtprio:
-	install -Dm 644 $(FLUX_LIMITS_CONF_OUTPUT_PATH) /etc/security/limits.d/
 
 # Remove limits config if 'uninstall-rtprio' option is passed
 uninstall-rtprio:
