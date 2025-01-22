@@ -58,7 +58,7 @@ install-rtprio:
 
 # Create 'flux' group if 'install-group' option is passed
 install-group:
-	groupadd flux
+	groupadd -r flux
 
 # Uninstall daemon from prefix if 'uninstall' option is passed
 uninstall:
