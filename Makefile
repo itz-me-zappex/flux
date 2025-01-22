@@ -56,6 +56,10 @@ install:
 install-rtprio:
 	install -Dm 644 $(FLUX_LIMITS_CONF_OUTPUT_PATH) /etc/security/limits.d/
 
+# Create 'flux' group if 'install-group' option is passed
+install-group:
+	groupadd flux
+
 # Uninstall daemon from prefix if 'uninstall' option is passed
 uninstall:
 	rm -rf $(PREFIX)/lib/flux
@@ -65,5 +69,9 @@ uninstall:
 uninstall-rtprio:
 	rm /etc/security/limits.d/10-flux-rtprio.conf
 
+# Remove 'flux' group if 'uninstall-group' option is passed
+uninstall-group:
+	groupdel flux
+
 # Define sections as Makefile options
-.PHONY: all clean install uninstall install-rtprio uninstall-rtprio
+.PHONY: all clean install install-rtprio install-group uninstall uninstall-rtprio uninstall-group
