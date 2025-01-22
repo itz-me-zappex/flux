@@ -66,7 +66,7 @@ safe_exit(){
 		passed_command_type='lazy' \
 		passed_section="$previous_section" \
 		passed_event_command="${config_key_lazy_exec_unfocus_map["$previous_section"]}" \
-		passed_event='due to daemon termination' \
+		passed_event="$local_end_of_msg" \
 		exec_on_event
 	fi
 	# Remove lock file which prevents multiple instances of daemon from running
