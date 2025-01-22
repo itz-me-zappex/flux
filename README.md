@@ -11,6 +11,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [Fedora and dereatives](#fedora-and-dereatives)
   - [OpenSUSE Tumbleweed and dereatives](#opensuse-tumbleweed-and-dereatives)
 - [Building and installation](#building-and-installation)
+  - [Make options](#make-options)
   - [Manual installation using release tarball](#manual-installation-using-release-tarball)
   - [Arch Linux and dereatives](#arch-linux-and-dereatives-1)
 - [Usage](#usage)
@@ -18,6 +19,9 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [Autostart](#autostart)
 - [Configuration](#configuration)
   - [Available keys and description](#available-keys-and-description)
+    - [Identifiers](#identifiers)
+    - [Limits](#limits)
+    - [Miscellaneous](#miscellaneous)
   - [Config path](#config-path)
   - [Limitations](#limitations)
   - [Configuration example](#configuration-example)
@@ -45,18 +49,18 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - Stuttery audio in unfocused game if CPU limit is pretty aggressive, that should be expected because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. If you use Pipewire with Wireplumber, you may want to mute process as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
 
 ## Features
-- CPU and FPS limiting process on unfocus and unlimiting on focus (FPS limiting requires game running using MangoHud with already existing config file)
-- Reducing process priority on unfocus and restoring it on focus
-- Minimizing window on unfocus using xdotool (useful for borderless windows only)
-- Commands/scripts execution on focus and unfocus events to make user able extend daemon functionality
-- Configurable logging
-- Notifications support
-- Multiple identifiers you can set to avoid false positives
-- Easy INI config
-- Ability to use window and process info through environment variables which daemon passes to scripts/commands in `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys
-- Works with processes running in sandbox with PID namespaces (e.g. Firejail)
-- Survives a whole DE/WM restart (not relogin) and continues work without issues
-- Supports all X11 DEs/WMs and does not rely on neither GPU nor its driver
+- CPU and FPS limiting process on unfocus and unlimiting on focus (FPS limiting requires game running using MangoHud with already existing config file).
+- Reducing process priority on unfocus and restoring it on focus.
+- Minimizing window on unfocus using xdotool (useful for borderless windows only).
+- Commands/scripts execution on focus and unfocus events to make user able extend daemon functionality.
+- Configurable logging.
+- Notifications support.
+- Multiple identifiers you can set to avoid false positives.
+- Easy INI config.
+- Ability to use window and process info through environment variables which daemon passes to scripts/commands in `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys.
+- Works with processes running in sandbox with PID namespaces (e.g. Firejail).
+- Survives a whole DE/WM restart (not relogin) and continues work without issues.
+- Supports all X11 DEs/WMs and does not rely on neither GPU nor its driver.
 
 ## Dependencies
 ### Arch Linux and dereatives
@@ -102,6 +106,16 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 ## Building and installation
 ### Manual installation using release tarball
 You can use this method if there is no package build script for your distro. Make sure you have installed dependencies as described above before continue.
+
+### Make options
+| Option | Description |
+|--------|-------------|
+| `install` | Install daemon to prefix, can be changed using `$PREFIX`, defaults to `/usr/local`. |
+| `install-rtprio` | Install `10-flux.conf` config to `/etc/security/limits.d` to bypass scheduling policy changing restrictions for users in `flux` group |
+| `install-group` | Create `flux` group |
+| `uninstall` | Remove `bin/flux` and `lib/flux/` from prefix, can be changed using `$PREFIX`, defaults to `/usr/local`. |
+| `uninstall-rtprio` | Remove `10-flux.conf` config from `/etc/security/limits.d`. |
+| `uninstall-group` | Remove `flux` group from system. |
 
 #### Download latest release with source
 ```bash
@@ -162,25 +176,30 @@ sudo usermod -aG flux $USER
 Usage: flux [OPTIONS]
 
 Options and values:
-  -c, --config <path>        Specify path to config file
-                             (default: $XDG_CONFIG_HOME/flux.ini; $HOME/.config/flux.ini; /etc/flux.ini)
-  -h, --help                 Display this help and exit
-  -H, --hot                  Apply actions to already unfocused windows before handling events
-  -l, --log <path>           Store messages to specified file
-  -L, --log-overwrite        Recreate log file before start, use only with '--log'
-  -n, --notifications        Display messages as notifications
-  -q, --quiet                Display errors and warnings only
-  -T, --timestamp-format     Set timestamp format, use only with '--timestamps' (default: [%Y-%m-%dT%H:%M:%S%z])
-  -t, --timestamps           Add timestamps to messages
-  -u, --usage                Alias for '--help'
-  -v, --verbose              Detailed output
-  -V, --version              Display release information and exit
+  -c, --config <path>                 Specify path to config file
+                                      default: $XDG_CONFIG_HOME/flux.ini or $HOME/.config/flux.ini or /etc/flux.ini
+  -h, --help                          Display this help and exit
+  -H, --hot                           Apply actions to already unfocused windows before handling events
+  -l, --log <path>                    Store messages to specified file
+  -L, --log-overwrite                 Recreate log file before start, requires '--log'
+  -n, --notifications                 Display messages as notifications
+  -q, --quiet                         Display errors and warnings only
+  -T, --timestamp-format <format>     Set timestamp format, requires '--timestamps'
+                                      default: [%Y-%m-%dT%H:%M:%S%z]
+  -t, --timestamps                    Add timestamps to messages
+  -u, --usage                         Alias for '--help'
+  -v, --verbose                       Detailed output
+  -V, --version                       Display release information and exit
 
 Prefixes configuration:
-  --prefix-error <prefix>    Set prefix for error messages (default: [x])
-  --prefix-info <prefix>     Set prefix for info messages (default: [i])
-  --prefix-verbose <prefix>  Set prefix for verbose messages (default: [~])
-  --prefix-warning <prefix>  Set prefix for warning messages (default: [!])
+  --prefix-error <prefix>    Set prefix for error messages
+                             default: [x]
+  --prefix-info <prefix>     Set prefix for info messages
+                             default: [i]
+  --prefix-verbose <prefix>  Set prefix for verbose messages
+                             default: [~]
+  --prefix-warning <prefix>  Set prefix for warning messages
+                             default: [!]
 
 Examples:
   flux -Hvt
@@ -196,22 +215,32 @@ Just add command to autostart using your DE/WM settings. Running daemon as root 
 A simple INI is used for configuration.
 
 ### Available keys and description
-| Key               | Description |
-|-------------------|-------------|
-| `name` | Name of process, required if `command` is not specified. Daemon uses soft match for processes with names which have length 15 symbols, i.e. stripped. |
-| `owner` | Effective UID of process or username (login), optional identifier. |
+#### Identifiers
+| Key | Description |
+|-----|-------------|
+| `command` | Command which is used to execute process, required if `name` is not specified. |
+| `name` | Name of process, required if `command` is not specified. Daemon uses soft match for processes with names which have length 15 symbols (not including 16th `\n`), i.e. probably stripped. |
+| `owner` | Effective UID of process or username (login), optional. |
+
+#### Limits
+| Key | Description |
+|-----|-------------|
 | `cpu-limit` | CPU limit to set on unfocus event, accepts values between `0%` and `100%` (no limit), `%` symbol is optional. Defaults to `100%`. |
+| `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`, cannot be equal to `0` as that means no limit. |
+| `fps-focus` | FPS to set on focus or list of comma-separated integers (e.g. `30,60,120`, used in MangoHud as FPS limits you can switch between using built-in keybinding), requires `fps-unfocus`. Defaults to `0` (i.e. no limit). |
+| `idle` | Boolean, set `SCHED_IDLE` scheduling policy for process on unfocus event to greatly reduce its priority. Daemon should run as `@flux` to be able restore `SCHED_RR`/`SCHED_FIFO`/`SCHED_OTHER`/`SCHED_BATCH` scheduling policy and only as root to restore `SCHED_DEADLINE` scheduling policy (if daemon does not have sufficient rights to restore these scheduling policies, it will print warning and will not change anything). Defaults to `false`. |
+
+
+#### Miscellaneous
+| Key | Description |
+|-----|-------------|
 | `delay` | Delay in seconds before applying CPU/FPS limit or setting `SCHED_IDLE`. Defaults to `0`, supports values with floating point. |
 | `exec-focus` | Command to execute on focus event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
 | `exec-unfocus` | Command to execute on unfocus event or window closure, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
 | `lazy-exec-focus` | Same as `exec-focus`, but command will not run when processing opened windows if `--hot` is specified. |
 | `lazy-exec-unfocus` | Same as `exec-unfocus`, but command will not run when processing opened windows if `--hot` is specified and will be executed on daemon termination if focused window matches with section where this key and command specified. |
-| `command` | Command which is used to start process, required if `name` is not specified. |
 | `mangohud-source-config` | Path to MangoHud config which should be used as a base before apply FPS limit in `mangohud-config`, if not specified, then target behaves as source. Useful if you not looking for duplicate MangoHud config for multiple games. |
 | `mangohud-config` | Path to MangoHud config which should be changed (target), required if you want change FPS limits and requires `fps-unfocus`. Make sure you created specified config, at least just keep it blank, otherwise MangoHud will not be able to load new config on fly and daemon will throw warnings related to config absence. Do not use the same config for multiple sections! |
-| `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`, cannot be equal to `0` as that means no limit. |
-| `fps-focus` | FPS to set on focus or list of comma-separated integers (e.g. `30,60,120`, used in MangoHud as FPS limits you can switch between using built-in keybinding), requires `fps-unfocus`. Defaults to `0` (i.e. no limit). |
-| `idle` | Boolean, set `SCHED_IDLE` scheduling policy for process on unfocus event to greatly reduce its priority. Daemon should run as `@flux` to be able restore `SCHED_RR`/`SCHED_FIFO`/`SCHED_OTHER`/`SCHED_BATCH` scheduling policy and only as root to restore `SCHED_DEADLINE` scheduling policy (if daemon does not have sufficient rights to restore these scheduling policies, it will print warning and will not change anything). Defaults to `false`.|
 | `minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`, requires `xdotool` installed on system. Defaults to `false`. |
 
 ### Config path
@@ -337,8 +366,8 @@ Note: You may want to use these variables in commands and scripts which running 
 
 ### Types of limits and which you should use
 - FPS limits recommended for online and multiplayer games and if you do not mind to use MangoHud.
-- CPU limits greater than zero recommended for online and multiplayer games in case you do not use MangoHud, but you should be ready for stuttery audio, because `cpulimit` tool interrupts process with `SIGSTOP` and `SIGCONT` signals.
-- CPU limit equal to zero recommended for singleplayer games or online games in offline mode, this method freezes game completely to make it just hang in RAM without using any CPU or GPU resources.
+- CPU limits greater than zero recommended for online/multiplayer games in case you do not use MangoHud and for CPU heavy applications e.g. VirtualBox and Handbrake with encoding on CPU, but you should be ready for stuttery audio which caused because of `cpulimit` tool which interrupts process with `SIGSTOP` and `SIGCONT` signals, to fix that on systems with Pipewire and Wireplumber check [this](#mute-process-audio-on-unfocus-pipewire--wireplumber).
+- CPU limit equal to zero (freezing) recommended for singleplayer games, online games in offline mode and for stuff which consumes resources in background without reason, makes game/app just hang in RAM without consuming neither CPU nor GPU resources.
 
 ## Possible questions
 ### How does that daemon work?
