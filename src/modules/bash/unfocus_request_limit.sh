@@ -33,5 +33,9 @@ unfocus_request_limit(){
 		if [[ "${config_key_minimize_map["$previous_section"]}" == '1' ]]; then
 			request_minimize_map["$previous_process_pid"]='1'
 		fi
+		# Request unfocus command execution if specified in config
+		if [[ -n "${config_key_exec_unfocus_map["$previous_section"]}" || -n "${config_key_lazy_exec_unfocus_map["$previous_section"]}" ]]; then
+			request_exec_unfocus_general_map["$previous_process_pid"]='1'
+		fi
 	fi
 }
