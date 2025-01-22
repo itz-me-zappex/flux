@@ -20,8 +20,8 @@ background_cpu_limit(){
 		trap 'message --info "Delayed for $local_delay second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to window $passed_window_id focus event." ; \
 		kill "$local_sleep_pid"; \
 		exit 0' SIGUSR1
-		# Print relevant message on target process termination and stop this subprocess
-		trap 'message --info "Delayed for $local_delay second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to window $passed_window_id termination." ; \
+		# Print relevant message on closure of target window and stop this subprocess
+		trap 'message --info "Delayed for $local_delay second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to window $passed_window_id closure." ; \
 		kill "$local_sleep_pid"; \
 		exit 0' SIGUSR2
 		# Wait for 'sleep' termination
@@ -49,8 +49,8 @@ background_cpu_limit(){
 		trap 'message --info "Process '"'$passed_process_name'"' with PID $passed_process_pid has been CPU unlimited due to window $passed_window_id focus event." ; \
 		kill "$local_cpulimit_pid" > /dev/null 2>&1 ; \
 		exit 0' SIGUSR1
-		# Terminate 'cpulimit' on termination of target and print relevant message
-		trap 'message --info "Process '"'$passed_process_name'"' with PID $passed_process_pid has been CPU unlimited due to window $passed_window_id termination." ; \
+		# Terminate 'cpulimit' on closure of target window and print relevant message
+		trap 'message --info "Process '"'$passed_process_name'"' with PID $passed_process_pid has been CPU unlimited due to window $passed_window_id closure." ; \
 		kill "$local_cpulimit_pid" > /dev/null 2>&1 ; \
 		exit 0' SIGUSR2
 		# Wait for 'cpulimit' termination
