@@ -18,6 +18,9 @@ FLUX_OUTPUT_PATH = $(OUTPUT_PATH)/flux
 # Set path to compiled 'flux-event-reader' binary
 FLUX_EVENT_READER_OUTPUT_PATH = $(OUTPUT_PATH)/flux-event-reader
 
+# Set path to limits.conf
+FLUX_LIMITS_CONF_OUTPUT_PATH = $(shell pwd)/src/10-flux-rtprio.conf
+
 # Build daemon if option is not specified
 all:
 	mkdir -p "$(OUTPUT_PATH)"
@@ -30,6 +33,7 @@ all:
 	cat src/main.sh >> "$(FLUX_OUTPUT_PATH)"
 	chmod +x "$(FLUX_OUTPUT_PATH)"
 	$(CXX) $(CXXFLAGS) -o $(FLUX_EVENT_READER_OUTPUT_PATH) $(CPP_MODULES_PATH)/flux_event_reader.cpp -lX11 -lXext -lXRes
+	cp $(FLUX_LIMITS_CONF_OUTPUT_PATH) $(OUTPUT_PATH)/
 
 # Remove build result if 'clean' option is passed
 clean:
@@ -47,5 +51,9 @@ uninstall:
 	rm -rf $(PREFIX)/lib/flux
 	rm $(PREFIX)/bin/flux
 
+# Install limits.conf if 'rtprio' option is passed
+rtprio:
+	install -Dm 644 $(FLUX_LIMITS_CONF_OUTPUT_PATH) /etc/security/limits.d/
+
 # Define sections as Makefile options
-.PHONY: all clean install uninstall
+.PHONY: all clean install uninstall rtprio
