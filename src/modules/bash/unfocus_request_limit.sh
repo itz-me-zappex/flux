@@ -35,7 +35,10 @@ unfocus_request_limit(){
 		fi
 		# Request unfocus command execution if specified in config
 		if [[ -n "${config_key_exec_unfocus_map["$previous_section"]}" || -n "${config_key_lazy_exec_unfocus_map["$previous_section"]}" ]]; then
-			request_exec_unfocus_general_map["$previous_process_pid"]='1'
+			# Do not do anything if focused window process PID is exacly the same as previous one
+			if [[ "$process_pid" != "$previous_process_pid" ]]; then
+				request_exec_unfocus_general_map["$previous_process_pid"]='1'
+			fi
 		fi
 	fi
 }
