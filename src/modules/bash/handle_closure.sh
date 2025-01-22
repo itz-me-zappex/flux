@@ -15,6 +15,7 @@ handle_closure(){
 	local_temp_cached_pid \
 	local_temp_window_id \
 	local_terminated_process_owner \
+	local_terminated_process_owner_username \
 	local_terminated_process_command
 	# Obtain list of existing window IDs
 	local_existing_windows="${event/'windows_list: '/}" # Remove everything including type name of list with window IDs
@@ -41,6 +42,8 @@ handle_closure(){
 			local_terminated_process_name="${cache_process_name_map["$local_temp_terminated_window_id"]}"
 			# Simplify access to process owner of cached window info
 			local_terminated_process_owner="${cache_process_owner_map["$local_temp_terminated_window_id"]}"
+			# Simplify access to process owner username of cached window info
+			local_terminated_process_owner_username="${cache_process_owner_username_map["$local_temp_terminated_window_id"]}"
 			# Simplify access to process command of cached window info
 			local_terminated_process_command="${cache_process_command_map["$local_temp_terminated_window_id"]}"
 			# Set end of message with actual window ID to not duplicate it
@@ -101,6 +104,7 @@ handle_closure(){
 				passed_section="$local_terminated_section" \
 				passed_process_name="$local_terminated_process_name" \
 				passed_process_owner="$local_terminated_process_owner" \
+				passed_process_owner_username="$local_terminated_process_owner_username" \
 				passed_process_command="$local_terminated_process_command" \
 				passed_end_of_msg="$local_end_of_msg" \
 				exec_unfocus
