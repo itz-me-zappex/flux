@@ -128,6 +128,8 @@ handle_closure(){
 			if [[ -n "${request_minimize_map["$local_terminated_process_pid"]}" ]]; then
 				message --verbose "Window $local_temp_window_id minimization of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window closure."
 			fi
+			# Unset unfocus event command execution request
+			unset request_exec_unfocus_general_map["$local_terminated_process_pid"]
 			# Remove data related to terminated window from cache
 			unset cache_process_pid_map["$local_temp_terminated_window_id"] \
 			cache_process_name_map["$local_temp_terminated_window_id"] \
