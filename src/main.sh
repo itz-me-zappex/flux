@@ -194,8 +194,6 @@ while read -r raw_event; do
 					message --warning "Unable to obtain owner username of process $process_name with PID $process_pid!"
 				fi
 			fi
-			# Execute command on unfocus event if specified in config
-			exec_unfocus
 			# Define what to do with info about previous window depending by exit code (overwrite or unset)
 			if (( get_process_info_exit_code == 0 )); then
 				# Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
