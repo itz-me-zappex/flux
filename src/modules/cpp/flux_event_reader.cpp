@@ -151,7 +151,7 @@ int main(){
 	// Needed to simulate event to obtain and print atoms state immediately after start
 	bool fake_first_event = true;
 	// Needed to set time before which events should be skipped on WM restart
-	auto wm_restart_wait_for = chrono::steady_clock::now();
+	chrono::steady_clock::time_point wm_restart_wait_for;
 	// Needed to trigger skipping
 	bool wm_restart_wait = false;
 	// Connect to X server
