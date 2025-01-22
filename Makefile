@@ -13,7 +13,7 @@ SRC_PATH = $(PWD)/src
 
 # Set path to bash modules
 BASH_MODULES_PATH = $(SRC_PATH)/modules/bash
-CPP_MODULES_PATH = $(SRC_PATH)/src/modules/cpp
+CPP_MODULES_PATH = $(SRC_PATH)/modules/cpp
 
 # Set output directory
 OUTPUT_PATH = $(PWD)/out
