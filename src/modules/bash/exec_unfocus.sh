@@ -5,11 +5,13 @@ exec_unfocus(){
 	FLUX_NEW_PROCESS_PID="$process_pid" \
 	FLUX_NEW_PROCESS_NAME="$process_name" \
 	FLUX_NEW_PROCESS_OWNER="$process_owner" \
+	FLUX_NEW_PROCESS_OWNER_USERNAME="$process_owner_username" \
 	FLUX_NEW_PROCESS_COMMAND="$process_command" \
 	FLUX_WINDOW_ID="$passed_window_id" \
 	FLUX_PROCESS_PID="$passed_process_pid" \
 	FLUX_PROCESS_NAME="$passed_process_name" \
 	FLUX_PROCESS_OWNER="$passed_process_owner" \
+	FLUX_PROCESS_OWNER_USERNAME="$passed_process_owner_username" \
 	FLUX_PROCESS_COMMAND="$passed_process_command"
 	# Execute command from 'exec-unfocus' key if it has been specified
 	if [[ -n "${config_key_exec_unfocus_map["$passed_section"]}" ]]; then
@@ -34,10 +36,12 @@ exec_unfocus(){
 	FLUX_NEW_PROCESS_PID \
 	FLUX_NEW_PROCESS_NAME \
 	FLUX_NEW_PROCESS_OWNER \
+	FLUX_NEW_PROCESS_OWNER_USERNAME \
 	FLUX_NEW_PROCESS_COMMAND \
 	FLUX_WINDOW_ID \
 	FLUX_PROCESS_PID \
 	FLUX_PROCESS_NAME \
 	FLUX_PROCESS_OWNER \
+	FLUX_PROCESS_OWNER_USERNAME \
 	FLUX_PROCESS_COMMAND
 }
