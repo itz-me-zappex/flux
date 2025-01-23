@@ -83,15 +83,15 @@ void get_opened_windows(Display *display, Window root, string &opened_window_ids
 	// Convert to array
 	Window *windows = (Window *)data;
 	// Convert to string
-	stringstream local_opened_windows;
+	stringstream opened_windows_stream;
 	for (unsigned long i = 0; i < windows_count; i++){
-		local_opened_windows << "0x" << hex << windows[i] << dec;
+		opened_windows_stream << "0x" << hex << windows[i] << dec;
 		// Add space if not last
 		if (i < windows_count - 1){
-			local_opened_windows << " ";
+			opened_windows_stream << " ";
 		}
 	}
-	opened_window_ids_str = local_opened_windows.str();
+	opened_window_ids_str = opened_windows_stream.str();
 	XFree(data);
 }
 
@@ -148,6 +148,8 @@ int main(){
 	Window previous_owner = None;
 	// Window ID of window manager
 	Window wm_id;
+	stringstream wm_id_stream;
+	string wm_id_str;
 	// Needed to simulate event to obtain and print atoms state immediately after start
 	bool fake_first_event = true;
 	// Needed to set time before which events should be skipped on WM restart
@@ -207,9 +209,18 @@ int main(){
 				if (active_window_id != wm_id){
 					continue;
 				}
+			} else{
+				// Get window manager ID to add for add it to list of opened windows
+				get_wm_id(display, root, wm_id);
 			}
 			// Get list of opened windows
 			get_opened_windows(display, root, opened_window_ids_str);
+			// Add window manager ID to list of opened windows
+			wm_id_stream << " 0x" << hex << wm_id << dec;
+			wm_id_str = wm_id_stream.str();
+			opened_window_ids_str += wm_id_str;
+			wm_id_stream.str("");
+			wm_id_stream.clear();
 			// Continue only if at least one atom has been changed
 			if (previous_active_window_id != active_window_id || previous_opened_window_ids_str != opened_window_ids_str){
 				// Get active window process PID
