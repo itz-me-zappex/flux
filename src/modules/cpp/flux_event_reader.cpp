@@ -201,17 +201,15 @@ int main(){
 			}
 			// Get active window ID
 			get_active_window(display, root, active_window_id);
+			// Get window manager ID for add it to list of opened windows and use it to detect invalid '0x0' event
+			get_wm_id(display, root, wm_id);
 			// Get window ID using 'XGetInputFocus()' and compare it with WM window ID if '_NET_ACTIVE_WINDOW' returns '0x0'
 			if (active_window_id == 0){
 				get_active_window_legacy(display, root, active_window_id);
-				get_wm_id(display, root, wm_id);
 				// Skip event if that is invalid event
 				if (active_window_id != wm_id){
 					continue;
 				}
-			} else{
-				// Get window manager ID to add for add it to list of opened windows
-				get_wm_id(display, root, wm_id);
 			}
 			// Get list of opened windows
 			get_opened_windows(display, root, opened_window_ids_str);
