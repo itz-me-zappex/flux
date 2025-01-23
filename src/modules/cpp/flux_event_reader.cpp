@@ -183,13 +183,11 @@ int main(){
 		if (fake_event || event.type == PropertyNotify){
 			// Skip events for 1 second after WM restart
 			if (wm_restart_wait){
-				if (chrono::steady_clock::now() <= wm_restart_wait_for){
-					continue;
-				} else{
+				if (chrono::steady_clock::now() >= wm_restart_wait_for){
 					fake_event = true;
 					wm_restart_wait = false;
-					continue;
 				}
+				continue;
 			}
 			// Skip events during 1 second if WM has been restarted
 			if (check_wm_restart(display, root, previous_owner)){
