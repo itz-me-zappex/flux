@@ -150,8 +150,8 @@ int main(){
 	Window wm_id;
 	stringstream wm_id_stream;
 	string wm_id_str;
-	// Needed to simulate event to obtain and print atoms state immediately after start
-	bool fake_first_event = true;
+	// Needed to simulate event to obtain and print atoms state immediately after daemon start or WM restart
+	bool fake_event = true;
 	// Needed to set time before which events should be skipped on WM restart
 	chrono::steady_clock::time_point wm_restart_wait_for;
 	// Needed to trigger skipping
@@ -176,18 +176,20 @@ int main(){
 	// Handle events
 	while (true){
 		// Get event
-		if (!fake_first_event){
+		if (!fake_event){
 			XNextEvent(display, &event);
 		}
 		// Wait for property to change
-		if (fake_first_event || event.type == PropertyNotify){
+		if (fake_event || event.type == PropertyNotify){
 			// Skip events for 1 second after WM restart
 			if (wm_restart_wait){
 				if (chrono::steady_clock::now() <= wm_restart_wait_for){
+					continue;
 				} else{
+					fake_event = true;
 					wm_restart_wait = false;
+					continue;
 				}
-				continue;
 			}
 			// Skip events during 1 second if WM has been restarted
 			if (check_wm_restart(display, root, previous_owner)){
@@ -196,8 +198,8 @@ int main(){
 				continue;
 			}
 			// Unset trigger
-			if (fake_first_event){
-				fake_first_event = false;
+			if (fake_event){
+				fake_event = false;
 			}
 			// Get active window ID
 			get_active_window(display, root, active_window_id);
