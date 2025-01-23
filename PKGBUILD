@@ -1,5 +1,5 @@
 pkgname='flux'
-pkgver='1.20.8'
+pkgver='1.20.9'
 pkgrel='1'
 pkgdesc='Advanced daemon for X11 desktops and window managers, designed to automatically limit FPS/CPU usage of unfocused windows and run commands on focus and unfocus events. Written in Bash and C++.'
 arch=('any')
@@ -42,5 +42,5 @@ package(){
 	cd "${srcdir}/${pkgname}-${pkgver}"
 	PREFIX="${pkgdir}/usr" make install
 	mkdir -p "${pkgdir}/etc/security/limits.d"
-	install -Dm644 'src/10-flux-rtprio.conf' "${pkgdir}/etc/security/limits.d/10-flux-rtprio.conf"
+	install -Dm644 '10-flux.conf' "${pkgdir}/etc/security/limits.d/"
 }
