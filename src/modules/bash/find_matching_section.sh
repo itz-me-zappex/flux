@@ -3,7 +3,8 @@ find_matching_section(){
 	local local_temp_section \
 	local_name_match \
 	local_owner_match \
-	local_command_match
+	local_command_match \
+	local_window_type_text
 	# Find matching section if was not found previously and store it to cache
 	if [[ -z "${cache_section_map["$process_pid"]}" ]]; then
 		# Avoid searching for matching section if it was not found previously
@@ -48,11 +49,17 @@ find_matching_section(){
 		# Obtain matching section from cache
 		section="${cache_section_map["$process_pid"]}"
 	fi
+	# Define type of window to print message about section match/mismatch
+	if [[ -n "$hot" ]]; then
+		local_window_type_text='opened window'
+	else
+		local_window_type_text='focused window'
+	fi
 	# Print message about section match
 	if [[ -n "$section" ]]; then
-		message --verbose "Process '$process_name' with PID $process_pid of window $window_id matches with section '$section'."
+		message --verbose "Process '$process_name' with PID $process_pid of $local_window_type_text $window_id matches with section '$section'."
 	else
-		message --verbose "Process '$process_name' with PID $process_pid of window $window_id does not match with any section."
+		message --verbose "Process '$process_name' with PID $process_pid of $local_window_type_text $window_id does not match with any section."
 		return 1
 	fi
 }
