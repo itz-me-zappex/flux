@@ -152,6 +152,8 @@ int main(){
 	string wm_id_str;
 	// Needed to simulate event to obtain and print atoms state immediately after daemon start or WM restart
 	bool fake_event = true;
+	// Needed to get current time once before 2 checks after WM restart
+	chrono::steady_clock::time_point current_time;
 	// Needed to set time before which events should be skipped on WM restart
 	chrono::steady_clock::time_point wm_restart_wait_for;
 	// Needed to trigger skipping
@@ -181,12 +183,18 @@ int main(){
 		}
 		// Wait for property to change
 		if (fake_event || event.type == PropertyNotify){
-			// Skip events for 1 second after WM restart
+			// Get current time
+			current_time = chrono::steady_clock::now();
+			// Disallow loop skipping if delay is out
 			if (wm_restart_wait){
-				if (chrono::steady_clock::now() >= wm_restart_wait_for){
-					fake_event = true;
+				if (current_time <= wm_restart_wait_for){
 					wm_restart_wait = false;
 				}
+			}
+			// Set fake event in case delay is out, otherwise skip event
+			if (!wm_restart_wait && current_time >= wm_restart_wait_for){
+				fake_event = true;
+			} else{
 				continue;
 			}
 			// Skip events during 1 second if WM has been restarted
