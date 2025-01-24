@@ -130,7 +130,7 @@ while read -r raw_event; do
 		message --info "Flux has been started."
 		display_has_been_opened='1'
 	fi
-	# Do nothing if '--hot' is not specified
+	# Add opened windows as focus events once if '--hot' is specified, otherwise find implicitly opened windows and add those as focus events
 	if [[ -n "$hot" ]]; then
 		# Add opened windows info except focused one to array as events to apply actions to already opened windows
 		for temp_window in $opened_windows; do
@@ -141,6 +141,29 @@ while read -r raw_event; do
 		unset temp_window
 		# Add event to unset '--hot'
 		events_array+=('unset_hot')
+	else
+		# Do not do anything if list of opened windows from previous event is blank
+		if [[ -n "$previous_opened_windows" ]]; then
+			# Attempt to find implicitly opened windows
+			for temp_window in $opened_windows; do
+				# Add window as event if opened implicitly
+				if [[ " $previous_opened_windows " != *" $temp_window "* && "$temp_window" != "$focused_window" ]]; then
+					# Add event to set '--hot' temporary, to avoid execution of lazy commands
+					if [[ "${events_array[*]}" != 'set_hot'* ]]; then
+						events_array+=('set_hot')
+					fi
+					# Add window as focus event
+					events_array+=("$temp_window")
+				fi
+			done
+			# Add event to unset '--hot'
+			if [[ "${events_array[*]}" == 'set_hot'* ]]; then
+				# Set last implicit window as previous
+				previous_focused_window="$temp_window"
+				events_array+=('unset_hot')
+			fi
+			unset temp_window
+		fi
 	fi
 	# Add info about focused window to array as event if it does not repeat
 	if [[ "$previous_focused_window" != "$focused_window" ]]; then
@@ -152,10 +175,18 @@ while read -r raw_event; do
 	events_array+=("windows_list: $opened_windows")
 	# Reset events count
 	events_count='0'
+	# Remember list of previously opened windows to find implicitly opened ones next time
+	previous_opened_windows="$opened_windows"
 	# Handle events
 	for event in "${events_array[@]}"; do
 		# Apply actions depending by event type
 		case "$event" in
+		'set_hot' )
+			# Set '--hot' temporary to process implicitly opened windows
+			hot='1'
+			# Prevent lazy commands in matching sections of implicitly opened windows from working
+			unset hot_is_unset
+		;;
 		'unset_hot' )
 			# Unset '--hot' as it becomes useless from this moment
 			unset hot
