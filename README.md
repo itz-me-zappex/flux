@@ -61,6 +61,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - Works with processes running in sandbox with PID namespaces (e.g. Firejail).
 - Survives a whole DE/WM restart (not relogin) and continues work without issues.
 - Supports all X11 DEs/WMs and does not rely on neither GPU nor its driver.
+- Detects and handles both explicitly (appeared with focus event) and implicitly (appeared without focus event) opened windows.
 
 ## Dependencies
 ### Arch Linux and dereatives
