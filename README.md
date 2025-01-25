@@ -11,9 +11,8 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [Fedora and dereatives](#fedora-and-dereatives)
   - [OpenSUSE Tumbleweed and dereatives](#opensuse-tumbleweed-and-dereatives)
 - [Building and installation](#building-and-installation)
-  - [Make options](#make-options)
-  - [Manual installation using release tarball](#manual-installation-using-release-tarball)
   - [Arch Linux and dereatives](#arch-linux-and-dereatives-1)
+  - [Manual installation using release tarball](#manual-installation-using-release-tarball)
 - [Usage](#usage)
   - [List of available options](#list-of-available-options)
   - [Autostart](#autostart)
@@ -105,10 +104,38 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - Build: `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto-devel` `make` `gcc`
 
 ## Building and installation
-### Manual installation using release tarball
-You can use this method if there is no package build script for your distro. Make sure you have installed dependencies as described above before continue.
+### Arch Linux and dereatives
+Make sure you have installed `base-devel` package before continue.
 
-### Make options
+#### Create and change build directory
+```bash
+mkdir 'flux' && cd 'flux'
+```
+
+#### Install `cpulimit` dependency from AUR
+```bash
+git clone 'https://aur.archlinux.org/cpulimit.git' && cd 'cpulimit' && makepkg -sric && cd ..
+```
+
+#### Download PKGBUILD from Git repo
+```bash
+wget 'https://raw.githubusercontent.com/itz-me-zappex/flux/refs/heads/main/PKGBUILD' && wget 'https://raw.githubusercontent.com/itz-me-zappex/flux/refs/heads/main/create-group.install'
+```
+
+#### Build and install package
+```bash
+makepkg -sric
+```
+
+#### Add user to `flux` group to bypass limitations related to changing scheduling policies
+```bash
+sudo usermod -aG flux $USER
+```
+
+### Manual installation using release tarball
+Use this method if you using different distro. Make sure you have installed dependencies as described above before continue.
+
+#### Make options
 | Option | Description |
 |--------|-------------|
 | `clean` | Remove `out/` in repository directory and all files created there after `make`. |
@@ -144,33 +171,6 @@ sudo make install install-bypass create-group && sudo usermod -aG flux $USER
 PREFIX="~/.local" make install
 ```
 
-### Arch Linux and dereatives
-Make sure you have installed `base-devel` package before continue.
-
-#### Create and change build directory
-```bash
-mkdir 'flux' && cd 'flux'
-```
-
-#### Install `cpulimit` dependency from AUR
-```bash
-git clone 'https://aur.archlinux.org/cpulimit.git' && cd 'cpulimit' && makepkg -sric && cd ..
-```
-
-#### Download PKGBUILD from Git repo
-```bash
-wget 'https://raw.githubusercontent.com/itz-me-zappex/flux/refs/heads/main/PKGBUILD' && wget 'https://raw.githubusercontent.com/itz-me-zappex/flux/refs/heads/main/create-group.install'
-```
-
-#### Build and install package
-```bash
-makepkg -sric
-```
-
-#### Add user to `flux` group to bypass limitations related to changing scheduling policies
-```bash
-sudo usermod -aG flux $USER
-```
 
 ## Usage
 ### List of available options
@@ -280,7 +280,7 @@ cpu-limit = 0%
 lazy-exec-focus = killall picom
 lazy-exec-unfocus = picom
 
-; Set FPS limit to 5 on unfocus and restore it to 60 on focus, unmute and mute on focus and unfocus respectively, minimize on unfocus as game supports only borderless windowed mode and reduce priority
+; Set FPS limit to 5, minimize (borderless) and mute on unfocus, restore FPS to 60 and unmute on focus
 [Forza Horizon 4]
 name = ForzaHorizon4.exe
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\ForzaHorizon4\ForzaHorizon4.exe 
@@ -294,7 +294,7 @@ exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1
 idle = true
 minimize = true
 
-; Reduce CPU usage when unfocused to make game able download music and assets and reduce priority
+; Reduce CPU usage and reduce priority when unfocused, to keep game able download music and assets
 [Geometry Dash]
 name = GeometryDash.exe
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\Geometry Dash\GeometryDash.exe 
@@ -312,7 +312,7 @@ cpu-limit = 0%
 lazy-exec-focus = killall picom
 lazy-exec-unfocus = picom
 
-; Set FPS limit to 5 on unfocus and restore it to 60 on focus, unmute and mute on focus and unfocus respectively, minimize on unfocus as game supports only borderless windowed mode and reduce priority
+; Set FPS limit to 5, minimize (borderless) and mute on unfocus, restore FPS to 60 and unmute on focus
 [Forza Horizon 4]
 name = ForzaHorizon4.exe
 mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
@@ -324,7 +324,7 @@ exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1
 idle = true
 minimize = true
 
-; Reduce CPU usage when unfocused to make game able download music and assets and reduce priority
+; Reduce CPU usage and reduce priority when unfocused, to keep game able download music and assets
 [Geometry Dash]
 name = GeometryDash.exe
 cpu-limit = 2%
