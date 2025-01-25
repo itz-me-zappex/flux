@@ -169,9 +169,7 @@ int main(){
 	if (get_wm_id(display, root, wm_id) == 1){
 		return 1;
 	}
-	// Listen '_NET_ACTIVE_WINDOW' and '_NET_CLIENT_LIST_STACKING' atoms infinitely (until SIGTERM/SIGINT of course)
-	Atom net_active_window = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
-	Atom net_client_list_stacking = XInternAtom(display, "_NET_CLIENT_LIST_STACKING", False);
+	// Listen all changes in properties, that is heavy but needed to detect WM restart properly and to prevent "broken" list of opened windows from being shown
 	XSelectInput(display, root, PropertyChangeMask);
 	// Store events here
 	XEvent event;
