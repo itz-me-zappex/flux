@@ -30,7 +30,7 @@ parse_config(){
 				sections_array+=("$local_section")
 			elif [[ "${local_temp_config_line,,}" =~ ^(name|owner|cpu-limit|delay|(lazy-)?exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus|idle|minimize)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
 				# Remove key name and equal symbol
-				local_config_value="${local_temp_config_line/*=/}"
+				local_config_value="${local_temp_config_line#*=}"
 				# Remove all spaces before and after string, internal shell parameter expansion required to get spaces supposed to be removed
 				local_config_value="${local_config_value#"${local_config_value%%[![:space:]]*}"}" # Remove spaces in beginning for string
 				local_config_value="${local_config_value%"${local_config_value##*[![:space:]]}"}" # Remove spaces in end of string
