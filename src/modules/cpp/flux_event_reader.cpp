@@ -197,7 +197,7 @@ int main(){
 			}
 			// Skip events during 1 second if WM has been restarted
 			if (check_wm_restart(display, root, previous_owner)){
-				wm_restart_wait_for = chrono::steady_clock::now() + chrono::seconds(1);
+				wm_restart_wait_for = chrono::steady_clock::now() + chrono::milliseconds(1500);
 				wm_restart_wait = true;
 				continue;
 			}
@@ -205,6 +205,8 @@ int main(){
 			if (fake_event){
 				fake_event = false;
 			}
+			// Wait before continue, no idea how to fix changing client list stacking atom before active window one in other way
+			this_thread::sleep_for(chrono::milliseconds(20));
 			// Get active window ID
 			get_active_window(display, root, active_window_id);
 			// Get window manager ID for add it to list of opened windows and use it to detect invalid '0x0' event
