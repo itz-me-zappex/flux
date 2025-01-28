@@ -1,3 +1,4 @@
+// TODO: Rewrite that pure, unreadable and buggy garbage
 /*
 	Written as small replacement for 'xprop -root -spy _NET_ACTIVE_WINDOW _NET_CLIENT_LIST_STACKING' which aims at following:
 	1) Obtaining and printing info in specific order unlike 'xprop', which gets events from X11 (those are random ordered) and "throws" them.
@@ -206,7 +207,7 @@ int main(){
 				fake_event = false;
 			}
 			// Wait before continue, no idea how to fix changing client list stacking atom before active window one in other way
-			this_thread::sleep_for(chrono::milliseconds(20));
+			this_thread::sleep_for(chrono::milliseconds(30));
 			// Get active window ID
 			get_active_window(display, root, active_window_id);
 			// Get window manager ID for add it to list of opened windows and use it to detect invalid '0x0' event
