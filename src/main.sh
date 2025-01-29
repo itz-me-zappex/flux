@@ -1,5 +1,5 @@
 # Version of daemon shown from 'parse_options()' if '--version' is specified
-daemon_version='1.20.11'
+daemon_version='1.20.12'
 
 # Set default prefixes for messages
 prefix_error='[x]'
