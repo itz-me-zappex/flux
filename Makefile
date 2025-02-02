@@ -1,77 +1,52 @@
-# Configure compiler
-CXXFLAGS ?= -O2 -s
-CXX ?= g++
-
-# Configure installation path
 PREFIX ?= /usr/local
 
-# Set current directory
-PWD ?= $(shell pwd)
+CC ?= gcc
+CFLAGS ?= -O2 -s
 
-# Set path to source code
-SRC_PATH = $(PWD)/src
+PWD = $(shell pwd)
 
-# Set path to bash modules
-BASH_MODULES_PATH = $(SRC_PATH)/modules/bash
-CPP_MODULES_PATH = $(SRC_PATH)/modules/cpp
+BUILD_DIR = $(PWD)/build
 
-# Set output directory
-OUTPUT_PATH = $(PWD)/out
+FLUX_BUILD = $(BUILD_DIR)/flux
+FLUX_EVENT_READER_BUILD = $(BUILD_DIR)/flux-event-reader
 
-# Set path to built 'flux' executable
-FLUX_OUTPUT_PATH = $(OUTPUT_PATH)/flux
-
-# Set path to compiled 'flux-event-reader' binary
-FLUX_EVENT_READER_OUTPUT_PATH = $(OUTPUT_PATH)/flux-event-reader
-
-# Set path to limits config
-FLUX_LIMITS_CONF_OUTPUT_PATH = $(OUTPUT_PATH)/10-flux.conf
-
-# Build daemon if option is not specified
 all:
-	mkdir -p "$(OUTPUT_PATH)"
-	echo '#!/usr/bin/bash' > $(FLUX_OUTPUT_PATH)
-	for module in "$(BASH_MODULES_PATH)"/*.sh; do \
-		echo >> "$(FLUX_OUTPUT_PATH)"; \
-		cat $$module >> "$(FLUX_OUTPUT_PATH)"; \
+	mkdir -p $(BUILD_DIR)
+
+	echo '#!/usr/bin/bash' > $(FLUX_BUILD)
+
+	for module in $(PWD)/src/functions/*.sh; do \
+		echo >> $(FLUX_BUILD); \
+		cat $$module >> $(FLUX_BUILD); \
 	done
-	echo >> "$(FLUX_OUTPUT_PATH)"
-	cat src/main.sh >> "$(FLUX_OUTPUT_PATH)"
-	chmod +x "$(FLUX_OUTPUT_PATH)"
-	$(CXX) $(CXXFLAGS) -o $(FLUX_EVENT_READER_OUTPUT_PATH) $(CPP_MODULES_PATH)/flux_event_reader.cpp -lX11 -lXext -lXRes
-	cp $(PWD)/10-flux.conf $(FLUX_LIMITS_CONF_OUTPUT_PATH)
 
-# Remove build result if 'clean' option is passed
+	echo >> $(FLUX_BUILD)
+	cat src/main.sh >> $(FLUX_BUILD)
+
+	$(CC) $(CFLAGS) -o $(FLUX_EVENT_READER_BUILD) $(PWD)/src/modules/flux_event_reader.c -lX11 -lXext -lXRes
+
 clean:
-	rm -rf $(OUTPUT_PATH)
+	rm -rf $(BUILD_DIR)
 
-# Install daemon to prefix if 'install' option is passed
-install:
-	mkdir -p $(PREFIX)/bin
-	mkdir -p $(PREFIX)/lib/flux
-	install -Dm 755 $(FLUX_EVENT_READER_OUTPUT_PATH) $(PREFIX)/lib/flux/
-	install -Dm 755 $(FLUX_OUTPUT_PATH) $(PREFIX)/bin/
-
-# Install limits config if 'install-bypass' option is passed
-install-bypass:
-	install -Dm 644 $(FLUX_LIMITS_CONF_OUTPUT_PATH) /etc/security/limits.d/
-
-# Create 'flux' group if 'create-group' option is passed
-create-group:
+groupadd:
 	groupadd -r flux
 
-# Uninstall daemon from prefix if 'uninstall' option is passed
-uninstall:
-	rm -rf $(PREFIX)/lib/flux
-	rm $(PREFIX)/bin/flux
+install:
+	mkdir -p $(PREFIX)/bin/
+	mkdir -p $(PREFIX)/lib/flux/
+	install -Dm 755 $(FLUX_BUILD) $(PREFIX)/bin/
+	install -Dm 755 $(FLUX_EVENT_READER_BUILD) $(PREFIX)/lib/flux/
 
-# Remove limits config if 'uninstall-bypass' option is passed
-uninstall-bypass:
-	rm /etc/security/limits.d/10-flux.conf
+install-bypass:
+	mkdir -p /etc/security/limits.d/
+	install -Dm 644 $(PWD)/10-flux.conf /etc/security/limits.d/
 
-# Remove 'flux' group if 'remove-group' option is passed
-remove-group:
+groupdel:
 	groupdel flux
 
-# Define sections as Makefile options
-.PHONY: all clean install install-bypass create-group uninstall uninstall-bypass remove-group
+uninstall:
+	rm $(PREFIX)/bin/flux
+	rm -rf $(PREFIX)/lib/flux/
+
+uninstall-bypass:
+	rm /etc/security/limits.d/10-flux.conf
