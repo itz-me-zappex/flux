@@ -3,6 +3,7 @@ message(){
 	local local_timestamp \
 	local_log_prefix \
 	local_notification_icon
+	
 	# Get timestamp if that behavior is allowed using '--timestamps' option
 	if [[ -n "$timestamps" ]]; then
 		local_timestamp="$(printf "%($timestamp_format)T") "
@@ -47,6 +48,7 @@ message(){
 		local_log_prefix="$prefix_warning"
 		local_notification_icon='emblem-warning'
 	esac
+
 	# Print message with timestamp to log file if responding option is specified and logging has been allowed before event reading
 	if [[ -n "$allow_logging" ]]; then
 		# Check log file for read-write access before store message to log
@@ -56,6 +58,7 @@ message(){
 			allow_logging='' message --warning "Unable to write message to log file '$log', recreate it or check read-write access!"
 		fi
 	fi
+
 	# Print message as notification if '--notifications' option is specified and those have been allowed (before start event reading)
 	if [[ -n "$allow_notifications" ]]; then
 		notify-send --icon="$local_notification_icon" "$(echo "$*")"

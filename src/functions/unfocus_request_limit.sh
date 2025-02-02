@@ -19,6 +19,7 @@ unfocus_request_limit(){
 				request_fps_limit_map["$previous_section"]='1'
 			fi
 		fi
+		
 		# Request 'SCHED_IDLE' scheduling policy for process if specified in config
 		if [[ "${config_key_idle_map["$previous_section"]}" == '1' ]]; then
 			# Do not request idle scheduling policy if CPU limit specified to zero because that is useless as process will not consume neither GPU nor CPU time
@@ -29,10 +30,12 @@ unfocus_request_limit(){
 				fi
 			fi
 		fi
+
 		# Request window minimization if specified in config
 		if [[ "${config_key_minimize_map["$previous_section"]}" == '1' ]]; then
 			request_minimize_map["$previous_process_pid"]='1'
 		fi
+
 		# Request unfocus command execution if specified in config
 		if [[ -n "${config_key_exec_unfocus_map["$previous_section"]}" || -n "${config_key_lazy_exec_unfocus_map["$previous_section"]}" ]]; then
 			# Do not do anything if focused window process PID is exacly the same as previous one

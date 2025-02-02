@@ -11,6 +11,7 @@ cmdline_get(){
 	# Remember that option is passed in case value is not specified
 	option_repeat_check "$passed_check" "$passed_option"
 	eval "$passed_check"='1'
+
 	# Define option type (short, long or long+value) and remember specified value
 	case "$1" in
 	"$passed_option" | "$passed_short_option" )
@@ -32,7 +33,7 @@ cmdline_get(){
 # Requred to check process existence
 check_pid_existence(){
 	local local_pid="$1"
-	# Check PID directory in '/proc' for existence
+
 	if [[ -d "/proc/$local_pid" ]]; then
 		return 0
 	else
@@ -43,6 +44,7 @@ check_pid_existence(){
 # Required to check read-write access on file
 check_rw(){
 	local local_file="$1"
+
 	if [[ -r "$local_file" && -w "$local_file" ]]; then
 		return 0
 	else
@@ -53,6 +55,7 @@ check_rw(){
 # Required to check read-only access on file
 check_ro(){
 	local local_file="$1"
+
 	if [[ -r "$local_file" ]]; then
 		return 0
 	else
@@ -67,6 +70,7 @@ exec_on_event(){
 	passed_event_command='' \
 	passed_end_of_msg='' \
 	nohup setsid bash -c "$passed_event_command" > /dev/null 2>&1 &
+
 	# Notify user about execution
 	if [[ "$passed_command_type" == 'default' ]]; then
 		message --info "Command '$(bash -c "echo \"$passed_event_command\"")' from section '$passed_section' has been executed $passed_end_of_msg."
@@ -78,6 +82,7 @@ exec_on_event(){
 # Required to convert relative paths to absolute
 get_realpath(){
 	local local_relative_path="$1"
+
 	# Output will be stored to variable which calls this function from '$(…)'
 	realpath -m "${local_relative_path/'~'/"$HOME"}"
 }
@@ -85,6 +90,7 @@ get_realpath(){
 # Required to check if value is boolean or nor
 check_bool(){
 	local local_value="$1"
+
 	if [[ "${local_value,,}" =~ ^('true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0')$ ]]; then
 		return 0
 	else
@@ -95,6 +101,7 @@ check_bool(){
 # Required to check if boolean value is true
 check_true(){
 	local local_value="$1"
+	
 	if [[ "${local_value,,}" =~ ^('true'|'t'|'yes'|'y'|'1')$ ]]; then
 		return 0
 	else

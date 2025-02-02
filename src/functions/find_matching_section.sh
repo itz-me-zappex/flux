@@ -5,6 +5,7 @@ find_matching_section(){
 	local_owner_match \
 	local_command_match \
 	local_window_type_text
+
 	# Find matching section if was not found previously and store it to cache
 	if [[ -z "${cache_section_map["$process_pid"]}" ]]; then
 		# Avoid searching for matching section if it was not found previously
@@ -22,24 +23,29 @@ find_matching_section(){
 						local_name_match='1'
 					fi
 				fi
+
 				# Compare UID of process with specified in section
 				if [[ -z "${config_key_owner_map["$local_temp_section"]}" || "${config_key_owner_map["$local_temp_section"]}" == "$process_owner" || "${config_key_owner_map["$local_temp_section"]}" == "$process_owner_username" ]]; then
 					local_owner_match='1'
 				fi
+
 				# Compare process command with specified in section
 				if [[ -z "${config_key_command_map["$local_temp_section"]}" || "${config_key_command_map["$local_temp_section"]}" == "$process_command" ]]; then
 					local_command_match='1'
 				fi
+
 				# Mark as matching if all identifiers containing non-zero value
 				if [[ -n "$local_name_match" && -n "$local_owner_match" && -n "$local_command_match" ]]; then
 					section="$local_temp_section"
 					cache_section_map["$process_pid"]="$local_temp_section"
 					break
 				fi
+
 				unset local_name_match \
 				local_owner_match \
 				local_command_match
 			done
+
 			# Mark process as mismatched if matching section was not found
 			if [[ -z "$section" ]]; then
 				cache_mismatch_map["$process_pid"]='1'
@@ -49,12 +55,14 @@ find_matching_section(){
 		# Obtain matching section from cache
 		section="${cache_section_map["$process_pid"]}"
 	fi
+
 	# Define type of window to print message about section match/mismatch
 	if [[ -n "$hot" ]]; then
 		local_window_type_text='opened window'
 	else
 		local_window_type_text='focused window'
 	fi
+	
 	# Print message about section match
 	if [[ -n "$section" ]]; then
 		message --verbose "Process '$process_name' with PID $process_pid of $local_window_type_text $window_id matches with section '$section'."

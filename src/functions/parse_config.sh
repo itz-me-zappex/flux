@@ -5,6 +5,7 @@ parse_config(){
 	local_section \
 	local_temp_section \
 	local_key_name
+
 	# Parse INI config
 	while read -r local_temp_config_line; do
 		# Skip cycle if line is commented or blank, regexp means comments which beginning from ';' or '#' symbols
@@ -23,6 +24,7 @@ parse_config(){
 						fi
 					done
 				fi
+
 				# Remove square brackets from section name and add it to array
 				# Array required to check for repeating sections and find matching rule(s) for process in config
 				local_section="${local_temp_config_line/\[/}"
@@ -31,9 +33,11 @@ parse_config(){
 			elif [[ "${local_temp_config_line,,}" =~ ^(name|owner|cpu-limit|delay|(lazy-)?exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus|idle|minimize)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
 				# Remove key name and equal symbol
 				local_config_value="${local_temp_config_line#*=}"
+
 				# Remove all spaces before and after string, internal shell parameter expansion required to get spaces supposed to be removed
 				local_config_value="${local_config_value#"${local_config_value%%[![:space:]]*}"}" # Remove spaces in beginning for string
 				local_config_value="${local_config_value%"${local_config_value##*[![:space:]]}"}" # Remove spaces in end of string
+
 				# Remove single or double quotes from strings, that is what regexp means
 				if [[ "$local_config_value" =~ ^(\".*\"|\'.*\')$ ]]; then
 					# Regexp means double quoted string
@@ -45,6 +49,7 @@ parse_config(){
 						local_config_value="${local_config_value/%\'/}" # And last one
 					fi
 				fi
+
 				# Associate value with section if it is not blank
 				if [[ -n "$local_config_value" ]]; then
 					# Define type of key to associate value properly
@@ -85,6 +90,7 @@ parse_config(){
 					mangohud-source-config* | mangohud-config* )
 						# Get absolute path to MangoHud config in case it is specified as relative
 						local_config_value="$(get_realpath "$local_config_value")"
+
 						# Check for config file existence
 						if [[ -f "$local_config_value" ]]; then
 							# Set path to MangoHud config depending by specified key
@@ -104,6 +110,7 @@ parse_config(){
 							mangohud-config* )
 								local_key_name='mangohud-config'
 							esac
+
 							# Exit with an error if specified MangoHud config file does not exist
 							message --error "MangoHud config file '$local_config_value' specified in key '$local_key_name' in section '$local_section' in '$config' config file does not exist!"
 							exit 1
@@ -181,9 +188,11 @@ parse_config(){
 				else
 					message --error "Unable to define type of line '$local_temp_config_line' in '$config' config file!"
 				fi
+
 				exit 1
 			fi
 		fi
 	done < "$config"
+
 	unset max_cpu_limit
 }

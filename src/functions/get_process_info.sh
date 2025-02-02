@@ -14,6 +14,7 @@ get_process_info(){
 	local_matching_window_id \
 	local_temp_cached_window_id \
 	local_temp_passwd_line
+
 	# Use cache with window info if exists
 	if [[ -n "${cache_process_pid_map["$window_id"]}" ]]; then
 		# Get process info from cache
@@ -28,6 +29,7 @@ get_process_info(){
 				break
 			fi
 		done
+
 		# Check for match of cached process info to define a way how to obtain it
 		if [[ -n "$local_matching_window_id" ]]; then
 			# Get process info using cache of parent window
@@ -39,6 +41,7 @@ get_process_info(){
 			else
 				return 1
 			fi
+
 			# Get effective UID of process
 			if check_ro "/proc/$process_pid/status"; then
 				while read -r local_temp_status_line; do
@@ -48,6 +51,7 @@ get_process_info(){
 						for local_status_column in $local_temp_status_line; do
 							# Increase column count
 							(( local_column_count++ ))
+
 							# Remember effective UID and break loop (3rd column)
 							if (( local_column_count == 3 )); then
 								process_owner="$local_status_column"
@@ -59,6 +63,7 @@ get_process_info(){
 			else
 				return 1
 			fi
+
 			# Get command of process
 			if check_ro "/proc/$process_pid/cmdline"; then
 				# Read file ignoring '\0' and those are replaced with spaces automatically because of arrays nature :D
@@ -68,6 +73,7 @@ get_process_info(){
 				return 1
 			fi
 		fi
+
 		# Obtain process owner username from '/etc/passwd' file using UID of process
 		if check_ro '/etc/passwd'; then
 			while read -r local_temp_passwd_line; do
@@ -80,6 +86,7 @@ get_process_info(){
 		else
 			return 2
 		fi
+		
 		# Store process info to cache to speed up its obtainance on next focus event and to use it implicitly using only window ID
 		cache_process_pid_map["$window_id"]="$process_pid"
 		cache_process_name_map["$window_id"]="$process_name"

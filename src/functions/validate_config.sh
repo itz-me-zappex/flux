@@ -7,6 +7,7 @@ validate_config(){
 		if [[ -z "$XDG_CONFIG_HOME" ]]; then
 			XDG_CONFIG_HOME="$HOME/.config"
 		fi
+
 		# Find a config
 		for local_temp_config in "$XDG_CONFIG_HOME/flux.ini" "$HOME/.config/flux.ini" '/etc/flux.ini'; do
 			if [[ -f "$local_temp_config" ]]; then
@@ -15,6 +16,7 @@ validate_config(){
 			fi
 		done
 	fi
+
 	# Exit with an error if config file is not found
 	if [[ -z "$config" ]]; then
 		message --error "Config file is not found!"
@@ -29,6 +31,7 @@ validate_config(){
 		message --error "Config file '$config' is not accessible for reading!"
 		exit 1
 	fi
+
 	# Exit with an error if '--notifications' option is specified but 'notify-send' command is not found
 	if [[ -n "$notifications" ]] && ! type notify-send > /dev/null 2>&1; then
 		message --error "Command 'notify-send' required to print notifications is not found!"

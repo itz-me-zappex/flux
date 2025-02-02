@@ -4,14 +4,18 @@ unset_sched_idle(){
 	local_policy_option \
 	local_policy_name \
 	local_config_delay
+
 	# Simplify access to PID of background process with delayed setting of 'SCHED_IDLE'
 	local_background_sched_idle_pid="${background_sched_idle_pid_map["$passed_process_pid"]}"
+
 	# Check for existence of background process with delayed setting of 'SCHED_IDLE'
 	if check_pid_existence "$local_background_sched_idle_pid"; then
 		# Simplify access to delay config key value
 		local_config_delay="${config_key_delay_map["$passed_section"]}"
+
 		# Attempt to terminate background process
 		kill "$local_background_sched_idle_pid" > /dev/null 2>&1
+
 		# Print message if delay is not zero
 		if [[ "$local_config_delay" != '0' ]]; then
 			# Define message depending by 'kill' exit code
@@ -43,6 +47,7 @@ unset_sched_idle(){
 		'SCHED_DEADLINE' ) # Setting option unneeded because command for deadline differs greatly
 			local_policy_name="'deadline'"
 		esac
+
 		# Define how to restore scheduling policy depending by whether that is deadline or not
 		if [[ "${sched_previous_policy_map["$passed_process_pid"]}" == 'SCHED_DEADLINE' ]]; then
 			# Restore deadline scheduling policy and its parameters for process
@@ -55,12 +60,14 @@ unset_sched_idle(){
 			# Attempt to restore scheduling policy and priority for process
 			chrt "$local_policy_option" --pid "${sched_previous_priority_map["$passed_process_pid"]}" "$passed_process_pid" > /dev/null 2>&1
 		fi
+
 		# Print message depending by 'chrt' exit code
 		if (( $? > 0 )); then
 			message --warning "Unable to restore $local_policy_name scheduling policy for process '$passed_process_name' with PID $passed_process_pid $passed_end_of_msg!"
 		else
 			message --info "Scheduling policy $local_policy_name has been restored for process '$passed_process_name' with PID $passed_process_pid $passed_end_of_msg."
 		fi
+		
 		# Unset details about previous and applied idle cheduling policies
 		unset sched_previous_policy_map["$passed_process_pid"] \
 		sched_previous_priority_map["$passed_process_pid"] \

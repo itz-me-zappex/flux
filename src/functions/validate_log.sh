@@ -3,11 +3,13 @@ validate_log(){
 	# Run multiple checks related to logging if '--log' option is specified
 	if [[ -n "$log_is_passed" ]]; then
 		unset log_is_passed
+
 		# Exit with an error if '--log' option is specified without path to log file
 		if [[ -z "$log" ]]; then
 			message --error-opt "Option '--log' is specified without path to log file!"
 			exit 1
 		fi
+		
 		# Exit with an error if specified log file exists but not accessible for read-write operations
 		if [[ -f "$log" ]] && ! check_rw "$log"; then
 			message --error "Log file '$log' is not accessible for read-write operations!"

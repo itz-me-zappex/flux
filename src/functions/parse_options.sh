@@ -9,7 +9,9 @@ parse_options(){
 			passed_option='--config' \
 			passed_short_option='-c' \
 			cmdline_get "$@"
+
 			shift "$shift"
+
 			if [[ -n "$config" ]]; then
 				config="$(get_realpath "$config")"
 			fi
@@ -62,7 +64,9 @@ Examples:
 			passed_option='--log' \
 			passed_short_option='-l' \
 			cmdline_get "$@"
+
 			shift "$shift"
+
 			if [[ -n "$log" ]]; then
 				log="$(get_realpath "$log")"
 			fi
@@ -88,6 +92,7 @@ Examples:
 			passed_option='--timestamp-format' \
 			passed_short_option='-T' \
 			cmdline_get "$@"
+
 			shift "$shift"
 		;;
 		--timestamps | -t )
@@ -118,6 +123,7 @@ There is NO WARRANTY, to the extent permitted by law.
 			passed_set='new_prefix_error' \
 			passed_option='--prefix-error' \
 			cmdline_get "$@"
+
 			shift "$shift"
 		;;
 		--prefix-info | --prefix-info=* )
@@ -125,6 +131,7 @@ There is NO WARRANTY, to the extent permitted by law.
 			passed_set='new_prefix_info' \
 			passed_option='--prefix-info' \
 			cmdline_get "$@"
+
 			shift "$shift"
 		;;
 		--prefix-verbose | --prefix-verbose=* )
@@ -132,6 +139,7 @@ There is NO WARRANTY, to the extent permitted by law.
 			passed_set='new_prefix_verbose' \
 			passed_option='--prefix-verbose' \
 			cmdline_get "$@"
+
 			shift "$shift"
 		;;
 		--prefix-warning | --prefix-warning=* )
@@ -139,6 +147,7 @@ There is NO WARRANTY, to the extent permitted by law.
 			passed_set='new_prefix_warning' \
 			passed_option='--prefix-warning' \
 			cmdline_get "$@"
+
 			shift "$shift"
 		;;
 		* )
@@ -149,8 +158,10 @@ There is NO WARRANTY, to the extent permitted by law.
 				for (( i = 1; i < ${#1} ; i++ )); do
 					options_array+=("-${1:i:1}")
 				done
+
 				# Forget current option
 				shift 1
+
 				# Set options obtained after splitting
 				set -- "${options_array[@]}" "$@"
 				unset options_array i
@@ -160,5 +171,6 @@ There is NO WARRANTY, to the extent permitted by law.
 			fi
 		esac
 	done
+
 	unset shift
 }

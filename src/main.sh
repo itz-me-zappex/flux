@@ -117,6 +117,7 @@ events_count='0'
 # Read events from 'flux-event-reader' binary
 while read -r raw_event; do
 	(( events_count++ ))
+
 	# Collect events
 	if (( events_count == 1 )); then
 		focused_window="$raw_event"
@@ -124,12 +125,14 @@ while read -r raw_event; do
 	elif (( events_count == 2 )); then
 		opened_windows="$raw_event"
 	fi
+
 	# Remember that daemon received events to print proper message on event reading tool termination
 	# And to print message about daemon start
 	if [[ -z "$display_has_been_opened" ]]; then
 		message --info "Flux has been started."
 		display_has_been_opened='1'
 	fi
+
 	# Add opened windows as focus events once if '--hot' is specified, otherwise find implicitly opened windows and add those as focus events
 	if [[ -n "$hot" ]]; then
 		# Add opened windows info except focused one to array as events to apply actions to already opened windows
@@ -139,6 +142,7 @@ while read -r raw_event; do
 			fi
 		done
 		unset temp_window
+
 		# Add event to unset '--hot'
 		events_array+=('unset_hot')
 	else
@@ -152,10 +156,12 @@ while read -r raw_event; do
 					if [[ "${events_array[*]}" != 'set_hot'* ]]; then
 						events_array+=('set_hot')
 					fi
+
 					# Add window as focus event
 					events_array+=("$temp_window")
 				fi
 			done
+
 			# Add event to unset '--hot'
 			if [[ "${events_array[*]}" == 'set_hot'* ]]; then
 				# Set last implicit window as previous
@@ -165,18 +171,21 @@ while read -r raw_event; do
 			unset temp_window
 		fi
 	fi
+
 	# Add info about focused window to array as event if it does not repeat
 	if [[ "$previous_focused_window" != "$focused_window" ]]; then
 		events_array+=("$focused_window")
 		# Remember focused window ID to skip adding it to array as event if repeats
 		previous_focused_window="$focused_window"
 	fi
+
 	# Add opened windows list as event to array to find terminated windows and check requests
 	events_array+=("windows_list: $opened_windows")
 	# Reset events count
 	events_count='0'
 	# Remember list of previously opened windows to find implicitly opened ones next time
 	previous_opened_windows="$opened_windows"
+
 	# Handle events
 	for event in "${events_array[@]}"; do
 		# Apply actions depending by event type
@@ -207,15 +216,19 @@ while read -r raw_event; do
 			process_owner \
 			process_command \
 			section
+
 			# Get window ID
 			window_id="${event/'='*/}"
 			# Get process PID of focused window
 			process_pid="${event/*'='/}"
+
 			# Attempt to obtain info about process using window ID
 			get_process_info
 			get_process_info_exit_code="$?"
+
 			# Request CPU/FPS limit for unfocused process if it matches with section
 			unfocus_request_limit
+
 			# Actions depending by exit code of 'get_process_info()'
 			if (( get_process_info_exit_code == 0 )); then
 				# Find matching section for process in config
@@ -232,6 +245,7 @@ while read -r raw_event; do
 					message --warning "Unable to obtain owner username of process $process_name with PID $process_pid!"
 				fi
 			fi
+
 			# Define what to do with info about previous window depending by exit code (overwrite or unset)
 			if (( get_process_info_exit_code == 0 )); then
 				# Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
@@ -253,6 +267,7 @@ while read -r raw_event; do
 			unset get_process_info_exit_code
 		esac
 	done
+	
 	# Unset events
 	unset events_array
 done < <("$flux_event_reader" 2>/dev/null)

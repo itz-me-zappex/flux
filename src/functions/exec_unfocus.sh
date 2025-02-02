@@ -13,6 +13,7 @@ exec_unfocus(){
 	FLUX_PROCESS_OWNER="$passed_process_owner" \
 	FLUX_PROCESS_OWNER_USERNAME="$passed_process_owner_username" \
 	FLUX_PROCESS_COMMAND="$passed_process_command"
+
 	# Execute command from 'exec-unfocus' key if it has been specified
 	if [[ -n "${config_key_exec_unfocus_map["$passed_section"]}" ]]; then
 		passed_command_type='default' \
@@ -21,6 +22,7 @@ exec_unfocus(){
 		passed_end_of_msg="$passed_end_of_msg" \
 		exec_on_event
 	fi
+
 	# Execute command from 'lazy-exec-unfocus' key if it has been specified and if '--hot' has been unset by daemon after processing opened windows
 	if [[ -n "${config_key_lazy_exec_unfocus_map["$passed_section"]}" && "$hot_is_unset" == '2' ]]; then
 		passed_command_type='lazy' \
@@ -31,6 +33,7 @@ exec_unfocus(){
 	elif [[ "$hot_is_unset" == '1' ]]; then # Needed to avoid execution of lazy unfocus command immediately after unsetting '--hot' option
 		hot_is_unset='2'
 	fi
+	
 	# Unset exported variables
 	unset FLUX_NEW_WINDOW_ID \
 	FLUX_NEW_PROCESS_PID \
