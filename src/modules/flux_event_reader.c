@@ -16,15 +16,13 @@ Window get_active_window(Display* display, Window root, Atom atom) {
 
 	int status = XGetWindowProperty(display, root, atom, 0, 1, False, XA_WINDOW, &type, &format, &windows_count, &bytes_after, &data);
 
-	if (status == Success && data != NULL) {
+	if (status == Success) {
 		active_window = *(Window *)data;
 	} else {
 		active_window = None;
 	}
 
-	if (data != NULL) {
-		XFree(data);
-	}
+	XFree(data);
 
 	return active_window;
 }
@@ -62,7 +60,7 @@ pid_t get_window_process(Display* display, Window window_id) {
 
 	int status = XResQueryClientIds(display, 1, &client_spec, &elements, &client_ids);
 
-	if (status == Success && client_ids != NULL) {
+	if (status == Success) {
 		for (long i = 0; i < elements; i++) {
 			if (window_id > 0) {
 				window_process = XResGetClientPid(&client_ids[i]);
@@ -73,9 +71,7 @@ pid_t get_window_process(Display* display, Window window_id) {
 		window_process = -1;
 	}
 
-	if (client_ids != NULL) {
-		XFree(client_ids);
-	}
+	XFree(client_ids);
 
 	return window_process;
 }
@@ -90,15 +86,13 @@ Window get_wm_window(Display* display, Window root, Atom atom) {
 
 	int status = XGetWindowProperty(display, root, atom, 0, 1, False, XA_WINDOW, &type, &format, &windows_count, &bytes_after, &data);
 
-	if (status == Success && data != NULL) {
+	if (status == Success) {
 		wm_window = *(Window *)data;
 	} else {
 		wm_window = None;
 	}
 
-	if (data != NULL) {
-		XFree(data);
-	}
+	XFree(data);
 
 	return wm_window;
 }
@@ -112,7 +106,7 @@ Window* get_opened_windows(Display* display, Window root, unsigned long *opened_
 
 	int status = XGetWindowProperty(display, root, atom, 0, ~0, False, XA_WINDOW, &type, &format, &windows_count, &bytes_after, &data);
 
-	if (status != Success || data == NULL) {
+	if (status != Success) {
 		*opened_windows_count = 0;
 		return NULL;
 	}
@@ -196,18 +190,13 @@ int main() {
 			}
 		}
 
-		// To avoid memory leak
-		if (opened_windows != NULL) {
-			XFree(opened_windows);
-			opened_windows = NULL;
-		}
-
 		// Unset bits as I need new value instead of increasing it
 		active_window_xor = 0;
 		opened_windows_xor = 0;
 		wm_window_xor = 0;
 
 		// Get list of opened windows from '_NET_CLIENT_LIST_STACKING'
+		XFree(opened_windows);
 		opened_windows = get_opened_windows(display, root, &opened_windows_count, net_client_list_stacking);
 		for (unsigned long i = 0; i < opened_windows_count; i++) {
 			opened_windows_xor ^= opened_windows[i];
