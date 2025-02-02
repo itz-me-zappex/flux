@@ -5,14 +5,6 @@
 #include <X11/Xatom.h>
 #include <X11/extensions/XRes.h>
 #include <unistd.h>
-#include <signal.h>
-#include <setjmp.h>
-
-// Used to exit safely on INT/TERM signal because of 'while (true) {}' loop
-sigjmp_buf env;
-void handle_interrupt(int signum) {
-	siglongjmp(env, 1);
-}
 
 // Get window ID using '_NET_ACTIVE_WINDOW' atom
 Window get_active_window(Display* display, Window root, Atom atom) {
@@ -179,22 +171,8 @@ int main() {
 	// Mark needed to remember and handle WM restart
 	bool wm_restart_mark = false;
 
-	// Define handling for INT and TERM signals
-	signal(SIGINT, handle_interrupt);
-	signal(SIGTERM, handle_interrupt);
-
 	// Handle changes in atom states
 	while (true) {
-		// Exit safely if 'handle_interrupt()' has been triggered (due to INT/TERM signal)
-		if (sigsetjmp(env, 1) != 0) {
-			break;
-			if (opened_windows != NULL) {
-				XFree(opened_windows);
-			}
-			XCloseDisplay(display);
-			return 0;
-		}
-
 		// Do not wait for event if there is fake one
 		if (!fake_event) {
 			XNextEvent(display, &event);
@@ -225,6 +203,7 @@ int main() {
 		// To avoid memory leak
 		if (opened_windows != NULL) {
 			XFree(opened_windows);
+			opened_windows = NULL;
 		}
 
 		// Unset bits as I need new value instead of increasing it
@@ -283,4 +262,8 @@ int main() {
 			previous_wm_window_xor = wm_window_xor;
 		}
 	}
+
+	// Unreachable due to 'XNextEvent()' locks loop up
+	// Handling SIGINT/SIGTERM also impossible because of that
+	return 0;
 }
