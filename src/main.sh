@@ -263,6 +263,6 @@ if [[ -n "$display_has_been_opened" ]]; then
 	safe_exit
 	message --error "Flux has been terminated unexpectedly!"
 else
-	message --error "Unable to open display, something is wrong with X11 session or window manager is not running!"
+	message --error "Something is wrong with X11 session or EWMH-compatible window manager is not running!"
 fi
 exit 1
