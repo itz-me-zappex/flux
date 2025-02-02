@@ -27,9 +27,9 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [Configuration example](#configuration-example)
     - [Long examples](#long-examples)
     - [Short examples](#short-examples)
-  - [Environment variables passed to commands](#environment-variables-passed-to-commands)
-    - [List of variables passed to `exec-focus` and `lazy-exec-focus` config keys and description](#list-of-variables-passed-to-exec-focus-and-lazy-exec-focus-config-keys-and-description)
-    - [List of variables passed to `exec-unfocus` and `lazy-exec-unfocus` config keys and description](#list-of-variables-passed-to-exec-unfocus-and-lazy-exec-unfocus-config-keys-and-description)
+  - [Environment variables passed to commands and description](#environment-variables-passed-to-commands-and-description)
+    - [Passed to `exec-focus` and `lazy-exec-focus` config keys](#passed-to-exec-focus-and-lazy-exec-focus-config-keys)
+    - [Passed to `exec-unfocus` and `lazy-exec-unfocus` config keys](#passed-to-exec-unfocus-and-lazy-exec-unfocus-config-keys)
 - [Tips and tricks](#tips-and-tricks)
   - [Apply changes in config file](#apply-changes-in-config-file)
   - [Mute process audio on unfocus (Pipewire & Wireplumber)](#mute-process-audio-on-unfocus-pipewire--wireplumber)
@@ -61,7 +61,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - Ability to use window and process info through environment variables which daemon passes to scripts/commands in `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys.
 - Works with processes running in sandbox with PID namespaces (e.g. Firejail).
 - Survives a whole DE/WM restart (not relogin) and continues work without issues.
-- Supports all X11 DEs/WMs and does not rely on neither GPU nor its driver.
+- Supports most of X11 DEs/WMs [(EWMH-compatible ones)](<https://specifications.freedesktop.org/wm-spec/latest/>) and does not rely on neither GPU nor its driver.
 - Detects and handles both explicitly (appeared with focus event) and implicitly (appeared without focus event) opened windows.
 
 ## Dependencies
@@ -135,7 +135,7 @@ sudo usermod -aG flux $USER
 ```
 
 ### Manual installation using release tarball
-Use this method if you using different distro. Make sure you have installed dependencies as described above before continue.
+Use this method if you using different distro. Make sure you have installed dependencies as described [here](#dependencies) before continue.
 
 #### Make options
 | Option | Description |
@@ -247,13 +247,13 @@ A simple INI is used for configuration.
 | `exec-focus` | Command to execute on focus event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
 | `exec-unfocus` | Command to execute on unfocus event or window closure, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
 | `lazy-exec-focus` | Same as `exec-focus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event). |
-| `lazy-exec-unfocus` | Same as `exec-unfocus`, but command will not run when processing opened windows if `--hot` is specified and will be executed on daemon termination if focused window matches with section where this key and command specified or in case window appeared implicitly (w/o focus event). |
+| `lazy-exec-unfocus` | Same as `exec-unfocus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event), will be executed on daemon termination if focused window matches with section where this key and command is specified. |
 | `minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`, requires `xdotool` installed on system. Defaults to `false`. |
 
 ### Config path
 - Daemon searches for following configuration files by priority:
   - `$XDG_CONFIG_HOME/flux.ini`
-  - `~/.config/flux.ini`
+  - `$HOME/.config/flux.ini`
   - `/etc/flux.ini`
 
 ### Limitations
@@ -262,12 +262,12 @@ As INI is not standartized, I should mention all supported features here.
   - Spaces and other symbols in section names.
   - Single and double quoted strings.
   - Сase insensitivity of key names.
-  - Comments using `;` and/or `#` symbols.
+  - Comments (using `;` and/or `#` symbols).
   - Insensetivity to spaces before and after `=` symbol.
 - Unsupported
   - Regular expressions.
-  - Line continuation using `\` symbol.
-  - Inline comments using `;` and/or `#` symbols.
+  - Line continuation (using `\` symbol).
+  - Inline comments
   - Anything else that unmentioned here.
 
 ### Configuration example
@@ -333,10 +333,10 @@ cpu-limit = 2%
 idle = true
 ```
 
-### Environment variables passed to commands
+### Environment variables passed to commands and description
 Note: You may want to use these variables in commands and scripts which running from `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys to extend daemon functionality.
 
-#### List of variables passed to `exec-focus` and `lazy-exec-focus` config keys and description
+#### Passed to `exec-focus` and `lazy-exec-focus` config keys
 | Variable | Description |
 |----------|-------------|
 | `FLUX_WINDOW_ID` | Hexadecimal ID of focused window. |
@@ -352,7 +352,7 @@ Note: You may want to use these variables in commands and scripts which running 
 | `FLUX_PREV_PROCESS_OWNER_USERNAME` | Effective process owner username of unfocused window. |
 | `FLUX_PREV_PROCESS_COMMAND` | Command used to run process of unfocused window. |
 
-#### List of variables passed to `exec-unfocus` and `lazy-exec-unfocus` config keys and description
+#### Passed to `exec-unfocus` and `lazy-exec-unfocus` config keys
 | Variable | Description |
 |----------|-------------|
 | `FLUX_WINDOW_ID` | Hexadecimal ID of unfocused window. |
