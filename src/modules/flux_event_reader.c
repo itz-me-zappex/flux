@@ -140,8 +140,6 @@ int main() {
 	// Attempt to open display
 	Display *display = XOpenDisplay(NULL);
 	if (!display) {
-		// Will be wrapped and printed in daemon which uses this code
-		printf("Unable to open display!\n");
 		return 1;
 	}
 
@@ -156,8 +154,6 @@ int main() {
 
 	// Exit with an error if window manager is not running
 	if (get_wm_window(display, root, net_supporting_wm_check) == None) {
-		// Will be wrapped and printed in daemon which uses this code
-		printf("EWMH-compatible window manager is not found!\n");
 		return 1;
 	}
 
