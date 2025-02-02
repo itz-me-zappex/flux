@@ -47,7 +47,6 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 ## Known issues
 - Freezing online/multiplayer games by setting `cpu-limit` to `0%` causes disconnects. Use less aggressive CPU limit to allow game to send/receive packets.
 - Stuttery audio in unfocused game if CPU limit is pretty aggressive, that should be expected because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. If you use Pipewire with Wireplumber, you may want to mute process as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
-- Daemon processes some buggy events after WM restart (e.g. blank list of opened windows in `_NET_CLIENT_LIST_STACKING` atom) if that takes more time than expected, because daemon uses time window (1.5s) to skip those.
 - Daemon unable to process events in absolute realtime due to asynchronous events changing, so it waits for 30ms before get atoms state (except `WM_S0` as that is should be processed immediately to detect WM restart).
 
 ## Features
@@ -80,7 +79,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 
 - Optional: `mangohud` `mangohud:i386` `libnotify-bin` `xdotool`
 
-- Build: `libxres-dev` `libx11-dev` `libxext-dev` `x11proto-dev` `make` `g++`
+- Build: `libxres-dev` `libx11-dev` `libxext-dev` `x11proto-dev` `make` `gcc`
 
 ### Void Linux and dereatives
 
@@ -96,7 +95,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 
 - Optional: `mangohud` `mangohud.i686` `libnotify` `xdotool`
 
-- Build: `libXres-devel` `libX11-devel` `libXext-devel` `xorg-x11-proto-devel` `make` `gcc-c++`
+- Build: `libXres-devel` `libX11-devel` `libXext-devel` `xorg-x11-proto-devel` `make` `gcc`
 
 ### OpenSUSE Tumbleweed and dereatives
 
@@ -144,10 +143,10 @@ Use this method if you using different distro. Make sure you have installed depe
 | `clean` | Remove `out/` in repository directory and all files created there after `make`. |
 | `install` | Install daemon to prefix, can be changed using `$PREFIX`, defaults to `/usr/local`. |
 | `install-bypass` | Install `10-flux.conf` config to `/etc/security/limits.d` to bypass scheduling policy changing restrictions for users in `flux` group |
-| `create-group` | Create `flux` group to which you can add users. |
+| `groupadd` | Create `flux` group to which you can add users. |
 | `uninstall` | Remove `bin/flux` and `lib/flux/` from prefix, can be changed using `$PREFIX`, defaults to `/usr/local`. |
 | `uninstall-bypass` | Remove `10-flux.conf` config from `/etc/security/limits.d`. |
-| `remove-group` | Remove `flux` group from system. |
+| `groupdel` | Remove `flux` group from system. |
 
 #### Download latest release with source
 ```bash
@@ -166,7 +165,7 @@ make
 
 #### Install daemon to `/usr/local`, bypass limitations related to changing scheduling policies and create `flux` group
 ```bash
-sudo make install install-bypass create-group && sudo usermod -aG flux $USER
+sudo make install install-bypass groupadd && sudo usermod -aG flux $USER
 ```
 
 #### Or you may want to change prefix e.g. in case you want install it locally
