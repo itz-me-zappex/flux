@@ -169,6 +169,9 @@ while read -r raw_event; do
 				events_array+=('unset_hot')
 			fi
 			unset temp_window
+
+			# Prevent focused window from being handled as unfocused
+			disallow_request="$focused_window"
 		fi
 	fi
 
@@ -195,6 +198,7 @@ while read -r raw_event; do
 		'set_hot' )
 			# Set '--hot' temporary to process implicitly opened windows
 			hot='1'
+
 			# Prevent lazy commands in matching sections of implicitly opened windows from working
 			unset allow_lazy_commands
 		;;
@@ -205,6 +209,7 @@ while read -r raw_event; do
 		'windows_list'* )
 			# Unset CPU/FPS limits for terminated windows and remove info about them from cache
 			handle_closure
+
 			# Apply CPU/FPS limits for process which have been requested to be limited
 			handle_requests
 		;;
@@ -235,10 +240,12 @@ while read -r raw_event; do
 				if find_matching_section; then
 					# Unset CPU/FPS limit for focused process if it has been limited on unfocus
 					focus_unset_limit
+
 					# Execute command on focus event if specified in config
 					exec_focus
 				fi
 			else
+				# Define message depending by exit code
 				if (( get_process_info_exit_code == 1 )); then
 					message --warning "Unable to obtain info about process with PID $process_pid! Probably process has been terminated during check."
 				elif (( get_process_info_exit_code == 2 )); then
@@ -271,6 +278,11 @@ while read -r raw_event; do
 	# Allow lazy commands
 	if [[ -z "$hot" ]]; then
 		allow_lazy_commands='1'
+	fi
+
+	# Unset request lock
+	if [[ -n "$disallow_request" ]]; then
+		unset disallow_request
 	fi
 	
 	# Unset events
