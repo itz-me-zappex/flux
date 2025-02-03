@@ -30,8 +30,6 @@ exec_unfocus(){
 		passed_event_command="${config_key_lazy_exec_unfocus_map["$passed_section"]}" \
 		passed_end_of_msg="$passed_end_of_msg" \
 		exec_on_event
-	elif [[ "$hot_is_unset" == '1' ]]; then # Needed to avoid execution of lazy unfocus command immediately after unsetting '--hot' option
-		hot_is_unset='2'
 	fi
 	
 	# Unset exported variables
