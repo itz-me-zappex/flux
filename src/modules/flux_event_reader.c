@@ -236,11 +236,18 @@ int main() {
 			printf("0x%lx=%d\n", active_window, active_window_process);
 
 			for (unsigned long i = 0; i < opened_windows_count; i++) {
-				opened_window_process = get_window_process(display, opened_windows[i]);
-				printf("0x%lx=%d ", opened_windows[i], opened_window_process);
+				if (opened_windows[i] != None) {
+					opened_window_process = get_window_process(display, opened_windows[i]);
+					printf("0x%lx=%d ", opened_windows[i], opened_window_process);
+				}
 			}
+
 			opened_window_process = get_window_process(display, wm_window);
-			printf("0x%lx=%d\n", wm_window, opened_window_process);
+			if (wm_window != None) {
+				printf("0x%lx=%d\n", wm_window, opened_window_process);
+			} else {
+				printf("\n");
+			}
 
 			previous_active_window_xor = active_window_xor;
 			previous_opened_windows_xor = opened_windows_xor;
