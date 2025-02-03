@@ -24,7 +24,7 @@ exec_unfocus(){
 	fi
 
 	# Execute command from 'lazy-exec-unfocus' key if it has been specified and if '--hot' has been unset by daemon after processing opened windows
-	if [[ -n "${config_key_lazy_exec_unfocus_map["$passed_section"]}" && "$hot_is_unset" == '2' ]]; then
+	if [[ -n "${config_key_lazy_exec_unfocus_map["$passed_section"]}" && -n "$allow_lazy_commands" ]]; then
 		passed_command_type='lazy' \
 		passed_section="$passed_section" \
 		passed_event_command="${config_key_lazy_exec_unfocus_map["$passed_section"]}" \

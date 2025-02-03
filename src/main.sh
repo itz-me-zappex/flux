@@ -196,13 +196,11 @@ while read -r raw_event; do
 			# Set '--hot' temporary to process implicitly opened windows
 			hot='1'
 			# Prevent lazy commands in matching sections of implicitly opened windows from working
-			unset hot_is_unset
+			unset allow_lazy_commands
 		;;
 		'unset_hot' )
 			# Unset '--hot' as it becomes useless from this moment
 			unset hot
-			# Needed to make commands from 'lazy-exec-unfocus' keys work properly, 'exec_unfocus()' skips execution 'lazy-exec-unfocus' first time and increases value to '2'
-			hot_is_unset='1'
 		;;
 		'windows_list'* )
 			# Unset CPU/FPS limits for terminated windows and remove info about them from cache
@@ -271,8 +269,8 @@ while read -r raw_event; do
 	done
 
 	# Allow lazy commands
-	if [[ "$hot_is_unset" == '1' ]]; then
-		hot_is_unset='2'
+	if [[ -z "$hot" ]]; then
+		allow_lazy_commands='1'
 	fi
 	
 	# Unset events
