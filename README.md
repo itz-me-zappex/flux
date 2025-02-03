@@ -148,6 +148,13 @@ Use this method if you using different distro. Make sure you have installed depe
 | `uninstall-bypass` | Remove `10-flux.conf` config from `/etc/security/limits.d`. |
 | `groupdel` | Remove `flux` group from system. |
 
+#### Make environment variables
+| Variable | Description |
+|----------|-------------|
+| `PREFIX` | Install to `<PREFIX>/bin/` and `<PREFIX>/lib/flux/`, defaults to `/usr/local`. |
+| `CC` | C compiler, defaults to `gcc`. |
+| `CFLAGS` | C compiler options, defaults to `-O2 -s`. |
+
 #### Download latest release with source
 ```bash
 wget -qO- 'https://api.github.com/repos/itz-me-zappex/flux/releases/latest' | grep '"tarball_url":' | cut -d '"' -f 4 | xargs wget -O flux.tar.gz
