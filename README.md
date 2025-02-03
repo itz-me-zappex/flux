@@ -47,7 +47,6 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 ## Known issues
 - Freezing online/multiplayer games by setting `cpu-limit` to `0%` causes disconnects. Use less aggressive CPU limit to allow game to send/receive packets.
 - Stuttery audio in unfocused game if CPU limit is pretty aggressive, that should be expected because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. If you use Pipewire with Wireplumber, you may want to mute process as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
-- Daemon unable to process events in absolute realtime due to asynchronous events changing, so it waits for 30ms before get atoms state (except `WM_S0` as that is should be processed immediately to detect WM restart).
 
 ## Features
 - CPU and FPS limiting process on unfocus and unlimiting on focus (FPS limiting requires game running using MangoHud with already existing config file).
