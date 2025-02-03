@@ -166,11 +166,7 @@ int main() {
 		if (!fake_event) {
 			XNextEvent(display, &event);
 			// Handle only needed events
-			if (event.type != PropertyNotify &&
-				event.xproperty.atom != net_active_window &&
-				event.xproperty.atom != wm_s0 &&
-				event.xproperty.atom != net_supporting_wm_check &&
-				event.xproperty.atom != net_client_list_stacking) {
+			if (event.type != PropertyNotify && event.xproperty.atom != net_active_window && event.xproperty.atom != net_client_list_stacking) {
 				continue;
 			}
 		} else if (fake_event) {
