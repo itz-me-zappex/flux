@@ -16,7 +16,7 @@ Window get_active_window(Display* display, Window root, Atom atom) {
 
 	int status = XGetWindowProperty(display, root, atom, 0, 1, False, XA_WINDOW, &type, &format, &windows_count, &bytes_after, &data);
 
-	if (status == Success) {
+	if (status == Success && data != NULL) {
 		active_window = *(Window *)data;
 	} else {
 		active_window = None;
@@ -86,7 +86,7 @@ Window get_wm_window(Display* display, Window root, Atom atom) {
 
 	int status = XGetWindowProperty(display, root, atom, 0, 1, False, XA_WINDOW, &type, &format, &windows_count, &bytes_after, &data);
 
-	if (status == Success) {
+	if (status == Success && data != NULL) {
 		wm_window = *(Window *)data;
 	} else {
 		wm_window = None;
