@@ -181,8 +181,10 @@ while read -r raw_event; do
 
 	# Add opened windows list as event to array to find terminated windows and check requests
 	events_array+=("windows_list: $opened_windows")
+
 	# Reset events count
 	events_count='0'
+
 	# Remember list of previously opened windows to find implicitly opened ones next time
 	previous_opened_windows="$opened_windows"
 
@@ -267,6 +269,11 @@ while read -r raw_event; do
 			unset get_process_info_exit_code
 		esac
 	done
+
+	# Allow lazy commands
+	if [[ "$hot_is_unset" == '1' ]]; then
+		hot_is_unset='2'
+	fi
 	
 	# Unset events
 	unset events_array
