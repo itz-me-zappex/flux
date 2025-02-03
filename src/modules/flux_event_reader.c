@@ -71,7 +71,7 @@ pid_t get_window_process(Display* display, Window window_id) {
 		window_process = -1;
 	}
 
-	XFree(client_ids);
+	XResClientIdsDestroy(elements, client_ids);
 
 	return window_process;
 }
