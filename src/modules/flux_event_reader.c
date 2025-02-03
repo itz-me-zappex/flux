@@ -67,7 +67,7 @@ pid_t get_window_process(Display* display, Window window_id) {
 			}
 		}
 	} else {
-		window_process = -1;
+		window_process = 0;
 	}
 
 	XResClientIdsDestroy(elements, client_ids);
