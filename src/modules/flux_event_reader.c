@@ -151,6 +151,10 @@ int main() {
 		return 1;
 	}
 
+	// Get and print its own PID, needed to make daemon receive it as event and make it able to terminate this process on exit
+	const pid_t event_reader_pid = getpid();
+	printf("%d\n", event_reader_pid);
+
 	// Listen changes in atoms
 	XSelectInput(display, root, PropertyChangeMask);
 	XEvent event;
