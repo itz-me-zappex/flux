@@ -125,7 +125,7 @@ int main() {
 	pid_t opened_window_process;
 	Window wm_window;
 	Window *opened_windows = NULL;
-	unsigned long opened_windows_count;
+	unsigned long opened_windows_count, previous_opened_windows_count;
 
 	// Bitwise "eXclusive OR" difference between current and previous atom states
 	unsigned long active_window_xor, opened_windows_xor, wm_window_xor;
@@ -178,7 +178,13 @@ int main() {
 		if (!wm_restart_mark) {
 			// Set mark and skip loop if WM has been restarted
 			if (check_wm_restart(display, root, wm_s0)) {
+				// Remember opened windows count and skip events until current value equals before restart one
+				previous_opened_windows_count = opened_windows_count;
+
+				// Remember that WM has been restarted as this event appears only once
 				wm_restart_mark = true;
+
+				// Skip event
 				continue;
 			} else {
 				// Wait 30ms before handle event and unset events in order
@@ -194,17 +200,15 @@ int main() {
 		opened_windows_xor = 0;
 		wm_window_xor = 0;
 
-		// Get list of opened windows from '_NET_CLIENT_LIST_STACKING'
+		// Freeing here because of a bunch of 'continue' below
 		XFree(opened_windows);
+		// Get list of opened windows from '_NET_CLIENT_LIST_STACKING'
 		opened_windows = get_opened_windows(display, root, &opened_windows_count, net_client_list_stacking);
-		for (unsigned long i = 0; i < opened_windows_count; i++) {
-			opened_windows_xor ^= opened_windows[i];
-		}
 
 		// Check for WM restart
 		if (wm_restart_mark) {
 			// Skip loops until '_NET_CLIENT_LIST_STACKING' become adequate
-			if (opened_windows_xor != previous_opened_windows_xor) {
+			if (previous_opened_windows_count != opened_windows_count) {
 				continue;
 			} else {
 				// Unset mark and handle this event
@@ -228,6 +232,9 @@ int main() {
 		// Used to check difference between previous and current states
 		active_window_xor ^= active_window;
 		wm_window_xor ^= wm_window;
+		for (unsigned long i = 0; i < opened_windows_count; i++) {
+			opened_windows_xor ^= opened_windows[i];
+		}
 
 		// Print atom states if at least one has been changed
 		if (active_window_xor != previous_active_window_xor || opened_windows_xor != previous_opened_windows_xor || wm_window_xor != previous_wm_window_xor) {
