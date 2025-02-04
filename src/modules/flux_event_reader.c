@@ -4,6 +4,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/XRes.h>
+#include <unistd.h>
 
 // Get window ID using '_NET_ACTIVE_WINDOW' atom
 Window get_active_window(Display* display, Window root, Atom atom) {
@@ -179,6 +180,12 @@ int main() {
 			if (check_wm_restart(display, root, wm_s0)) {
 				wm_restart_mark = true;
 				continue;
+			} else {
+				// Wait 30ms before handle event and unset events in order
+				usleep(30000);
+				while (XPending(display)) {
+					XNextEvent(display, &event);
+				}
 			}
 		}
 
