@@ -161,14 +161,12 @@ while read -r raw_event; do
 					events_array+=("$temp_window")
 				fi
 			done
+			unset temp_window
 
 			# Add event to unset '--hot'
 			if [[ "${events_array[*]}" == 'set_hot'* ]]; then
-				# Set last implicit window as previous
-				previous_focused_window="$temp_window"
 				events_array+=('unset_hot')
 			fi
-			unset temp_window
 
 			# Prevent focused window from being handled as unfocused
 			disallow_request="$focused_window"
