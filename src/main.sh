@@ -153,8 +153,8 @@ while read -r raw_event; do
 				# Add window as event if opened implicitly
 				if [[ " $previous_opened_windows " != *" $temp_window "* && "$temp_window" != "$focused_window" ]]; then
 					# Add event to set '--hot' temporary, to avoid execution of lazy commands
-					if [[ "${events_array[*]}" != 'set_hot'* ]]; then
-						events_array+=('set_hot')
+					if [[ "${events_array[*]}" != 'disallow_lazy_commands'* ]]; then
+						events_array+=('disallow_lazy_commands')
 					fi
 
 					# Add window as focus event
@@ -164,8 +164,8 @@ while read -r raw_event; do
 			unset temp_window
 
 			# Add event to unset '--hot'
-			if [[ "${events_array[*]}" == 'set_hot'* ]]; then
-				events_array+=('unset_hot')
+			if [[ "${events_array[*]}" == 'disallow_lazy_commands'* ]]; then
+				events_array+=('allow_lazy_commands')
 			fi
 
 			# Prevent focused window from being handled as unfocused
@@ -203,6 +203,40 @@ while read -r raw_event; do
 		'unset_hot' )
 			# Unset '--hot' as it becomes useless from this moment
 			unset hot
+		;;
+		'disallow_lazy_commands' )
+			# Disallow lazy commands before handle implicitly opened windows
+			hot='1'
+			unset allow_lazy_commands
+
+			# Remember focused window info to set it as previous after handling implicitly opened windows
+			# Needed to make daemon able to handle requests after first unfocus event (after handling implicitly opened windows)
+			explicit_window_id="$window_id"
+			explicit_process_pid="$process_pid"
+			explicit_process_name="$process_name"
+			explicit_process_owner="$process_owner"
+			explicit_process_command="$process_command"
+			explicit_section="$section"
+		;;
+		'allow_lazy_commands' )
+			# Allow lazy commands immediately after handling implicitly opened windows
+			unset hot
+			allow_lazy_commands='1'
+
+			# Restore info about focused window after handling implicitly opened windows
+			previous_window_id="$explicit_window_id"
+			previous_process_pid="$explicit_process_pid"
+			previous_process_name="$explicit_process_name"
+			previous_process_owner="$explicit_process_owner"
+			previous_process_command="$explicit_process_command"
+			previous_section="$explicit_section"
+
+			unset explicit_window_id \
+			explicit_process_pid \
+			explicit_process_name \
+			explicit_process_owner \
+			explicit_process_command \
+			explicit_section
 		;;
 		'windows_list'* )
 			# Unset CPU/FPS limits for terminated windows and remove info about them from cache
