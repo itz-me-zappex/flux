@@ -82,6 +82,9 @@ safe_exit(){
 	if [[ -f "$lock_file" ]] && ! rm "$lock_file" > /dev/null 2>&1; then
 		message --warning "Unable to remove lock file '$lock_file' which prevents multiple instances from running!"
 	fi
+
+	# Terminate 'flux-event-reader'
+	kill "$flux_event_reader_pid" > /dev/null 2>&1
 	
 	# Wait a bit to avoid printing message about daemon termination earlier than messages from background functions appear
 	sleep 0.1
