@@ -219,9 +219,8 @@ while read -r raw_event; do
 			explicit_section="$section"
 		;;
 		'allow_lazy_commands' )
-			# Allow lazy commands immediately after handling implicitly opened windows
+			# Unset '--hot' to allow lazy commands after handling all internal events
 			unset hot
-			allow_lazy_commands='1'
 
 			# Restore info about focused window after handling implicitly opened windows
 			previous_window_id="$explicit_window_id"
