@@ -60,7 +60,7 @@ pid_t get_window_process(Display* display, Window window_id) {
 
 	int status = XResQueryClientIds(display, 1, &client_spec, &elements, &client_ids);
 
-	if (status == Success) {
+	if (status == Success && client_ids != NULL) {
 		for (long i = 0; i < elements; i++) {
 			if (window_id > 0) {
 				window_process = XResGetClientPid(&client_ids[i]);
