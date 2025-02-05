@@ -246,9 +246,11 @@ int main() {
 			printf("0x%lx=%d\n", active_window, active_window_process);
 
 			for (unsigned long i = 0; i < opened_windows_count; i++) {
-				if (opened_windows[i] != None) {
+				if (opened_windows[i] != None && opened_windows[i] != active_window) {
 					opened_window_process = get_window_process(display, opened_windows[i]);
 					printf("0x%lx=%d ", opened_windows[i], opened_window_process);
+				} else if (opened_windows[i] == active_window) {
+					printf("0x%lx=%d ", active_window, active_window_process);
 				}
 			}
 
