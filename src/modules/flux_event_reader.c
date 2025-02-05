@@ -242,18 +242,29 @@ int main() {
 
 		// Print atom states if at least one has been changed
 		if (active_window_xor != previous_active_window_xor || opened_windows_xor != previous_opened_windows_xor || wm_window_xor != previous_wm_window_xor) {
+			// Get and print info about focused window
 			active_window_process = get_window_process(display, active_window);
-			printf("0x%lx=%d\n", active_window, active_window_process);
+			// Skip event if XRes returned zero PID for active window
+			if (active_window_process != 0) {
+				printf("0x%lx=%d\n", active_window, active_window_process);
+			} else {
+				continue;
+			}
 
+			// Get and print info about opened windows
 			for (unsigned long i = 0; i < opened_windows_count; i++) {
 				if (opened_windows[i] != None && opened_windows[i] != active_window) {
 					opened_window_process = get_window_process(display, opened_windows[i]);
-					printf("0x%lx=%d ", opened_windows[i], opened_window_process);
+					// Do not print info about window if XRes returned zero PID
+					if (opened_window_process != 0) {
+						printf("0x%lx=%d ", opened_windows[i], opened_window_process);
+					}
 				} else if (opened_windows[i] == active_window) {
 					printf("0x%lx=%d ", active_window, active_window_process);
 				}
 			}
 
+			// Get and print window manager info
 			opened_window_process = get_window_process(display, wm_window);
 			if (wm_window != None) {
 				printf("0x%lx=%d\n", wm_window, opened_window_process);
