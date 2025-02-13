@@ -84,7 +84,9 @@ safe_exit(){
 	fi
 
 	# Terminate 'flux-event-reader'
-	kill "$flux_event_reader_pid" > /dev/null 2>&1
+	if check_pid_existence "$flux_event_reader_pid"; then
+		kill "$flux_event_reader_pid" > /dev/null 2>&1
+	fi
 	
 	# Wait a bit to avoid printing message about daemon termination earlier than messages from background functions appear
 	sleep 0.1
