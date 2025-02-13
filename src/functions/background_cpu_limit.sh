@@ -50,7 +50,9 @@ background_cpu_limit(){
 		local_cpulimit_pid="$!"
 
 		# Enforce 'SCHED_BATCH' to improve interval stability between interrupts
-		chrt --batch --pid 0 "$local_cpulimit_pid" > /dev/null 2>&1
+		if check_pid_existence "$local_cpulimit_pid" && ! chrt --batch --pid 0 "$local_cpulimit_pid" > /dev/null 2>&1; then
+			message --warning "Daemon has insufficient rights to change scheduling policy to 'batch' for 'cpulimit'!"
+		fi
 
 		# Terminate 'cpulimit' process and print relevant message on daemon termination
 		trap 'message --info "Process '"'$passed_process_name'"' with PID $passed_process_pid has been CPU unlimited due to daemon termination." ; \
