@@ -34,7 +34,7 @@ install='create-group.install'
 
 build(){
 	cd "${srcdir}/${pkgname}-${pkgver}"
-	make
+	PREFIX="${pkgdir}/usr" make
 }
 
 package(){
