@@ -8,7 +8,9 @@ PWD = $(shell pwd)
 BUILD_DIR = $(PWD)/build
 
 FLUX_BUILD = $(BUILD_DIR)/flux
+
 FLUX_EVENT_READER_BUILD = $(BUILD_DIR)/flux-event-reader
+WINDOW_MINIMIZE_BUILD = $(BUILD_DIR)/window-minimize
 
 all:
 	mkdir -p $(BUILD_DIR)
@@ -24,6 +26,7 @@ all:
 	cat src/main.sh >> $(FLUX_BUILD)
 
 	$(CC) $(CFLAGS) -o $(FLUX_EVENT_READER_BUILD) $(PWD)/src/modules/flux_event_reader.c -lX11 -lXext -lXRes
+	$(CC) $(CFLAGS) -o $(WINDOW_MINIMIZE_BUILD) $(PWD)/src/modules/window_minimize.c -lX11
 
 clean:
 	rm -rf $(BUILD_DIR)
@@ -36,6 +39,7 @@ install:
 	mkdir -p $(PREFIX)/lib/flux/
 	install -Dm 755 $(FLUX_BUILD) $(PREFIX)/bin/
 	install -Dm 755 $(FLUX_EVENT_READER_BUILD) $(PREFIX)/lib/flux/
+	install -Dm 755 $(WINDOW_MINIMIZE_BUILD) $(PREFIX)/lib/flux/
 
 install-bypass:
 	mkdir -p /etc/security/limits.d/
