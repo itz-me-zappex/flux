@@ -10,18 +10,6 @@ prefix_warning='[!]'
 # Set default timestamp format for logger
 timestamp_format='[%Y-%m-%dT%H:%M:%S%z]'
 
-# Find path to `flux-event-reader` binary depending by main executable path
-flux_event_reader="$(get_realpath "$0")"
-case "$flux_event_reader" in
-*'/bin/'* )
-	# Replace '/bin/<executable>' with path to 'flux-event-reader' binary
-	flux_event_reader="${flux_event_reader/%'/bin/'*/'/lib/flux/flux-event-reader'}"
-;;
-* )
-	# Replace executable name with 'flux-event-reader' binary
-	flux_event_reader="${flux_event_reader%/*}/flux-event-reader"
-esac
-
 # Create associative arrays to store values from config
 declare -A config_key_name_map \
 config_key_owner_map \
@@ -324,7 +312,7 @@ while read -r raw_event; do
 	
 	# Unset events
 	unset events_array
-done < <("$flux_event_reader" 2>/dev/null)
+done < <("${PREFIX}/lib/flux/flux-event-reader" 2>/dev/null)
 
 # Exit with an error if loop has been broken and daemon did not exit because of 'SIGTERM' or 'SIGINT'
 if [[ -n "$display_has_been_opened" ]]; then
