@@ -51,7 +51,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 ## Features
 - CPU and FPS limiting process on unfocus and unlimiting on focus (FPS limiting requires game running using MangoHud with already existing config file).
 - Reducing process priority on unfocus and restoring it on focus.
-- Minimizing window on unfocus using xdotool (useful for borderless windows only).
+- Minimizing window on unfocus (useful for borderless windows only).
 - Commands/scripts execution on focus and unfocus events to make user able extend daemon functionality.
 - Configurable logging.
 - Notifications support.
@@ -68,7 +68,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 
 - Required: `bash` `util-linux` `cpulimit` `coreutils` `libxres` `libx11` `libxext` `xorgproto`
   
-- Optional: `mangohud` `lib32-mangohud` `libnotify` `xdotool`
+- Optional: `mangohud` `lib32-mangohud` `libnotify`
 
 - Build: `libxres` `libx11` `libxext` `xorgproto` `make` `gcc`
 
@@ -76,7 +76,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   
 - Required: `bash` `cpulimit` `coreutils` `libxres1` `libx11-6` `libxext6`
 
-- Optional: `mangohud` `mangohud:i386` `libnotify-bin` `xdotool`
+- Optional: `mangohud` `mangohud:i386` `libnotify-bin`
 
 - Build: `libxres-dev` `libx11-dev` `libxext-dev` `x11proto-dev` `make` `gcc`
 
@@ -84,7 +84,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 
 - Required: `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext` `xorgproto`
 
-- Optional: `MangoHud` `MangoHud-32bit` `libnotify` `xdotool`
+- Optional: `MangoHud` `MangoHud-32bit` `libnotify`
 
 - Build: `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto` `make` `gcc`
 
@@ -92,7 +92,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 
 - Required: `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext`
 
-- Optional: `mangohud` `mangohud.i686` `libnotify` `xdotool`
+- Optional: `mangohud` `mangohud.i686` `libnotify`
 
 - Build: `libXres-devel` `libX11-devel` `libXext-devel` `xorg-x11-proto-devel` `make` `gcc`
 
@@ -100,7 +100,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 
 - Required: `bash` `util-linux` `cpulimit` `coreutils` `libXRes1` `libX11-6` `libXext6`
 
-- Optional: `mangohud` `mangohud-32bit` `libnotify4` `xdotool`
+- Optional: `mangohud` `mangohud-32bit` `libnotify4`
 
 - Build: `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto-devel` `make` `gcc`
 
@@ -254,7 +254,7 @@ A simple INI is used for configuration.
 | `exec-unfocus` | Command to execute on unfocus event or window closure, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
 | `lazy-exec-focus` | Same as `exec-focus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event). |
 | `lazy-exec-unfocus` | Same as `exec-unfocus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event), will be executed on daemon termination if focused window matches with section where this key and command is specified. |
-| `minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`, requires `xdotool` installed on system. Defaults to `false`. |
+| `minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`. Defaults to `false`. |
 
 ### Config path
 - Daemon searches for following configuration files by priority:
