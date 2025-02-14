@@ -1,5 +1,5 @@
 pkgname='flux'
-pkgver='1.20.18'
+pkgver='1.21'
 pkgrel='1'
 pkgdesc='Advanced daemon for X11 desktops and window managers, designed to automatically limit FPS/CPU usage of unfocused windows and run commands on focus and unfocus events. Written in Bash and C++.'
 arch=('any')
@@ -27,7 +27,6 @@ optdepends=(
 	'mangohud: support for FPS limits'
 	'lib32-mangohud: support for FPS limits (32-bit)'
 	'libnotify: support for notifications'
-	'xdotool: minimize borderless windows on unfocus'
 )
 source=("${url}/archive/refs/tags/v${pkgver}.tar.gz")
 sha256sums=('SKIP')
