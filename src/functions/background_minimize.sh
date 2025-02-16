@@ -5,8 +5,8 @@ background_minimize(){
 	
 	# Attempt to minimize window
 	if ! "${PREFIX}/lib/flux/window-minimize" "$passed_window_id" > /dev/null 2>&1; then
-		message --warning "Unable to forcefully minimize window '$passed_window_id' of process '$passed_process_name' with PID $passed_process_pid on unfocus event!"
+		message --warning "Unable to minimize window '$passed_window_id' of process '$passed_process_name' with PID $passed_process_pid on unfocus event!"
 	else
-		message --info "Window '$passed_window_id' of process '$passed_process_name' with PID $passed_process_pid has been forcefully minimized on unfocus event."
+		message --info "Window '$passed_window_id' of process '$passed_process_name' with PID $passed_process_pid has been minimized on unfocus event."
 	fi
 }
