@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
 	Window *opened_windows = get_opened_windows(display, root, &opened_windows_count, net_client_list_stacking);
 
 	if (!opened_windows) {
+		XCloseDisplay(display);
 		return 1;
 	}
 
