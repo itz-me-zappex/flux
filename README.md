@@ -139,7 +139,7 @@ Use this method if you using different distro. Make sure you have installed depe
 #### Make options
 | Option | Description |
 |--------|-------------|
-| `clean` | Remove `out/` in repository directory and all files created there after `make`. |
+| `clean` | Remove `build/` in repository directory with all files created there after `make`. |
 | `install` | Install daemon to prefix, can be changed using `$PREFIX`, defaults to `/usr/local`. |
 | `install-bypass` | Install `10-flux.conf` config to `/etc/security/limits.d` to bypass scheduling policy changing restrictions for users in `flux` group |
 | `groupadd` | Create `flux` group to which you can add users. |
@@ -345,7 +345,7 @@ idle = true
 ```
 
 ### Environment variables passed to commands and description
-Note: You may want to use these variables in commands and scripts which running from `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys to extend daemon functionality.
+You may want to use these variables in commands and scripts which running from `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys to extend daemon functionality.
 
 #### Passed to `exec-focus` and `lazy-exec-focus` config keys
 | Variable | Description |
@@ -381,25 +381,27 @@ Note: You may want to use these variables in commands and scripts which running 
 
 ## Tips and tricks
 ### Apply changes in config file
-- Daemon does not support config parsing on a fly, but there is workaround you can use. Create keybinding for command like `killall flux ; flux --hot` which restarts daemon, use this keybinding if you done with config file editing.
+- As daemon does not parse config on a go, you need to restart daemon with `--hot` option after editing config, `--hot` makes daemon handle already opened windows immediately after start.
 
 ### Mute process audio on unfocus (Pipewire & Wireplumber)
-- Add `exec-focus = wpctl set-mute -p $FLUX_PROCESS_PID 0` and `exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1` lines to section responsible for game. No idea about neither Pulseaudio nor pure Alsa setups, that is why I can not just add `mute` config key.
+- Add following lines to section responsible for game:
+  - `exec-focus = wpctl set-mute -p $FLUX_PROCESS_PID 0`
+  - `exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1`
 
 ### Types of limits and which you should use
-- FPS limits recommended for online and multiplayer games and if you do not mind to use MangoHud.
-- CPU limits greater than zero recommended for online/multiplayer games in case you do not use MangoHud and for CPU heavy applications e.g. VirtualBox and Handbrake with encoding on CPU, but you should be ready for stuttery audio which caused because of `cpulimit` tool which interrupts process with `SIGSTOP` and `SIGCONT` signals, to fix that on systems with Pipewire and Wireplumber check [this](#mute-process-audio-on-unfocus-pipewire--wireplumber).
+- FPS limits recommended for online and multiplayer games if you do not mind to use MangoHud.
+- CPU limits greater than zero recommended for online/multiplayer games in case you do not use MangoHud and for CPU heavy applications e.g. VirtualBox and Handbrake (with CPU encoding), but you should be ready for stuttery audio which caused by `cpulimit` tool which interrupts process with `SIGSTOP` and `SIGCONT` signals, if you use Pipewire and Wireplumber, you may want to mute process as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
 - CPU limit equal to zero (freezing) recommended for singleplayer games, online games in offline mode and for stuff which consumes resources in background without reason, makes game/app just hang in RAM without consuming neither CPU nor GPU resources.
 
 ## Possible questions
 ### How does that daemon work?
-- Daemon listens changes in `_NET_ACTIVE_WINDOW` and `_NET_CLIENT_LIST_STACKING` atoms, obtains window IDs and using those obtains PIDs, then reads info about processes from files in `/proc/<PID>` to compare it with identifiers in config file and if matching section appears, then it does specified in config file actions.
+- Daemon listens changes in `_NET_ACTIVE_WINDOW` and `_NET_CLIENT_LIST_STACKING` atoms, obtains window IDs and using those obtains PIDs by "asking" Xorg server via `XRes` extension, then reads info about processes from files in `/proc/<PID>` to compare it with identifiers in config file and if matching section appears, then it does specified in config file actions.
 
 ### Does that daemon reduce performance?
 - Daemon uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time and just chills out when you doing stuff in single window. Performance loss should not be noticeable even on weak systems.
 
 ### May I get banned in game because of this daemon?
-- Nowadays, anti-cheats are pure garbage, developed by freaks without balls, and you may get banned even for a wrong click or sudden mouse movement, I am not even talking about bans because of broken libs provided with games by developers themselves. But daemon by its nature should not trigger anti-cheat, anyway, I am not responsible for your actions, so - use it carefully and do not write me if you get banned.
+- Nowadays, anti-cheats are pure garbage, developed by freaks without balls, and you may get banned even for a wrong click or sudden mouse movement, I am not even talking about bans because of broken libs provided with games by developers themselves. But daemon by its nature should not trigger anti-cheat, anyway, I am not responsible for your actions, so use it carefully and do not write me if you got a ban.
 
 ### Why was that daemon developed?
 - Main task is to reduce CPU/GPU usage of games that have been minimized. Almost every engine fails to recognize that game is unfocused and still consumes a lot of CPU and GPU resources, what can make system slow for other tasks like browsing stuff, chatting, transcoding video etc. or even unresponsive at all. With that daemon now I can simply play a game or tinker with virtual machine and then minimize window if needed without carrying about high CPU/GPU usage and suffering from low multitasking performance. Also, daemon does not care about type of software, so you can use it with everything. Inspiried by feature from NVIDIA driver for Windows where user can set FPS limit for minimized software, this tool is not exactly the same, but better than nothing.
@@ -411,7 +413,7 @@ Note: You may want to use these variables in commands and scripts which running 
 - You can use it if you like, my project is aimed at X11 and systems without Wayland support, as well as at non-interference with application/game window and user input unlike Gamescope does, so you have no need to execute app/game using wrapper (except you need FPS limiting, MangoHud required in this case), just configure daemon and have fun.
 
 ### What about Wayland support?
-- That is impossible, there is no any unified way to read window related events (focus, unfocus, closing etc.) and obtain PIDs from windows on Wayland.
+- That is impossible, there is no any unified way to read window related events and obtain PIDs of windows on Wayland.
 
 ### Why did you write it in Bash?
 - That is (scripting) language I know pretty good, despite a fact that Bash as all interpretators works slower than compilable languages, it still fits my needs almost perfectly.
