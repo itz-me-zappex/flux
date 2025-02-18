@@ -21,7 +21,7 @@ parse_options(){
 
 Options and values:
   -c, --config <path>                 Specify path to config file
-                                      default: \$XDG_CONFIG_HOME/flux.ini or \$HOME/.config/flux.ini or /etc/flux.ini
+                                      default: '\$XDG_CONFIG_HOME/flux.ini' or '\$HOME/.config/flux.ini' or '/etc/flux.ini'
   -h, --help                          Display this help and exit
   -H, --hot                           Apply actions to already unfocused windows before handling events
   -l, --log <path>                    Store messages to specified file
@@ -29,7 +29,7 @@ Options and values:
   -n, --notifications                 Display messages as notifications
   -q, --quiet                         Display errors and warnings only
   -T, --timestamp-format <format>     Set timestamp format, requires '--timestamps'
-                                      default: [%Y-%m-%dT%H:%M:%S%z]
+                                      default: '[%Y-%m-%dT%H:%M:%S%z]'
   -t, --timestamps                    Add timestamps to messages
   -u, --usage                         Alias for '--help'
   -v, --verbose                       Detailed output
@@ -37,13 +37,13 @@ Options and values:
 
 Prefixes configuration:
   --prefix-error <prefix>             Set prefix for error messages
-                                      default: [x]
+                                      default: '[x]'
   --prefix-info <prefix>              Set prefix for info messages
-                                      default: [i]
+                                      default: '[i]'
   --prefix-verbose <prefix>           Set prefix for verbose messages
-                                      default: [~]
+                                      default: '[~]'
   --prefix-warning <prefix>           Set prefix for warning messages
-                                      default: [!]
+                                      default: '[!]'
 
 Examples:
   flux -Hvt
