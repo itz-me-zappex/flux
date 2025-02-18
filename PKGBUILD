@@ -6,40 +6,40 @@ arch=('any')
 url='https://github.com/itz-me-zappex/flux'
 license=('GPL-3.0-only')
 makedepends=(
-	'libxres'
-	'libx11'
-	'libxext'
-	'xorgproto'
-	'gcc'
-	'make'
+  'libxres'
+  'libx11'
+  'libxext'
+  'xorgproto'
+  'gcc'
+  'make'
 )
 depends=(
-	'bash'
-	'util-linux'
-	'cpulimit'
-	'coreutils'
-	'libxres'
-	'libx11'
-	'libxext'
-	'xorgproto'
+  'bash'
+  'util-linux'
+  'cpulimit'
+  'coreutils'
+  'libxres'
+  'libx11'
+  'libxext'
+  'xorgproto'
 )
 optdepends=(
-	'mangohud: support for FPS limits'
-	'lib32-mangohud: support for FPS limits (32-bit)'
-	'libnotify: support for notifications'
+  'mangohud: support for FPS limits'
+  'lib32-mangohud: support for FPS limits (32-bit)'
+  'libnotify: support for notifications'
 )
 source=("${url}/archive/refs/tags/v${pkgver}.tar.gz")
 sha256sums=('SKIP')
 install='create-group.install'
 
 build(){
-	cd "${srcdir}/${pkgname}-${pkgver}"
-	PREFIX="/usr" make
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  PREFIX="/usr" make
 }
 
 package(){
-	cd "${srcdir}/${pkgname}-${pkgver}"
-	PREFIX="${pkgdir}/usr" make install
-	mkdir -p "${pkgdir}/etc/security/limits.d"
-	install -Dm644 '10-flux.conf' "${pkgdir}/etc/security/limits.d/"
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  PREFIX="${pkgdir}/usr" make install
+  mkdir -p "${pkgdir}/etc/security/limits.d"
+  install -Dm644 '10-flux.conf' "${pkgdir}/etc/security/limits.d/"
 }
