@@ -17,7 +17,7 @@ parse_options(){
 			fi
 		;;
 		--help | -h | --usage | -u )
-			echo "Usage: flux [OPTIONS]
+			echo "Usage: flux [-c <path>] [-l <path>] [-T <format>] [--prefix-* <prefix>] [options]
 
 Options and values:
   -c, --config <path>                 Specify path to config file
