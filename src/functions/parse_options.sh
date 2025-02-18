@@ -36,14 +36,14 @@ Options and values:
   -V, --version                       Display release information and exit
 
 Prefixes configuration:
-  --prefix-error <prefix>    Set prefix for error messages
-                             default: [x]
-  --prefix-info <prefix>     Set prefix for info messages
-                             default: [i]
-  --prefix-verbose <prefix>  Set prefix for verbose messages
-                             default: [~]
-  --prefix-warning <prefix>  Set prefix for warning messages
-                             default: [!]
+  --prefix-error <prefix>             Set prefix for error messages
+                                      default: [x]
+  --prefix-info <prefix>              Set prefix for info messages
+                                      default: [i]
+  --prefix-verbose <prefix>           Set prefix for verbose messages
+                                      default: [~]
+  --prefix-warning <prefix>           Set prefix for warning messages
+                                      default: [!]
 
 Examples:
   flux -Hvt
