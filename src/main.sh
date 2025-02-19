@@ -90,7 +90,7 @@ parse_config
 unset -f parse_config \
 get_realpath \
 check_bool \
-check_true
+bool_to_int
 
 # Config keys validation
 validate_config_keys

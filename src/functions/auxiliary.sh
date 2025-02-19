@@ -101,12 +101,12 @@ check_bool(){
 }
 
 # Required to check if boolean value is true
-check_true(){
+bool_to_int(){
   local local_value="$1"
   
   if [[ "${local_value,,}" =~ ^('true'|'t'|'yes'|'y'|'1')$ ]]; then
-    return 0
+    echo 0
   else
-    return 1
+    echo 1
   fi
 }
