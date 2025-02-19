@@ -15,9 +15,8 @@ get_process_info(){
   local_temp_cached_window_id \
   local_temp_passwd_line
 
-  # Use cache with window info if exists
+  # Prefer using cache with window info if exists
   if [[ -n "${cache_process_pid_map["$window_id"]}" ]]; then
-    # Get process info from cache
     passed_window_id="$window_id" cache_get_process_info
   else
     # Attempt to find cache with info about the same process
@@ -32,10 +31,10 @@ get_process_info(){
 
     # Check for match of cached process info to define a way how to obtain it
     if [[ -n "$local_matching_window_id" ]]; then
-      # Get process info using cache of parent window
+      # Get process info using cache
       passed_window_id="$local_matching_window_id" cache_get_process_info
     else
-      # Get name of process
+      # Get process name
       if check_ro "/proc/$process_pid/comm"; then
         process_name="$(<"/proc/$process_pid/comm")"
       else
@@ -45,14 +44,14 @@ get_process_info(){
       # Get effective UID of process
       if check_ro "/proc/$process_pid/status"; then
         while read -r local_temp_status_line; do
-          # Find a line which contains UID
+          # Find a line containing UID
           if [[ "$local_temp_status_line" == 'Uid:'* ]]; then
-            # Find 3rd column, which effective UID is
+            # Find 3rd column
             for local_status_column in $local_temp_status_line; do
               # Increase column count
               (( local_column_count++ ))
 
-              # Remember effective UID and break loop (3rd column)
+              # Remember effective UID and break loop
               if (( local_column_count == 3 )); then
                 process_owner="$local_status_column"
                 break
@@ -64,7 +63,7 @@ get_process_info(){
         return 1
       fi
 
-      # Get command of process
+      # Get process command
       if check_ro "/proc/$process_pid/cmdline"; then
         # Read file ignoring '\0' and those are replaced with spaces automatically because of arrays nature :D
         mapfile -d '' process_command < "/proc/$process_pid/cmdline"
@@ -77,7 +76,7 @@ get_process_info(){
     # Obtain process owner username from '/etc/passwd' file using UID of process
     if check_ro '/etc/passwd'; then
       while read -r local_temp_passwd_line; do
-        # Do not do anything if it does not match with pattern and UID of process
+        # Ignore line if it does not contain owner UID
         if [[ "$local_temp_passwd_line" =~ .*\:.*\:"$process_owner"\:.* ]]; then
           process_owner_username="${local_temp_passwd_line/\:*/}"
           break

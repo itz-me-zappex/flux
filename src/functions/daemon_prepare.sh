@@ -3,8 +3,9 @@ daemon_prepare(){
   local local_temp_prefix_type \
   local_variable_name
 
-  # Exit with an error if lock file and process specified there exists
   lock_file='/tmp/flux-lock'
+
+  # Exit with an error if lock file and process specified there exists
   if [[ -f "$lock_file" ]] &&
      check_pid_existence "$(<"$lock_file")"; then
     message --error "Multiple instances are not allowed, make sure that daemon is not running before start, if you are really sure, then remove '$lock_file' file."
@@ -17,7 +18,7 @@ daemon_prepare(){
     fi
   fi
 
-  # Set specified timestamp format if exists
+  # Set specified timestamp format if any
   if [[ -n "$new_timestamp_format" ]]; then
     timestamp_format="$new_timestamp_format"
     unset new_timestamp_format

@@ -32,7 +32,7 @@ focus_unset_limit(){
     unset_sched_idle
   fi
   
-  # Terminate background process with minimization
+  # Terminate minimization background process
   if [[ -n "${background_minimize_pid_map["$process_pid"]}" ]]; then
     passed_window_id="$window_id" \
     passed_process_pid="$process_pid" \

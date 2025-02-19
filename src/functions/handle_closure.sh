@@ -18,7 +18,7 @@ handle_closure(){
   local_terminated_process_owner_username \
   local_terminated_process_command
 
-  # Remove everything including event type name to obtain list of existing windows
+  # Remove everything including event type name, to obtain list of existing windows
   local_existing_windows="${event/'windows_list: '/}"
 
   # Remove PIDs from list of existing windows

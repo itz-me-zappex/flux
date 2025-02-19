@@ -8,11 +8,11 @@ option_repeat_check(){
 
 # Required to obtain values from command line options
 cmdline_get(){
-  # Remember that option is passed in case value is not specified
+  # Remember that option is passed to check whether it is passed again or not 
   option_repeat_check "$passed_check" "$passed_option"
   eval "$passed_check"='1'
 
-  # Define option type (short, long or long+value) and remember specified value
+  # Define option type (short, long or long=value) and remember specified value
   case "$1" in
   "$passed_option" | "$passed_short_option" )
     # Remember value only if that is not an another option, regexp means long or short option
@@ -25,7 +25,7 @@ cmdline_get(){
     fi
   ;;
   * )
-    # Shell parameter expansion, remove option name from string
+    # Remove option name from string
     eval "$passed_set"=\'"${1/"$passed_option"=/}"\'
     shift='1'
   esac
@@ -100,7 +100,7 @@ is_bool(){
   fi
 }
 
-# Required to check if boolean value is true
+# Required to convent boolean value to integer
 bool_to_int(){
   local local_value="$1"
   

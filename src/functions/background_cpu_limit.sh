@@ -11,9 +11,10 @@ background_cpu_limit(){
   if [[ "$local_delay" != '0' ]]; then
     message --verbose "Process '$passed_process_name' with PID $passed_process_pid will be CPU limited after $local_delay second(s) due to window $passed_window_id unfocus event."
 
-    # Run in background to make subprocess interruptable
+    # Run in background to make this subprocess interruptable
     sleep "$local_delay" &
-    # Remember PID of 'sleep' to terminate it if needed
+
+    # Remember PID of 'sleep' to terminate it on SIGINT/SIGTERM
     local_sleep_pid="$!"
 
     # Print relevant message on daemon termination and stop this subprocess
@@ -31,7 +32,6 @@ background_cpu_limit(){
     kill "$local_sleep_pid"; \
     exit 0' SIGUSR2
 
-    # Wait for 'sleep' termination
     wait "$local_sleep_pid"
   fi
 
@@ -46,6 +46,7 @@ background_cpu_limit(){
 
     # Run in background to make subprocess interruptable
     cpulimit --lazy --limit="$(( "${config_key_cpu_limit_map["$passed_section"]}" * cpu_threads ))" --pid="$passed_process_pid" > /dev/null 2>&1 &
+
     # Remember PID of 'cpulimit' to terminate it if needed
     local_cpulimit_pid="$!"
 
@@ -69,8 +70,7 @@ background_cpu_limit(){
     trap 'message --info "Process '"'$passed_process_name'"' with PID $passed_process_pid has been CPU unlimited due to window $passed_window_id closure." ; \
     kill "$local_cpulimit_pid" > /dev/null 2>&1 ; \
     exit 0' SIGUSR2
-    
-    # Wait for 'cpulimit' termination
+
     wait "$local_cpulimit_pid"
   else
     message --warning "Process '$passed_process_name' with PID $passed_process_pid has been terminated before applying CPU limit!"

@@ -7,18 +7,17 @@ mangohud_fps_set(){
   local_fps_to_set="$3" \
   local_fps_limit_is_changed
 
-  # Check if config file exists before continue in case it has been removed
+  # Check whether config file exists or not before continue
   if [[ -f "$local_target_config" ]]; then
-    # Check for readability of source config only if it differs from target config
+    # Check for source config readability only if it differs from target config
     if [[ "$local_target_config" != "$local_source_config" ]]; then
-      # Check readability of source MangoHud config file
       if ! check_ro "$local_source_config"; then
         message --warning "Source MangoHud config file '$local_target_config' is not readable!"
         return 1
       fi
     fi
 
-    # Check read-write ability of target MangoHud config file
+    # Check read-write access of target MangoHud config file
     if ! check_rw "$local_target_config"; then
       message --warning "Target MangoHud config file '$local_target_config' is not rewritable!"
       return 1

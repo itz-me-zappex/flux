@@ -2,12 +2,12 @@
 exec_focus(){
   local local_end_of_msg
 
-  # Set end of message to not repeat it in code
+  # Set end of message to not duplicate it
   local_end_of_msg="due to window $window_id focus event"
 
   # Do not do anything if focused window process PID is exacly the same as previous one
   if [[ "$process_pid" != "$previous_process_pid" ]]; then
-    # Export environment variables to interact with them using commands/scripts in 'exec-focus' and 'lazy-exec-focus' config keys
+    # Export environment variables to interact with those using commands/scripts in 'exec-focus' and 'lazy-exec-focus' config keys
     export FLUX_WINDOW_ID="$window_id" \
     FLUX_PROCESS_PID="$process_pid" \
     FLUX_PROCESS_NAME="$process_name" \
