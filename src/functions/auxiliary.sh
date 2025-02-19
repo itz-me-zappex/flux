@@ -105,8 +105,8 @@ bool_to_int(){
   local local_value="$1"
   
   if [[ "${local_value,,}" =~ ^('true'|'t'|'yes'|'y'|'1')$ ]]; then
-    echo 0
-  else
     echo 1
+  else
+    echo 0
   fi
 }
