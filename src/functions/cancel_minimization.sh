@@ -8,8 +8,11 @@ cancel_minimization(){
   # Check for existence of background minimize process
   if check_pid_existence "$local_background_minimize_pid"; then
     # Attempt to terminate background process
-    kill "$local_background_minimize_pid" > /dev/null 2>&1
-    message --verbose "Window minimization $passed_window_id of process '$passed_process_name' with PID $passed_process_pid has been cancelled $passed_end_of_msg."
+    if kill "$local_background_minimize_pid" > /dev/null 2>&1; then
+      message --verbose "Window minimization $passed_window_id of process '$passed_process_name' with PID $passed_process_pid has been cancelled $passed_end_of_msg."
+    else
+      message --warning "Unable to cancel window $passed_window_id minimization of process '$passed_process_name' with PID $passed_process_pid!"
+    fi
   fi
   
   # Forget background process PID
