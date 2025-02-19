@@ -32,6 +32,6 @@ unfreeze_process(){
   fi
   
   # Unset details about freezing
-  unset freeze_applied_map["$passed_process_pid"] \
+  unset is_freeze_applied_map["$passed_process_pid"] \
   background_freeze_pid_map["$passed_process_pid"]
 }

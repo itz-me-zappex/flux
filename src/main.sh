@@ -28,13 +28,13 @@ config_key_idle_map \
 config_key_minimize_map
 
 # Declare associative arrays to store info about applied limits
-declare -A freeze_applied_map \
+declare -A is_freeze_applied_map \
 background_freeze_pid_map \
-cpu_limit_applied_map \
+is_cpu_limit_applied_map \
 background_cpu_limit_pid_map \
-fps_limit_applied_map \
+is_fps_limit_applied_map \
 background_fps_limit_pid_map \
-sched_idle_applied_map \
+is_sched_idle_applied_map \
 background_sched_idle_pid_map \
 background_minimize_pid_map
 

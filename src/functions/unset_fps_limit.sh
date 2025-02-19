@@ -38,6 +38,6 @@ unset_fps_limit(){
   fi
   
   # Unset details about FPS limiting
-  unset fps_limit_applied_map["$passed_section"] \
+  unset is_fps_limit_applied_map["$passed_section"] \
   background_fps_limit_pid_map["$passed_section"]
 }

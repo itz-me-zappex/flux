@@ -17,14 +17,14 @@ safe_exit(){
     local_process_name="${cache_process_name_map["$local_temp_window_id"]}"
 
     # Define type of limit which should be unset
-    if [[ -n "${freeze_applied_map["$local_process_pid"]}" ]]; then
+    if [[ -n "${is_freeze_applied_map["$local_process_pid"]}" ]]; then
       # Unfreeze process if has been frozen
       passed_process_pid="$local_process_pid" \
       passed_section="$local_section" \
       passed_process_name="$local_process_name" \
       passed_end_of_msg="$local_end_of_msg" \
       unfreeze_process
-    elif [[ -n "${cpu_limit_applied_map["$local_process_pid"]}" ]]; then
+    elif [[ -n "${is_cpu_limit_applied_map["$local_process_pid"]}" ]]; then
       # Unset CPU limit if has been applied
       passed_process_pid="$local_process_pid" \
       passed_process_name="$local_process_name" \
@@ -39,7 +39,7 @@ safe_exit(){
     fi
 
     # Restore scheduling policy for process if it has been changed to idle
-    if [[ -n "${sched_idle_applied_map["$local_process_pid"]}" ]]; then
+    if [[ -n "${is_sched_idle_applied_map["$local_process_pid"]}" ]]; then
       passed_process_pid="$local_process_pid" \
       passed_section="$local_section" \
       passed_process_name="$local_process_name" \
