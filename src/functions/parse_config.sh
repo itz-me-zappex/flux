@@ -152,7 +152,7 @@ parse_config(){
           ;;
           idle* )
             # Exit with an error if value is not boolean
-            if ! check_bool "$local_config_value"; then
+            if ! is_bool "$local_config_value"; then
               message --error "Value '$local_config_value' specified in key 'idle' in section '$local_section' in '$config' config file is not boolean!"
               exit 1
             else
@@ -161,7 +161,7 @@ parse_config(){
           ;;
           minimize* )
             # Exit with an error if value is not boolean
-            if ! check_bool "$local_config_value"; then
+            if ! is_bool "$local_config_value"; then
               message --error "Value '$local_config_value' specified in key 'minimize' in section '$local_section' in '$config' config file is not boolean!"
               exit 1
             else

@@ -89,7 +89,7 @@ unset -f calculate_max_limit
 parse_config
 unset -f parse_config \
 get_realpath \
-check_bool \
+is_bool \
 bool_to_int
 
 # Config keys validation

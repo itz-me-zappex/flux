@@ -90,7 +90,7 @@ get_realpath(){
 }
 
 # Required to check if value is boolean or nor
-check_bool(){
+is_bool(){
   local local_value="$1"
 
   if [[ "${local_value,,}" =~ ^('true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0')$ ]]; then
