@@ -1,9 +1,7 @@
 # Required to find matching section for process
 find_matching_section(){
   local local_temp_section \
-  local_name_match \
-  local_owner_match \
-  local_command_match \
+  local_match \
   local_window_type_text
 
   # Find matching section if was not found previously and store it to cache
@@ -16,40 +14,35 @@ find_matching_section(){
         if [[ -z "${config_key_name_map["$local_temp_section"]}" ]]; then
           local_name_match='1'
         else
-          # Use soft match if name of process in 'name' config key longer than or equal to 16 symbols
-          if [[ "${config_key_name_map["$local_temp_section"]}" == "$process_name" ]]; then
-            local_name_match='1'
-          elif [[ "${config_key_name_map["$local_temp_section"]}" == "$process_name"* &&
-                  "${config_key_name_map["$local_temp_section"]}" =~ ^.{16,}$ ]]; then
-            local_name_match='1'
+          # Compare process name with specified in config, use soft match if process name in config key longer than or equal to 16 symbols
+          if [[ "${config_key_name_map["$local_temp_section"]}" == "$process_name" ||
+                "${config_key_name_map["$local_temp_section"]}" == "$process_name"* &&
+                "${config_key_name_map["$local_temp_section"]}" =~ ^.{16,}$ ]]; then
+            (( local_match++ ))
           fi
         fi
 
-        # Compare UID of process with specified in section
+        # Compare process owner with specified in section
         if [[ -z "${config_key_owner_map["$local_temp_section"]}" ||
               "${config_key_owner_map["$local_temp_section"]}" == "$process_owner" ||
               "${config_key_owner_map["$local_temp_section"]}" == "$process_owner_username" ]]; then
-          local_owner_match='1'
+          (( local_match++ ))
         fi
 
         # Compare process command with specified in section
         if [[ -z "${config_key_command_map["$local_temp_section"]}" ||
               "${config_key_command_map["$local_temp_section"]}" == "$process_command" ]]; then
-          local_command_match='1'
+          (( local_match++ ))
         fi
 
-        # Mark as matching if all identifiers containing non-zero value
-        if [[ -n "$local_name_match" &&
-              -n "$local_owner_match" &&
-              -n "$local_command_match" ]]; then
+        # Mark section as matching if matching section is found
+        if (( local_match == 3 )); then
           section="$local_temp_section"
           cache_section_map["$process_pid"]="$local_temp_section"
           break
         fi
 
-        unset local_name_match \
-        local_owner_match \
-        local_command_match
+        unset local_match
       done
 
       # Mark process as mismatched if matching section was not found
