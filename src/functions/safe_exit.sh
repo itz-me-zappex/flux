@@ -11,13 +11,9 @@ safe_exit(){
 
   # Get list of all cached windows
   for local_temp_window_id in "${!cache_process_pid_map[@]}"; do
-    # Simplify access to process PID
+    # Simplify access to cached process info
     local_process_pid="${cache_process_pid_map["$local_temp_window_id"]}"
-
-    # Simplify access to matching section of process
     local_section="${cache_section_map["$local_process_pid"]}"
-
-    # Simplify access to process name
     local_process_name="${cache_process_name_map["$local_temp_window_id"]}"
 
     # Define type of limit which should be unset

@@ -38,22 +38,12 @@ handle_closure(){
   for local_temp_terminated_window_id in "${local_terminated_window_ids_array[@]}"; do
     # Skip window ID if info about it does not exist in cache
     if [[ -n "${cache_process_pid_map["$local_temp_terminated_window_id"]}" ]]; then
-      # Simplify access to PID of cached window info
+      # Simplify access to cached info about terminated window
       local_terminated_process_pid="${cache_process_pid_map["$local_temp_terminated_window_id"]}"
-
-      # Simplify access to matching section of cached window info
       local_terminated_section="${cache_section_map["$local_terminated_process_pid"]}"
-
-      # Simplify access to process name of cached window info
       local_terminated_process_name="${cache_process_name_map["$local_temp_terminated_window_id"]}"
-
-      # Simplify access to process owner of cached window info
       local_terminated_process_owner="${cache_process_owner_map["$local_temp_terminated_window_id"]}"
-
-      # Simplify access to process owner username of cached window info
       local_terminated_process_owner_username="${cache_process_owner_username_map["$local_temp_terminated_window_id"]}"
-
-      # Simplify access to process command of cached window info
       local_terminated_process_command="${cache_process_command_map["$local_temp_terminated_window_id"]}"
 
       # Set end of message with actual window ID to not duplicate it
