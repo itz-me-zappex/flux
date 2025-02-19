@@ -123,7 +123,7 @@ Window* get_opened_windows(Display* display, Window root, unsigned long *opened_
 
 // Daemon
 int main() {
-  // Enforce per-line buffer to make output readable from command substitution in Bash
+  // Use line buffer to make output readable from command substitution in Bash
   setlinebuf(stdout);
 
   // Store obtained data here
@@ -134,7 +134,7 @@ int main() {
   Window *opened_windows = NULL;
   unsigned long opened_windows_count, previous_opened_windows_count;
 
-  // Bitwise "eXclusive OR" difference between current and previous atom states
+  // Bitwise difference between current and previous atom states
   unsigned long active_window_xor, opened_windows_xor, wm_window_xor;
   unsigned long previous_active_window_xor, previous_opened_windows_xor, previous_wm_window_xor;
 
@@ -144,7 +144,7 @@ int main() {
     return 1;
   }
 
-  // Get atom IDs
+  // Declare needed atoms
   Atom net_active_window = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
   Atom wm_s0 = XInternAtom(display, "WM_S0", False);
   Atom net_supporting_wm_check = XInternAtom(display, "_NET_SUPPORTING_WM_CHECK", False);
@@ -200,7 +200,7 @@ int main() {
         // Skip event
         continue;
       } else {
-        // Wait 30ms before handle event and unset events in order
+        // Wait 30ms before handle event and unset pending events after delay
         usleep(30000);
         while (XPending(display)) {
           XNextEvent(display, &event);
@@ -290,7 +290,7 @@ int main() {
     }
   }
 
-  // Unreachable due to 'XNextEvent()' locks loop up
+  // Unreachable because 'XNextEvent()' locks loop up
   // Handling SIGINT/SIGTERM also impossible because of that
   return 0;
 }
