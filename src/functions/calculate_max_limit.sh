@@ -1,8 +1,7 @@
 # Required to get threads count and maximum CPU limit
 calculate_max_limit(){
-  local local_temp_cpuinfo_line
-
   # Count CPU threads
+  local local_temp_cpuinfo_line
   cpu_threads='0'
   while read -r local_temp_cpuinfo_line; do
     if [[ "$local_temp_cpuinfo_line" == 'processor'* ]]; then

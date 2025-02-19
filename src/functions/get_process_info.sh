@@ -8,23 +8,17 @@ cache_get_process_info(){
 
 # Required to get process info using PID
 get_process_info(){
-  local local_temp_status_line \
-  local_column_count='0' \
-  local_status_column \
-  local_matching_window_id \
-  local_temp_cached_window_id \
-  local_temp_passwd_line
-
   # Prefer using cache with window info if exists
   if [[ -n "${cache_process_pid_map["$window_id"]}" ]]; then
     passed_window_id="$window_id" cache_get_process_info
   else
     # Attempt to find cache with info about the same process
+    local local_temp_cached_window_id
     for local_temp_cached_window_id in "${!cache_process_pid_map[@]}"; do
       # Compare parent PID with PID of process
       if [[ "${cache_process_pid_map[$local_temp_cached_window_id]}" == "$process_pid" ]]; then
         # Remember window ID of matching process
-        local_matching_window_id="$local_temp_cached_window_id"
+        local local_matching_window_id="$local_temp_cached_window_id"
         break
       fi
     done
@@ -43,17 +37,20 @@ get_process_info(){
 
       # Get effective UID of process
       if check_ro "/proc/$process_pid/status"; then
+        local local_temp_status_line
+        local local_column_count
+        local local_temp_status_column
         while read -r local_temp_status_line; do
           # Find a line containing UID
           if [[ "$local_temp_status_line" == 'Uid:'* ]]; then
             # Find 3rd column
-            for local_status_column in $local_temp_status_line; do
+            for local_temp_status_column in $local_temp_status_line; do
               # Increase column count
               (( local_column_count++ ))
 
               # Remember effective UID and break loop
               if (( local_column_count == 3 )); then
-                process_owner="$local_status_column"
+                process_owner="$local_temp_status_column"
                 break
               fi
             done
@@ -75,6 +72,7 @@ get_process_info(){
 
     # Obtain process owner username from '/etc/passwd' file using UID of process
     if check_ro '/etc/passwd'; then
+      local local_temp_passwd_line
       while read -r local_temp_passwd_line; do
         # Ignore line if it does not contain owner UID
         if [[ "$local_temp_passwd_line" =~ .*\:.*\:"$process_owner"\:.* ]]; then

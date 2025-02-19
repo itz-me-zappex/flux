@@ -1,20 +1,15 @@
 # Required to unset applied limits for windows on SIGTERM/SIGINT signal
 safe_exit(){
-  local local_end_of_msg \
-  local_temp_window_id \
-  local_process_pid \
-  local_section \
-  local_process_name
-
   # Specify end of message passed to functions
-  local_end_of_msg='due to daemon termination'
+  local local_end_of_msg='due to daemon termination'
 
   # Get list of all cached windows
+  local local_temp_window_id
   for local_temp_window_id in "${!cache_process_pid_map[@]}"; do
     # Simplify access to cached process info
-    local_process_pid="${cache_process_pid_map["$local_temp_window_id"]}"
-    local_section="${cache_section_map["$local_process_pid"]}"
-    local_process_name="${cache_process_name_map["$local_temp_window_id"]}"
+    local local_process_pid="${cache_process_pid_map["$local_temp_window_id"]}"
+    local local_section="${cache_section_map["$local_process_pid"]}"
+    local local_process_name="${cache_process_name_map["$local_temp_window_id"]}"
 
     # Define type of limit which should be unset
     if [[ -n "${is_freeze_applied_map["$local_process_pid"]}" ]]; then

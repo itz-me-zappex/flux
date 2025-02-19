@@ -1,9 +1,7 @@
 # Required to execute command from 'exec-focus' and 'lazy-exec-focus' config keys
 exec_focus(){
-  local local_end_of_msg
-
   # Set end of message to not duplicate it
-  local_end_of_msg="due to window $window_id focus event"
+  local local_end_of_msg="due to window $window_id focus event"
 
   # Do not do anything if focused window process PID is exacly the same as previous one
   if [[ "$process_pid" != "$previous_process_pid" ]]; then

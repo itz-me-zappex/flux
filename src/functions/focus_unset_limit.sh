@@ -1,5 +1,6 @@
 # Required to unset limit for focused process
 focus_unset_limit(){
+  # Set end of message to not duplicate it
   local local_end_of_msg="due to window $window_id focus event"
 
   # Define type of limit which should be unset

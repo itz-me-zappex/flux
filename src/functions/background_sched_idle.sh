@@ -1,9 +1,7 @@
 # Required to change scheduling policy of process to 'SCHED_IDLE' on unfocus event, runs in background via '&'
 background_sched_idle(){
-  local local_delay
-
   # Simplify access to delay specified in config
-  local_delay="${config_key_delay_map["$passed_section"]}"
+  local local_delay="${config_key_delay_map["$passed_section"]}"
 
   # Wait before change scheduling policy and notify user if delay is specified
   if [[ "$local_delay" != '0' ]]; then

@@ -1,17 +1,12 @@
 # Required to terminate background process with delayed setting of 'SCHED_IDLE' or restore scheduling policy for process if window becomes focused or terminated
 unset_sched_idle(){
-  local local_background_sched_idle_pid \
-  local_policy_option \
-  local_policy_name \
-  local_config_delay
-
   # Simplify access to PID of background process with delayed setting of 'SCHED_IDLE'
-  local_background_sched_idle_pid="${background_sched_idle_pid_map["$passed_process_pid"]}"
+  local local_background_sched_idle_pid="${background_sched_idle_pid_map["$passed_process_pid"]}"
 
   # Check for existence of background process with delayed setting of 'SCHED_IDLE'
   if check_pid_existence "$local_background_sched_idle_pid"; then
     # Simplify access to delay config key value
-    local_config_delay="${config_key_delay_map["$passed_section"]}"
+    local local_config_delay="${config_key_delay_map["$passed_section"]}"
 
     # Attempt to terminate background process
     kill "$local_background_sched_idle_pid" > /dev/null 2>&1
@@ -29,23 +24,23 @@ unset_sched_idle(){
     # Define option and scheduling policy name depending by scheduling policy
     case "${sched_previous_policy_map["$passed_process_pid"]}" in
     'SCHED_FIFO' )
-      local_policy_option='--fifo'
-      local_policy_name="'FIFO' (first in first out)"
+      local local_policy_option='--fifo'
+      local local_policy_name="'FIFO' (first in first out)"
     ;;
     'SCHED_RR' )
-      local_policy_option='--rr'
-      local_policy_name="'RR' (round robin)"
+      local local_policy_option='--rr'
+      local local_policy_name="'RR' (round robin)"
     ;;
     'SCHED_OTHER' )
-      local_policy_option='--other'
-      local_policy_name="'other'"
+      local local_policy_option='--other'
+      local local_policy_name="'other'"
     ;;
     'SCHED_BATCH' )
-      local_policy_option='--batch'
-      local_policy_name="'batch'"
+      local local_policy_option='--batch'
+      local local_policy_name="'batch'"
     ;;
     'SCHED_DEADLINE' ) # Setting option unneeded because command for deadline differs greatly
-      local_policy_name="'deadline'"
+      local local_policy_name="'deadline'"
     esac
 
     # Define how to restore scheduling policy depending by whether that is deadline or not

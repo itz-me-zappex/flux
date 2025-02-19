@@ -1,42 +1,26 @@
 # Required to set CPU/FPS limits for requested windows
 handle_requests(){
-  local local_temp_window_id \
-  local_windows \
-  local_process_pid \
-  local_section \
-  local_process_name \
-  local_sched_info \
-  local_temp_sched_info_line \
-  local_deadline_parameters \
-  local_temp_deadline_parameter \
-  local_count \
-  local_idle_cancelled \
-  local_process_owner \
-  local_process_owner_username \
-  local_temp_window \
-  local_window_ids_array \
-  local_test_sleep_pid \
-  local_process_command
-
   # Get list of existing windows
-  local_windows="${event/'windows_list: '/}"
+  local local_windows="${event/'windows_list: '/}"
 
   # Remove PIDs from list of existing windows
+  local local_temp_window
   for local_temp_window in $local_windows; do
-    local_window_ids_array+=("${local_temp_window/'='*/}")
+    local local_window_ids_array+=("${local_temp_window/'='*/}")
   done
 
   # Apply requested limits to existing windows
+  local local_temp_window_id
   for local_temp_window_id in "${local_window_ids_array[@]}"; do
     # Skip cycle if info about window is not cached
     if [[ -n "${cache_process_pid_map["$local_temp_window_id"]}" ]]; then
       # Simplify access to cached window info
-      local_process_pid="${cache_process_pid_map["$local_temp_window_id"]}"
-      local_section="${cache_section_map["$local_process_pid"]}"
-      local_process_name="${cache_process_name_map["$local_temp_window_id"]}"
-      local_process_owner="${cache_process_owner_map["$local_temp_window_id"]}"
-      local_process_owner_username="${cache_process_owner_username_map["$local_temp_window_id"]}"
-      local_process_command="${cache_process_command_map["$local_temp_window_id"]}"
+      local local_process_pid="${cache_process_pid_map["$local_temp_window_id"]}"
+      local local_section="${cache_section_map["$local_process_pid"]}"
+      local local_process_name="${cache_process_name_map["$local_temp_window_id"]}"
+      local local_process_owner="${cache_process_owner_map["$local_temp_window_id"]}"
+      local local_process_owner_username="${cache_process_owner_username_map["$local_temp_window_id"]}"
+      local local_process_command="${cache_process_command_map["$local_temp_window_id"]}"
 
       # Minimize window if requested
       if [[ -n "${request_minimize_map["$local_process_pid"]}" ]]; then
@@ -128,9 +112,10 @@ handle_requests(){
         unset request_sched_idle_map["$local_process_pid"]
 
         # Remember scheduling policy and priority before change it
-        local_sched_info="$(chrt --pid "$local_process_pid")"
+        local local_sched_info="$(chrt --pid "$local_process_pid")"
 
         # Read output of 'chrt' tool line-by-line and remember scheduling policy with priority of process to restore it on daemon exit or window focus event
+        local local_temp_sched_info_line
         while read -r local_temp_sched_info_line; do
           # Define associative array which should store value depending by what line contains
           case "$local_temp_sched_info_line" in
@@ -144,9 +129,10 @@ handle_requests(){
           ;;
           *'runtime/deadline/period parameters'* )
             # Extract parameters from string
-            local_deadline_parameters="${local_temp_sched_info_line/*': '/}"
+            local local_deadline_parameters="${local_temp_sched_info_line/*': '/}"
             # Remove slashes and remember 'SCHED_DEADLINE' parameters
-            local_count='0'
+            local local_count='0'
+            local local_temp_deadline_parameter
             for local_temp_deadline_parameter in ${local_deadline_parameters//'/'/' '}; do
               (( local_count++ ))
               case "$local_count" in
@@ -166,7 +152,7 @@ handle_requests(){
         # Attempt to change scheduling policy to idle and restore it to check whether daemon can restore it on focus or not
         if [[ -z "$sched_change_is_supported" ]]; then
           sleep 999 &
-          local_test_sleep_pid="$!"
+          local local_test_sleep_pid="$!"
           chrt --idle --pid 0 "$local_test_sleep_pid" > /dev/null 2>&1
 
           if ! chrt --other --pid 0 "$local_test_sleep_pid" > /dev/null 2>&1; then
@@ -192,15 +178,15 @@ handle_requests(){
         # Print warning if daemon unable to change scheduling policy, otherwise - change it to 'SCHED_IDLE' if not set already
         if [[ "$sched_change_is_supported" == '0' ]]; then
           message --warning "Daemon has insufficient rights to restore scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle due to window $local_temp_window_id unfocus event cancelled!"
-          local_idle_cancelled='1'
+          local local_idle_cancelled='1'
         elif [[ "$sched_realtime_is_supported" == '0' &&
                 "${sched_previous_policy_map["$local_process_pid"]}" =~ ^('SCHED_RR'|'SCHED_FIFO')$ ]]; then
           message --warning "Daemon has insufficient rights to restore realtime scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle due to window $local_temp_window_id unfocus event cancelled!"
-          local_idle_cancelled='1'
+          local local_idle_cancelled='1'
         elif [[ "$UID" != '0' &&
                 "${sched_previous_policy_map["$local_process_pid"]}" == 'SCHED_DEADLINE' ]]; then
           message --warning "Daemon has insufficient rights to restore deadline scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle due to window $local_temp_window_id unfocus event cancelled!"
-          local_idle_cancelled='1'
+          local local_idle_cancelled='1'
         elif [[ "${sched_previous_policy_map["$local_process_pid"]}" != 'SCHED_IDLE' ]]; then # Do not do anything if scheduling policy already idle
           # Change scheduling policy to 'SCHED_IDLE'
           passed_section="$local_section" \
@@ -216,7 +202,7 @@ handle_requests(){
           is_sched_idle_applied_map["$local_process_pid"]='1'
         else
           message --info "Process '$local_process_name' with PID $local_process_pid already has scheduling policy set to idle, changing it to idle on unfocus event cancelled."
-          local_idle_cancelled='1'
+          local local_idle_cancelled='1'
         fi
 
         # Unset info about scheduling policy if changing it to idle is cancelled

@@ -1,14 +1,12 @@
 # Required to find matching section for process
 find_matching_section(){
-  local local_temp_section \
-  local_match \
-  local_window_type_text
-
   # Find matching section if was not found previously and store it to cache
   if [[ -z "${cache_section_map["$process_pid"]}" ]]; then
     # Avoid searching for matching section if it was not found previously
     if [[ -z "${cache_mismatch_map["$process_pid"]}" ]]; then
       # Attempt to find a matching section in config
+      local local_temp_section
+      local local_match
       for local_temp_section in "${sections_array[@]}"; do
         # Compare process name with specified in section
         if [[ -z "${config_key_name_map["$local_temp_section"]}" ]]; then
@@ -57,9 +55,9 @@ find_matching_section(){
 
   # Define type of window to print message about section match/mismatch
   if [[ -n "$hot" ]]; then
-    local_window_type_text='opened window'
+    local local_window_type_text='opened window'
   else
-    local_window_type_text='focused window'
+    local local_window_type_text='focused window'
   fi
   
   # Print message about section match

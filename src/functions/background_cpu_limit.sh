@@ -1,11 +1,7 @@
 # Required to set CPU limit using 'cpulimit' tool on unfocus event, runs in background via '&'
 background_cpu_limit(){
-  local local_cpulimit_pid \
-  local_sleep_pid \
-  local_delay
-
   # Simplify access to delay specified in config
-  local_delay="${config_key_delay_map["$passed_section"]}"
+  local local_delay="${config_key_delay_map["$passed_section"]}"
 
   # Wait before set limit and notify user if delay is specified
   if [[ "$local_delay" != '0' ]]; then
@@ -15,7 +11,7 @@ background_cpu_limit(){
     sleep "$local_delay" &
 
     # Remember PID of 'sleep' to terminate it on SIGINT/SIGTERM
-    local_sleep_pid="$!"
+    local local_sleep_pid="$!"
 
     # Print relevant message on daemon termination and stop this subprocess
     trap 'message --info "Delayed for $local_delay second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to daemon termination." ; \
@@ -48,7 +44,7 @@ background_cpu_limit(){
     cpulimit --lazy --limit="$(( "${config_key_cpu_limit_map["$passed_section"]}" * cpu_threads ))" --pid="$passed_process_pid" > /dev/null 2>&1 &
 
     # Remember PID of 'cpulimit' to terminate it if needed
-    local_cpulimit_pid="$!"
+    local local_cpulimit_pid="$!"
 
     # Enforce 'SCHED_BATCH' to improve interval stability between interrupts
     if check_pid_existence "$local_cpulimit_pid" &&

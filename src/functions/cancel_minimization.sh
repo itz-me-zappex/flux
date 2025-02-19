@@ -1,9 +1,7 @@
 # Required to stop 'background_minimize()' in case of daemon termination or focus event which appears earlier than 100ms
 cancel_minimization(){
-  local local_background_minimize_pid
-
   # Simplify access to PID of background process
-  local_background_minimize_pid="${background_minimize_pid_map["$passed_process_pid"]}"
+  local local_background_minimize_pid="${background_minimize_pid_map["$passed_process_pid"]}"
 
   # Check for existence of background minimize process
   if check_pid_existence "$local_background_minimize_pid"; then

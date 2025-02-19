@@ -1,8 +1,7 @@
 # Required to validate config keys
 validate_config_keys(){
-  local local_temp_section
-
   # Check values in sections and exit with an error if something is wrong or set default values in some keys if is not specified
+  local local_temp_section
   for local_temp_section in "${sections_array[@]}"; do
     # Exit with an error if neither identifier 'name' nor 'command' is specified
     if [[ -z "${config_key_name_map["$local_temp_section"]}" &&

@@ -1,6 +1,5 @@
 # Required to validate config file
 validate_config(){
-  local local_temp_config
   # Automatically set a path to config file if it is not specified
   if [[ -z "$config" ]]; then
     # Set XDG_CONFIG_HOME automatically if it is not specified
@@ -9,6 +8,7 @@ validate_config(){
     fi
 
     # Find a config
+    local local_temp_config
     for local_temp_config in "$XDG_CONFIG_HOME/flux.ini" "$HOME/.config/flux.ini" '/etc/flux.ini'; do
       if [[ -f "$local_temp_config" ]]; then
         config="$local_temp_config"

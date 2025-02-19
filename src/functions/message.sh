@@ -1,20 +1,17 @@
 # Required to print messages to console, log and notifications
 message(){
-  local local_timestamp \
-  local_log_prefix \
-  local_notification_icon
-  
   # Get timestamp if that behavior is allowed using '--timestamps' option
   if [[ -n "$timestamps" ]]; then
-    local_timestamp="$(printf "%($timestamp_format)T") "
+    local local_timestamp="$(printf "%($timestamp_format)T") "
   fi
+
   # Print message depending by passed option
   case "$1" in
   --error )
     shift 1
     echo "$local_timestamp$prefix_error $*" >&2
-    local_log_prefix="$prefix_error"
-    local_notification_icon='emblem-error'
+    local local_log_prefix="$prefix_error"
+    local local_notification_icon='emblem-error'
   ;;
   --error-opt )
     # Setting '$local_log_prefix' is unneeded because this message will not be logged ever
@@ -26,8 +23,8 @@ message(){
     shift 1
     if [[ -z "$quiet" ]]; then
       echo "$local_timestamp$prefix_info $*"
-      local_log_prefix="$prefix_info"
-      local_notification_icon='emblem-information'
+      local local_log_prefix="$prefix_info"
+      local local_notification_icon='emblem-information'
     else
       return 0
     fi
@@ -36,8 +33,8 @@ message(){
     shift 1
     if [[ -n "$verbose" ]]; then
       echo "$local_timestamp$prefix_verbose $*"
-      local_log_prefix="$prefix_verbose"
-      local_notification_icon='emblem-added'
+      local local_log_prefix="$prefix_verbose"
+      local local_notification_icon='emblem-added'
     else
       return 0
     fi
@@ -45,8 +42,8 @@ message(){
   --warning )
     shift 1
     echo "$local_timestamp$prefix_warning $*" >&2
-    local_log_prefix="$prefix_warning"
-    local_notification_icon='emblem-warning'
+    local local_log_prefix="$prefix_warning"
+    local local_notification_icon='emblem-warning'
   esac
 
   # Print message with timestamp to log file if responding option is specified and logging has been allowed before event reading

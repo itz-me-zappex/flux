@@ -1,12 +1,7 @@
 # Required to parse INI config file
 parse_config(){
-  local local_temp_config_line \
-  local_config_value \
-  local_section \
-  local_temp_section \
-  local_key_name
-
   # Parse INI config
+  local local_temp_config_line
   while read -r local_temp_config_line; do
     # Skip cycle if line is commented or blank, regexp means comments which beginning from ';' or '#' symbols
     if [[ ! "$local_temp_config_line" =~ ^(\;|\#) &&
@@ -19,6 +14,7 @@ parse_config(){
       elif [[ "$local_temp_config_line" =~ ^\[.*\]$ ]]; then # Regexp means any symbols in square brackes
         # Exit with an error if section repeated
         if [[ -n "${sections_array[*]}" ]]; then
+          local local_temp_section
           for local_temp_section in "${sections_array[@]}"; do
             if [[ "[$local_temp_section]" == "$local_temp_config_line" ]]; then
               message --error "Section name '$local_temp_section' is repeated in '$config' config file!"
@@ -29,26 +25,26 @@ parse_config(){
 
         # Remove square brackets from section name and add it to array
         # Array required to check for repeating sections and find matching rule(s) for process in config
-        local_section="${local_temp_config_line/\[/}"
-        local_section="${local_section/%\]/}"
+        local local_section="${local_temp_config_line/\[/}"
+        local local_section="${local_section/%\]/}"
         sections_array+=("$local_section")
       elif [[ "${local_temp_config_line,,}" =~ ^(name|owner|cpu-limit|delay|(lazy-)?exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus|idle|minimize)([[:space:]]+)?=([[:space:]]+)?* ]]; then # Exit with an error if type of line cannot be defined, regexp means [key name][space(s)?]=[space(s)?][anything else]
         # Remove key name and equal symbol
-        local_config_value="${local_temp_config_line#*=}"
+        local local_config_value="${local_temp_config_line#*=}"
 
         # Remove all spaces before and after string, internal shell parameter expansion required to get spaces supposed to be removed
-        local_config_value="${local_config_value#"${local_config_value%%[![:space:]]*}"}" # Remove spaces in beginning for string
-        local_config_value="${local_config_value%"${local_config_value##*[![:space:]]}"}" # Remove spaces in end of string
+        local local_config_value="${local_config_value#"${local_config_value%%[![:space:]]*}"}" # Remove spaces in beginning for string
+        local local_config_value="${local_config_value%"${local_config_value##*[![:space:]]}"}" # Remove spaces in end of string
 
         # Remove single or double quotes from strings, that is what regexp means
         if [[ "$local_config_value" =~ ^(\".*\"|\'.*\')$ ]]; then
           # Regexp means double quoted string
           if [[ "$local_config_value" =~ ^\".*\"$ ]]; then
-            local_config_value="${local_config_value/\"/}" # Remove first double quote
-            local_config_value="${local_config_value/%\"/}" # And last one
+            local local_config_value="${local_config_value/\"/}" # Remove first double quote
+            local local_config_value="${local_config_value/%\"/}" # And last one
           else
-            local_config_value="${local_config_value/\'/}" # Remove first single quote
-            local_config_value="${local_config_value/%\'/}" # And last one
+            local local_config_value="${local_config_value/\'/}" # Remove first single quote
+            local local_config_value="${local_config_value/%\'/}" # And last one
           fi
         fi
 
@@ -92,7 +88,7 @@ parse_config(){
           ;;
           mangohud-source-config* | mangohud-config* )
             # Get absolute path to MangoHud config in case it is specified as relative
-            local_config_value="$(get_realpath "$local_config_value")"
+            local local_config_value="$(get_realpath "$local_config_value")"
 
             # Check for config file existence
             if [[ -f "$local_config_value" ]]; then
@@ -108,10 +104,10 @@ parse_config(){
               # Set key name depending by key name on line
               case "${local_temp_config_line,,}" in
               mangohud-source-config* )
-                local_key_name='mangohud-source-config'
+                local local_key_name='mangohud-source-config'
               ;;
               mangohud-config* )
-                local_key_name='mangohud-config'
+                local local_key_name='mangohud-config'
               esac
 
               # Exit with an error if specified MangoHud config file does not exist

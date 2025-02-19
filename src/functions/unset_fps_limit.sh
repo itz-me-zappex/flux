@@ -1,15 +1,12 @@
 # Required to terminate FPS limit background process or unset FPS limit if window becomes focused or terminated
 unset_fps_limit(){
-  local local_background_fps_limit_pid \
-  local_config_delay
-
   # Simplify access to PID of background process with delayed setting of FPS limit
-  local_background_fps_limit_pid="${background_fps_limit_pid_map["$passed_section"]}"
+  local local_background_fps_limit_pid="${background_fps_limit_pid_map["$passed_section"]}"
 
   # Check for existence of FPS limit background process
   if check_pid_existence "$local_background_fps_limit_pid"; then
     # Simplify access to delay config key value
-    local_config_delay="${config_key_delay_map["$passed_section"]}"
+    local local_config_delay="${config_key_delay_map["$passed_section"]}"
 
     # Attempt to terminate background process
     kill "$local_background_fps_limit_pid" > /dev/null 2>&1

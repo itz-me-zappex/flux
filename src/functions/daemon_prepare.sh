@@ -1,8 +1,5 @@
 # Required to prepare daemon for event reading
 daemon_prepare(){
-  local local_temp_prefix_type \
-  local_variable_name
-
   lock_file='/tmp/flux-lock'
 
   # Exit with an error if lock file and process specified there exists
@@ -38,9 +35,10 @@ daemon_prepare(){
   fi
 
   # Set specified prefixes for messages if any
+  local local_temp_prefix_type
   for local_temp_prefix_type in error info verbose warning; do
     # Get name of variable with new prefix
-    local_variable_name="new_prefix_$local_temp_prefix_type"
+    local local_variable_name="new_prefix_$local_temp_prefix_type"
 
     # Check for existence of value in variable indirectly
     if [[ -n "${!local_variable_name}" ]]; then

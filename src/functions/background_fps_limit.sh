@@ -1,9 +1,7 @@
 # Required to set specified FPS on unfocus event, runs in background via '&'
 background_fps_limit(){
-  local local_delay
-
   # Simplify access to delay specified in config
-  local_delay="${config_key_delay_map["$passed_section"]}"
+  local local_delay="${config_key_delay_map["$passed_section"]}"
 
   # Wait before set limit and notify user if delay is specified
   if [[ "$local_delay" != '0' ]]; then

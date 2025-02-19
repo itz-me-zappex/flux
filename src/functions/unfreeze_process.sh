@@ -1,9 +1,7 @@
 # Required to terminate freeze background process or unfreeze process if window becomes focused or terminated
 unfreeze_process(){
-  local local_background_freeze_pid
-
   # Simplify access to PID of freeze background process
-  local_background_freeze_pid="${background_freeze_pid_map["$passed_process_pid"]}"
+  local local_background_freeze_pid="${background_freeze_pid_map["$passed_process_pid"]}"
 
   # Check for existence of freeze background process
   if check_pid_existence "$local_background_freeze_pid"; then

@@ -1,9 +1,5 @@
 # Required to validate options
 validate_options(){
-  local local_temp_prefix_type \
-  local_is_passed \
-  local_new_prefix
-
   # Exit with an error if verbose and quiet modes are specified at the same time
   if [[ -n "$verbose" &&
         -n "$quiet" ]]; then
@@ -35,10 +31,11 @@ validate_options(){
   unset config_is_passed
 
   # Exit with error if at least one prefix option is specified without prefix
+  local local_temp_prefix_type
   for local_temp_prefix_type in error info verbose warning; do
     # Set proper variables names to obtain their values using indirectly
-    local_is_passed="prefix_${local_temp_prefix_type}_is_passed"
-    local_new_prefix="new_prefix_$local_temp_prefix_type"
+    local local_is_passed="prefix_${local_temp_prefix_type}_is_passed"
+    local local_new_prefix="new_prefix_$local_temp_prefix_type"
 
     # Exit with an error if option is passed but value does not exist
     if [[ -n "${!local_is_passed}" &&
