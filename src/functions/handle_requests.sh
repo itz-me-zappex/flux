@@ -106,48 +106,54 @@ handle_requests(){
         # Mark section as FPS limited, required to check FPS limit existence on focus event
         is_fps_limit_applied_map["$local_section"]='1'
       fi
+
       # Check for 'SCHED_IDLE' scheduling policy request
       if [[ -n "${request_sched_idle_map["$local_process_pid"]}" ]]; then
         # Unset as it becomes useless
         unset request_sched_idle_map["$local_process_pid"]
 
         # Remember scheduling policy and priority before change it
-        local local_sched_info="$(chrt --pid "$local_process_pid")"
+        if ! local local_sched_info="$(chrt --pid "$local_process_pid" 2>/dev/null)"; then
+          local local_chrt_error='1'
+        fi
 
-        # Read output of 'chrt' tool line-by-line and remember scheduling policy with priority of process to restore it on daemon exit or window focus event
-        local local_temp_sched_info_line
-        while read -r local_temp_sched_info_line; do
-          # Define associative array which should store value depending by what line contains
-          case "$local_temp_sched_info_line" in
-          *'scheduling policy'* )
-            # Extract scheduling policy name from string and remember it
-            sched_previous_policy_map["$local_process_pid"]="${local_temp_sched_info_line/*': '/}"
-          ;;
-          *'scheduling priority'* )
-            # Extract scheduling priority value from string and remember it
-            sched_previous_priority_map["$local_process_pid"]="${local_temp_sched_info_line/*': '/}"
-          ;;
-          *'runtime/deadline/period parameters'* )
-            # Extract parameters from string
-            local local_deadline_parameters="${local_temp_sched_info_line/*': '/}"
-            # Remove slashes and remember 'SCHED_DEADLINE' parameters
-            local local_count='0'
-            local local_temp_deadline_parameter
-            for local_temp_deadline_parameter in ${local_deadline_parameters//'/'/' '}; do
-              (( local_count++ ))
-              case "$local_count" in
-              '1' )
-                sched_previous_runtime_map["$local_process_pid"]="$local_temp_deadline_parameter"
-              ;;
-              '2' )
-                sched_previous_deadline_map["$local_process_pid"]="$local_temp_deadline_parameter"
-              ;;
-              '3' )
-                sched_previous_period_map["$local_process_pid"]="$local_temp_deadline_parameter"
-              esac
-            done
-          esac
-        done <<< "$local_sched_info"
+        # Skip handling 'chrt' output if it returned an error
+        if [[ -z "$local_chrt_error" ]]; then
+          # Read output of 'chrt' tool line-by-line and remember scheduling policy with priority of process to restore it on daemon exit or window focus event
+          local local_temp_sched_info_line
+          while read -r local_temp_sched_info_line; do
+            # Define associative array which should store value depending by what line contains
+            case "$local_temp_sched_info_line" in
+            *'scheduling policy'* )
+              # Extract scheduling policy name from string and remember it
+              sched_previous_policy_map["$local_process_pid"]="${local_temp_sched_info_line/*': '/}"
+            ;;
+            *'scheduling priority'* )
+              # Extract scheduling priority value from string and remember it
+              sched_previous_priority_map["$local_process_pid"]="${local_temp_sched_info_line/*': '/}"
+            ;;
+            *'runtime/deadline/period parameters'* )
+              # Extract parameters from string
+              local local_deadline_parameters="${local_temp_sched_info_line/*': '/}"
+              # Remove slashes and remember 'SCHED_DEADLINE' parameters
+              local local_count='0'
+              local local_temp_deadline_parameter
+              for local_temp_deadline_parameter in ${local_deadline_parameters//'/'/' '}; do
+                (( local_count++ ))
+                case "$local_count" in
+                '1' )
+                  sched_previous_runtime_map["$local_process_pid"]="$local_temp_deadline_parameter"
+                ;;
+                '2' )
+                  sched_previous_deadline_map["$local_process_pid"]="$local_temp_deadline_parameter"
+                ;;
+                '3' )
+                  sched_previous_period_map["$local_process_pid"]="$local_temp_deadline_parameter"
+                esac
+              done
+            esac
+          done <<< "$local_sched_info"
+        fi
 
         # Attempt to change scheduling policy to idle and restore it to check whether daemon can restore it on focus or not
         if [[ -z "$sched_change_is_supported" ]]; then
@@ -176,7 +182,10 @@ handle_requests(){
         fi
 
         # Print warning if daemon unable to change scheduling policy, otherwise - change it to 'SCHED_IDLE' if not set already
-        if [[ "$sched_change_is_supported" == '0' ]]; then
+        if [[ -n "$local_chrt_error" ]]; then
+          message --warning "Unable to obtain scheduling policy info of process '$local_process_name' with PID $local_process_pid, changing it to idle due to window $local_temp_window_id unfocus event cancelled!"
+          local local_idle_cancelled='1'
+        elif [[ "$sched_change_is_supported" == '0' ]]; then
           message --warning "Daemon has insufficient rights to restore scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle due to window $local_temp_window_id unfocus event cancelled!"
           local local_idle_cancelled='1'
         elif [[ "$sched_realtime_is_supported" == '0' &&
