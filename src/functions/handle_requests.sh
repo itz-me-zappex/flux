@@ -50,7 +50,7 @@ handle_requests(){
           request_fps_limit_map["$local_section"] \
           request_sched_idle_map["$local_process_pid"]
 
-          message --warning "Daemon has insufficient rights to apply limit for process '$local_process_name' with PID '$local_process_pid'!"
+          message --warning "Daemon has insufficient rights to apply limit for process '$local_process_name' with PID $local_process_pid!"
 
           return 1
         fi
