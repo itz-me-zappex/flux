@@ -89,7 +89,7 @@ get_realpath(){
   realpath -m "${local_relative_path/'~'/"$HOME"}"
 }
 
-# Required to check if value is boolean or nor
+# Required to check whether value is boolean or not
 is_bool(){
   local local_value="$1"
 
