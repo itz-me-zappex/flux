@@ -10,17 +10,20 @@ validate_log(){
       exit 1
     fi
     
-    # Exit with an error if specified log file exists but not accessible for read-write operations
+    # Check for critical errors
     if [[ -f "$log" ]] &&
        ! check_rw "$log"; then
+      # Exit with an error if specified log file exists but not accessible for read-write operations
       message --error "Log file '$log' is not accessible for read-write operations!"
       exit 1
     elif [[ -e "$log" &&
-            ! -f "$log" ]]; then # Exit with an error if path to log exists and that is not a file
+            ! -f "$log" ]]; then
+      # Exit with an error if path to log exists and that is not a file
       message --error "Path '$log' specified in '--log' option is expected to be a file!"
       exit 1
     elif [[ -d "${log%/*}" ]] &&
-         ! check_rw "${log%/*}"; then # Exit with an error if log file directory is not accessible for read-write operations
+         ! check_rw "${log%/*}"; then
+      # Exit with an error if log file directory is not accessible for read-write operations
       message --error "Directory of log file '$log' is not accessible for read-write operations!"
       exit 1
     fi

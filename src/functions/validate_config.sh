@@ -17,18 +17,22 @@ validate_config(){
     done
   fi
 
-  # Exit with an error if config file is not found
+  # Check for critical errors
   if [[ -z "$config" ]]; then
+    # Exit with an error if config file is not found
     message --error "Config file is not found!"
     exit 1
   elif [[ -e "$config" &&
-          ! -f "$config" ]]; then # Exit with an error if path exists but that is not a file
+          ! -f "$config" ]]; then
+    # Exit with an error if path exists but that is not a file
     message --error "Path '$config' specified in '--config' is not a file!"
     exit 1
-  elif [[ ! -f "$config" ]]; then # Exit with an error if config file does not exist
+  elif [[ ! -f "$config" ]]; then
+    # Exit with an error if config file does not exist
     message --error "Config file '$config' does not exist!"
     exit 1
-  elif ! check_ro "$config"; then # Exit with an error if config file is not readable
+  elif ! check_ro "$config"; then
+    # Exit with an error if config file is not readable
     message --error "Config file '$config' is not accessible for reading!"
     exit 1
   fi
