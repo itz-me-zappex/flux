@@ -125,7 +125,7 @@ handle_closure(){
       # Unset 'SCHED_IDLE' request
       if [[ -n "${request_sched_idle_map["$local_terminated_process_pid"]}" ]]; then
         unset request_sched_idle_map["$local_terminated_process_pid"]
-        message --verbose "Changing scheduling policy to idle for process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id closure."
+        message --verbose "Changing scheduling policy to 'idle' for process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id closure."
       fi
 
       # Unset window minimization request
