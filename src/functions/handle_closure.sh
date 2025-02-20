@@ -35,19 +35,21 @@ handle_closure(){
       local local_end_of_msg="due to window $local_temp_window_id closure"
 
       # Unset applied limits
-      if [[ -n "${is_freeze_applied_map["$local_terminated_process_pid"]}" ]]; then # Unfreeze process if frozen
+      if [[ -n "${is_freeze_applied_map["$local_terminated_process_pid"]}" ]]; then
+        # Unfreeze process if frozen
         passed_process_pid="$local_terminated_process_pid" \
         passed_section="$local_terminated_section" \
         passed_process_name="$local_terminated_process_name" \
         passed_end_of_msg="$local_end_of_msg" \
         unfreeze_process
-      elif [[ -n "${is_cpu_limit_applied_map["$local_terminated_process_pid"]}" ]]; then # # Unset CPU limit if limited
+      elif [[ -n "${is_cpu_limit_applied_map["$local_terminated_process_pid"]}" ]]; then
+        # Unset CPU limit if limited
         passed_process_pid="$local_terminated_process_pid" \
         passed_process_name="$local_terminated_process_name" \
         passed_signal='-SIGUSR2' \
         unset_cpu_limit
       elif [[ -n "$local_terminated_section" &&
-              -n "${is_fps_limit_applied_map["$local_terminated_section"]}" ]]; then # Unset FPS limit if limited
+              -n "${is_fps_limit_applied_map["$local_terminated_section"]}" ]]; then
         # Do not remove FPS limit if one of existing windows matches with the same section
         local local_temp_existing_window_id
         for local_temp_existing_window_id in "${local_existing_window_ids_array[@]}"; do
