@@ -117,7 +117,7 @@ while read -r raw_event; do
   if (( events_count == 1 )); then
     focused_window="$raw_event"
     continue
-  elif (( events_count == 2 )); then
+  else
     opened_windows="$raw_event"
   fi
 
@@ -271,17 +271,7 @@ while read -r raw_event; do
           # Execute command on focus event if specified in config
           exec_focus
         fi
-      else
-        # Define message depending by exit code
-        if (( get_process_info_exit_code == 1 )); then
-          message --warning "Unable to obtain info about process with PID $process_pid! Probably process has been terminated during check."
-        elif (( get_process_info_exit_code == 2 )); then
-          message --warning "Unable to obtain owner username of process $process_name with PID $process_pid!"
-        fi
-      fi
 
-      # Define what to do with info about previous window depending by exit code (overwrite or unset)
-      if (( get_process_info_exit_code == 0 )); then
         # Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
         previous_window_id="$window_id"
         previous_process_pid="$process_pid"
@@ -290,6 +280,13 @@ while read -r raw_event; do
         previous_process_command="$process_command"
         previous_section="$section"
       else
+        # Define message depending by exit code
+        if (( get_process_info_exit_code == 1 )); then
+          message --warning "Unable to obtain info about process with PID $process_pid! Probably process has been terminated during check."
+        else
+          message --warning "Unable to obtain owner username of process $process_name with PID $process_pid!"
+        fi
+
         # Forget info about previous window/process because it is not changed
         unset previous_window_id \
         previous_process_pid \
@@ -298,6 +295,7 @@ while read -r raw_event; do
         previous_process_command \
         previous_section
       fi
+
       unset get_process_info_exit_code
     esac
   done
