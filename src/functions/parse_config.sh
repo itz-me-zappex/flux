@@ -150,20 +150,16 @@ parse_config(){
           ;;
           idle* )
             # Exit with an error if value is not boolean
-            if ! is_bool "$local_config_value"; then
+            if ! config_key_idle_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
               message --error "Value '$local_config_value' specified in key 'idle' in section '$local_section' in '$config' config file is not boolean!"
               exit 1
-            else
-              config_key_idle_map["$local_section"]="$(bool_to_int "$local_config_value")"
             fi
           ;;
           minimize* )
             # Exit with an error if value is not boolean
-            if ! is_bool "$local_config_value"; then
+            if ! config_key_minimize_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
               message --error "Value '$local_config_value' specified in key 'minimize' in section '$local_section' in '$config' config file is not boolean!"
               exit 1
-            else
-              config_key_minimize_map["$local_section"]="$(bool_to_int "$local_config_value")"
             fi
           esac
         fi
