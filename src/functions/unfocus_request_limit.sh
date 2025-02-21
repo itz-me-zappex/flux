@@ -23,7 +23,7 @@ unfocus_request_limit(){
     fi
     
     # Request 'SCHED_IDLE' scheduling policy for process if specified in config
-    if [[ "${config_key_idle_map["$previous_section"]}" == '1' ]]; then
+    if [[ -n "${config_key_idle_map["$previous_section"]}" ]]; then
       # Do not request idle scheduling policy if CPU limit specified to zero because that is useless as process will not consume neither GPU nor CPU time
       if (( "${config_key_cpu_limit_map["$previous_section"]}" > 0 )) ||
          [[ "${config_key_cpu_limit_map["$previous_section"]}" == '-1' ]]; then
@@ -35,7 +35,7 @@ unfocus_request_limit(){
     fi
 
     # Request window minimization if specified in config
-    if [[ "${config_key_minimize_map["$previous_section"]}" == '1' ]]; then
+    if [[ -n "${config_key_minimize_map["$previous_section"]}" ]]; then
       request_minimize_map["$previous_process_pid"]='1'
     fi
 
