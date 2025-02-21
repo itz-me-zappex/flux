@@ -85,28 +85,22 @@ exec_on_event(){
 get_realpath(){
   local local_relative_path="$1"
 
-  # Output will be stored to variable which calls this function from '$(…)'
+  # Output will be stored to variable from command substitution
   realpath -m "${local_relative_path/'~'/"$HOME"}"
 }
 
-# Required to check whether value is boolean or not
-is_bool(){
+# Required to check whether value is boolean or not and simplify it
+simplify_bool(){
   local local_value="$1"
 
+  # Return an error if value is not boolean
   if [[ "${local_value,,}" =~ ^('true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0')$ ]]; then
-    return 0
+    # Value will be stored to variable from command substitution
+    # No need to set value in case it is false
+    if [[ "${local_value,,}" =~ ^('true'|'t'|'yes'|'y'|'1')$ ]]; then
+      echo 1
+    fi
   else
     return 1
-  fi
-}
-
-# Required to convent boolean value to integer
-bool_to_int(){
-  local local_value="$1"
-  
-  if [[ "${local_value,,}" =~ ^('true'|'t'|'yes'|'y'|'1')$ ]]; then
-    echo 1
-  else
-    echo 0
   fi
 }
