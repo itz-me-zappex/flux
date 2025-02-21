@@ -38,8 +38,8 @@ handle_requests(){
       fi
 
       # Return an error if daemon has insufficient rights to apply limit (except FPS limit, that does not require interaction with process)
-      if [[ "$local_process_owner" != "$UID" &&
-            "$UID" != '0' ]]; then
+      if (( UID != 0 &&
+            local_process_owner != UID )); then
         # Check for limit requests which are requiring sufficient rights
         if [[ -n "${request_freeze_map["$local_process_pid"]}" ||
               -n "${request_cpu_limit_map["$local_process_pid"]}" ||
@@ -157,27 +157,37 @@ handle_requests(){
 
         # Attempt to change scheduling policy to idle and restore it to check whether daemon can restore it on focus or not
         if [[ -z "$sched_change_is_supported" ]]; then
-          sleep 999 &
-          local local_test_sleep_pid="$!"
-          chrt --idle --pid 0 "$local_test_sleep_pid" > /dev/null 2>&1
-
-          if ! chrt --other --pid 0 "$local_test_sleep_pid" > /dev/null 2>&1; then
-            sched_change_is_supported='0'
-          else
+          # Do not run checks if running as root
+          if (( UID == 0 )); then
             sched_change_is_supported='1'
-          fi
+          else
+            sleep 999 &
+            local local_test_sleep_pid="$!"
+            chrt --idle --pid 0 "$local_test_sleep_pid" > /dev/null 2>&1
 
-          kill "$local_test_sleep_pid" > /dev/null 2>&1
+            if ! chrt --other --pid 0 "$local_test_sleep_pid" > /dev/null 2>&1; then
+              sched_change_is_supported='0'
+            else
+              sched_change_is_supported='1'
+            fi
+
+            kill "$local_test_sleep_pid" > /dev/null 2>&1
+          fi
         fi
 
         # Attempt to execute command with realtime scheduling policy to check whether daemon can restore it on focus or not
         if [[ "$sched_change_is_supported" == '1' &&
               -z "$sched_realtime_is_supported" &&
               "${sched_previous_policy_map["$local_process_pid"]}" =~ ^('SCHED_RR'|'SCHED_FIFO')$ ]]; then
-          if ! chrt --fifo 1 echo > /dev/null 2>&1; then
-            sched_realtime_is_supported='0'
-          else
+          # Do not run checks if running as root
+          if (( UID == 0 )); then
             sched_realtime_is_supported='1'
+          else
+            if ! chrt --fifo 1 echo > /dev/null 2>&1; then
+              sched_realtime_is_supported='0'
+            else
+              sched_realtime_is_supported='1'
+            fi
           fi
         fi
 
@@ -192,8 +202,8 @@ handle_requests(){
                 "${sched_previous_policy_map["$local_process_pid"]}" =~ ^('SCHED_RR'|'SCHED_FIFO')$ ]]; then
           message --warning "Daemon has insufficient rights to restore realtime scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle due to window $local_temp_window_id unfocus event cancelled!"
           local local_idle_cancelled='1'
-        elif [[ "$UID" != '0' &&
-                "${sched_previous_policy_map["$local_process_pid"]}" == 'SCHED_DEADLINE' ]]; then
+        elif (( UID != 0 )) &&
+             [[ "${sched_previous_policy_map["$local_process_pid"]}" == 'SCHED_DEADLINE' ]]; then
           message --warning "Daemon has insufficient rights to restore deadline scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to idle due to window $local_temp_window_id unfocus event cancelled!"
           local local_idle_cancelled='1'
         elif [[ "${sched_previous_policy_map["$local_process_pid"]}" != 'SCHED_IDLE' ]]; then
