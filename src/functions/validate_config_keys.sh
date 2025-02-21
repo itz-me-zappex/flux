@@ -67,16 +67,6 @@ validate_config_keys(){
           -n "${config_key_mangohud_config_map["$local_temp_section"]}" ]]; then
       config_key_mangohud_source_config_map["$local_temp_section"]="${config_key_mangohud_config_map["$local_temp_section"]}"
     fi
-
-    # Set 'idle' to false if it is not specified
-    if [[ -z "${config_key_idle_map["$local_temp_section"]}" ]]; then
-      config_key_idle_map["$local_temp_section"]='0'
-    fi
-
-    # Set 'minimize' to false if it is not specified
-    if [[ -z "${config_key_minimize_map["$local_temp_section"]}" ]]; then
-      config_key_minimize_map["$local_temp_section"]='0'
-    fi
   done
 
   unset config
