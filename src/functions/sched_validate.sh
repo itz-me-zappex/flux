@@ -30,7 +30,7 @@ sched_validate(){
 
     # Warn user about inablity to restore 'SCHED_DEADLINE' in case daemon runs without root rights
     if (( UID != 0 )); then
-      message --warning "Daemon has insufficient rights to restore 'deadline' scheduling policy! If you need that feature, run daemon as root."
+      message --info "Daemon has insufficient rights to restore 'deadline' scheduling policy, if you need that feature, run daemon as root."
     fi
   fi
 }
