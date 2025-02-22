@@ -1,8 +1,8 @@
 # Required to request CPU/FPS limit for process on unfocus
 unfocus_request_limit(){
   # Do not apply limit if previous and current PIDs are exactly the same or previous window does not match with any section
-  if [[ "$process_pid" != "$previous_process_pid" &&
-        -n "$previous_section" &&
+  if (( process_pid != previous_process_pid )) &&
+     [[ -n "$previous_section" &&
         "$disallow_request" != "$previous_window_id=$previous_process_pid" ]]; then
     # Request limits to be applied on 'check_requests' internal event (from 'event_source()')
     if [[ "${config_key_cpu_limit_map["$previous_section"]}" == '0' ]]; then
@@ -42,7 +42,7 @@ unfocus_request_limit(){
     if [[ -n "${config_key_exec_unfocus_map["$previous_section"]}" ||
           -n "${config_key_lazy_exec_unfocus_map["$previous_section"]}" ]]; then
       # Do not do anything if focused window process PID is exacly the same as previous one
-      if [[ "$process_pid" != "$previous_process_pid" ]]; then
+      if (( process_pid != previous_process_pid )); then
         request_exec_unfocus_general_map["$previous_process_pid"]='1'
       fi
     fi
