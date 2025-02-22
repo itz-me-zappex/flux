@@ -10,9 +10,9 @@ unset_sched_idle(){
 
     # Attempt to terminate background process
     if ! kill "$local_background_sched_idle_pid" > /dev/null 2>&1; then
-      message --warning "Unable to cancel delayed for $local_config_delay second(s) delayed setting of idle scheduling policy for process '$passed_process_name' with PID $passed_process_pid $passed_end_of_msg!"
+      message --warning "Unable to cancel delayed for $local_config_delay second(s) delayed setting of 'idle' scheduling policy for process '$passed_process_name' with PID $passed_process_pid $passed_end_of_msg!"
     else
-      message --info "Delayed for $local_config_delay second(s) setting of idle scheduling policy for process $passed_process_name' with PID $passed_process_pid has been cancelled $passed_end_of_msg."
+      message --info "Delayed for $local_config_delay second(s) setting of 'idle' scheduling policy for process $passed_process_name' with PID $passed_process_pid has been cancelled $passed_end_of_msg."
     fi
   else
     # Define option and scheduling policy name depending by scheduling policy
@@ -57,7 +57,7 @@ unset_sched_idle(){
       message --info "Scheduling policy $local_policy_name has been restored for process '$passed_process_name' with PID $passed_process_pid $passed_end_of_msg."
     fi
     
-    # Unset details about previous and applied idle cheduling policies
+    # Unset details about previous and applied 'idle' cheduling policies
     unset sched_previous_policy_map["$passed_process_pid"] \
     sched_previous_priority_map["$passed_process_pid"] \
     sched_previous_runtime_map["$passed_process_pid"] \
