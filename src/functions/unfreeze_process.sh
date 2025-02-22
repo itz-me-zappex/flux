@@ -4,7 +4,8 @@ unfreeze_process(){
   local local_background_freeze_pid="${background_freeze_pid_map["$passed_process_pid"]}"
 
   # Check for existence of freeze background process
-  if [[ "$local_config_delay" != '0' ]] && check_pid_existence "$local_background_freeze_pid"; then
+  if [[ "$local_config_delay" != '0' ]] &&
+     check_pid_existence "$local_background_freeze_pid"; then
     # Simplify access to delay config key value
     local_config_delay="${config_key_delay_map["$passed_section"]}"
 
