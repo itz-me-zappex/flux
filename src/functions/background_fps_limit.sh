@@ -5,7 +5,7 @@ background_fps_limit(){
 
   # Wait before set limit and notify user if delay is specified
   if [[ "$local_delay" != '0' ]]; then
-    message --verbose "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' will be FPS limited after $local_delay second(s) due to window $passed_window_id unfocus event."
+    message --verbose "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' will be FPS limited after $local_delay second(s) due to window with XID $passed_window_id unfocus event."
     sleep "$local_delay"
   fi
   
@@ -15,9 +15,9 @@ background_fps_limit(){
     if mangohud_fps_set "${config_key_mangohud_config_map["$passed_section"]}" "${config_key_mangohud_source_config_map["$passed_section"]}" "${config_key_fps_unfocus_map["$passed_section"]}"; then
       # Define message depending by whether delay is specified or not
       if [[ "$local_delay" == '0' ]]; then
-        message --info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS due to window $passed_window_id unfocus event."
+        message --info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS due to window with XID $passed_window_id unfocus event."
       else
-        message --info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS due to window $passed_window_id unfocus event after $local_delay second(s)."
+        message --info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS due to window with XID $passed_window_id unfocus event after $local_delay second(s)."
       fi
     fi
   else

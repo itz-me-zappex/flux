@@ -32,7 +32,7 @@ handle_closure(){
       local local_terminated_process_command="${cache_process_command_map["$local_temp_terminated_window_id"]}"
 
       # Set end of message with actual window ID to not duplicate it
-      local local_end_of_msg="due to window $local_temp_window_id closure"
+      local local_end_of_msg="due to window with XID $local_temp_window_id closure"
 
       # Unset applied limits
       if [[ -n "${is_freeze_applied_map["$local_terminated_process_pid"]}" ]]; then
@@ -108,29 +108,29 @@ handle_closure(){
       # Unset limit request
       if [[ -n "${request_freeze_map["$local_terminated_process_pid"]}" ]]; then
         unset request_freeze_map["$local_terminated_process_pid"]
-        message --verbose "Freezing of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id closure."
+        message --verbose "Freezing of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window with XID $local_temp_terminated_window_id closure."
       elif [[ -n "${request_cpu_limit_map["$local_terminated_process_pid"]}" ]]; then
         unset request_cpu_limit_map["$local_terminated_process_pid"]
-        message --verbose "CPU limiting of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id closure."
+        message --verbose "CPU limiting of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window with XID $local_temp_terminated_window_id closure."
       elif [[ -n "$local_terminated_section" &&
               -n "${request_fps_limit_map["$local_terminated_section"]}" ]]; then
         unset request_fps_limit_map["$local_terminated_section"]
-        message --verbose "FPS limiting of section '$local_terminated_section' has been cancelled due to window $local_temp_terminated_window_id closure."
+        message --verbose "FPS limiting of section '$local_terminated_section' has been cancelled due to window with XID $local_temp_terminated_window_id closure."
       elif [[ -z "${request_sched_idle_map["$local_terminated_process_pid"]}" &&
               -z "${request_minimize_map["$local_terminated_process_pid"]}" ]]; then
         # Print verbose message about window termination if there is no limits specified for it in config file
-        message --verbose "Window $local_temp_terminated_window_id of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been terminated."
+        message --verbose "Window with XID $local_temp_terminated_window_id of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been terminated."
       fi
 
       # Unset 'SCHED_IDLE' request
       if [[ -n "${request_sched_idle_map["$local_terminated_process_pid"]}" ]]; then
         unset request_sched_idle_map["$local_terminated_process_pid"]
-        message --verbose "Changing scheduling policy to 'idle' for process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window $local_temp_terminated_window_id closure."
+        message --verbose "Changing scheduling policy to 'idle' for process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window with XID $local_temp_terminated_window_id closure."
       fi
 
       # Unset window minimization request
       if [[ -n "${request_minimize_map["$local_terminated_process_pid"]}" ]]; then
-        message --verbose "Window $local_temp_window_id minimization of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window closure."
+        message --verbose "Window with XID $local_temp_window_id minimization of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window closure."
       fi
 
       # Unset unfocus event command execution request
