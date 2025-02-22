@@ -12,7 +12,6 @@ sched_validate(){
     chrt --idle --pid 0 "$local_sleep_pid" > /dev/null 2>&1
 
     if ! chrt --other --pid 0 "$local_sleep_pid" > /dev/null 2>&1; then
-      sched_change_is_supported='0'
       kill "$local_sleep_pid" > /dev/null 2>&1
       return 1
     else
@@ -22,7 +21,6 @@ sched_validate(){
 
     # Attempt to execute command with realtime scheduling policy to check whether daemon can restore it on focus or not
     if ! chrt --fifo 1 echo > /dev/null 2>&1; then
-      sched_realtime_is_supported='0'
       return 1
     else
       sched_realtime_is_supported='1'
