@@ -155,42 +155,6 @@ handle_requests(){
           done <<< "$local_sched_info"
         fi
 
-        # Attempt to change scheduling policy to idle and restore it to check whether daemon can restore it on focus or not
-        if [[ -z "$sched_change_is_supported" ]]; then
-          # Do not run checks if running as root
-          if (( UID == 0 )); then
-            sched_change_is_supported='1'
-          else
-            sleep 999 &
-            local local_test_sleep_pid="$!"
-            chrt --idle --pid 0 "$local_test_sleep_pid" > /dev/null 2>&1
-
-            if ! chrt --other --pid 0 "$local_test_sleep_pid" > /dev/null 2>&1; then
-              sched_change_is_supported='0'
-            else
-              sched_change_is_supported='1'
-            fi
-
-            kill "$local_test_sleep_pid" > /dev/null 2>&1
-          fi
-        fi
-
-        # Attempt to execute command with realtime scheduling policy to check whether daemon can restore it on focus or not
-        if [[ "$sched_change_is_supported" == '1' &&
-              -z "$sched_realtime_is_supported" &&
-              "${sched_previous_policy_map["$local_process_pid"]}" =~ ^('SCHED_RR'|'SCHED_FIFO')$ ]]; then
-          # Do not run checks if running as root
-          if (( UID == 0 )); then
-            sched_realtime_is_supported='1'
-          else
-            if ! chrt --fifo 1 echo > /dev/null 2>&1; then
-              sched_realtime_is_supported='0'
-            else
-              sched_realtime_is_supported='1'
-            fi
-          fi
-        fi
-
         # Print warning if daemon unable to change scheduling policy, otherwise - change it to 'SCHED_IDLE' if not set already
         if [[ -n "$local_chrt_error" ]]; then
           message --warning "Unable to obtain scheduling policy info of process '$local_process_name' with PID $local_process_pid, changing it to idle due to window $local_temp_window_id unfocus event cancelled!"

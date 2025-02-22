@@ -67,6 +67,12 @@ validate_config_keys(){
           -n "${config_key_mangohud_config_map["$local_temp_section"]}" ]]; then
       config_key_mangohud_source_config_map["$local_temp_section"]="${config_key_mangohud_config_map["$local_temp_section"]}"
     fi
+
+    # Request check for ability to change and restore scheduling policies if specified in config
+    if [[ -z "$should_validate_sched" &&
+          -n "${config_key_idle_map["$local_temp_section"]}" ]]; then
+      should_validate_sched='1'
+    fi
   done
 
   unset config
