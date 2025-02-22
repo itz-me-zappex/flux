@@ -257,7 +257,7 @@ int main() {
       active_window_process = get_window_process(display, active_window);
       // Skip event if XRes returned zero PID for active window
       if (active_window_process != 0) {
-        printf("0x%lx=%d\n", active_window, active_window_process);
+        printf("%d=%d\n", active_window, active_window_process);
       } else {
         continue;
       }
@@ -269,17 +269,17 @@ int main() {
           opened_window_process = get_window_process(display, opened_windows[i]);
           // Do not print info about window if XRes returned zero PID
           if (opened_window_process != 0) {
-            printf("0x%lx=%d ", opened_windows[i], opened_window_process);
+            printf("%d=%d ", opened_windows[i], opened_window_process);
           }
         } else if (opened_windows[i] == active_window) {
-          printf("0x%lx=%d ", active_window, active_window_process);
+          printf("%d=%d ", active_window, active_window_process);
         }
       }
 
       // Get and print window manager info
       opened_window_process = get_window_process(display, wm_window);
       if (wm_window != None) {
-        printf("0x%lx=%d\n", wm_window, opened_window_process);
+        printf("%d=%d\n", wm_window, opened_window_process);
       } else {
         printf("\n");
       }
