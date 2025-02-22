@@ -154,7 +154,7 @@ handle_requests(){
 
           # Print warning if daemon unable to change scheduling policy, otherwise - change it to 'SCHED_IDLE' if not set already
           if [[ -z "$sched_realtime_is_supported" &&
-                  "${sched_previous_policy_map["$local_process_pid"]}" =~ ^('SCHED_RR'|'SCHED_FIFO')$ ]]; then
+                "${sched_previous_policy_map["$local_process_pid"]}" =~ ^('SCHED_RR'|'SCHED_FIFO')$ ]]; then
             message --warning "Daemon has insufficient rights to restore realtime scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to 'idle' due to window $local_temp_window_id unfocus event cancelled!"
             local local_idle_cancelled='1'
           elif (( UID != 0 )) &&
@@ -190,7 +190,8 @@ handle_requests(){
         else
           message --warning "Unable to obtain scheduling policy info of process '$local_process_name' with PID $local_process_pid, changing it to 'idle' due to window $local_temp_window_id unfocus event cancelled!"
         fi
-      elif [[ -z "$sched_change_is_supported" ]]; then
+      elif [[ -n "${request_sched_idle_map["$local_process_pid"]}" &&
+              -z "$sched_change_is_supported" ]]; then
         message --warning "Daemon has insufficient rights to restore scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to 'idle' due to window $local_temp_window_id unfocus event cancelled!"
       fi
 
