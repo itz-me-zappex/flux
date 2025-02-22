@@ -282,9 +282,9 @@ while read -r raw_event; do
       else
         # Define message depending by exit code
         if (( get_process_info_exit_code == 1 )); then
-          message --warning "Unable to obtain info about process with PID $process_pid! Probably process has been terminated during check."
+          message --warning "Unable to obtain info about process with PID $process_pid of window with XID $window_id! Probably process has been terminated during check."
         else
-          message --warning "Unable to obtain owner username of process $process_name with PID $process_pid!"
+          message --warning "Unable to obtain owner username of process $process_name with PID $process_pid of window with XID $window_id!"
         fi
 
         # Forget info about previous window/process because it is not changed
