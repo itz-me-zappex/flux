@@ -6,7 +6,7 @@ sched_validate(){
     sched_change_is_supported='1'
     sched_realtime_is_supported='1'
   else
-    # Attempt to change scheduling policy to idle and restore it to check whether daemon can restore it on focus or not
+    # Attempt to change scheduling policy to 'idle' and restore it to check whether daemon can restore it on focus or not
     sleep 999 &
     local local_sleep_pid="$!"
     chrt --idle --pid 0 "$local_sleep_pid" > /dev/null 2>&1
