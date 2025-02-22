@@ -16,7 +16,7 @@ get_process_info(){
     local local_temp_cached_window_id
     for local_temp_cached_window_id in "${!cache_process_pid_map[@]}"; do
       # Compare parent PID with PID of process
-      if [[ "${cache_process_pid_map[$local_temp_cached_window_id]}" == "$process_pid" ]]; then
+      if (( ${cache_process_pid_map["$local_temp_cached_window_id"]} == process_pid )); then
         # Remember window ID of matching process
         local local_matching_window_id="$local_temp_cached_window_id"
         break
