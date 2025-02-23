@@ -19,7 +19,7 @@ background_sched_idle(){
       if [[ "$local_delay" == '0' ]]; then
         message --info "Scheduling policy of process '$passed_process_name' with PID $passed_process_pid has been changed to 'idle' due to window with XID $passed_window_xid unfocus event."
       else
-        message --info "Scheduling policy of process '$passed_process_name' with PID $passed_process_pid has been changed to 'idle' due to window with XID $passed_window_xid unfocus event after $local_delay second(s)."
+        message --info "Scheduling policy of process '$passed_process_name' with PID $passed_process_pid has been changed to 'idle' after $local_delay second(s) due to window with XID $passed_window_xid unfocus event."
       fi
     fi
   else

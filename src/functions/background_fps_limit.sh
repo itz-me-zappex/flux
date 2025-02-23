@@ -17,7 +17,7 @@ background_fps_limit(){
       if [[ "$local_delay" == '0' ]]; then
         message --info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS due to window with XID $passed_window_xid unfocus event."
       else
-        message --info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS due to window with XID $passed_window_xid unfocus event after $local_delay second(s)."
+        message --info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS after $local_delay second(s) due to window with XID $passed_window_xid unfocus event."
       fi
     fi
   else
