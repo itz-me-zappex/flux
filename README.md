@@ -350,13 +350,13 @@ You may want to use these variables in commands and scripts which running from `
 #### Passed to `exec-focus` and `lazy-exec-focus` config keys
 | Variable | Description |
 |----------|-------------|
-| `FLUX_WINDOW_ID` | Hexadecimal ID of focused window. |
+| `FLUX_WINDOW_XID` | Decimal XID of focused window. |
 | `FLUX_PROCESS_PID` | Process PID of focused window. |
 | `FLUX_PROCESS_NAME` | Process name of focused window. |
 | `FLUX_PROCESS_OWNER` | Effective process UID of focused window. |
 | `FLUX_PROCESS_OWNER_USERNAME` | Effective process owner username of focused window. |
 | `FLUX_PROCESS_COMMAND` | Command used to run process of focused window. |
-| `FLUX_PREV_WINDOW_ID` | Hexadecimal ID of unfocused window. |
+| `FLUX_PREV_WINDOW_XID` | Decimal XID of unfocused window. |
 | `FLUX_PREV_PROCESS_PID` | Process PID of unfocused window. |
 | `FLUX_PREV_PROCESS_NAME` | Process name of unfocused window. |
 | `FLUX_PREV_PROCESS_OWNER` | Effective process UID of unfocused window. |
@@ -366,13 +366,13 @@ You may want to use these variables in commands and scripts which running from `
 #### Passed to `exec-unfocus` and `lazy-exec-unfocus` config keys
 | Variable | Description |
 |----------|-------------|
-| `FLUX_WINDOW_ID` | Hexadecimal ID of unfocused window. |
+| `FLUX_WINDOW_XID` | Decimal XID of unfocused window. |
 | `FLUX_PROCESS_PID` | Process PID of unfocused window. |
 | `FLUX_PROCESS_NAME` | Process name of unfocused window. |
 | `FLUX_PROCESS_OWNER` | Effective process UID of unfocused window. |
 | `FLUX_PROCESS_OWNER_USERNAME` | Effective process owner username of unfocused window. |
 | `FLUX_PROCESS_COMMAND` | Command used to run process of unfocused window. |
-| `FLUX_NEW_WINDOW_ID` | Hexadecimal ID of focused window. |
+| `FLUX_NEW_WINDOW_XID` | Decimal XID of focused window. |
 | `FLUX_NEW_PROCESS_PID` | Process PID of focused window. |
 | `FLUX_NEW_PROCESS_NAME` | Process name of focused window. |
 | `FLUX_NEW_PROCESS_OWNER` | Effective process UID of focused window. |
