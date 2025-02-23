@@ -1,8 +1,8 @@
 # Required to prepare daemon for event reading
 daemon_prepare(){
-  # Set specified timestamp format if any
+  # Set specified timestamp format if any and handle ANSI escapes
   if [[ -n "$new_timestamp_format" ]]; then
-    timestamp_format="$new_timestamp_format"
+    timestamp_format="$(echo -e "$new_timestamp_format")"
     unset new_timestamp_format
   fi
 
@@ -27,8 +27,8 @@ daemon_prepare(){
 
     # Check for existence of value in variable indirectly
     if [[ -n "${!local_variable_name}" ]]; then
-      # Replace old prefix with new one
-      eval "prefix_$local_temp_prefix_type"=\'"${!local_variable_name}"\'
+      # Replace old prefix with new one and handle ANSI-escapes
+      eval "prefix_$local_temp_prefix_type"=\'"$(echo -e "${!local_variable_name}")"\'
       unset "new_prefix_$local_temp_prefix_type"
     fi
   done
