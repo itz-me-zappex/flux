@@ -8,7 +8,7 @@ if [[ -t 1 ]]; then
   prefix_info="$(echo -e "[\033[0;32mi\033[0m]")" # Green
   prefix_verbose="$(echo -e "[\033[0;34m~\033[0m]")" # Blue
   prefix_warning="$(echo -e "[\033[0;33m!\033[0m]")" # Yellow
-  timestamp_format="$(echo -e "[\033[0;35m%Y-%m-%dT%H:%M:%S%z\033[0m]")"
+  timestamp_format="$(echo -e "[\033[0;35m%Y-%m-%dT%H:%M:%S%z\033[0m]")" # Pink
 else
   # Assuming stdout redirected
   prefix_error='[x]'
