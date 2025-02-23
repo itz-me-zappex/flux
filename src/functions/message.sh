@@ -3,7 +3,10 @@ message(){
   # Get timestamp if that behavior is allowed using '--timestamps' option
   if [[ -n "$timestamps" ]]; then
     local local_timestamp="$(printf "%($timestamp_format)T") "
-    local local_log_timestamp="$(printf "%($log_timestamp_format)T") "
+
+    if [[ -n "$log_timestamp_format" ]]; then
+      local local_log_timestamp="$(printf "%($log_timestamp_format)T") "
+    fi
   fi
 
   # Print message depending by passed option
