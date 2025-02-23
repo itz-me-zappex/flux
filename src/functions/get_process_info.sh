@@ -1,32 +1,32 @@
 # Required to get process info from cache using window ID
 cache_get_process_info(){
-  process_name="${cache_process_name_map["$passed_window_id"]}"
-  process_owner="${cache_process_owner_map["$passed_window_id"]}"
-  process_command="${cache_process_command_map["$passed_window_id"]}"
-  process_owner_username="${cache_process_owner_username_map["$passed_window_id"]}"
+  process_name="${cache_process_name_map["$passed_window_xid"]}"
+  process_owner="${cache_process_owner_map["$passed_window_xid"]}"
+  process_command="${cache_process_command_map["$passed_window_xid"]}"
+  process_owner_username="${cache_process_owner_username_map["$passed_window_xid"]}"
 }
 
 # Required to get process info using PID
 get_process_info(){
   # Prefer using cache with window info if exists
-  if [[ -n "${cache_process_pid_map["$window_id"]}" ]]; then
-    passed_window_id="$window_id" cache_get_process_info
+  if [[ -n "${cache_process_pid_map["$window_xid"]}" ]]; then
+    passed_window_xid="$window_xid" cache_get_process_info
   else
     # Attempt to find cache with info about the same process
-    local local_temp_cached_window_id
-    for local_temp_cached_window_id in "${!cache_process_pid_map[@]}"; do
+    local local_temp_cached_window_xid
+    for local_temp_cached_window_xid in "${!cache_process_pid_map[@]}"; do
       # Compare parent PID with PID of process
-      if (( ${cache_process_pid_map["$local_temp_cached_window_id"]} == process_pid )); then
+      if (( ${cache_process_pid_map["$local_temp_cached_window_xid"]} == process_pid )); then
         # Remember window ID of matching process
-        local local_matching_window_id="$local_temp_cached_window_id"
+        local local_matching_window_xid="$local_temp_cached_window_xid"
         break
       fi
     done
 
     # Check for match of cached process info to define a way how to obtain it
-    if [[ -n "$local_matching_window_id" ]]; then
+    if [[ -n "$local_matching_window_xid" ]]; then
       # Get process info using cache
-      passed_window_id="$local_matching_window_id" cache_get_process_info
+      passed_window_xid="$local_matching_window_xid" cache_get_process_info
     else
       # Get process name
       if check_ro "/proc/$process_pid/comm"; then
@@ -85,10 +85,10 @@ get_process_info(){
     fi
     
     # Store process info to cache to speed up its obtainance on next focus event and to use it implicitly using only window ID
-    cache_process_pid_map["$window_id"]="$process_pid"
-    cache_process_name_map["$window_id"]="$process_name"
-    cache_process_owner_map["$window_id"]="$process_owner"
-    cache_process_command_map["$window_id"]="$process_command"
-    cache_process_owner_username_map["$window_id"]="$process_owner_username"
+    cache_process_pid_map["$window_xid"]="$process_pid"
+    cache_process_name_map["$window_xid"]="$process_name"
+    cache_process_owner_map["$window_xid"]="$process_owner"
+    cache_process_command_map["$window_xid"]="$process_command"
+    cache_process_owner_username_map["$window_xid"]="$process_owner_username"
   fi
 }

@@ -3,7 +3,7 @@ unfocus_request_limit(){
   # Do not apply limit if previous and current PIDs are exactly the same or previous window does not match with any section
   if (( process_pid != previous_process_pid )) &&
      [[ -n "$previous_section" &&
-        "$disallow_request" != "$previous_window_id=$previous_process_pid" ]]; then
+        "$disallow_request" != "$previous_window_xid=$previous_process_pid" ]]; then
     # Request limits to be applied on 'check_requests' internal event (from 'event_source()')
     if [[ "${config_key_cpu_limit_map["$previous_section"]}" == '0' ]]; then
       # Request freezing of process if it is not limited

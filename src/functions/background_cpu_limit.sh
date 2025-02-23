@@ -5,7 +5,7 @@ background_cpu_limit(){
 
   # Wait before set limit and notify user if delay is specified
   if [[ "$local_delay" != '0' ]]; then
-    message --verbose "Process '$passed_process_name' with PID $passed_process_pid will be CPU limited after $local_delay second(s) due to window with XID $passed_window_id unfocus event."
+    message --verbose "Process '$passed_process_name' with PID $passed_process_pid will be CPU limited after $local_delay second(s) due to window with XID $passed_window_xid unfocus event."
 
     # Run in background to make this subprocess interruptable
     sleep "$local_delay" &
@@ -19,12 +19,12 @@ background_cpu_limit(){
     exit 0' SIGINT SIGTERM
 
     # Print relevant message on focus event and stop this subprocess
-    trap 'message --info "Delayed for $local_delay second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to window with XID $passed_window_id focus event." ; \
+    trap 'message --info "Delayed for $local_delay second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to window with XID $passed_window_xid focus event." ; \
     kill "$local_sleep_pid"; \
     exit 0' SIGUSR1
 
     # Print relevant message on closure of target window and stop this subprocess
-    trap 'message --info "Delayed for $local_delay second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to window with XID $passed_window_id closure." ; \
+    trap 'message --info "Delayed for $local_delay second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to window with XID $passed_window_xid closure." ; \
     kill "$local_sleep_pid"; \
     exit 0' SIGUSR2
 
@@ -35,9 +35,9 @@ background_cpu_limit(){
   if check_pid_existence "$passed_process_pid"; then
     # Define message depending by whether delay is specified or not
     if [[ "$local_delay" == '0' ]]; then
-      message --info "Process '$passed_process_name' with PID $passed_process_pid has been CPU limited to ${config_key_cpu_limit_map["$passed_section"]}% due to window with XID $passed_window_id unfocus event."
+      message --info "Process '$passed_process_name' with PID $passed_process_pid has been CPU limited to ${config_key_cpu_limit_map["$passed_section"]}% due to window with XID $passed_window_xid unfocus event."
     else
-      message --info "Process '$passed_process_name' with PID $passed_process_pid has been CPU limited to ${config_key_cpu_limit_map["$passed_section"]}% due to window with XID $passed_window_id unfocus event after $local_delay second(s)."
+      message --info "Process '$passed_process_name' with PID $passed_process_pid has been CPU limited to ${config_key_cpu_limit_map["$passed_section"]}% due to window with XID $passed_window_xid unfocus event after $local_delay second(s)."
     fi
 
     # Run in background to make subprocess interruptable
@@ -58,12 +58,12 @@ background_cpu_limit(){
     exit 0' SIGINT SIGTERM
 
     # Terminate 'cpulimit' process on focus event and print relevant message
-    trap 'message --info "Process '"'$passed_process_name'"' with PID $passed_process_pid has been CPU unlimited due to window with XID $passed_window_id focus event." ; \
+    trap 'message --info "Process '"'$passed_process_name'"' with PID $passed_process_pid has been CPU unlimited due to window with XID $passed_window_xid focus event." ; \
     kill "$local_cpulimit_pid" > /dev/null 2>&1 ; \
     exit 0' SIGUSR1
 
     # Terminate 'cpulimit' on closure of target window and print relevant message
-    trap 'message --info "Process '"'$passed_process_name'"' with PID $passed_process_pid has been CPU unlimited due to window with XID $passed_window_id closure." ; \
+    trap 'message --info "Process '"'$passed_process_name'"' with PID $passed_process_pid has been CPU unlimited due to window with XID $passed_window_xid closure." ; \
     kill "$local_cpulimit_pid" > /dev/null 2>&1 ; \
     exit 0' SIGUSR2
 

@@ -1,13 +1,13 @@
 # Required to execute command from 'exec-unfocus' and 'lazy-exec-unfocus' config keys
 exec_unfocus(){
   # Export environment variables to interact with them using commands/scripts in 'exec-unfocus' and 'lazy-exec-unfocus' config keys
-  export FLUX_NEW_WINDOW_ID="$window_id" \
+  export FLUX_NEW_WINDOW_XID="$window_xid" \
   FLUX_NEW_PROCESS_PID="$process_pid" \
   FLUX_NEW_PROCESS_NAME="$process_name" \
   FLUX_NEW_PROCESS_OWNER="$process_owner" \
   FLUX_NEW_PROCESS_OWNER_USERNAME="$process_owner_username" \
   FLUX_NEW_PROCESS_COMMAND="$process_command" \
-  FLUX_WINDOW_ID="$passed_window_id" \
+  FLUX_WINDOW_XID="$passed_window_xid" \
   FLUX_PROCESS_PID="$passed_process_pid" \
   FLUX_PROCESS_NAME="$passed_process_name" \
   FLUX_PROCESS_OWNER="$passed_process_owner" \
@@ -34,13 +34,13 @@ exec_unfocus(){
   fi
   
   # Unset exported variables
-  unset FLUX_NEW_WINDOW_ID \
+  unset FLUX_NEW_WINDOW_XID \
   FLUX_NEW_PROCESS_PID \
   FLUX_NEW_PROCESS_NAME \
   FLUX_NEW_PROCESS_OWNER \
   FLUX_NEW_PROCESS_OWNER_USERNAME \
   FLUX_NEW_PROCESS_COMMAND \
-  FLUX_WINDOW_ID \
+  FLUX_WINDOW_XID \
   FLUX_PROCESS_PID \
   FLUX_PROCESS_NAME \
   FLUX_PROCESS_OWNER \

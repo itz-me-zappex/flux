@@ -1,7 +1,7 @@
 # Required to unset limit for focused process
 focus_unset_limit(){
   # Set end of message to not duplicate it
-  local local_end_of_msg="due to window with XID $window_id focus event"
+  local local_end_of_msg="due to window with XID $window_xid focus event"
 
   # Define type of limit which should be unset
   if [[ -n "${is_freeze_applied_map["$process_pid"]}" ]]; then
@@ -35,7 +35,7 @@ focus_unset_limit(){
   
   # Terminate minimization background process
   if [[ -n "${background_minimize_pid_map["$process_pid"]}" ]]; then
-    passed_window_id="$window_id" \
+    passed_window_xid="$window_xid" \
     passed_process_pid="$process_pid" \
     passed_section="$section" \
     passed_process_name="$process_name" \

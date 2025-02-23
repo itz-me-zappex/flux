@@ -207,7 +207,7 @@ while read -r raw_event; do
 
       # Remember focused window info to set it as previous after handling implicitly opened windows
       # Needed to make daemon able to handle requests after first unfocus event (after handling implicitly opened windows)
-      explicit_window_id="$window_id"
+      explicit_window_xid="$window_xid"
       explicit_process_pid="$process_pid"
       explicit_process_name="$process_name"
       explicit_process_owner="$process_owner"
@@ -219,14 +219,14 @@ while read -r raw_event; do
       unset hot
 
       # Restore info about focused window after handling implicitly opened windows
-      previous_window_id="$explicit_window_id"
+      previous_window_xid="$explicit_window_xid"
       previous_process_pid="$explicit_process_pid"
       previous_process_name="$explicit_process_name"
       previous_process_owner="$explicit_process_owner"
       previous_process_command="$explicit_process_command"
       previous_section="$explicit_section"
 
-      unset explicit_window_id \
+      unset explicit_window_xid \
       explicit_process_pid \
       explicit_process_name \
       explicit_process_owner \
@@ -242,7 +242,7 @@ while read -r raw_event; do
     ;;
     * )
       # Unset info about process to avoid using it by an accident
-      unset window_id \
+      unset window_xid \
       process_pid \
       process_name \
       process_owner \
@@ -250,7 +250,7 @@ while read -r raw_event; do
       section
 
       # Get window ID
-      window_id="${event/'='*/}"
+      window_xid="${event/'='*/}"
       # Get process PID of focused window
       process_pid="${event/*'='/}"
 
@@ -273,7 +273,7 @@ while read -r raw_event; do
         fi
 
         # Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
-        previous_window_id="$window_id"
+        previous_window_xid="$window_xid"
         previous_process_pid="$process_pid"
         previous_process_name="$process_name"
         previous_process_owner="$process_owner"
@@ -282,13 +282,13 @@ while read -r raw_event; do
       else
         # Define message depending by exit code
         if (( get_process_info_exit_code == 1 )); then
-          message --warning "Unable to obtain info about process with PID $process_pid of window with XID $window_id! Probably process has been terminated during check."
+          message --warning "Unable to obtain info about process with PID $process_pid of window with XID $window_xid! Probably process has been terminated during check."
         else
-          message --warning "Unable to obtain owner username of process $process_name with PID $process_pid of window with XID $window_id!"
+          message --warning "Unable to obtain owner username of process $process_name with PID $process_pid of window with XID $window_xid!"
         fi
 
         # Forget info about previous window/process because it is not changed
-        unset previous_window_id \
+        unset previous_window_xid \
         previous_process_pid \
         previous_process_name \
         previous_process_owner \

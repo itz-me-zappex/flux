@@ -4,12 +4,12 @@ safe_exit(){
   local local_end_of_msg='due to daemon termination'
 
   # Get list of all cached windows
-  local local_temp_window_id
-  for local_temp_window_id in "${!cache_process_pid_map[@]}"; do
+  local local_temp_window_xid
+  for local_temp_window_xid in "${!cache_process_pid_map[@]}"; do
     # Simplify access to cached process info
-    local local_process_pid="${cache_process_pid_map["$local_temp_window_id"]}"
+    local local_process_pid="${cache_process_pid_map["$local_temp_window_xid"]}"
     local local_section="${cache_section_map["$local_process_pid"]}"
-    local local_process_name="${cache_process_name_map["$local_temp_window_id"]}"
+    local local_process_name="${cache_process_name_map["$local_temp_window_xid"]}"
 
     # Define type of limit which should be unset
     if [[ -n "${is_freeze_applied_map["$local_process_pid"]}" ]]; then
@@ -44,7 +44,7 @@ safe_exit(){
 
     # Terminate background process with minimization
     if [[ -n "${background_minimize_pid_map["$local_process_pid"]}" ]]; then
-      passed_window_id="$local_temp_window_id" \
+      passed_window_xid="$local_temp_window_xid" \
       passed_process_pid="$local_process_pid" \
       passed_section="$local_section" \
       passed_process_name="$local_process_name" \
@@ -59,7 +59,7 @@ safe_exit(){
     # Pass environment variables to interact with them using commands/scripts in 'lazy-exec-unfocus' config key
     # There is no need to pass '$FLUX_NEW_*' because there is no focus event and info about new window respectively
     # And yes, info about focused window becomes previous immediately after processing it, check event handling in 'main.sh'
-    FLUX_WINDOW_ID="$previous_window_id" \
+    FLUX_WINDOW_XID="$previous_window_xid" \
     FLUX_PROCESS_PID="$previous_process_pid" \
     FLUX_PROCESS_NAME="$previous_process_name" \
     FLUX_PROCESS_OWNER="$previous_process_owner" \

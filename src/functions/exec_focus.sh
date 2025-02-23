@@ -1,18 +1,18 @@
 # Required to execute command from 'exec-focus' and 'lazy-exec-focus' config keys
 exec_focus(){
   # Set end of message to not duplicate it
-  local local_end_of_msg="due to window with XID $window_id focus event"
+  local local_end_of_msg="due to window with XID $window_xid focus event"
 
   # Do not do anything if focused window process PID is exacly the same as previous one
   if (( process_pid != previous_process_pid )); then
     # Export environment variables to interact with those using commands/scripts in 'exec-focus' and 'lazy-exec-focus' config keys
-    export FLUX_WINDOW_ID="$window_id" \
+    export FLUX_WINDOW_XID="$window_xid" \
     FLUX_PROCESS_PID="$process_pid" \
     FLUX_PROCESS_NAME="$process_name" \
     FLUX_PROCESS_OWNER="$process_owner" \
     FLUX_PROCESS_OWNER_USERNAME="$process_owner_username" \
     FLUX_PROCESS_COMMAND="$process_command" \
-    FLUX_PREV_WINDOW_ID="$previous_window_id" \
+    FLUX_PREV_WINDOW_XID="$previous_window_xid" \
     FLUX_PREV_PROCESS_PID="$previous_process_pid" \
     FLUX_PREV_PROCESS_NAME="$previous_process_name" \
     FLUX_PREV_PROCESS_OWNER="$previous_process_owner" \
@@ -39,13 +39,13 @@ exec_focus(){
     fi
     
     # Unset exported variables
-    unset FLUX_WINDOW_ID \
+    unset FLUX_WINDOW_XID \
     FLUX_PROCESS_PID \
     FLUX_PROCESS_NAME \
     FLUX_PROCESS_OWNER \
     FLUX_PROCESS_OWNER_USERNAME \
     FLUX_PROCESS_COMMAND \
-    FLUX_PREV_WINDOW_ID \
+    FLUX_PREV_WINDOW_XID \
     FLUX_PREV_PROCESS_PID \
     FLUX_PREV_PROCESS_NAME \
     FLUX_PREV_PROCESS_OWNER \

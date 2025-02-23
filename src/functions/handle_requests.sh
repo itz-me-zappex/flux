@@ -6,21 +6,21 @@ handle_requests(){
   # Remove PIDs from list of existing windows
   local local_temp_window
   for local_temp_window in $local_windows; do
-    local local_window_ids_array+=("${local_temp_window/'='*/}")
+    local local_window_xids_array+=("${local_temp_window/'='*/}")
   done
 
   # Apply requested limits to existing windows
-  local local_temp_window_id
-  for local_temp_window_id in "${local_window_ids_array[@]}"; do
+  local local_temp_window_xid
+  for local_temp_window_xid in "${local_window_xids_array[@]}"; do
     # Skip cycle if info about window is not cached
-    if [[ -n "${cache_process_pid_map["$local_temp_window_id"]}" ]]; then
+    if [[ -n "${cache_process_pid_map["$local_temp_window_xid"]}" ]]; then
       # Simplify access to cached window info
-      local local_process_pid="${cache_process_pid_map["$local_temp_window_id"]}"
+      local local_process_pid="${cache_process_pid_map["$local_temp_window_xid"]}"
       local local_section="${cache_section_map["$local_process_pid"]}"
-      local local_process_name="${cache_process_name_map["$local_temp_window_id"]}"
-      local local_process_owner="${cache_process_owner_map["$local_temp_window_id"]}"
-      local local_process_owner_username="${cache_process_owner_username_map["$local_temp_window_id"]}"
-      local local_process_command="${cache_process_command_map["$local_temp_window_id"]}"
+      local local_process_name="${cache_process_name_map["$local_temp_window_xid"]}"
+      local local_process_owner="${cache_process_owner_map["$local_temp_window_xid"]}"
+      local local_process_owner_username="${cache_process_owner_username_map["$local_temp_window_xid"]}"
+      local local_process_command="${cache_process_command_map["$local_temp_window_xid"]}"
 
       # Minimize window if requested
       if [[ -n "${request_minimize_map["$local_process_pid"]}" ]]; then
@@ -28,7 +28,7 @@ handle_requests(){
         unset request_minimize_map["$local_process_pid"]
         
         # Minimize window
-        passed_window_id="$local_temp_window_id" \
+        passed_window_xid="$local_temp_window_xid" \
         passed_process_name="$local_process_name" \
         passed_process_pid="$local_process_pid" \
         background_minimize &
@@ -65,7 +65,7 @@ handle_requests(){
         passed_section="$local_section" \
         passed_process_name="$local_process_name" \
         passed_process_pid="$local_process_pid" \
-        passed_window_id="$local_temp_window_id" \
+        passed_window_xid="$local_temp_window_xid" \
         background_freeze &
 
         # Associate PID of background process with PID of process to interrupt it in case focus event appears earlier than delay ends
@@ -81,7 +81,7 @@ handle_requests(){
         passed_section="$local_section" \
         passed_process_name="$local_process_name" \
         passed_process_pid="$local_process_pid" \
-        passed_window_id="$local_temp_window_id" \
+        passed_window_xid="$local_temp_window_xid" \
         background_cpu_limit &
 
         # Associate PID of background process with PID of process to interrupt it on focus event
@@ -97,7 +97,7 @@ handle_requests(){
         # Set FPS limit
         passed_section="$local_section" \
         passed_process_pid="$local_process_pid" \
-        passed_window_id="$local_temp_window_id" \
+        passed_window_xid="$local_temp_window_xid" \
         background_fps_limit &
 
         # Associate PID of background process with section to interrupt in case focus event appears earlier than delay ends
@@ -155,18 +155,18 @@ handle_requests(){
           # Print warning if daemon unable to change scheduling policy, otherwise - change it to 'SCHED_IDLE' if not set already
           if [[ -z "$sched_realtime_is_supported" &&
                 "${sched_previous_policy_map["$local_process_pid"]}" =~ ^('SCHED_RR'|'SCHED_FIFO')$ ]]; then
-            message --warning "Daemon has insufficient rights to restore realtime scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to 'idle' due to window with XID $local_temp_window_id unfocus event cancelled!"
+            message --warning "Daemon has insufficient rights to restore realtime scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to 'idle' due to window with XID $local_temp_window_xid unfocus event cancelled!"
             local local_idle_cancelled='1'
           elif (( UID != 0 )) &&
                [[ "${sched_previous_policy_map["$local_process_pid"]}" == 'SCHED_DEADLINE' ]]; then
-            message --warning "Daemon has insufficient rights to restore deadline scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to 'idle' due to window with XID $local_temp_window_id unfocus event cancelled!"
+            message --warning "Daemon has insufficient rights to restore deadline scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to 'idle' due to window with XID $local_temp_window_xid unfocus event cancelled!"
             local local_idle_cancelled='1'
           elif [[ "${sched_previous_policy_map["$local_process_pid"]}" != 'SCHED_IDLE' ]]; then
             # Change scheduling policy to 'SCHED_IDLE' if not already set
             passed_section="$local_section" \
             passed_process_name="$local_process_name" \
             passed_process_pid="$local_process_pid" \
-            passed_window_id="$local_temp_window_id" \
+            passed_window_xid="$local_temp_window_xid" \
             background_sched_idle &
 
             # Associate PID of background process with PID of process to interrupt it on focus event
@@ -175,7 +175,7 @@ handle_requests(){
             # Mark process as idle
             is_sched_idle_applied_map["$local_process_pid"]='1'
           else
-            message --warning "Process '$local_process_name' with PID $local_process_pid already has scheduling policy set to 'idle', changing it due to window with XID $local_temp_window_id unfocus event cancelled!"
+            message --warning "Process '$local_process_name' with PID $local_process_pid already has scheduling policy set to 'idle', changing it due to window with XID $local_temp_window_xid unfocus event cancelled!"
             local local_idle_cancelled='1'
           fi
 
@@ -188,11 +188,11 @@ handle_requests(){
             sched_previous_period_map["$local_process_pid"]
           fi
         else
-          message --warning "Unable to obtain scheduling policy info of process '$local_process_name' with PID $local_process_pid, changing it to 'idle' due to window with XID $local_temp_window_id unfocus event cancelled!"
+          message --warning "Unable to obtain scheduling policy info of process '$local_process_name' with PID $local_process_pid, changing it to 'idle' due to window with XID $local_temp_window_xid unfocus event cancelled!"
         fi
       elif [[ -n "${request_sched_idle_map["$local_process_pid"]}" &&
               -z "$sched_change_is_supported" ]]; then
-        message --warning "Daemon has insufficient rights to restore scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to 'idle' due to window with XID $local_temp_window_id unfocus event cancelled!"
+        message --warning "Daemon has insufficient rights to restore scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to 'idle' due to window with XID $local_temp_window_xid unfocus event cancelled!"
       fi
 
       # Unset as it becomes useless
@@ -200,14 +200,14 @@ handle_requests(){
       
       # Execute unfocus event command
       if [[ -n "${request_exec_unfocus_general_map["$local_process_pid"]}" ]]; then
-        passed_window_id="$local_temp_window_id" \
+        passed_window_xid="$local_temp_window_xid" \
         passed_process_pid="$local_process_pid" \
         passed_section="$local_section" \
         passed_process_name="$local_process_name" \
         passed_process_owner="$local_process_owner" \
         passed_process_owner_username="$local_process_owner_username" \
         passed_process_command="$local_process_command" \
-        passed_end_of_msg="due to window with XID $local_temp_window_id unfocus event" \
+        passed_end_of_msg="due to window with XID $local_temp_window_xid unfocus event" \
         exec_unfocus
         unset request_exec_unfocus_general_map["$local_process_pid"]
       fi
