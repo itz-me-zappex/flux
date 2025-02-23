@@ -33,6 +33,28 @@ daemon_prepare(){
     fi
   done
 
+  # Remove colors from prefixes and timestamp using 'sed' tool, needed for logging
+  if [[ -n "$log" ]]; then
+    # Prefixes
+    local local_temp_prefix_type
+    for local_temp_prefix_type in error info verbose warning; do
+      # Define whether daemon should remove colors or not
+      local local_variable_name="prefix_$local_temp_prefix_type"
+      if [[ "${!local_variable_name}" =~ $'\033'\[[0-9(\;)?]+'m' ]]; then
+        eval "log_$local_variable_name"=\'"$(echo "${!local_variable_name}" | sed 's/\x1b\[[0-9;]*m//g')"\'
+      else
+        eval "log_$local_variable_name"=\'"${!local_variable_name}"\'
+      fi
+    done
+
+    # Timestamp
+    if [[ "$timestamp_format" =~ $'\033'\[[0-9(\;)?]+'m' ]]; then
+      log_timestamp_format="$(echo "$timestamp_format" | sed 's/\x1b\[[0-9;]*m//g')"
+    else
+      log_timestamp_format="$timestamp_format"
+    fi
+  fi
+
   # Allow notifications if '--notifications' option is specified (checked by 'message()')
   if [[ -n "$notifications" ]]; then
     allow_notifications='1'

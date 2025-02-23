@@ -1,14 +1,22 @@
 # Version of daemon shown from 'parse_options()' if '--version' is specified
 daemon_version='1.21.2'
 
-# Set default prefixes for messages
-prefix_error='[x]'
-prefix_info='[i]'
-prefix_verbose='[~]'
-prefix_warning='[!]'
-
-# Set default timestamp format for logger
-timestamp_format='[%Y-%m-%dT%H:%M:%S%z]'
+# Set default prefixes and timestamp format for messages automatically
+if [[ -t 1 ]]; then
+  # Assuming stdout is a terminal
+  prefix_error="$(echo -e "[\033[0;31mx\033[0m]")" # Red
+  prefix_info="$(echo -e "[\033[0;32mi\033[0m]")" # Green
+  prefix_verbose="$(echo -e "[\033[0;34m~\033[0m]")" # Blue
+  prefix_warning="$(echo -e "[\033[0;33m!\033[0m]")" # Yellow
+  timestamp_format="$(echo -e "[\033[0;35m%Y-%m-%dT%H:%M:%S%z\033[0m]")"
+else
+  # Assuming stdout redirected
+  prefix_error='[x]'
+  prefix_info='[i]'
+  prefix_verbose='[~]'
+  prefix_warning='[!]'
+  timestamp_format='[%Y-%m-%dT%H:%M:%S%z]'
+fi
 
 # Create associative arrays to store values from config
 declare -A config_key_name_map \
