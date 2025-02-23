@@ -2,7 +2,7 @@
 daemon_prepare(){
   # Set specified timestamp format if any and handle ANSI escapes
   if [[ -n "$new_timestamp_format" ]]; then
-    timestamp_format="$(echo -e "$new_timestamp_format")"
+    timestamp_format="$(echo -e "$new_timestamp_format\033[0m")"
     unset new_timestamp_format
   fi
 
@@ -28,7 +28,7 @@ daemon_prepare(){
     # Check for existence of value in variable indirectly
     if [[ -n "${!local_variable_name}" ]]; then
       # Replace old prefix with new one and handle ANSI-escapes
-      eval "prefix_$local_temp_prefix_type"=\'"$(echo -e "${!local_variable_name}")"\'
+      eval "prefix_$local_temp_prefix_type"=\'"$(echo -e "${!local_variable_name}\033[0m")"\'
       unset "new_prefix_$local_temp_prefix_type"
     fi
   done
