@@ -2,7 +2,7 @@
 daemon_version='1.21.2'
 
 # Set default prefixes and timestamp format for messages automatically
-if [[ -t 1 ]]; then
+if [[ -t 1 && -t 2 ]]; then
   # Assuming stdout is a terminal
   prefix_error="$(echo -e "[\033[0;31mx\033[0m]")" # Red
   prefix_info="$(echo -e "[\033[0;32mi\033[0m]")" # Green
