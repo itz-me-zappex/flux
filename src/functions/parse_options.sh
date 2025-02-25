@@ -3,6 +3,15 @@ parse_options(){
   # Continue until count of passed command line options is greater than zero
   while (( $# > 0 )); do
     case "$1" in
+    --color | -C | --color=* )
+      passed_check='color_is_passed' \
+      passed_set='color' \
+      passed_option='--color' \
+      passed_short_option='-C' \
+      cmdline_get "$@"
+
+      shift "$shift"
+    ;;
     --config | -c | --config=* )
       passed_check='config_is_passed' \
       passed_set='config' \
@@ -17,9 +26,11 @@ parse_options(){
       fi
     ;;
     --help | -h | --usage | -u )
-      echo "Usage: flux [-c <path>] [-l <path>] [-T <format>] [--prefix-* <prefix>] [options]
+      echo "Usage: flux [-C <when>] [-c <path>] [-l <path>] [-T <format>] [--prefix-* <prefix>] [options]
 
 Options and values:
+  -C, --color <when>                  Color mode, can be 'always', 'auto' or 'never'
+                                      default: 'auto' (enabled in terminal, disabled if redirected)
   -c, --config <path>                 Specify path to config file
                                       default: '\$XDG_CONFIG_HOME/flux.ini' or '\$HOME/.config/flux.ini' or '/etc/flux.ini'
   -h, --help                          Display this help and exit
