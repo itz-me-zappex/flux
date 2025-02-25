@@ -46,7 +46,7 @@ daemon_prepare(){
     fi
   done
 
-  # Remove colors from prefixes and timestamp using 'sed' tool, needed for logging
+  # Remove colors from prefixes and timestamp, needed for logging
   if [[ -n "$log" ]]; then
     # Prefixes
     local local_temp_prefix_type
