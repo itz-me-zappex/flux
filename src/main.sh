@@ -13,13 +13,28 @@ if [[ -t 1 &&
   prefix_verbose="$(echo -e "[\033[34m~\033[0m]")" # Blue
   prefix_warning="$(echo -e "[\033[33m!\033[0m]")" # Yellow
   timestamp_format="$(echo -e "[\033[35m%Y-%m-%dT%H:%M:%S%z\033[0m]")" # Pink
+
+  log_prefix_error='[x]'
+  log_prefix_info='[i]'
+  log_prefix_verbose='[~]'
+  log_prefix_warning='[!]'
+  log_timestamp_format='[%Y-%m-%dT%H:%M:%S%z]'
 else
+  # For case color mode will not be specified using '--color', needed in 'daemon_prepare()'
+  color='never'
+
   # Assuming stdout/stderr is redirected
   prefix_error='[x]'
   prefix_info='[i]'
   prefix_verbose='[~]'
   prefix_warning='[!]'
   timestamp_format='[%Y-%m-%dT%H:%M:%S%z]'
+
+  log_prefix_error="$prefix_error"
+  log_prefix_info="$prefix_info"
+  log_prefix_verbose="$prefix_verbose"
+  log_prefix_warning="$prefix_warning"
+  log_timestamp_format="$timestamp_format"
 fi
 
 # Create associative arrays to store values from config
