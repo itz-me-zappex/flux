@@ -2,7 +2,7 @@
 lock_file='/tmp/flux-lock'
 
 # Version of daemon shown from 'parse_options()' if '--version' is specified
-daemon_version='1.21.2'
+daemon_version='1.22'
 
 # Set default prefixes and timestamp format for messages automatically
 if [[ -t 1 &&
