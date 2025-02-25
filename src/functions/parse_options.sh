@@ -30,7 +30,7 @@ parse_options(){
 
 Options and values:
   -C, --color <when>                  Color mode, can be 'always', 'auto' or 'never'
-                                      default: 'auto' (enabled in terminal, disabled if redirected)
+                                      default: 'auto' (enabled in terminal, disabled if redirected and when writing to log)
   -c, --config <path>                 Specify path to config file
                                       default: '\$XDG_CONFIG_HOME/flux.ini' or '\$HOME/.config/flux.ini' or '/etc/flux.ini'
   -h, --help                          Display this help and exit
