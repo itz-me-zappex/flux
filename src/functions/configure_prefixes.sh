@@ -61,16 +61,10 @@ configure_prefixes(){
       # Store value of current variable to log related variable
       eval "$local_log_variable_name"=\'"${!local_variable_name}"\'
 
-      # Define whether daemon should remove colors or not
-      if [[ "${!local_log_variable_name}" =~ $'\033'\[[0-9(\;)?]+'m' ]]; then
-        # Remove first matching ANSI escape
+      # Remove ANSI escapes
+      while [[ "${!local_log_variable_name}" =~ $'\033'\[[0-9(\;)?]+'m' ]]; do
         eval "$local_log_variable_name"=\'"${!local_log_variable_name//${BASH_REMATCH[0]}/}"\'
-
-        # Remove other ANSI escapes
-        while [[ "${!local_log_variable_name}" =~ $'\033'\[[0-9(\;)?]+'m' ]]; do
-          eval "$local_log_variable_name"=\'"${!local_log_variable_name//${BASH_REMATCH[0]}/}"\'
-        done
-      fi
+      done
     done
   fi
 
@@ -80,16 +74,10 @@ configure_prefixes(){
     # Store value of timestamp variable into log related one
     log_timestamp_format="$timestamp_format"
 
-    # Define whether daemon should remove colors or not
-    if [[ "$log_timestamp_format" =~ $'\033'\[[0-9(\;)?]+'m' ]]; then
-      # Remove first matching ANSI escape
+    # Remove other ANSI escapes
+    while [[ "$log_timestamp_format" =~ $'\033'\[[0-9(\;)?]+'m' ]]; do
       log_timestamp_format="${log_timestamp_format//${BASH_REMATCH[0]}/}"
-
-      # Remove other ANSI escapes
-      while [[ "$log_timestamp_format" =~ $'\033'\[[0-9(\;)?]+'m' ]]; do
-        log_timestamp_format="${log_timestamp_format//${BASH_REMATCH[0]}/}"
-      done
-    fi
+    done
   fi
 
   # Define whether daemon should enforce colorless or colorful prefixes and timestamp
