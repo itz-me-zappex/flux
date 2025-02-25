@@ -104,3 +104,22 @@ simplify_bool(){
     return 1
   fi
 }
+
+# Required to interpret colors/formatting in specified variable using ANSI escapes
+# That is needed because handling all escape characters with just 'echo -e' may break output
+colors_interpret(){
+  # Accepts variable names and gets value
+  local local_variable_value="${!1}"
+
+  # Disable formatting in the end of value
+  local local_variable_value="${local_variable_value}\033[0m"
+
+  # Replace ANSI escapes with their interpreted form
+  while [[ "$local_variable_value" =~ '\033'\[[0-9(\;)?]+'m' ]]; do
+    local local_ansi_interpretation="$(echo -e "${BASH_REMATCH[0]}")"
+    local local_variable_value="${local_variable_value//"${BASH_REMATCH[0]}"/"$local_ansi_interpretation"}"
+  done
+
+  # Value will be stored to variable from command substitution
+  echo "$local_variable_value"
+}
