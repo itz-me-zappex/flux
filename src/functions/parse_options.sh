@@ -26,7 +26,7 @@ parse_options(){
       fi
     ;;
     --help | -h | --usage | -u )
-      echo "Usage: flux [-C <when>] [-c <path>] [-l <path>] [-T <format>] [--prefix-* <prefix>] [options]
+      echo "Usage: flux [-C <when>] [-c <path>] [-l <path>] [-T <format>] [-P{e,i,v,w} <prefix>] [options]
 
 Options and values:
   -C, --color <when>                  Color mode, can be 'always', 'auto' or 'never'
@@ -47,13 +47,13 @@ Options and values:
   -V, --version                       Display release information and exit
 
 Prefixes configuration:
-  --prefix-error <prefix>             Set prefix for error messages
+  -Pe, --prefix-error <prefix>        Set prefix for error messages
                                       default: '[x]'
-  --prefix-info <prefix>              Set prefix for info messages
+  -Pi, --prefix-info <prefix>         Set prefix for info messages
                                       default: '[i]'
-  --prefix-verbose <prefix>           Set prefix for verbose messages
+  -Pv, --prefix-verbose <prefix>      Set prefix for verbose messages
                                       default: '[~]'
-  --prefix-warning <prefix>           Set prefix for warning messages
+  -Pw, --prefix-warning <prefix>      Set prefix for warning messages
                                       default: '[!]'
 
 Examples:
@@ -129,34 +129,38 @@ There is NO WARRANTY, to the extent permitted by law.
 "
       exit 0
     ;;
-    --prefix-error | --prefix-error=* )
+    --prefix-error | -Pe | --prefix-error=* )
       passed_check='prefix_error_is_passed' \
       passed_set='new_prefix_error' \
       passed_option='--prefix-error' \
+      passed_short_option='-Pe' \
       cmdline_get "$@"
 
       shift "$shift"
     ;;
-    --prefix-info | --prefix-info=* )
+    --prefix-info | -Pi | --prefix-info=* )
       passed_check='prefix_info_is_passed' \
       passed_set='new_prefix_info' \
       passed_option='--prefix-info' \
+      passed_short_option='-Pi' \
       cmdline_get "$@"
 
       shift "$shift"
     ;;
-    --prefix-verbose | --prefix-verbose=* )
+    --prefix-verbose | -Pv | --prefix-verbose=* )
       passed_check='prefix_verbose_is_passed' \
       passed_set='new_prefix_verbose' \
       passed_option='--prefix-verbose' \
+      passed_short_option='-Pv' \
       cmdline_get "$@"
 
       shift "$shift"
     ;;
-    --prefix-warning | --prefix-warning=* )
+    --prefix-warning | -Pw | --prefix-warning=* )
       passed_check='prefix_warning_is_passed' \
       passed_set='new_prefix_warning' \
       passed_option='--prefix-warning' \
+      passed_short_option='-Pw' \
       cmdline_get "$@"
 
       shift "$shift"
