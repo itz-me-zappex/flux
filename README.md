@@ -188,9 +188,11 @@ PREFIX="~/.local" make install
 ## Usage
 ### List of available options
 ```
-Usage: flux [-c <path>] [-l <path>] [-T <format>] [--prefix-* <prefix>] [options]
+Usage: flux [-C <when>] [-c <path>] [-l <path>] [-T <format>] [-P{e,i,v,w} <prefix>] [options]
 
 Options and values:
+  -C, --color <when>                  Color mode, can be 'always', 'auto' or 'never'
+                                      default: 'auto' (enabled in terminal, disabled if redirected and exclusively in log file)
   -c, --config <path>                 Specify path to config file
                                       default: '$XDG_CONFIG_HOME/flux.ini' or '$HOME/.config/flux.ini' or '/etc/flux.ini'
   -h, --help                          Display this help and exit
@@ -207,13 +209,13 @@ Options and values:
   -V, --version                       Display release information and exit
 
 Prefixes configuration:
-  --prefix-error <prefix>             Set prefix for error messages
+  -Pe, --prefix-error <prefix>        Set prefix for error messages
                                       default: '[x]'
-  --prefix-info <prefix>              Set prefix for info messages
+  -Pi, --prefix-info <prefix>         Set prefix for info messages
                                       default: '[i]'
-  --prefix-verbose <prefix>           Set prefix for verbose messages
+  -Pv, --prefix-verbose <prefix>      Set prefix for verbose messages
                                       default: '[~]'
-  --prefix-warning <prefix>           Set prefix for warning messages
+  -Pw, --prefix-warning <prefix>      Set prefix for warning messages
                                       default: '[!]'
 
 Examples:
