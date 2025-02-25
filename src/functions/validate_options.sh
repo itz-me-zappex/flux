@@ -26,9 +26,9 @@ validate_options(){
         -z "$config" ]]; then
     message --error-opt "Option '--config' is specified without path to config file!"
     exit 1
+  else
+    unset config_is_passed
   fi
-
-  unset config_is_passed
 
   # Exit with error if at least one prefix option is specified without prefix
   local local_temp_prefix_type
@@ -50,7 +50,19 @@ validate_options(){
         -z "$new_timestamp_format" ]]; then
     message --error-opt "Option '--timestamp-format' is specified without timestamp format!"
     exit 1
+  else
+    unset timestamp_is_passed
   fi
-  
-  unset timestamp_is_passed
+
+  # Exit with an error if '--color' option is specified behavior or has wrong value
+  if [[ -n "$color_is_passed" &&
+        -z "$color" ]]; then
+    message --error-opt "Option '--color' is specified without mode!"
+    exit 1
+  elif [[ -n "$color" && ! "${color,,}" =~ ^('always'|'auto'|'never')$ ]]; then
+    message --error-opt "Specified mode '$color' in '--color' option is not supported!"
+    exit 1
+  else
+    unset color_is_passed
+  fi
 }
