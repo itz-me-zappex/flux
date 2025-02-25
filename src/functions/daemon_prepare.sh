@@ -61,6 +61,12 @@ daemon_prepare(){
     unset notifications
   fi
 
+  # Allow timestamps to be displayed
+  if [[ -n "$timestamps" ]]; then
+    allow_timestamps='1'
+    unset timestamps
+  fi
+
   # Check whether daemon able change and restore scheduling policies
   if [[ -n "$should_validate_sched" ]]; then
     sched_validate
