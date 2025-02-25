@@ -232,12 +232,12 @@ Daemon supports colors in prefixes and timestamps, those are configurable and I 
   - Daemon adds additional `\e[0m` to end of prefix/timestamp, that prevents output breakage by isolating formatting inside variables.
   - If colors specified by user in custom prefixes/timestamp and `--color` set to `auto` (or unset), daemon disables those when writes message to log file or output appears redirected to file (`stdout` and `stderr`), if `--color` set to `never` - disables colors completely, if `always` - enforces colors even for logging and redirection.
 
-To configure colors in custom prefix/timestamp, you need to use ANSI-escape sequence inside of prefix/timestamp as specified below:
+To configure colors in custom prefix/timestamp, you need to use ANSI escape sequence inside of prefix/timestamp as specified below:
 ```bash
 flux -tT '\e[36m%d.%m.%Y %H:%M:%S\e[0m'
 ```
 
-Now you will get cyan `25.02.2025 21:49:41` timestamps, order or count of ANSI escape sequences does not matter, so you can turn timestamps into freaking rainbow without causing explosion of the Sun. Same with prefixes. If you do not like `\e` for whatever reason, you can use either `\033`, `\001b` or `\x1b` instead, those are handled registry independently. More about colors and ANSI escape sequences you can find on `https://www.shellhacks.com/bash-colors` or any other website.
+Now you will get cyan `25.02.2025 21:49:41` timestamps, order or count of ANSI escape sequences does not matter, so you can turn timestamps into freaking rainbow without causing explosion of the Sun. Same with prefixes. If you do not like `\e` for whatever reason, you can use either `\033`, `\u001b` or `\x1b` instead, those are handled registry independently. More about colors and ANSI escape sequences you can find on `https://www.shellhacks.com/bash-colors` or any other website.
 
 ### Autostart
 Just add command to autostart using your DE/WM settings. Running daemon as root also possible, but that feature almost useless.
