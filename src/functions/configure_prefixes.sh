@@ -32,8 +32,7 @@ configure_prefixes(){
 
     # Check for existence of value in variable indirectly
     if [[ -n "${!local_variable_name}" ]]; then
-      # Replace old prefix with new one and handle ANSI-escapes
-      eval "prefix_$local_temp_prefix_type"=\'"$(echo -e "${!local_variable_name}\033[0m")"\'
+      eval "prefix_$local_temp_prefix_type"=\'"$(colors_interpret "$local_variable_name")"\'
       local local_is_prefixes_changed='1'
       unset "new_prefix_$local_temp_prefix_type"
     fi
@@ -41,7 +40,7 @@ configure_prefixes(){
 
   # Set specified timestamp format if any and handle ANSI escapes
   if [[ -n "$new_timestamp_format" ]]; then
-    timestamp_format="$(echo -e "$new_timestamp_format\033[0m")"
+    timestamp_format="$(colors_interpret "new_timestamp_format")"
     local local_is_timestamp_format_changed='1'
     unset new_timestamp_format
   fi
