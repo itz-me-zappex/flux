@@ -1,7 +1,7 @@
 # Required to print messages to console, log and notifications
 message(){
   # Get timestamp if that behavior is allowed using '--timestamps' option
-  if [[ -n "$timestamps" ]]; then
+  if [[ -n "$allow_timestamps" ]]; then
     local local_timestamp="$(printf "%($timestamp_format)T") "
 
     if [[ -n "$log_timestamp_format" ]]; then
