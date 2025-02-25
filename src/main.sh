@@ -20,7 +20,7 @@ if [[ -t 1 &&
   log_prefix_warning='[!]'
   log_timestamp_format='[%Y-%m-%dT%H:%M:%S%z]'
 else
-  # For case color mode will not be specified using '--color', needed in 'daemon_prepare()'
+  # For case color mode will not be specified using '--color', needed to handle custom prefixes and timestamp
   color='never'
 
   # Assuming stdout/stderr is redirected
