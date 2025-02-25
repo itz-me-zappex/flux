@@ -1,7 +1,7 @@
 pkgname='flux'
 pkgver='1.22'
 pkgrel='1'
-pkgdesc='Advanced daemon for X11 desktops and window managers, designed to automatically limit FPS/CPU usage of unfocused windows and run commands on focus and unfocus events. Written in Bash and C++.'
+pkgdesc='Advanced daemon for X11 desktops and window managers, designed to automatically limit FPS/CPU usage of unfocused windows and run commands on focus and unfocus events. Written in Bash and partially in C.'
 arch=('any')
 url='https://github.com/itz-me-zappex/flux'
 license=('GPL-3.0-only')
