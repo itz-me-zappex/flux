@@ -45,7 +45,7 @@ daemon_prepare(){
       local local_log_variable_name="log_$local_variable_name"
 
       # Store value of current variable to log related variable
-      eval "$local_log_variable_name"="${!local_variable_name}"
+      eval "$local_log_variable_name"=\'"${!local_variable_name}"\'
 
       # Define whether daemon should remove colors or not
       if [[ "${!local_log_variable_name}" =~ $'\033'\[[0-9(\;)?]+'m' ]]; then
