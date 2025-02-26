@@ -12,18 +12,17 @@ sched_validate(){
     chrt --idle --pid 0 "$local_sleep_pid" > /dev/null 2>&1
 
     if ! chrt --other --pid 0 "$local_sleep_pid" > /dev/null 2>&1; then
-      kill "$local_sleep_pid" > /dev/null 2>&1
       message --warning "Daemon has insufficient rights to restore scheduling policies, including 'other', add your user to 'flux' group and reboot!"
-      return 0
     else
       sched_change_is_supported='1'
-      kill "$local_sleep_pid" > /dev/null 2>&1
     fi
 
+    kill "$local_sleep_pid" > /dev/null 2>&1
+
     # Attempt to execute command with realtime scheduling policy to check whether daemon can restore it on focus or not
-    if ! chrt --fifo 1 echo > /dev/null 2>&1; then
+    if [[ -n "$sched_change_is_supported" ]] &&
+       ! chrt --fifo 1 echo > /dev/null 2>&1; then
       message --warning "Daemon has insufficient rights to restore 'RR' (round robin) and 'FIFO' (first in first out) scheduling policies, add your user to 'flux' group and reboot!"
-      return 0
     else
       sched_realtime_is_supported='1'
     fi
