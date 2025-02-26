@@ -124,7 +124,9 @@ unset -f validate_config_keys
 
 # Preparation for event reading
 daemon_prepare
-unset -f daemon_prepare
+unset -f daemon_prepare \
+colors_interpret \
+configure_prefixes
 
 # Set initial events count
 events_count='0'
