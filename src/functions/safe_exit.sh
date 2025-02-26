@@ -84,7 +84,4 @@ safe_exit(){
   
   # Wait a bit to avoid printing message about daemon termination earlier than messages from background functions appear
   sleep 0.1
-
-  # Print message about unsetting applied limits so user does not worry
-  message --info "Applied limits have been unset due to daemon termination."
 }
