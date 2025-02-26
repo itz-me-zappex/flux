@@ -66,7 +66,7 @@ handle_closure(){
         # Unset FPS limit if there is no any matching windows except target
         if [[ -z "$local_found" ]]; then
           passed_section="$local_terminated_section" \
-          passed_end_of_msg="$local_end_of_msg" \
+          passed_end_of_msg="due to window with XID $local_temp_window_xid of process '$local_terminated_process_name' with PID $local_terminated_process_pid closure" \
           unset_fps_limit
         else
           unset local_found

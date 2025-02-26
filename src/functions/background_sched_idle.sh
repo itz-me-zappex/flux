@@ -23,6 +23,6 @@ background_sched_idle(){
       fi
     fi
   else
-    message --warning "Process '$passed_process_name' with PID $passed_process_pid has been terminated before changing scheduling policy to 'idle'!"
+    message --warning "Process '$passed_process_name' with PID $passed_process_pid of window with XID $passed_window_xid has been terminated before changing scheduling policy to 'idle'!"
   fi
 }

@@ -96,6 +96,7 @@ handle_requests(){
 
         # Set FPS limit
         passed_section="$local_section" \
+        passed_process_name="$local_process_name" \
         passed_process_pid="$local_process_pid" \
         passed_window_xid="$local_temp_window_xid" \
         background_fps_limit &

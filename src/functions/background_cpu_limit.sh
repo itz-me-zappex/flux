@@ -14,7 +14,7 @@ background_cpu_limit(){
     local local_sleep_pid="$!"
 
     # Print relevant message on daemon termination and stop this subprocess
-    trap 'message --info "Delayed for $local_delay second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid has been cancelled due to daemon termination." ; \
+    trap 'message --info "Delayed for $local_delay second(s) CPU limiting of process '"'$passed_process_name'"' with PID $passed_process_pid of window with XID $passed_window_xid has been cancelled due to daemon termination." ; \
     kill "$local_sleep_pid"; \
     exit 0' SIGINT SIGTERM
 
@@ -49,11 +49,11 @@ background_cpu_limit(){
     # Enforce 'SCHED_BATCH' to improve interval stability between interrupts
     if check_pid_existence "$local_cpulimit_pid" &&
        ! chrt --batch --pid 0 "$local_cpulimit_pid" > /dev/null 2>&1; then
-      message --warning "Daemon has insufficient rights to change scheduling policy to 'batch' for 'cpulimit'!"
+      message --warning "Daemon has insufficient rights to change scheduling policy to 'batch' for 'cpulimit' which is hooked to process '$passed_process_name' with PID $passed_process_pid of window with XID $passed_window_xid!"
     fi
 
     # Terminate 'cpulimit' process and print relevant message on daemon termination
-    trap 'message --info "Process '"'$passed_process_name'"' with PID $passed_process_pid has been CPU unlimited due to daemon termination." ; \
+    trap 'message --info "Process '"'$passed_process_name'"' with PID $passed_process_pid of window with XID $passed_window_xid has been CPU unlimited due to daemon termination." ; \
     kill "$local_cpulimit_pid" > /dev/null 2>&1 ; \
     exit 0' SIGINT SIGTERM
 
@@ -69,6 +69,6 @@ background_cpu_limit(){
 
     wait "$local_cpulimit_pid"
   else
-    message --warning "Process '$passed_process_name' with PID $passed_process_pid has been terminated before applying CPU limit!"
+    message --warning "Process '$passed_process_name' with PID $passed_process_pid of window with XID $passed_window_xid has been terminated before applying CPU limit!"
   fi
 }

@@ -20,7 +20,7 @@ focus_unset_limit(){
   elif [[ -n "${config_key_mangohud_config_map["$section"]}" ]]; then
     # Unset FPS limit or update target config
     passed_section="$section" \
-    passed_end_of_msg="$local_end_of_msg" \
+    passed_end_of_msg="due to window with XID $window_xid of process '$process_name' with PID $process_pid focus event" \
     unset_fps_limit
   fi
 
