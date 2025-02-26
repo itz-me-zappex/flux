@@ -3,12 +3,12 @@ unset_sched_idle(){
   # Simplify access to PID of background process with delayed setting of 'SCHED_IDLE'
   local local_background_sched_idle_pid="${background_sched_idle_pid_map["$passed_process_pid"]}"
 
+  # Simplify access to delay config key value
+  local local_config_delay="${config_key_delay_map["$passed_section"]}"
+
   # Check for existence of background process with delayed setting of 'SCHED_IDLE'
   if [[ "$local_config_delay" != '0' ]] &&
      check_pid_existence "$local_background_sched_idle_pid"; then
-    # Simplify access to delay config key value
-    local local_config_delay="${config_key_delay_map["$passed_section"]}"
-
     # Attempt to terminate background process
     if ! kill "$local_background_sched_idle_pid" > /dev/null 2>&1; then
       message --warning "Unable to cancel delayed for $local_config_delay second(s) delayed setting of 'idle' scheduling policy for process '$passed_process_name' with PID $passed_process_pid $passed_end_of_msg!"
