@@ -193,7 +193,7 @@ Usage: flux [-C <when>] [-c <path>] [-l <path>] [-T <format>] [-P{e,i,v,w} <pref
 
 Options and values:
   -C, --color <when>                  Color mode, can be 'always', 'auto' or 'never'
-                                      default: 'auto' (enabled in terminal, disabled if redirected and exclusively in log file)
+                                      default: 'auto'
   -c, --config <path>                 Specify path to config file
                                       default: '$XDG_CONFIG_HOME/flux.ini' or '$HOME/.config/flux.ini' or '/etc/flux.ini'
   -h, --help                          Display this help and exit
