@@ -73,7 +73,7 @@ configure_prefixes(){
     # Store value of timestamp variable into log related one
     log_timestamp_format="$timestamp_format"
 
-    # Remove other ANSI escapes
+    # Remove ANSI escapes
     while [[ "$log_timestamp_format" =~ $'\033'\[[0-9(\;)?]+'m' ]]; do
       log_timestamp_format="${log_timestamp_format//"${BASH_REMATCH[0]}"/}"
     done
