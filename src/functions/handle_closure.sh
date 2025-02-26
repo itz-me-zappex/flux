@@ -119,7 +119,7 @@ handle_closure(){
       elif [[ -z "${request_sched_idle_map["$local_terminated_process_pid"]}" &&
               -z "${request_minimize_map["$local_terminated_process_pid"]}" ]]; then
         # Print verbose message about window termination if there is no limits specified for it in config file
-        message --verbose "Window with XID $local_temp_terminated_window_xid of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been terminated."
+        message --verbose "Window with XID $local_temp_terminated_window_xid of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been closed."
       fi
 
       # Unset 'SCHED_IDLE' request
