@@ -277,6 +277,7 @@ while read -r raw_event; do
 
       # Get window ID
       window_xid="${event/'='*/}"
+
       # Get process PID of focused window
       process_pid="${event/*'='/}"
 
