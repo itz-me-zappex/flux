@@ -61,6 +61,7 @@ Examples:
   flux -HtLl ~/.flux.log -T '[%d.%m.%Y %H:%M:%S]'
   flux -ql ~/.flux.log
   flux -c ~/.config/flux.ini.bak
+  flux -tT '(\e[1;4;36m%d.%m.%Y\e[0m \e[1;4;31m%H:%M:%S\e[0m)'
 "
       exit 0
     ;;
