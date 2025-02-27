@@ -18,7 +18,7 @@ Window get_active_window(Display* display, Window root, Atom atom) {
                                   &type, &format, &windows_count, &bytes_after, &data);
 
   if (status == Success &&
-      data != NULL) {
+      data) {
     active_window = *(Window *)data;
   } else {
     active_window = None;
@@ -64,7 +64,7 @@ pid_t get_window_process(Display* display, Window window_id) {
   int status = XResQueryClientIds(display, 1, &client_spec, &elements, &client_ids);
 
   if (status == Success &&
-      client_ids != NULL) {
+      client_ids) {
     for (long i = 0; i < elements; i++) {
       if (window_id > 0) {
         window_process = XResGetClientPid(&client_ids[i]);
@@ -92,7 +92,7 @@ Window get_wm_window(Display* display, Window root, Atom atom) {
                                   &type, &format, &windows_count, &bytes_after, &data);
 
   if (status == Success &&
-      data != NULL) {
+      data) {
     wm_window = *(Window *)data;
   } else {
     wm_window = None;
@@ -215,8 +215,14 @@ int main() {
 
     // Freeing here because of a bunch of 'continue' below
     XFree(opened_windows);
+
     // Get list of opened windows from '_NET_CLIENT_LIST_STACKING'
     opened_windows = get_opened_windows(display, root, &opened_windows_count, net_client_list_stacking);
+
+    // Skip event if list of opened windows appears blank
+    if (!opened_windows) {
+      continue;
+    }
 
     // Check for WM restart
     if (wm_restart_mark) {
