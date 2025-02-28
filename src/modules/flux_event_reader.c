@@ -6,7 +6,7 @@
 #include <X11/extensions/XRes.h>
 #include <unistd.h>
 
-// Get window ID using '_NET_ACTIVE_WINDOW' atom
+// Get window XID using '_NET_ACTIVE_WINDOW' atom
 Window get_active_window(Display* display, Window root, Atom atom) {
   Window active_window;
   Atom type;
@@ -29,7 +29,7 @@ Window get_active_window(Display* display, Window root, Atom atom) {
   return active_window;
 }
 
-// Fallback, get window ID from X server if '_NET_ACTIVE_WINDOW' is zero
+// Fallback, get window XID from X server if '_NET_ACTIVE_WINDOW' is zero
 Window get_input_focus(Display* display) {
   int revert;
   Window active_window;
@@ -80,7 +80,7 @@ pid_t get_window_process(Display* display, Window window_id) {
   return window_process;
 }
 
-// Get window manager WID using '_NET_SUPPORTING_WM_CHECK' atom, needed to include it to list of opened windows and skip event if 'XGetInputFocus()' returns smth else instead of WM WID
+// Get window manager XID using '_NET_SUPPORTING_WM_CHECK' atom, needed to include it to list of opened windows and skip event if 'XGetInputFocus()' returns smth else instead of WM XID
 Window get_wm_window(Display* display, Window root, Atom atom) {
   Window wm_window;
   Atom type;
@@ -235,15 +235,15 @@ int main() {
       }
     }
 
-    // Get window ID from '_NET_ACTIVE_WINDOW'
+    // Get window XID from '_NET_ACTIVE_WINDOW'
     active_window = get_active_window(display, root, net_active_window);
-    // Get window manager WID from '_NET_SUPPORTING_WM_CHECK'
+    // Get window manager XID from '_NET_SUPPORTING_WM_CHECK'
     wm_window = get_wm_window(display, root, net_supporting_wm_check);
     // Fallback
     if (active_window == None) {
       // Use 'XGetInputFocus()' if '_NET_ACTIVE_WINDOW' is zero
       active_window = get_input_focus(display);
-      // Skip loop if 'XGetInputFocus()' did not return window manager WID
+      // Skip loop if 'XGetInputFocus()' did not return window manager XID
       if (active_window != wm_window) {
         continue;
       }
