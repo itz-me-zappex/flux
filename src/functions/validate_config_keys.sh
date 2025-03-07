@@ -46,6 +46,12 @@ validate_config_keys(){
       exit 1
     fi
 
+    # Exit with an error if section contains only identifiers
+    if [[ -z "${is_section_useful["$local_temp_section"]}" ]]; then
+      message --error "Section '$local_temp_section' in '$config' config file contains only identifiers!"
+      exit 1
+    fi
+
     # Set 'fps-focus' to '0' (full FPS unlock) if it is not specified
     if [[ -n "${config_key_fps_unfocus_map["$local_temp_section"]}" &&
           -z "${config_key_fps_focus_map["$local_temp_section"]}" ]]; then

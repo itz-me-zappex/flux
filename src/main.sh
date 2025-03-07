@@ -89,6 +89,9 @@ sched_previous_runtime_map \
 sched_previous_deadline_map \
 sched_previous_period_map
 
+# Needed to define section with just identifiers specified, i.e. with no any action
+declare -A is_section_useful
+
 # Options parsing and forget cmdline options
 parse_options "$@"
 shift "${#@}"
@@ -121,6 +124,7 @@ simplify_bool
 # Config keys validation
 validate_config_keys
 unset -f validate_config_keys
+unset is_section_useful # Associative array
 
 # Preparation for event reading
 daemon_prepare
