@@ -70,9 +70,6 @@ handle_requests(){
 
         # Associate PID of background process with PID of process to interrupt it in case focus event appears earlier than delay ends
         background_freeze_pid_map["$local_process_pid"]="$!"
-
-        # Mark process as frozen
-        is_freeze_applied_map["$local_process_pid"]='1'
       elif [[ -n "${request_cpu_limit_map["$local_process_pid"]}" ]]; then
         # Unset request as it becomes useless
         unset request_cpu_limit_map["$local_process_pid"]
@@ -86,9 +83,6 @@ handle_requests(){
 
         # Associate PID of background process with PID of process to interrupt it on focus event
         background_cpu_limit_pid_map["$local_process_pid"]="$!"
-
-        # Mark process as CPU limited
-        is_cpu_limit_applied_map["$local_process_pid"]='1'
       elif [[ -n "$local_section" &&
               -n "${request_fps_limit_map["$local_section"]}" ]]; then
         # Unset request as it becomes useless
@@ -103,9 +97,6 @@ handle_requests(){
 
         # Associate PID of background process with section to interrupt in case focus event appears earlier than delay ends
         background_fps_limit_pid_map["$local_section"]="$!"
-
-        # Mark section as FPS limited, required to check FPS limit existence on focus event
-        is_fps_limit_applied_map["$local_section"]='1'
       fi
 
       # Check for 'SCHED_IDLE' scheduling policy request
@@ -172,9 +163,6 @@ handle_requests(){
 
             # Associate PID of background process with PID of process to interrupt it on focus event
             background_sched_idle_pid_map["$local_process_pid"]="$!"
-
-            # Mark process as idle
-            is_sched_idle_applied_map["$local_process_pid"]='1'
           else
             message --warning "Process '$local_process_name' with PID $local_process_pid already has scheduling policy set to 'idle', changing it due to window with XID $local_temp_window_xid unfocus event cancelled!"
             local local_idle_cancelled='1'

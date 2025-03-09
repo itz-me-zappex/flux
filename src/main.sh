@@ -55,17 +55,12 @@ config_key_fps_focus_map \
 config_key_idle_map \
 config_key_minimize_map
 
-# Declare associative arrays to store info about applied limits
-declare -A is_freeze_applied_map \
-background_freeze_pid_map \
-is_cpu_limit_applied_map \
+# Declare associative arrays to store info about backgrounded limits
+declare -A background_freeze_pid_map \
 background_cpu_limit_pid_map \
-is_fps_limit_applied_map \
 background_fps_limit_pid_map \
-is_sched_idle_applied_map \
 background_sched_idle_pid_map \
-background_minimize_pid_map \
-is_exec_oneshot_executed_map
+background_minimize_pid_map
 
 # Declare associative arrays to store info about requested limits
 declare -A request_freeze_map \
@@ -92,7 +87,10 @@ sched_previous_deadline_map \
 sched_previous_period_map
 
 # Needed to define section with just identifiers specified, i.e. with no any action
-declare -A is_section_useful
+declare -A is_section_useful_map
+
+# Needed to remember that 'exec-oneshot' command has been executed
+declare -A is_exec_oneshot_executed_map
 
 # Options parsing and forget cmdline options
 parse_options "$@"
@@ -126,7 +124,7 @@ simplify_bool
 # Config keys validation
 validate_config_keys
 unset -f validate_config_keys
-unset is_section_useful # Associative array
+unset is_section_useful_map
 
 # Preparation for event reading
 daemon_prepare

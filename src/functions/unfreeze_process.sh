@@ -23,8 +23,6 @@ unfreeze_process(){
       message --info "Process '$passed_process_name' with PID $passed_process_pid has been unfrozen $passed_end_of_msg."
     fi
   fi
-  
-  # Unset details about freezing
-  unset is_freeze_applied_map["$passed_process_pid"] \
-  background_freeze_pid_map["$passed_process_pid"]
+
+  unset background_freeze_pid_map["$passed_process_pid"]
 }
