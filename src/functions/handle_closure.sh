@@ -120,7 +120,7 @@ handle_closure(){
         message --verbose "MangoHud config file '${config_key_mangohud_config_map["$local_terminated_section"]}' FPS limiting from section '$local_terminated_section' has been cancelled due to window with XID $local_temp_terminated_window_xid closure of process '$local_terminated_process_name' with PID $local_terminated_process_pid."
       elif [[ -z "${request_sched_idle_map["$local_terminated_process_pid"]}" &&
               -z "${request_minimize_map["$local_terminated_process_pid"]}" ]]; then
-        # Print verbose message about window termination if there is no limits specified for it in config file
+        # Print verbose message about window termination if there is no requests
         message --verbose "Window with XID $local_temp_terminated_window_xid of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been closed."
       fi
 
