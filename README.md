@@ -31,7 +31,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
     - [Long examples](#long-examples)
     - [Short examples](#short-examples)
   - [Environment variables passed to commands and description](#environment-variables-passed-to-commands-and-description)
-    - [Passed to `exec-focus` and `lazy-exec-focus` config keys](#passed-to-exec-focus-and-lazy-exec-focus-config-keys)
+    - [Passed to `exec-oneshot`, `exec-focus` and `lazy-exec-focus` config keys](#passed-to-exec-oneshot-exec-focus-and-lazy-exec-focus-config-keys)
     - [Passed to `exec-unfocus` and `lazy-exec-unfocus` config keys](#passed-to-exec-unfocus-and-lazy-exec-unfocus-config-keys)
 - [Tips and tricks](#tips-and-tricks)
   - [Apply changes in config file](#apply-changes-in-config-file)
@@ -274,6 +274,7 @@ A simple INI is used for configuration.
 #### Miscellaneous
 | Key | Description |
 |-----|-------------|
+| `exec-oneshot` | Command to execute on window appearance event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
 | `exec-focus` | Command to execute on focus event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
 | `exec-unfocus` | Command to execute on unfocus event or window closure, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
 | `lazy-exec-focus` | Same as `exec-focus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event). |
@@ -364,9 +365,9 @@ idle = true
 ```
 
 ### Environment variables passed to commands and description
-You may want to use these variables in commands and scripts which running from `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys to extend daemon functionality.
+You may want to use these variables in commands and scripts which running from `exec-oneshot`, `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys to extend daemon functionality.
 
-#### Passed to `exec-focus` and `lazy-exec-focus` config keys
+#### Passed to `exec-oneshot`, `exec-focus` and `lazy-exec-focus` config keys
 | Variable | Description |
 |----------|-------------|
 | `FLUX_WINDOW_XID` | Decimal XID of focused window. |
