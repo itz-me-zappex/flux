@@ -136,6 +136,9 @@ handle_closure(){
       # Unset unfocus event command execution request
       unset request_exec_unfocus_general_map["$local_terminated_process_pid"]
 
+      # Unset 'exec-oneshot' config key execution mark
+      unset is_exec_oneshot_executed_map["$local_terminated_process_pid"]
+
       # Remove data related to terminated window from cache
       unset cache_process_pid_map["$local_temp_terminated_window_xid"] \
       cache_process_name_map["$local_temp_terminated_window_xid"] \

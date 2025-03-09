@@ -42,6 +42,7 @@ declare -A config_key_name_map \
 config_key_owner_map \
 config_key_cpu_limit_map \
 config_key_delay_map \
+config_key_exec_oneshot_map \
 config_key_exec_focus_map \
 config_key_exec_unfocus_map \
 config_key_lazy_exec_focus_map \
@@ -63,7 +64,8 @@ is_fps_limit_applied_map \
 background_fps_limit_pid_map \
 is_sched_idle_applied_map \
 background_sched_idle_pid_map \
-background_minimize_pid_map
+background_minimize_pid_map \
+is_exec_oneshot_executed_map
 
 # Declare associative arrays to store info about requested limits
 declare -A request_freeze_map \

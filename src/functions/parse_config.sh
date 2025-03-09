@@ -29,7 +29,7 @@ parse_config(){
         local local_section="${local_temp_config_line/\[/}"
         local local_section="${local_section/%\]/}"
         sections_array+=("$local_section")
-      elif [[ "${local_temp_config_line,,}" =~ ^(name|owner|cpu-limit|delay|(lazy-)?exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus|idle|minimize)([[:space:]]+)?=([[:space:]]+)?* ]]; then
+      elif [[ "${local_temp_config_line,,}" =~ ^(name|owner|cpu-limit|delay|exec-oneshot|(lazy-)?exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus|idle|minimize)([[:space:]]+)?=([[:space:]]+)?* ]]; then
         # Ignore if type of line cannot be defined, regexp above means [key name][space(s)?]=[space(s)?][anything else]
         # Remove key name and equal symbol
         local local_config_value="${local_temp_config_line#*=}"
@@ -79,6 +79,10 @@ parse_config(){
               message --error "Value '$local_config_value' in key 'delay' in section '$local_section' is neither integer nor float in '$config' config file!"
               exit 1
             fi
+          ;;
+          exec-oneshot* )
+            config_key_exec_oneshot_map["$local_section"]="$local_config_value"
+            is_section_useful["$local_section"]='1'
           ;;
           exec-focus* )
             config_key_exec_focus_map["$local_section"]="$local_config_value"
