@@ -47,7 +47,7 @@ validate_config_keys(){
     fi
 
     # Exit with an error if section contains only identifiers
-    if [[ -z "${is_section_useful["$local_temp_section"]}" ]]; then
+    if [[ -z "${is_section_useful_map["$local_temp_section"]}" ]]; then
       message --error "Section '$local_temp_section' in '$config' config file contains only identifiers!"
       exit 1
     fi

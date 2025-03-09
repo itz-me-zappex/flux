@@ -65,7 +65,7 @@ parse_config(){
             if [[ "$local_config_value" =~ ^[0-9]+(\%)?$ ]] &&
                (( "${local_config_value/%\%/}" * cpu_threads <= max_cpu_limit )); then
               config_key_cpu_limit_map["$local_section"]="${local_config_value/%\%/}"
-              is_section_useful["$local_section"]='1'
+              is_section_useful_map["$local_section"]='1'
             else
               message --error "Value '$local_config_value' in key 'cpulimit' in section '$local_section' is invalid in '$config' config file! Allowed values are between 0 and 100."
               exit 1
@@ -82,15 +82,15 @@ parse_config(){
           ;;
           exec-oneshot* )
             config_key_exec_oneshot_map["$local_section"]="$local_config_value"
-            is_section_useful["$local_section"]='1'
+            is_section_useful_map["$local_section"]='1'
           ;;
           exec-focus* )
             config_key_exec_focus_map["$local_section"]="$local_config_value"
-            is_section_useful["$local_section"]='1'
+            is_section_useful_map["$local_section"]='1'
           ;;
           exec-unfocus* )
             config_key_exec_unfocus_map["$local_section"]="$local_config_value"
-            is_section_useful["$local_section"]='1'
+            is_section_useful_map["$local_section"]='1'
           ;;
           command* )
             config_key_command_map["$local_section"]="$local_config_value"
@@ -130,7 +130,7 @@ parse_config(){
               # Exit with an error if value equal to zero
               if [[ "$local_config_value" != '0' ]]; then
                 config_key_fps_unfocus_map["$local_section"]="$local_config_value"
-                is_section_useful["$local_section"]='1'
+                is_section_useful_map["$local_section"]='1'
               else
                 message --error "Value $local_config_value in key 'fps-unfocus' in section '$local_section' in '$config' config file should be greater than zero!"
                 exit 1
@@ -152,11 +152,11 @@ parse_config(){
           ;;
           lazy-exec-focus* )
             config_key_lazy_exec_focus_map["$local_section"]="$local_config_value"
-            is_section_useful["$local_section"]='1'
+            is_section_useful_map["$local_section"]='1'
           ;;
           lazy-exec-unfocus* )
             config_key_lazy_exec_unfocus_map["$local_section"]="$local_config_value"
-            is_section_useful["$local_section"]='1'
+            is_section_useful_map["$local_section"]='1'
           ;;
           idle* )
             # Exit with an error if value is not boolean
@@ -165,7 +165,7 @@ parse_config(){
               exit 1
             fi
 
-            is_section_useful["$local_section"]='1'
+            is_section_useful_map["$local_section"]='1'
           ;;
           minimize* )
             # Exit with an error if value is not boolean
@@ -174,7 +174,7 @@ parse_config(){
               exit 1
             fi
 
-            is_section_useful["$local_section"]='1'
+            is_section_useful_map["$local_section"]='1'
           esac
         fi
       else
