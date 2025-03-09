@@ -94,6 +94,8 @@ handle_closure(){
 
       # Execute unfocus event command
       if [[ -n "${request_exec_unfocus_general_map["$local_terminated_process_pid"]}" ]]; then
+        unset request_exec_unfocus_general_map["$local_terminated_process_pid"]
+
         passed_window_xid="$local_temp_terminated_window_xid" \
         passed_process_pid="$local_terminated_process_pid" \
         passed_section="$local_terminated_section" \
@@ -132,9 +134,6 @@ handle_closure(){
       if [[ -n "${request_minimize_map["$local_terminated_process_pid"]}" ]]; then
         message --verbose "Window with XID $local_temp_window_xid minimization of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window closure."
       fi
-
-      # Unset unfocus event command execution request
-      unset request_exec_unfocus_general_map["$local_terminated_process_pid"]
 
       # Unset 'exec-oneshot' config key execution mark
       unset is_exec_oneshot_executed_map["$local_terminated_process_pid"]
