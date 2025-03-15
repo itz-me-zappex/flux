@@ -1,125 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/extensions/XRes.h>
 #include <unistd.h>
 
-// Get window XID using '_NET_ACTIVE_WINDOW' atom
-Window get_active_window(Display* display, Window root, Atom atom) {
-  Window active_window;
-  Atom type;
-  unsigned char *data = NULL;
-  unsigned long windows_count, bytes_after;
-  int format;
-
-  int status = XGetWindowProperty(display, root, atom, 0, 1, False, XA_WINDOW,
-                                  &type, &format, &windows_count, &bytes_after, &data);
-
-  if (status == Success &&
-      data) {
-    active_window = *(Window *)data;
-  } else {
-    active_window = None;
-  }
-
-  XFree(data);
-
-  return active_window;
-}
-
-// Fallback, get window XID from X server if '_NET_ACTIVE_WINDOW' is zero
-Window get_input_focus(Display* display) {
-  int revert;
-  Window active_window;
-
-  XGetInputFocus(display, &active_window, &revert);
-
-  return active_window;
-}
-
-// Check difference between previous and current 'WM_S0' atom to detect WM restart
-bool check_wm_restart(Display* display, Window root, Atom atom) {
-  static Window previous_owner = None;
-
-  Window owner = XGetSelectionOwner(display, atom);
-
-  bool wm_restart = (previous_owner != None &&
-                     owner != previous_owner);
-  previous_owner = owner;
-
-  return wm_restart;
-}
-
-// Get process of window using XRes extension ('_NET_WM_PID' is unreliable)
-pid_t get_window_process(Display* display, Window window_id) {
-  pid_t window_process;
-  XResClientIdSpec client_spec;
-  client_spec.client = window_id;
-  client_spec.mask = XRES_CLIENT_ID_PID_MASK;
-  long elements;
-  XResClientIdValue *client_ids = NULL;
-
-  int status = XResQueryClientIds(display, 1, &client_spec, &elements, &client_ids);
-
-  if (status == Success &&
-      client_ids) {
-    for (long i = 0; i < elements; i++) {
-      if (window_id > 0) {
-        window_process = XResGetClientPid(&client_ids[i]);
-        break;
-      }
-    }
-  } else {
-    window_process = 0;
-  }
-
-  XResClientIdsDestroy(elements, client_ids);
-
-  return window_process;
-}
-
-// Get window manager XID using '_NET_SUPPORTING_WM_CHECK' atom, needed to include it to list of opened windows and skip event if 'XGetInputFocus()' returns smth else instead of WM XID
-Window get_wm_window(Display* display, Window root, Atom atom) {
-  Window wm_window;
-  Atom type;
-  unsigned char *data = NULL;
-  unsigned long windows_count, bytes_after;
-  int format;
-
-  int status = XGetWindowProperty(display, root, atom, 0, 1, False, XA_WINDOW,
-                                  &type, &format, &windows_count, &bytes_after, &data);
-
-  if (status == Success &&
-      data) {
-    wm_window = *(Window *)data;
-  } else {
-    wm_window = None;
-  }
-
-  XFree(data);
-
-  return wm_window;
-}
-
-// Get list of opened window IDs using '_NET_CLIENT_LIST_STACKING' atom
-Window* get_opened_windows(Display* display, Window root, unsigned long *opened_windows_count, Atom atom) {
-  Atom type;
-  unsigned char *data = NULL;
-  unsigned long windows_count, bytes_after;
-  int format;
-
-  int status = XGetWindowProperty(display, root, atom, 0, ~0, False, XA_WINDOW,
-                                  &type, &format, &windows_count, &bytes_after, &data);
-
-  if (status != Success) {
-    *opened_windows_count = 0;
-    return NULL;
-  }
-  *opened_windows_count = windows_count;
-  return (Window *)data;
-}
+#include "functions/check_wm_restart.h"
+#include "functions/get_active_window.h"
+#include "functions/get_input_focus.h"
+#include "functions/get_opened_windows.h"
+#include "functions/get_window_process.h"
+#include "functions/get_wm_window.h"
 
 // Daemon
 int main() {
