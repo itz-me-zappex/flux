@@ -1,5 +1,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <X11/Xutil.h>
 
 #include "functions/get_opened_windows.h"
 
