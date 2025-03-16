@@ -12,9 +12,6 @@ BUILD_DIR = $(PWD)/build
 
 FLUX_BUILD = $(BUILD_DIR)/flux
 
-FLUX_EVENT_READER_BUILD = $(BUILD_DIR)/flux-event-reader
-WINDOW_MINIMIZE_BUILD = $(BUILD_DIR)/window-minimize
-
 all:
 	mkdir -p $(BUILD_DIR)
 
@@ -30,7 +27,7 @@ all:
 	echo >> $(FLUX_BUILD)
 	cat src/main.sh >> $(FLUX_BUILD)
 
-	$(CC) $(CFLAGS) -o $(FLUX_EVENT_READER_BUILD) $(CMODULES_DIR)/flux_event_reader.c \
+	$(CC) $(CFLAGS) -o $(BUILD_DIR)/flux-event-reader $(CMODULES_DIR)/flux_event_reader.c \
 	$(CFUNCTIONS_DIR)/check_wm_restart.c \
 	$(CFUNCTIONS_DIR)/get_active_window.c \
 	$(CFUNCTIONS_DIR)/get_input_focus.c \
@@ -39,7 +36,7 @@ all:
 	$(CFUNCTIONS_DIR)/get_wm_window.c \
 	-lX11 -lXext -lXRes
 
-	$(CC) $(CFLAGS) -o $(WINDOW_MINIMIZE_BUILD) $(CMODULES_DIR)/window_minimize.c \
+	$(CC) $(CFLAGS) -o $(BUILD_DIR)/window-minimize $(CMODULES_DIR)/window_minimize.c \
 	$(CFUNCTIONS_DIR)/get_opened_windows.c \
 	-lX11
 
