@@ -27,6 +27,8 @@ all:
 	echo >> $(FLUX_BUILD)
 	cat src/main.sh >> $(FLUX_BUILD)
 
+	chmod +x $(FLUX_BUILD)
+
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/flux-event-reader $(CMODULES_DIR)/flux_event_reader.c \
 	$(CFUNCTIONS_DIR)/check_wm_restart.c \
 	$(CFUNCTIONS_DIR)/get_active_window.c \
