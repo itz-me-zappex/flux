@@ -52,8 +52,8 @@ install:
 	mkdir -p $(PREFIX)/bin/
 	mkdir -p $(PREFIX)/lib/flux/
 	install -Dm 755 $(FLUX_BUILD) $(PREFIX)/bin/
-	install -Dm 755 $(FLUX_EVENT_READER_BUILD) $(PREFIX)/lib/flux/
-	install -Dm 755 $(WINDOW_MINIMIZE_BUILD) $(PREFIX)/lib/flux/
+	install -Dm 755 $(BUILD_DIR)/flux-event-reader $(PREFIX)/lib/flux/
+	install -Dm 755 $(BUILD_DIR)/window-minimize $(PREFIX)/lib/flux/
 
 install-bypass:
 	mkdir -p /etc/security/limits.d/
