@@ -196,7 +196,7 @@ handle_requests(){
         passed_process_owner="$local_process_owner" \
         passed_process_owner_username="$local_process_owner_username" \
         passed_process_command="$local_process_command" \
-        passed_end_of_msg="due to window with XID $local_temp_window_xid unfocus event" \
+        passed_end_of_msg="due to window with XID $local_temp_window_xid unfocus event of process '$local_process_name' with PID $local_process_pid" \
         exec_unfocus
         unset request_exec_unfocus_general_map["$local_process_pid"]
       fi

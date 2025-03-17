@@ -103,7 +103,7 @@ handle_closure(){
         passed_process_owner="$local_terminated_process_owner" \
         passed_process_owner_username="$local_terminated_process_owner_username" \
         passed_process_command="$local_terminated_process_command" \
-        passed_end_of_msg="$local_end_of_msg" \
+        passed_end_of_msg="due to window with XID $local_temp_window_xid closure of process '$local_terminated_process_name' with PID $local_terminated_process_pid" \
         exec_unfocus
       fi
 
