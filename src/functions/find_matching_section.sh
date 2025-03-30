@@ -12,9 +12,10 @@ find_matching_section(){
         if [[ -z "${config_key_name_map["$local_temp_section"]}" ]]; then
           (( local_match++ ))
         else
-          # Compare process name with specified in config, use soft match if process name in config key longer than or equal to 16 symbols
+          # Compare process name with specified in config, use soft match if process name is stripped to 15 symbols (16th is '\n' character) and a full name is specified in config
           if [[ "${config_key_name_map["$local_temp_section"]}" == "$process_name" ||
                 "${config_key_name_map["$local_temp_section"]}" == "$process_name"* &&
+                "$process_name" =~ ^.{15}$ &&
                 "${config_key_name_map["$local_temp_section"]}" =~ ^.{16,}$ ]]; then
             (( local_match++ ))
           fi
