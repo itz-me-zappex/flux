@@ -53,7 +53,8 @@ config_key_mangohud_config_map \
 config_key_fps_unfocus_map \
 config_key_fps_focus_map \
 config_key_idle_map \
-config_key_unfocus_minimize_map
+config_key_unfocus_minimize_map \
+config_key_focus_fullscreen_map
 
 # Declare associative arrays to store info about backgrounded limits
 declare -A background_freeze_pid_map \
