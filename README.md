@@ -60,7 +60,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - Notifications support.
 - Multiple identifiers you can set to avoid false positives.
 - Easy INI config.
-- Ability to use window and process info through environment variables which daemon passes to scripts/commands in `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys.
+- Ability to use window and process info through environment variables which daemon passes to scripts/commands in `exec-oneshot`, `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys.
 - Works with processes running in sandbox with PID namespaces (e.g. Firejail).
 - Survives a whole DE/WM restart (not relogin) and continues work without issues.
 - Supports most of X11 DEs/WMs [(EWMH-compatible ones)](<https://specifications.freedesktop.org/wm-spec/latest/>) and does not rely on neither GPU nor its driver.
