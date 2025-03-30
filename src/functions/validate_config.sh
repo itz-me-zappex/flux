@@ -35,5 +35,9 @@ validate_config(){
     # Exit with an error if config file is not readable
     message --error "Config file '$config' is not accessible for reading!"
     exit 1
+  elif [[ -z "$(<"$config")" ]]; then
+    # Exit with an error if config file is blank
+    message --error "Config file '$config' is blank!"
+    exit 1
   fi
 }
