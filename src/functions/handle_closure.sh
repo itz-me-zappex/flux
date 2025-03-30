@@ -12,7 +12,7 @@ handle_closure(){
   # Obtain list of terminated windows and remove PIDs
   local local_temp_window_xid
   for local_temp_window_xid in "${!cache_process_pid_map[@]}"; do
-    # Add window ID to array with terminated windows if it does not exist in '_NET_CLIENT_LIST_STACKING'
+    # Add window XID to array with terminated windows if it does not exist in '_NET_CLIENT_LIST_STACKING'
     if [[ " ${local_existing_window_xids_array[*]} " != *" $local_temp_window_xid "* ]]; then
       local local_terminated_window_xids_array+=("$local_temp_window_xid")
     fi
@@ -21,7 +21,7 @@ handle_closure(){
   # Unset limits for terminated windows
   local local_temp_terminated_window_xid
   for local_temp_terminated_window_xid in "${local_terminated_window_xids_array[@]}"; do
-    # Skip window ID if info about it does not exist in cache
+    # Skip window XID if info about it does not exist in cache
     if [[ -n "${cache_process_pid_map["$local_temp_terminated_window_xid"]}" ]]; then
       # Simplify access to cached info about terminated window
       local local_terminated_process_pid="${cache_process_pid_map["$local_temp_terminated_window_xid"]}"
@@ -31,7 +31,7 @@ handle_closure(){
       local local_terminated_process_owner_username="${cache_process_owner_username_map["$local_temp_terminated_window_xid"]}"
       local local_terminated_process_command="${cache_process_command_map["$local_temp_terminated_window_xid"]}"
 
-      # Set end of message with actual window ID to not duplicate it
+      # Set end of message with actual window XID to not duplicate it
       local local_end_of_msg="due to window with XID $local_temp_window_xid closure"
 
       # Unset applied limits

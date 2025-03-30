@@ -1,4 +1,4 @@
-# Required to get process info from cache using window ID
+# Required to get process info from cache using window XID
 cache_get_process_info(){
   process_name="${cache_process_name_map["$passed_window_xid"]}"
   process_owner="${cache_process_owner_map["$passed_window_xid"]}"
@@ -17,7 +17,7 @@ get_process_info(){
     for local_temp_cached_window_xid in "${!cache_process_pid_map[@]}"; do
       # Compare parent PID with PID of process
       if (( ${cache_process_pid_map["$local_temp_cached_window_xid"]} == process_pid )); then
-        # Remember window ID of matching process
+        # Remember window XID of matching process
         local local_matching_window_xid="$local_temp_cached_window_xid"
         break
       fi
@@ -84,7 +84,7 @@ get_process_info(){
       return 2
     fi
     
-    # Store process info to cache to speed up its obtainance on next focus event and to use it implicitly using only window ID
+    # Store process info to cache to speed up its obtainance on next focus event and to use it implicitly using only window XID
     cache_process_pid_map["$window_xid"]="$process_pid"
     cache_process_name_map["$window_xid"]="$process_name"
     cache_process_owner_map["$window_xid"]="$process_owner"

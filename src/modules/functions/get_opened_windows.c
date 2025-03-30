@@ -1,6 +1,6 @@
 #include "get_opened_windows.h"
 
-// Get list of opened window IDs using '_NET_CLIENT_LIST_STACKING' atom
+// Get list of opened window XIDs using '_NET_CLIENT_LIST_STACKING' atom
 Window* get_opened_windows(Display* display, Window root, unsigned long *opened_windows_count, Atom atom) {
   Atom type;
   unsigned char *data = NULL;

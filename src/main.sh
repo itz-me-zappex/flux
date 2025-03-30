@@ -204,7 +204,7 @@ while read -r raw_event; do
   # Add info about focused window to array as event if it does not repeat
   if [[ "$previous_focused_window" != "$focused_window" ]]; then
     events_array+=("$focused_window")
-    # Remember focused window ID to skip adding it to array as event if repeats
+    # Remember focused window XID to skip adding it to array as event if repeats
     previous_focused_window="$focused_window"
   fi
 
@@ -281,13 +281,13 @@ while read -r raw_event; do
       process_command \
       section
 
-      # Get window ID
+      # Get window XID
       window_xid="${event/'='*/}"
 
       # Get process PID of focused window
       process_pid="${event/*'='/}"
 
-      # Attempt to obtain info about process using window ID
+      # Attempt to obtain info about process using window XID
       get_process_info
       get_process_info_exit_code="$?"
 

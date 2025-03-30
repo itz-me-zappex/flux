@@ -6,7 +6,7 @@
 
 #include "functions/get_opened_windows.h"
 
-// Minimize window if passed window ID is valid
+// Minimize window if passed window XID is valid
 int main(int argc, char *argv[]) {
   if (argc != 2) {
     return 1;
