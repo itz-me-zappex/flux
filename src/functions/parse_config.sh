@@ -29,7 +29,7 @@ parse_config(){
         local local_section="${local_temp_config_line/\[/}"
         local local_section="${local_section/%\]/}"
         sections_array+=("$local_section")
-      elif [[ "${local_temp_config_line,,}" =~ ^(name|owner|cpu-limit|delay|exec-oneshot|(lazy-)?exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus|idle|minimize)([[:space:]]+)?=([[:space:]]+)?* ]]; then
+      elif [[ "${local_temp_config_line,,}" =~ ^(name|owner|cpu-limit|delay|exec-oneshot|(lazy-)?exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus|idle|unfocus-minimize)([[:space:]]+)?=([[:space:]]+)?* ]]; then
         # Ignore if type of line cannot be defined, regexp above means [key name][space(s)?]=[space(s)?][anything else]
         # Remove key name and equal symbol
         local local_config_value="${local_temp_config_line#*=}"
@@ -167,9 +167,9 @@ parse_config(){
 
             is_section_useful_map["$local_section"]='1'
           ;;
-          minimize* )
+          unfocus-minimize* )
             # Exit with an error if value is not boolean
-            if ! config_key_minimize_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
+            if ! config_key_unfocus_minimize_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
               message --error "Value '$local_config_value' specified in key 'minimize' in section '$local_section' in '$config' config file is not boolean!"
               exit 1
             fi
