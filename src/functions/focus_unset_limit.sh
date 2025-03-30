@@ -39,7 +39,7 @@ focus_unset_limit(){
     passed_process_pid="$process_pid" \
     passed_section="$section" \
     passed_process_name="$process_name" \
-    passed_end_of_msg="due to focus event" \
+    passed_end_of_msg='due to focus event' \
     cancel_minimization
   fi
 }
