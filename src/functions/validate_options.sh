@@ -65,4 +65,11 @@ validate_options(){
   else
     unset color_is_passed
   fi
+
+  # Exit with an error if '--notifications' option is specified but 'notify-send' command is not found
+  if [[ -n "$notifications" ]] &&
+     ! type notify-send > /dev/null 2>&1; then
+    message --error "Command 'notify-send' required to print notifications is not found!"
+    exit 1
+  fi
 }
