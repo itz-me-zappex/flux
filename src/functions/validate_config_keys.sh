@@ -54,7 +54,7 @@ validate_config_keys(){
 
     # Exit with an error if there is another section which matches with the same process
     local local_temp_section2
-    local local_match='0'
+    local local_match
     for local_temp_section2 in "${sections_array[@]}"; do
       if [[ "$local_temp_section" == "$local_temp_section2" ]]; then
         continue
