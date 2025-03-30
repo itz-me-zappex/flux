@@ -1,6 +1,6 @@
 # Required to validate config keys
 validate_config_keys(){
-  # Check values in sections and exit with an error if something is wrong or set default values in some keys if is not specified
+  # Check values in sections and exit with an error if something is wrong or set default values in some keys if those are not specified
   local local_temp_section
   for local_temp_section in "${sections_array[@]}"; do
     # Exit with an error if neither identifier 'name' nor 'command' is specified
@@ -51,6 +51,40 @@ validate_config_keys(){
       message --error "Section '$local_temp_section' in '$config' config file contains only identifiers!"
       exit 1
     fi
+
+    # Exit with an error if there is another section which matches with the same process
+    local local_temp_section2
+    local local_match='0'
+    for local_temp_section2 in "${sections_array[@]}"; do
+      if [[ "$local_temp_section" == "$local_temp_section2" ]]; then
+        continue
+      fi
+
+      if [[ -z "${config_key_name_map["$local_temp_section2"]}" ||
+            -z "${config_key_name_map["$local_temp_section"]}" ||
+            "${config_key_name_map["$local_temp_section"]}" == "${config_key_name_map["$local_temp_section2"]}" ]]; then
+        (( local_match++ ))
+      fi
+
+      if [[ -z "${config_key_owner_map["$local_temp_section2"]}" ||
+            -z "${config_key_owner_map["$local_temp_section"]}" ||
+            "${config_key_owner_map["$local_temp_section"]}" == "${config_key_owner_map["$local_temp_section2"]}" ]]; then
+        (( local_match++ ))
+      fi
+
+      if [[ -z "${config_key_command_map["$local_temp_section2"]}" ||
+            -z "${config_key_command_map["$local_temp_section"]}" ||
+            "${config_key_command_map["$local_temp_section"]}" == "${config_key_command_map["$local_temp_section2"]}" ]]; then
+        (( local_match++ ))
+      fi
+
+      if (( local_match == 3 )); then
+        message --error "Identifiers in section '$local_temp_section2' in '$config' config file are very similar to ones in '$local_temp_section' section!"
+        exit 1
+      fi
+
+      unset local_match
+    done
 
     # Set 'fps-focus' to '0' (full FPS unlock) if it is not specified
     if [[ -n "${config_key_fps_unfocus_map["$local_temp_section"]}" &&
