@@ -28,13 +28,11 @@ handle_requests(){
         unset request_minimize_map["$local_process_pid"]
         
         # Minimize window
-        passed_window_xid="$local_temp_window_xid" \
-        passed_process_name="$local_process_name" \
-        passed_process_pid="$local_process_pid" \
-        background_minimize &
-
-        # Associate PID of background process with PID of process to interrupt it in case focus event appears earlier than hardcoded 100ms delay ends
-        background_minimize_pid_map["$local_process_pid"]="$!"
+        if ! "${PREFIX}/lib/flux/window-minimize" "$local_window_xid" > /dev/null 2>&1; then
+          message --warning "Unable to minimize window with XID $local_window_xid of process '$local_process_name' with PID $local_process_pid on unfocus event!"
+        else
+          message --info "Window with XID $local_window_xid of process '$local_process_name' with PID $local_process_pid has been minimized on unfocus event."
+        fi
       fi
 
       # Return an error if daemon has insufficient rights to apply limit (except FPS limit, that does not require interaction with process)

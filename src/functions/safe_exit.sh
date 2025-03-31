@@ -41,16 +41,6 @@ safe_exit(){
       passed_end_of_msg="$local_end_of_msg" \
       unset_sched_idle
     fi
-
-    # Terminate background process with minimization
-    if [[ -n "${background_minimize_pid_map["$local_process_pid"]}" ]]; then
-      passed_window_xid="$local_temp_window_xid" \
-      passed_process_pid="$local_process_pid" \
-      passed_section="$local_section" \
-      passed_process_name="$local_process_name" \
-      passed_end_of_msg="$local_end_of_msg" \
-      cancel_minimization
-    fi
   done
 
   # Execute command from 'lazy-exec-unfocus' if matching section for focused window is found and command is specified

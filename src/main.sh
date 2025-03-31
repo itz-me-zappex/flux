@@ -60,8 +60,7 @@ config_key_focus_fullscreen_map
 declare -A background_freeze_pid_map \
 background_cpu_limit_pid_map \
 background_fps_limit_pid_map \
-background_sched_idle_pid_map \
-background_minimize_pid_map
+background_sched_idle_pid_map
 
 # Declare associative arrays to store info about requested limits
 declare -A request_freeze_map \

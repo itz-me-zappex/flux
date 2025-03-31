@@ -32,14 +32,4 @@ focus_unset_limit(){
     passed_end_of_msg="$local_end_of_msg" \
     unset_sched_idle
   fi
-  
-  # Terminate minimization background process
-  if [[ -n "${background_minimize_pid_map["$process_pid"]}" ]]; then
-    passed_window_xid="$window_xid" \
-    passed_process_pid="$process_pid" \
-    passed_section="$section" \
-    passed_process_name="$process_name" \
-    passed_end_of_msg='due to focus event' \
-    cancel_minimization
-  fi
 }
