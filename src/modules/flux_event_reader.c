@@ -92,8 +92,8 @@ int main() {
         // Skip event
         continue;
       } else {
-        // Wait 50ms before handle event and unset pending events after delay
-        usleep(50000);
+        // Wait 150ms before handle event and unset pending events after delay
+        usleep(150000);
         while (XPending(display)) {
           XNextEvent(display, &event);
         }
