@@ -182,6 +182,11 @@ sudo make install install-bypass groupadd && sudo usermod -aG flux $USER
 PREFIX="~/.local" make install
 ```
 
+#### Or you may want to keep daemon and modules in single directory, that will work, just
+```bash
+./build/flux -h
+```
+
 
 ## Usage
 ### List of available options
