@@ -16,8 +16,6 @@ all:
 	mkdir -p $(BUILD_DIR)
 
 	echo '#!/usr/bin/bash' > $(FLUX_BUILD)
-	echo >> $(FLUX_BUILD)
-	echo 'PREFIX="$(PREFIX)"' >> $(FLUX_BUILD)
 
 	for module in $(PWD)/src/functions/*.sh; do \
 		echo >> $(FLUX_BUILD); \
