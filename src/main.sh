@@ -1,8 +1,21 @@
-# Set path file containing daemon PID, needed to prevent multiple instances from running
-lock_file='/tmp/flux-lock'
-
 # Version of daemon shown from 'parse_options()' if '--version' is specified
 daemon_version='1.23.4'
+
+# Set path to file containing daemon PID, needed to prevent multiple instances from running
+lock_file='/tmp/flux-lock'
+
+# Define prefix where daemon has been installed using path to 'flux'
+flux_path="$(get_realpath "$0")"
+case "$flux_path" in
+*'/bin/flux'* )
+  # Remove path to executable and keep just prefix directory
+  PREFIX="${flux_path/%'/bin/flux'/}"
+;;
+* )
+  # Remove path to executable and keep just directory
+  PREFIX="${flux_path/%'/flux'/}"
+esac
+unset flux_path
 
 # Set default prefixes and timestamp format for messages automatically
 if [[ -t 1 &&
