@@ -401,7 +401,7 @@ You may want to use these variables in commands and scripts which running from `
 
 ## Tips and tricks
 ### Apply changes in config file
-- As daemon does not parse config on a go, you need to restart daemon with `--hot` option after editing config, `--hot` makes daemon handle already opened windows immediately after start.
+- As daemon does not parse config on a go, you need to restart daemon with `--hot` option after editing config to make daemon handle already opened windows immediately after start.
 
 ### Mute process audio on unfocus (Pipewire & Wireplumber)
 - Add following lines to section responsible for game:
