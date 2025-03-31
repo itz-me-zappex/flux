@@ -26,7 +26,7 @@ parse_options(){
       fi
     ;;
     --help | -h | --usage | -u )
-      echo "Usage: flux [-C <when>] [-c <path>] [-l <path>] [-T <format>] [-P{e,i,v,w} <prefix>] [options]
+      echo "Usage: flux [-C <when>] [-c <path>] [-l <path>] [-T <format>] [-Pe/-Pi/-Pv/-Pw <prefix>] [options]
 
 Options and values:
   -C, --color <when>                  Color mode, can be 'always', 'auto' or 'never'
