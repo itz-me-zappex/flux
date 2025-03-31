@@ -153,7 +153,7 @@ Use this method if you using different distro. Make sure you have installed depe
 #### Make environment variables
 | Variable | Description |
 |----------|-------------|
-| `PREFIX` | Install to or hardcode to work with `<PREFIX>/bin/` and `<PREFIX>/lib/flux/`, defaults to `/usr/local`. |
+| `PREFIX` | Install daemon to `<PREFIX>/bin/` and `<PREFIX>/lib/flux/`, defaults to `/usr/local`. |
 | `CC` | C compiler, defaults to `gcc`. |
 | `CFLAGS` | C compiler options, defaults to `-O2 -s`. |
 
@@ -170,11 +170,6 @@ tar -xvf flux.tar.gz --one-top-level=flux --strip-components=1 && cd 'flux'
 #### Build daemon
 ```bash
 make
-```
-
-#### Or you may want to change prefix e.g. in case you want hardcode it to work from local prefix
-```bash
-PREFIX="~/.local" make
 ```
 
 #### Install daemon to `/usr/local`, bypass limitations related to changing scheduling policies and create `flux` group
