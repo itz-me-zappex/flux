@@ -92,8 +92,11 @@ int main() {
         // Skip event
         continue;
       } else {
-        // Wait 150ms before handle event and unset pending events after delay
-        usleep(150000);
+        // Wait for 100ms before handle event and unset pending events after delay
+        // Needed to filter buggy or unwanted X11 events
+        // E.g. changing window mode in game (~100ms delay for some games)
+        // Or opening app using command runner in Cinnamon DE or from XFCE4 panel etc. (~25ms delay is fine in this case)
+        usleep(100000);
         while (XPending(display)) {
           XNextEvent(display, &event);
         }
