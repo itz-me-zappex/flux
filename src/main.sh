@@ -10,12 +10,25 @@ case "$flux_path" in
 *'/bin/flux'* )
   # Remove path to executable and keep just prefix directory
   PREFIX="${flux_path/%'/bin/flux'/}"
+
+  # Path to 'flux-event-reader' module
+  flux_event_reader_path="${PREFIX}/lib/flux/flux-event-reader"
+
+  # Path to 'window-minimize' module
+  window_minimize_path="${PREFIX}/lib/flux/window-minimize"
 ;;
 * )
   # Remove path to executable and keep just directory
   PREFIX="${flux_path/%'/flux'/}"
+
+  # Path to 'flux-event-reader' module
+  flux_event_reader_path="${PREFIX}/flux-event-reader"
+
+  # Path to 'window-minimize' module
+  window_minimize_path="${PREFIX}/window-minimize"
 esac
-unset flux_path
+unset flux_path \
+PREFIX
 
 # Set default prefixes and timestamp format for messages automatically
 if [[ -t 1 &&
@@ -358,7 +371,7 @@ while read -r raw_event; do
   
   # Unset events
   unset events_array
-done < <("${PREFIX}/lib/flux/flux-event-reader" 2>/dev/null)
+done < <("$flux_event_reader_path" 2>/dev/null)
 
 # Exit with an error if loop has been broken and daemon did not exit because of 'SIGTERM' or 'SIGINT'
 if [[ -n "$display_has_been_opened" ]]; then

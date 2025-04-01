@@ -28,7 +28,7 @@ handle_requests(){
         unset request_minimize_map["$local_process_pid"]
         
         # Minimize window
-        if ! "${PREFIX}/lib/flux/window-minimize" "$local_temp_window_xid" > /dev/null 2>&1; then
+        if ! "$window_minimize_path" "$local_temp_window_xid" > /dev/null 2>&1; then
           message --warning "Unable to minimize window with XID $local_temp_window_xid of process '$local_process_name' with PID $local_process_pid on unfocus event!"
         else
           message --info "Window with XID $local_temp_window_xid of process '$local_process_name' with PID $local_process_pid has been minimized on unfocus event."
