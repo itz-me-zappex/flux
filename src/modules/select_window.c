@@ -14,6 +14,8 @@
 #include "functions/get_wm_window.h"
 #include "functions/get_input_focus.h"
 #include "functions/get_window_process.h"
+#include "functions/get_opened_windows.h"
+#include "functions/check_window_existence.h"
 
 #include "functions/third-party/xprop/clientwin.h"
 #include "functions/third-party/xprop/dsimple.h"
@@ -53,7 +55,8 @@ int main(int argc, char *argv[]) {
     window = Select_Window(display, 1);
 
     if (window == root || window == None) {
-      window = get_wm_window(display, root);
+      wm_window = get_wm_window(display, root);
+      window = wm_window;
     }
   } else {
     window = get_active_window(display, root);
@@ -68,6 +71,13 @@ int main(int argc, char *argv[]) {
         return 1;
       }
     }
+  }
+
+  bool window_exists = check_window_existence(display, root, window);
+
+  if (!window_exists && window != wm_window) {
+    XCloseDisplay(display);
+    return 1;
   }
 
   pid_t window_process = get_window_process(display, window);
