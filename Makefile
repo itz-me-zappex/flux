@@ -44,6 +44,15 @@ all:
 	$(CFUNCTIONS_DIR)/get_opened_windows.c \
 	-lX11
 
+	$(CC) $(CFLAGS) -o $(BUILD_DIR)/select-window $(CMODULES_DIR)/select_window.c \
+	$(CFUNCTIONS_DIR)/get_active_window.c \
+	$(CFUNCTIONS_DIR)/get_wm_window.c \
+	$(CFUNCTIONS_DIR)/get_input_focus.c \
+	$(CFUNCTIONS_DIR)/get_window_process.c \
+	$(CFUNCTIONS_DIR)/third-party/xprop/clientwin.c \
+	$(CFUNCTIONS_DIR)/third-party/xprop/dsimple.c \
+	-lX11 -lXRes -lXext
+
 clean:
 	rm -rf $(BUILD_DIR)
 
@@ -57,6 +66,7 @@ install:
 	install -Dm 755 $(BUILD_DIR)/flux-event-reader $(PREFIX)/lib/flux/
 	install -Dm 755 $(BUILD_DIR)/window-minimize $(PREFIX)/lib/flux/
 	install -Dm 755 $(BUILD_DIR)/window-fullscreen $(PREFIX)/lib/flux/
+	install -Dm 755 $(BUILD_DIR)/select-window $(PREFIX)/lib/flux/
 
 install-bypass:
 	mkdir -p /etc/security/limits.d/
