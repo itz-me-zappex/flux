@@ -112,24 +112,14 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 ### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
 
-#### Create and change build directory
-```bash
-mkdir 'flux' && cd 'flux'
-```
-
 #### Install `cpulimit` dependency from AUR
 ```bash
 git clone 'https://aur.archlinux.org/cpulimit.git' && cd 'cpulimit' && makepkg -sric && cd ..
 ```
 
-#### Download PKGBUILD from Git repo
+#### Clone this repository and use PKGBUILD to install daemon
 ```bash
-wget 'https://raw.githubusercontent.com/itz-me-zappex/flux/refs/heads/main/PKGBUILD' && wget 'https://raw.githubusercontent.com/itz-me-zappex/flux/refs/heads/main/create-group.install'
-```
-
-#### Build and install package
-```bash
-makepkg -sric
+git clone https://github.com/itz-me-zappex/flux.git && cd flux && makepkg -sric
 ```
 
 #### Add user to `flux` group to bypass limitations related to changing scheduling policies
