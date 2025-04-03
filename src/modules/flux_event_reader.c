@@ -45,6 +45,7 @@ int main() {
 
   // Exit with an error if window manager is not running
   if (get_wm_window(display, root) == None) {
+    XCloseDisplay(display);
     return 1;
   }
 
