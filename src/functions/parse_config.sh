@@ -76,7 +76,7 @@ parse_config(){
               config_key_cpu_limit_map["$local_section"]="${local_config_value/%\%/}"
               is_section_useful_map["$local_section"]='1'
             else
-              message --error "Value '$local_config_value' in key 'cpulimit' in section '$local_section' is invalid in '$config' config file! Allowed values are between 0 and 100."
+              message --error "Value '$local_config_value' in key '$local_config_key' in section '$local_section' is invalid in '$config' config file! Allowed values are between 0 and 100."
               exit 1
             fi
           ;;
@@ -85,7 +85,7 @@ parse_config(){
             if [[ "$local_config_value" =~ ^[0-9]+((\.|\,)[0-9]+)?$ ]]; then
               config_key_delay_map["$local_section"]="$local_config_value"
             else
-              message --error "Value '$local_config_value' in key 'delay' in section '$local_section' is neither integer nor float in '$config' config file!"
+              message --error "Value '$local_config_value' in key '$local_config_key' in section '$local_section' is neither integer nor float in '$config' config file!"
               exit 1
             fi
           ;;
@@ -119,17 +119,8 @@ parse_config(){
                 config_key_mangohud_config_map["$local_section"]="$local_config_value"
               esac
             else
-              # Set key name depending by key name on line
-              case "${local_temp_config_line,,}" in
-              mangohud-source-config )
-                local local_key_name='mangohud-source-config'
-              ;;
-              mangohud-config )
-                local local_key_name='mangohud-config'
-              esac
-
               # Exit with an error if specified MangoHud config file does not exist
-              message --error "MangoHud config file '$local_config_value' specified in key '$local_key_name' in section '$local_section' in '$config' config file does not exist!"
+              message --error "MangoHud config file '$local_config_value' specified in key '$local_config_key' in section '$local_section' in '$config' config file does not exist!"
               exit 1
             fi
           ;;
@@ -141,11 +132,11 @@ parse_config(){
                 config_key_fps_unfocus_map["$local_section"]="$local_config_value"
                 is_section_useful_map["$local_section"]='1'
               else
-                message --error "Value $local_config_value in key 'fps-unfocus' in section '$local_section' in '$config' config file should be greater than zero!"
+                message --error "Value $local_config_value in key '$local_config_key' in section '$local_section' in '$config' config file should be greater than zero!"
                 exit 1
               fi
             else
-              message --error "Value '$local_config_value' specified in key 'fps-unfocus' in section '$local_section' in '$config' config file is not an integer!"
+              message --error "Value '$local_config_value' specified in key '$local_config_key' in section '$local_section' in '$config' config file is not an integer!"
               exit 1
             fi
           ;;
@@ -155,7 +146,7 @@ parse_config(){
                   "$local_config_value" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
               config_key_fps_focus_map["$local_section"]="$local_config_value"
             else
-              message --error "Value '$local_config_value' specified in key 'fps-focus' in section '$local_section' in '$config' config file is not an integer!"
+              message --error "Value '$local_config_value' specified in key '$local_config_key' in section '$local_section' in '$config' config file is not an integer!"
               exit 1
             fi
           ;;
@@ -170,7 +161,7 @@ parse_config(){
           idle )
             # Exit with an error if value is not boolean
             if ! config_key_idle_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
-              message --error "Value '$local_config_value' specified in key 'idle' in section '$local_section' in '$config' config file is not boolean!"
+              message --error "Value '$local_config_value' specified in key '$local_config_key' in section '$local_section' in '$config' config file is not boolean!"
               exit 1
             fi
 
@@ -179,7 +170,7 @@ parse_config(){
           unfocus-minimize )
             # Exit with an error if value is not boolean
             if ! config_key_unfocus_minimize_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
-              message --error "Value '$local_config_value' specified in key 'unfocus-minimize' in section '$local_section' in '$config' config file is not boolean!"
+              message --error "Value '$local_config_value' specified in key '$local_config_key' in section '$local_section' in '$config' config file is not boolean!"
               exit 1
             fi
 
@@ -188,7 +179,7 @@ parse_config(){
           focus-fullscreen )
             # Exit with an error if value is not boolean
             if ! config_key_focus_fullscreen_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
-              message --error "Value '$local_config_value' specified in key 'focus-fullscreen' in section '$local_section' in '$config' config file is not boolean!"
+              message --error "Value '$local_config_value' specified in key '$local_config_key' in section '$local_section' in '$config' config file is not boolean!"
               exit 1
             fi
 
