@@ -40,6 +40,10 @@ all:
 	$(CFUNCTIONS_DIR)/get_opened_windows.c \
 	-lX11
 
+	$(CC) $(CFLAGS) -o $(BUILD_DIR)/window-fullscreen $(CMODULES_DIR)/window_fullscreen.c \
+	$(CFUNCTIONS_DIR)/get_opened_windows.c \
+	-lX11
+
 clean:
 	rm -rf $(BUILD_DIR)
 
