@@ -6,6 +6,7 @@
 #include <X11/Xatom.h>
 
 #include "functions/get_opened_windows.h"
+#include "functions/check_window_existence.h"
 
 // Send X11 event to make window fullscreen and resize its child window to screen size (for games which are kinda buggy in terms of window modes e.g. Forza Horizon 4)
 int main(int argc, char *argv[]) {
@@ -22,24 +23,7 @@ int main(int argc, char *argv[]) {
   Window root = DefaultRootWindow(display);
   Window window = strtoul(argv[1], NULL, 0);
 
-  unsigned long opened_windows_count;
-  Window *opened_windows = get_opened_windows(display, root, &opened_windows_count);
-
-  if (!opened_windows) {
-    XCloseDisplay(display);
-    return 1;
-  }
-
-  bool window_exists = false;
-
-  for (unsigned long i = 0; i < opened_windows_count; i++) {
-    if (opened_windows[i] == window) {
-      window_exists = true;
-      break;
-    }
-  }
-
-  XFree(opened_windows);
+  bool window_exists = check_window_existence(display, root, window);
 
   if (!window_exists) {
     XCloseDisplay(display);
