@@ -8,8 +8,10 @@ parse_config(){
           -n "$local_temp_config_line" ]]; then
       # Exit with an error if first line is not a section, otherwise remember section name, regexp means any symbols in square brackes
       if [[ ! "$local_temp_config_line" =~ ^\[.*\]$ &&
-            -z "$local_section" ]]; then
+            -z "$local_section" &&
+            -z "$local_no_init_section" ]]; then
         message --warning "Initial section is not found!"
+        local local_no_init_section='1'
         parse_config_error='1'
       elif [[ "$local_temp_config_line" =~ ^\[.*\]$ ]]; then
         # Regexp above means any symbols in square brackes
