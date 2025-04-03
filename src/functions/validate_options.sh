@@ -17,7 +17,7 @@ validate_options(){
   # Exit with an error if '--timestamp-format' is specified without '--timestamps'
   if [[ -n "$new_timestamp_format" &&
         -z "$timestamps" ]]; then
-    message --error "Do not use '--timestamp-format' without '--timestamps' option!"
+    message --error-opt "Do not use '--timestamp-format' without '--timestamps' option!"
     exit 1
   fi
 
