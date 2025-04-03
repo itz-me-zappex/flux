@@ -48,22 +48,25 @@ int main(int argc, char *argv[]) {
   }
 
   Window root = DefaultRootWindow(display);
+  Window wm_window = get_wm_window(display, root);
 
-  Window wm_window, window;
+  if (wm_window == None) {
+    XCloseDisplay(display);
+    return 1;
+  }
+
+  Window window;
 
   if (should_pick) {
     window = Select_Window(display, 1);
 
     if (window == root || window == None) {
-      wm_window = get_wm_window(display, root);
       window = wm_window;
     }
   } else {
     window = get_active_window(display, root);
 
     if (window == None) {
-      wm_window = get_wm_window(display, root);
-
       window = get_input_focus(display);
 
       if (window != wm_window) {
