@@ -4,6 +4,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 
-Window* get_opened_windows(Display* display, Window root, unsigned long *opened_windows_count, Atom atom);
+Window* get_opened_windows(Display* display, Window root, unsigned long *opened_windows_count);
 
 #endif

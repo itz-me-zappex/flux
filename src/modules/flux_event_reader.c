@@ -38,15 +38,13 @@ int main() {
 
   // Declare needed atoms
   Atom net_active_window = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
-  Atom wm_s0 = XInternAtom(display, "WM_S0", False);
-  Atom net_supporting_wm_check = XInternAtom(display, "_NET_SUPPORTING_WM_CHECK", False);
   Atom net_client_list_stacking = XInternAtom(display, "_NET_CLIENT_LIST_STACKING", False);
 
   // Get root window
   Window root = DefaultRootWindow(display);
 
   // Exit with an error if window manager is not running
-  if (get_wm_window(display, root, net_supporting_wm_check) == None) {
+  if (get_wm_window(display, root) == None) {
     return 1;
   }
 
@@ -82,7 +80,7 @@ int main() {
     // Do not check 'WM_S0' if WM restart has been detected
     if (!wm_restart_mark) {
       // Set mark and skip loop if WM has been restarted
-      if (check_wm_restart(display, root, wm_s0)) {
+      if (check_wm_restart(display, root)) {
         // Remember opened windows count and skip events until current value equals before restart one
         previous_opened_windows_count = opened_windows_count;
 
@@ -112,7 +110,7 @@ int main() {
     XFree(opened_windows);
 
     // Get list of opened windows from '_NET_CLIENT_LIST_STACKING'
-    opened_windows = get_opened_windows(display, root, &opened_windows_count, net_client_list_stacking);
+    opened_windows = get_opened_windows(display, root, &opened_windows_count);
 
     // Skip event if list of opened windows appears blank
     if (!opened_windows) {
@@ -131,9 +129,9 @@ int main() {
     }
 
     // Get window XID from '_NET_ACTIVE_WINDOW'
-    active_window = get_active_window(display, root, net_active_window);
+    active_window = get_active_window(display, root);
     // Get window manager XID from '_NET_SUPPORTING_WM_CHECK'
-    wm_window = get_wm_window(display, root, net_supporting_wm_check);
+    wm_window = get_wm_window(display, root);
     // Fallback
     if (active_window == None) {
       // Use 'XGetInputFocus()' if '_NET_ACTIVE_WINDOW' is zero

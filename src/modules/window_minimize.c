@@ -20,9 +20,9 @@ int main(int argc, char *argv[]) {
 
   Window root = DefaultRootWindow(display);
   Window window = strtoul(argv[1], NULL, 0);
-  Atom net_client_list_stacking = XInternAtom(display, "_NET_CLIENT_LIST_STACKING", False);
+
   unsigned long opened_windows_count;
-  Window *opened_windows = get_opened_windows(display, root, &opened_windows_count, net_client_list_stacking);
+  Window *opened_windows = get_opened_windows(display, root, &opened_windows_count);
 
   if (!opened_windows) {
     XCloseDisplay(display);

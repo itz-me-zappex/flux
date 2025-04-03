@@ -5,6 +5,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 
-bool check_wm_restart(Display* display, Window root, Atom atom);
+bool check_wm_restart(Display* display, Window root);
 
 #endif
