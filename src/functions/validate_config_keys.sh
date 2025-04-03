@@ -6,50 +6,50 @@ validate_config_keys(){
     # Exit with an error if neither identifier 'name' nor 'command' is specified
     if [[ -z "${config_key_name_map["$local_temp_section"]}" &&
           -z "${config_key_command_map["$local_temp_section"]}" ]]; then
-      message --error "At least one process identifier required in section '$local_temp_section' in '$config' config file!"
-      exit 1
+      message --warning "At least one process identifier required in section '$local_temp_section'!"
+      parse_config_error='1'
     fi
 
     # Exit with an error if MangoHud FPS limit is not specified along with config path
     if [[ -n "${config_key_fps_unfocus_map["$local_temp_section"]}" &&
           -z "${config_key_mangohud_config_map["$local_temp_section"]}" ]]; then
-      message --error "Value ${config_key_fps_unfocus_map["$local_temp_section"]} in 'fps-unfocus' key in section '$local_temp_section' is specified without 'mangohud-config' key in '$config' config file!"
-      exit 1
+      message --warning "Value ${config_key_fps_unfocus_map["$local_temp_section"]} in 'fps-unfocus' key in section '$local_temp_section' is specified without 'mangohud-config' key!"
+      parse_config_error='1'
     fi
 
     # Exit with an error if MangoHud FPS limit is specified along with CPU limit
     if [[ -n "${config_key_fps_unfocus_map["$local_temp_section"]}" &&
           -n "${config_key_cpu_limit_map["$local_temp_section"]}" &&
           "${config_key_cpu_limit_map["$local_temp_section"]}" != '100' ]]; then
-      message --error "Do not use FPS limit along with CPU limit in section '$local_temp_section' in '$config' config file!"
-      exit 1
+      message --warning "Do not use FPS limit along with CPU limit in section '$local_temp_section'!"
+      parse_config_error='1'
     fi
 
     # Exit with an error if 'fps-focus' is specified without 'fps-unfocus'
     if [[ -n "${config_key_fps_focus_map["$local_temp_section"]}" &&
           -z "${config_key_fps_unfocus_map["$local_temp_section"]}" ]]; then
-      message --error "Do not use 'fps-focus' key without 'fps-unfocus' key in section '$local_temp_section' in '$config' config file!"
-      exit 1
+      message --warning "Do not use 'fps-focus' key without 'fps-unfocus' key in section '$local_temp_section'!"
+      parse_config_error='1'
     fi
 
     # Exit with an error if 'mangohud-config' is specified without 'fps-unfocus'
     if [[ -n "${config_key_mangohud_config_map["$local_temp_section"]}" &&
           -z "${config_key_fps_unfocus_map["$local_temp_section"]}" ]]; then
-      message --error "Do not use 'mangohud-config' key without 'fps-unfocus' key in section '$local_temp_section' in '$config' config file!"
-      exit 1
+      message --warning "Do not use 'mangohud-config' key without 'fps-unfocus' key in section '$local_temp_section'!"
+      parse_config_error='1'
     fi
 
     # Exit with an error if 'mangohud-source-config' is specified without 'mangohud-config'
     if [[ -n "${config_key_mangohud_source_config_map["$local_temp_section"]}" &&
           -z "${config_key_mangohud_config_map["$local_temp_section"]}" ]]; then
-      message --error "Do not use 'mangohud-source-config' key without 'mangohud-config' key in section '$local_temp_section' in '$config' config file!"
-      exit 1
+      message --warning "Do not use 'mangohud-source-config' key without 'mangohud-config' key in section '$local_temp_section'!"
+      parse_config_error='1'
     fi
 
     # Exit with an error if section contains only identifiers
     if [[ -z "${is_section_useful_map["$local_temp_section"]}" ]]; then
-      message --error "Section '$local_temp_section' in '$config' config file contains only identifiers!"
-      exit 1
+      message --warning "Section '$local_temp_section' contains only identifiers!"
+      parse_config_error='1'
     fi
 
     # Exit with an error if there is another section which matches with the same process
@@ -79,8 +79,8 @@ validate_config_keys(){
       fi
 
       if (( local_match == 3 )); then
-        message --error "Identifiers in section '$local_temp_section2' in '$config' config file are very similar to ones in '$local_temp_section' section!"
-        exit 1
+        message --warning "Identifiers in section '$local_temp_section2' are very similar to ones in '$local_temp_section' section!"
+        parse_config_error='1'
       fi
 
       unset local_match
@@ -114,6 +114,11 @@ validate_config_keys(){
       should_validate_sched='1'
     fi
   done
+
+  if [[ -n "$parse_config_error" ]]; then
+    message --error "Unable to continue, fix error(s) displayed above in '$config' config file before start!"
+    exit 1
+  fi
 
   unset config
 }

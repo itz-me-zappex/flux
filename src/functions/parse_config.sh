@@ -9,8 +9,8 @@ parse_config(){
       # Exit with an error if first line is not a section, otherwise remember section name, regexp means any symbols in square brackes
       if [[ ! "$local_temp_config_line" =~ ^\[.*\]$ &&
             -z "$local_section" ]]; then
-        message --error "Initial section is not found in '$config' config file!"
-        local local_error='1'
+        message --warning "Initial section is not found!"
+        parse_config_error='1'
       elif [[ "$local_temp_config_line" =~ ^\[.*\]$ ]]; then
         # Regexp above means any symbols in square brackes
         # Exit with an error if section repeated
@@ -18,8 +18,8 @@ parse_config(){
           local local_temp_section
           for local_temp_section in "${sections_array[@]}"; do
             if [[ "[$local_temp_section]" == "$local_temp_config_line" ]]; then
-              message --error "Section name '$local_temp_section' is repeated in '$config' config file!"
-              local local_error='1'
+              message --warning "Section name '$local_temp_section' is repeated!"
+              parse_config_error='1'
             fi
           done
         fi
@@ -76,8 +76,8 @@ parse_config(){
               config_key_cpu_limit_map["$local_section"]="${local_config_value/%\%/}"
               is_section_useful_map["$local_section"]='1'
             else
-              message --error "Value '$local_config_value' in key '$local_config_key' in section '$local_section' is invalid in '$config' config file! Allowed values are between 0 and 100."
-              local local_error='1'
+              message --warning "Value '$local_config_value' in key '$local_config_key' in section '$local_section' is invalid! Allowed values are between 0 and 100."
+              parse_config_error='1'
             fi
           ;;
           delay )
@@ -85,8 +85,8 @@ parse_config(){
             if [[ "$local_config_value" =~ ^[0-9]+((\.|\,)[0-9]+)?$ ]]; then
               config_key_delay_map["$local_section"]="$local_config_value"
             else
-              message --error "Value '$local_config_value' in key '$local_config_key' in section '$local_section' is neither integer nor float in '$config' config file!"
-              local local_error='1'
+              message --warning "Value '$local_config_value' in key '$local_config_key' in section '$local_section' is neither integer nor float!"
+              parse_config_error='1'
             fi
           ;;
           exec-oneshot )
@@ -120,8 +120,8 @@ parse_config(){
               esac
             else
               # Exit with an error if specified MangoHud config file does not exist
-              message --error "MangoHud config file '$local_config_value' specified in key '$local_config_key' in section '$local_section' in '$config' config file does not exist!"
-              local local_error='1'
+              message --warning "MangoHud config file '$local_config_value' specified in key '$local_config_key' in section '$local_section' does not exist!"
+              parse_config_error='1'
             fi
           ;;
           fps-unfocus )
@@ -132,12 +132,12 @@ parse_config(){
                 config_key_fps_unfocus_map["$local_section"]="$local_config_value"
                 is_section_useful_map["$local_section"]='1'
               else
-                message --error "Value $local_config_value in key '$local_config_key' in section '$local_section' in '$config' config file should be greater than zero!"
-                local local_error='1'
+                message --warning "Value $local_config_value in key '$local_config_key' in section '$local_section' should be greater than zero!"
+                parse_config_error='1'
               fi
             else
-              message --error "Value '$local_config_value' specified in key '$local_config_key' in section '$local_section' in '$config' config file is not an integer!"
-              local local_error='1'
+              message --warning "Value '$local_config_value' specified in key '$local_config_key' in section '$local_section' is not an integer!"
+              parse_config_error='1'
             fi
           ;;
           fps-focus )
@@ -146,8 +146,8 @@ parse_config(){
                   "$local_config_value" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
               config_key_fps_focus_map["$local_section"]="$local_config_value"
             else
-              message --error "Value '$local_config_value' specified in key '$local_config_key' in section '$local_section' in '$config' config file is not an integer!"
-              local local_error='1'
+              message --warning "Value '$local_config_value' specified in key '$local_config_key' in section '$local_section' is not an integer!"
+              parse_config_error='1'
             fi
           ;;
           lazy-exec-focus )
@@ -161,8 +161,8 @@ parse_config(){
           idle )
             # Exit with an error if value is not boolean
             if ! config_key_idle_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
-              message --error "Value '$local_config_value' specified in key '$local_config_key' in section '$local_section' in '$config' config file is not boolean!"
-              local local_error='1'
+              message --warning "Value '$local_config_value' specified in key '$local_config_key' in section '$local_section' is not boolean!"
+              parse_config_error='1'
             fi
 
             is_section_useful_map["$local_section"]='1'
@@ -170,8 +170,8 @@ parse_config(){
           unfocus-minimize )
             # Exit with an error if value is not boolean
             if ! config_key_unfocus_minimize_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
-              message --error "Value '$local_config_value' specified in key '$local_config_key' in section '$local_section' in '$config' config file is not boolean!"
-              local local_error='1'
+              message --warning "Value '$local_config_value' specified in key '$local_config_key' in section '$local_section' is not boolean!"
+              parse_config_error='1'
             fi
 
             is_section_useful_map["$local_section"]='1'
@@ -179,33 +179,29 @@ parse_config(){
           focus-fullscreen )
             # Exit with an error if value is not boolean
             if ! config_key_focus_fullscreen_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
-              message --error "Value '$local_config_value' specified in key '$local_config_key' in section '$local_section' in '$config' config file is not boolean!"
-              local local_error='1'
+              message --warning "Value '$local_config_value' specified in key '$local_config_key' in section '$local_section' is not boolean!"
+              parse_config_error='1'
             fi
 
             is_section_useful_map["$local_section"]='1'
           ;;
           * )
-            message --error "Unknown config key '$local_config_key' in section '$local_section' in '$config' config file!"
-            local local_error='1'
+            message --warning "Unknown config key '$local_config_key' in section '$local_section'!"
+            parse_config_error='1'
           esac
         fi
       else
         # Print error message depending on whether section is defined or not
         if [[ -n "$local_section" ]]; then
-          message --error "Unable to define type of line '$local_temp_config_line' in section '$local_section' in '$config' config file!"
+          message --warning "Unable to define type of line '$local_temp_config_line' in section '$local_section'!"
         else
-          message --error "Unable to define type of line '$local_temp_config_line' in '$config' config file!"
+          message --warning "Unable to define type of line '$local_temp_config_line'!"
         fi
 
-        local local_error='1'
+        parse_config_error='1'
       fi
     fi
   done < "$config"
 
   unset max_cpu_limit
-
-  if [[ -n "$local_error" ]]; then
-    exit 1
-  fi
 }
