@@ -11,21 +11,21 @@ case "$flux_path" in
   # Remove path to executable and keep just prefix directory
   PREFIX="${flux_path/%'/bin/flux'/}"
 
-  # Path to 'flux-event-reader' module
   flux_event_reader_path="${PREFIX}/lib/flux/flux-event-reader"
 
-  # Path to 'window-minimize' module
   window_minimize_path="${PREFIX}/lib/flux/window-minimize"
+
+  window_fullscreen_path="${PREFIX}/lib/flux/window-fullscreen"
 ;;
 * )
   # Remove path to executable and keep just directory
   PREFIX="${flux_path/%'/flux'/}"
 
-  # Path to 'flux-event-reader' module
   flux_event_reader_path="${PREFIX}/flux-event-reader"
 
-  # Path to 'window-minimize' module
   window_minimize_path="${PREFIX}/window-minimize"
+
+  window_fullscreen_path="${PREFIX}/window-fullscreen"
 esac
 unset flux_path \
 PREFIX
@@ -329,6 +329,15 @@ while read -r raw_event; do
 
           # Execute command on focus event if specified in config
           exec_focus
+
+          # Enforce fullscreen mode for window if specified in config
+          if [[ -n "${config_key_focus_fullscreen_map["$section"]}" ]]; then
+            if ! "$window_fullscreen_path" "$window_xid" > /dev/null 2>&1; then
+              message --warning "Unable to expand to fullscreen window with XID $window_xid of process '$process_name' with PID $process_pid due to focus event!"
+            else
+              message --info "Window with XID $window_xid of process '$process_name' with PID $process_pid has been expanded into fullscreen due to focus event."
+            fi
+          fi
         fi
 
         # Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
