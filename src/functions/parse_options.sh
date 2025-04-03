@@ -43,7 +43,7 @@ parse_options(){
       fi
 
       if ! window_info="$("$select_window_path" "${get,,}")" > /dev/null 2>&1; then
-        message --error "Unable to obtain process info due to issues with X server!"
+        message --error "Unable to obtain process info because of bad event or issue with X server!"
         exit 1
       else
         window_xid="${window_info/'='*/}"
