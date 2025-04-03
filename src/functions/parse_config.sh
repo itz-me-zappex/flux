@@ -29,8 +29,17 @@ parse_config(){
         local local_section="${local_temp_config_line/\[/}"
         local local_section="${local_section/%\]/}"
         sections_array+=("$local_section")
-      elif [[ "${local_temp_config_line,,}" =~ ^(name|owner|cpu-limit|delay|exec-oneshot|(lazy-)?exec-(un)?focus|command|mangohud(-source)?-config|fps-unfocus|fps-focus|idle|unfocus-minimize|focus-fullscreen)([[:space:]]+)?=([[:space:]]+)?* ]]; then
-        # Ignore if type of line cannot be defined, regexp above means [key name][space(s)?]=[space(s)?][anything else]
+      elif [[ "${local_temp_config_line,,}" =~ ^([a-zA-Z0-9]|'-')+([[:space:]]+)?=([[:space:]]+)?* ]]; then
+        # Remove equal symbol and key value to keep just key name
+        local local_config_key="${local_temp_config_line/%=*/}"
+
+        # Remove all spaces before and after string, internal shell parameter expansion required to get spaces supposed to be removed
+        local local_config_key="${local_config_key#"${local_config_key%%[![:space:]]*}"}" # Remove spaces in beginning for string
+        local local_config_key="${local_config_key%"${local_config_key##*[![:space:]]}"}" # Remove spaces in end of string
+
+        # Use lowercase for key name
+        local local_config_key="${local_config_key,,}"
+
         # Remove key name and equal symbol
         local local_config_value="${local_temp_config_line#*=}"
 
@@ -53,14 +62,14 @@ parse_config(){
         # Associate value with section if it is not blank
         if [[ -n "$local_config_value" ]]; then
           # Define type of key to associate value properly
-          case "${local_temp_config_line,,}" in
-          name* )
+          case "$local_config_key" in
+          name )
             config_key_name_map["$local_section"]="$local_config_value"
           ;;
-          owner* )
+          owner )
             config_key_owner_map["$local_section"]="$local_config_value"
           ;;
-          cpu-limit* )
+          cpu-limit )
             # Exit with an error if CPU limit is specified incorrectly or greater than maximum allowed, regexp - any number with optional '%' symbol
             if [[ "$local_config_value" =~ ^[0-9]+(\%)?$ ]] &&
                (( "${local_config_value/%\%/}" * cpu_threads <= max_cpu_limit )); then
@@ -71,7 +80,7 @@ parse_config(){
               exit 1
             fi
           ;;
-          delay* )
+          delay )
             # Exit with an error if value is neither an integer nor a float (that is what regexp means)
             if [[ "$local_config_value" =~ ^[0-9]+((\.|\,)[0-9]+)?$ ]]; then
               config_key_delay_map["$local_section"]="$local_config_value"
@@ -80,42 +89,42 @@ parse_config(){
               exit 1
             fi
           ;;
-          exec-oneshot* )
+          exec-oneshot )
             config_key_exec_oneshot_map["$local_section"]="$local_config_value"
             is_section_useful_map["$local_section"]='1'
           ;;
-          exec-focus* )
+          exec-focus )
             config_key_exec_focus_map["$local_section"]="$local_config_value"
             is_section_useful_map["$local_section"]='1'
           ;;
-          exec-unfocus* )
+          exec-unfocus )
             config_key_exec_unfocus_map["$local_section"]="$local_config_value"
             is_section_useful_map["$local_section"]='1'
           ;;
-          command* )
+          command )
             config_key_command_map["$local_section"]="$local_config_value"
           ;;
-          mangohud-source-config* | mangohud-config* )
+          mangohud-source-config | mangohud-config )
             # Get absolute path to MangoHud config in case it is specified as relative
             local local_config_value="$(get_realpath "$local_config_value")"
 
             # Check for config file existence
             if [[ -f "$local_config_value" ]]; then
               # Set path to MangoHud config depending by specified key
-              case "${local_temp_config_line,,}" in
-              mangohud-source-config* )
+              case "$local_config_key" in
+              mangohud-source-config )
                 config_key_mangohud_source_config_map["$local_section"]="$local_config_value"
               ;;
-              mangohud-config* )
+              mangohud-config )
                 config_key_mangohud_config_map["$local_section"]="$local_config_value"
               esac
             else
               # Set key name depending by key name on line
               case "${local_temp_config_line,,}" in
-              mangohud-source-config* )
+              mangohud-source-config )
                 local local_key_name='mangohud-source-config'
               ;;
-              mangohud-config* )
+              mangohud-config )
                 local local_key_name='mangohud-config'
               esac
 
@@ -124,7 +133,7 @@ parse_config(){
               exit 1
             fi
           ;;
-          fps-unfocus* )
+          fps-unfocus )
             # Exit with an error if value is not integer, that is what regexp means
             if [[ "$local_config_value" =~ ^[0-9]+$ ]]; then
               # Exit with an error if value equal to zero
@@ -140,7 +149,7 @@ parse_config(){
               exit 1
             fi
           ;;
-          fps-focus* )
+          fps-focus )
             # Exit with an error if value is neither integer nor list of comma-separated integers
             if [[ "$local_config_value" =~ ^[0-9]+$ ||
                   "$local_config_value" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
@@ -150,15 +159,15 @@ parse_config(){
               exit 1
             fi
           ;;
-          lazy-exec-focus* )
+          lazy-exec-focus )
             config_key_lazy_exec_focus_map["$local_section"]="$local_config_value"
             is_section_useful_map["$local_section"]='1'
           ;;
-          lazy-exec-unfocus* )
+          lazy-exec-unfocus )
             config_key_lazy_exec_unfocus_map["$local_section"]="$local_config_value"
             is_section_useful_map["$local_section"]='1'
           ;;
-          idle* )
+          idle )
             # Exit with an error if value is not boolean
             if ! config_key_idle_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
               message --error "Value '$local_config_value' specified in key 'idle' in section '$local_section' in '$config' config file is not boolean!"
@@ -167,7 +176,7 @@ parse_config(){
 
             is_section_useful_map["$local_section"]='1'
           ;;
-          unfocus-minimize* )
+          unfocus-minimize )
             # Exit with an error if value is not boolean
             if ! config_key_unfocus_minimize_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
               message --error "Value '$local_config_value' specified in key 'unfocus-minimize' in section '$local_section' in '$config' config file is not boolean!"
@@ -176,7 +185,7 @@ parse_config(){
 
             is_section_useful_map["$local_section"]='1'
           ;;
-          focus-fullscreen* )
+          focus-fullscreen )
             # Exit with an error if value is not boolean
             if ! config_key_focus_fullscreen_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
               message --error "Value '$local_config_value' specified in key 'focus-fullscreen' in section '$local_section' in '$config' config file is not boolean!"
@@ -184,6 +193,10 @@ parse_config(){
             fi
 
             is_section_useful_map["$local_section"]='1'
+          ;;
+          * )
+            message --error "Unknown config key '$local_config_key' in section '$local_section' in '$config' config file!"
+            exit 1
           esac
         fi
       else
