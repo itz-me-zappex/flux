@@ -194,7 +194,7 @@ PREFIX="~/.local" make install
 Usage: flux [-C <when>] [-c <path>] [-l <path>] [-T <format>] [-Pe/-Pi/-Pv/-Pw <prefix>] [options]
 
 Options and values:
-  -C, --color <when>                  Color mode, can be 'always', 'auto' or 'never'
+  -C, --color <when>                  Color mode, either 'always', 'auto' or 'never'
                                       default: 'auto'
   -c, --config <path>                 Specify path to config file
                                       default: '$XDG_CONFIG_HOME/flux.ini' or '$HOME/.config/flux.ini' or '/etc/flux.ini'
