@@ -51,7 +51,8 @@ int main(int argc, char *argv[]) {
   Atom net_wm_state = XInternAtom(display, "_NET_WM_STATE", False);
   Atom net_wm_state_fullscreen = XInternAtom(display, "_NET_WM_STATE_FULLSCREEN", False);
 
-  if (net_wm_state == None || net_wm_state_fullscreen == None) {
+  if (net_wm_state == None ||
+      net_wm_state_fullscreen == None) {
     XCloseDisplay(display);
     return 1;
   }
@@ -74,22 +75,21 @@ int main(int argc, char *argv[]) {
   };
 
   XSendEvent(display, root, False, SubstructureRedirectMask | SubstructureNotifyMask, &event);
-  XFlush(display);
 
   Window parent;
-  Window *child;
+  Window *childs;
   unsigned int child_count;
 
-  if (XQueryTree(display, window, &root, &parent, &child, &child_count)) {
+  if (XQueryTree(display, window, &root, &parent, &childs, &child_count)) {
     if (child_count > 0) {
-      Window target_child = child[0];
+      Window child = childs[0];
 
-      XFree(child);
+      XFree(childs);
 
       int x, y;
       unsigned int child_width, child_height, child_border_width, child_depth;
 
-      if (XGetGeometry(display, target_child, &root, &x, &y, &child_width, &child_height, &child_border_width, &child_depth)) {
+      if (XGetGeometry(display, child, &root, &x, &y, &child_width, &child_height, &child_border_width, &child_depth)) {
         XWindowAttributes attrs;
         unsigned int screen;
 
@@ -103,11 +103,12 @@ int main(int argc, char *argv[]) {
         unsigned int screen_width = XDisplayWidth(display, screen);
         unsigned int screen_height = XDisplayHeight(display, screen);
 
-        if (screen_width != child_width || screen_height != child_height) {
+        if (screen_width != child_width ||
+            screen_height != child_height) {
           // 100ms delay needed because some games will not be resized without it
           usleep(100000);
 
-          XResizeWindow(display, target_child, screen_width, screen_height);
+          XResizeWindow(display, child, screen_width, screen_height);
         }
       } else {
         XCloseDisplay(display);
