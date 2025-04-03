@@ -52,29 +52,29 @@ int main(int argc, char *argv[]) {
   Atom net_wm_state_fullscreen = XInternAtom(display, "_NET_WM_STATE_FULLSCREEN", False);
 
   if (net_wm_state == None || net_wm_state_fullscreen == None) {
-  	XCloseDisplay(display);
-  	return 1;
+    XCloseDisplay(display);
+    return 1;
   }
 
   // Original: https://stackoverflow.com/questions/12706631/x11-change-resolution-and-make-window-fullscreen
-	XEvent event = {
-		.xclient = {
-			.type = ClientMessage,
-			.window = window,
-			.message_type = net_wm_state,
-			.format = 32,
-			.data = {
-				.l[0] = 1, // Enforce fullscreen mode
-				.l[1] = net_wm_state_fullscreen,
-				.l[2] = 0, // No property to toggle
-				.l[3] = 1,
-				.l[4] = 0,
-			}
-		}
-	};
+  XEvent event = {
+    .xclient = {
+      .type = ClientMessage,
+      .window = window,
+      .message_type = net_wm_state,
+      .format = 32,
+      .data = {
+        .l[0] = 1, // Enforce fullscreen mode
+        .l[1] = net_wm_state_fullscreen,
+        .l[2] = 0, // No property to toggle
+        .l[3] = 1,
+        .l[4] = 0,
+      }
+    }
+  };
 
-	XSendEvent(display, root, False, SubstructureRedirectMask | SubstructureNotifyMask, &event);
-	XFlush(display);
+  XSendEvent(display, root, False, SubstructureRedirectMask | SubstructureNotifyMask, &event);
+  XFlush(display);
 
   Window parent;
   Window *child;
@@ -82,11 +82,14 @@ int main(int argc, char *argv[]) {
 
   if (XQueryTree(display, window, &root, &parent, &child, &child_count)) {
     if (child_count > 0) {
-      Window selected_child = child[0];
+      Window target_child = child[0];
+
+      XFree(child);
+
       int x, y;
       unsigned int child_width, child_height, child_border_width, child_depth;
 
-      if (XGetGeometry(display, selected_child, &root, &x, &y, &child_width, &child_height, &child_border_width, &child_depth)) {
+      if (XGetGeometry(display, target_child, &root, &x, &y, &child_width, &child_height, &child_border_width, &child_depth)) {
         XWindowAttributes attrs;
         unsigned int screen;
 
@@ -104,8 +107,7 @@ int main(int argc, char *argv[]) {
           // 100ms delay needed because some games will not be resized without it
           usleep(100000);
 
-          XResizeWindow(display, selected_child, screen_width, screen_height);
-          XFlush(display);
+          XResizeWindow(display, target_child, screen_width, screen_height);
         }
       } else {
         XCloseDisplay(display);
