@@ -15,6 +15,10 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [Manual installation using release tarball](#manual-installation-using-release-tarball)
     - [Make options](#make-options)
     - [Make environment variables](#make-environment-variables)
+- [Uninstallation](#uninstallation)
+  - [Arch Linux and dereatives](#arch-linux-and-dereatives-2)
+  - [Uninstallation using `make`](#uninstallation-using-make)
+  - [Cleaning up](#cleaning-up)
 - [Usage](#usage)
   - [List of available options](#list-of-available-options)
   - [Colorful output](#colorful-output)
@@ -176,6 +180,40 @@ PREFIX="~/.local" make install
 #### Or you may want to keep daemon and modules in single directory, that will work, just
 ```bash
 ./build/flux -h
+```
+
+## Uninstallation
+### Arch Linux and dereatives
+#### Execute following
+```bash
+sudo pacman -Rnsc flux
+```
+
+### Uninstallation using `make`
+#### Download release archive with currently installed version and extract it, e.g
+```bash
+wget 'https://github.com/itz-me-zappex/flux/archive/refs/tags/v1.23.4.tar.gz' && tar -xvf 'v1.23.4.tar.gz' && cd 'flux-1.23.4'
+```
+
+#### Uninstall daemon from `/usr/local`
+```bash
+sudo make uninstall
+```
+
+#### Or, if it was installed somewhere else, e.g. in `/usr`, then
+```bash
+sudo PREFIX='/usr' make uninstall
+```
+
+### Cleaning up
+#### Lock file (after crash)
+```bash
+rm '/tmp/flux-lock'
+```
+
+#### Config file (if not needed anymore), e.g.
+```bash
+rm ~/.config/flux.ini
 ```
 
 
