@@ -54,7 +54,8 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 ## Features
 - CPU and FPS limiting process on unfocus and unlimiting on focus (FPS limiting requires game running using MangoHud with already existing config file).
 - Reducing process priority on unfocus and restoring it on focus.
-- Minimizing window on unfocus (useful for borderless windows only).
+- Minimizing window on unfocus, useful for borderless windows.
+- Expanding window to fullscreen on focus, useful for games which are handling window mode in weird way, e.g. Forza Horizon 4 changes its mode to windowed after minimization.
 - Commands/scripts execution on focus and unfocus events to make user able extend daemon functionality.
 - Configurable logging.
 - Notifications support.
@@ -279,7 +280,8 @@ A simple INI is used for configuration.
 | `exec-unfocus` | Command to execute on unfocus event or window closure, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
 | `lazy-exec-focus` | Same as `exec-focus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event). |
 | `lazy-exec-unfocus` | Same as `exec-unfocus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event), will be executed on daemon termination if focused window matches with section where this key and command is specified. |
-| `minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`. Defaults to `false`. |
+| `unfocus-minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`. Defaults to `false`. |
+| `focus-fullscreen` | Boolean, sends X event to window manager on focus to expand window to fullscreen, useful if game (e.g. Forza Horizon 4) handles window mode in weird way. Defaults to `false`. |
 
 ### Config path
 - Daemon searches for following configuration files by priority:
@@ -313,7 +315,7 @@ cpu-limit = 0%
 lazy-exec-focus = killall picom
 lazy-exec-unfocus = picom
 
-; Set FPS limit to 5, minimize (borderless) and mute on unfocus, restore FPS to 60 and unmute on focus
+; Set FPS limit to 5, minimize (as that is borderless window) and mute on unfocus, restore FPS to 60, unmute and expand to fullscreen on focus
 [Forza Horizon 4]
 name = ForzaHorizon4.exe
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\ForzaHorizon4\ForzaHorizon4.exe 
@@ -325,9 +327,10 @@ fps-focus = 60
 exec-focus = wpctl set-mute -p $FLUX_PROCESS_PID 0
 exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1
 idle = true
-minimize = true
+unfocus-minimize = true
+focus-fullscreen = true
 
-; Reduce CPU usage and reduce priority when unfocused, to keep game able download music and assets
+; Reduce CPU usage and reduce priority when unfocused, needed to keep game able download music and assets
 [Geometry Dash]
 name = GeometryDash.exe
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\Geometry Dash\GeometryDash.exe 
@@ -345,7 +348,7 @@ cpu-limit = 0%
 lazy-exec-focus = killall picom
 lazy-exec-unfocus = picom
 
-; Set FPS limit to 5, minimize (borderless) and mute on unfocus, restore FPS to 60 and unmute on focus
+; Set FPS limit to 5, minimize (as that is borderless window) and mute on unfocus, restore FPS to 60, unmute and expand to fullscreen on focus
 [Forza Horizon 4]
 name = ForzaHorizon4.exe
 mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
@@ -355,9 +358,10 @@ fps-focus = 60
 exec-focus = wpctl set-mute -p $FLUX_PROCESS_PID 0
 exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1
 idle = true
-minimize = true
+unfocus-minimize = true
+focus-fullscreen = true
 
-; Reduce CPU usage and reduce priority when unfocused, to keep game able download music and assets
+; Reduce CPU usage and reduce priority when unfocused, needed to keep game able download music and assets
 [Geometry Dash]
 name = GeometryDash.exe
 cpu-limit = 2%
