@@ -205,6 +205,9 @@ sudo make uninstall
 sudo PREFIX='/usr' make uninstall
 ```
 
+#### Remove unneeded dependencies
+Depends by distro and package manager you use, I highly suggest to remove dependencies selectively and check which packages are using it, to avoid system breakage.
+
 ### Cleaning up
 #### Lock file (after crash)
 ```bash
@@ -215,7 +218,6 @@ rm '/tmp/flux-lock'
 ```bash
 rm ~/.config/flux.ini
 ```
-
 
 ## Usage
 ### List of available options
