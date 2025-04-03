@@ -9,26 +9,30 @@ flux_path="$(get_realpath "$0")"
 case "$flux_path" in
 *'/bin/flux'* )
   # Remove path to executable and keep just prefix directory
-  PREFIX="${flux_path/%'/bin/flux'/}"
+  daemon_prefix="${flux_path/%'/bin/flux'/}"
 
-  flux_event_reader_path="${PREFIX}/lib/flux/flux-event-reader"
+  flux_event_reader_path="${daemon_prefix}/lib/flux/flux-event-reader"
 
-  window_minimize_path="${PREFIX}/lib/flux/window-minimize"
+  window_minimize_path="${daemon_prefix}/lib/flux/window-minimize"
 
-  window_fullscreen_path="${PREFIX}/lib/flux/window-fullscreen"
+  window_fullscreen_path="${daemon_prefix}/lib/flux/window-fullscreen"
+
+  select_window_path="${daemon_prefix}/lib/flux/select-window"
 ;;
 * )
   # Remove path to executable and keep just directory
-  PREFIX="${flux_path/%'/flux'/}"
+  daemon_prefix="${flux_path/%'/flux'/}"
 
-  flux_event_reader_path="${PREFIX}/flux-event-reader"
+  flux_event_reader_path="${daemon_prefix}/flux-event-reader"
 
-  window_minimize_path="${PREFIX}/window-minimize"
+  window_minimize_path="${daemon_prefix}/window-minimize"
 
-  window_fullscreen_path="${PREFIX}/window-fullscreen"
+  window_fullscreen_path="${daemon_prefix}/window-fullscreen"
+
+  select_window_path="${daemon_prefix}/select-window"
 esac
 unset flux_path \
-PREFIX
+daemon_prefix
 
 # Set default prefixes and timestamp format for messages automatically
 if [[ -t 1 &&
