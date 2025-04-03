@@ -25,14 +25,60 @@ parse_options(){
         config="$(get_realpath "$config")"
       fi
     ;;
+    --get | -g | --get=* )
+      passed_check='get_is_passed' \
+      passed_set='get' \
+      passed_option='--get' \
+      passed_short_option='-g' \
+      cmdline_get "$@"
+
+      shift "$shift"
+
+      if [[ -z "$get" ]]; then
+        message --error-opt "Option '--get' is specified without how to obtain window process info!"
+        exit 1
+      elif [[ ! "${get,,}" =~ ^('pick'|'focus')$ ]]; then
+        message --error-opt "Specified action '$get' in '--get' option is not supported!"
+        exit 1
+      fi
+
+      if ! window_info="$("$select_window_path" "${get,,}")" > /dev/null 2>&1; then
+        message --error "Unable to obtain process info due to issues with X server!"
+        exit 1
+      else
+        window_xid="${window_info/'='*/}"
+        process_pid="${window_info/*'='/}"
+
+        get_process_info
+
+        if (( get_process_info_exit_code == 1 )); then
+          message --error "Unable to obtain info about process with PID $process_pid of window with XID $window_xid! Probably process has been terminated during check."
+          exit 1
+        elif (( get_process_info_exit_code == 2 )); then
+          message --error "Unable to obtain owner username of process $process_name with PID $process_pid of window with XID $window_xid!"
+          exit 1
+        fi
+
+        echo "Window XID (decimal):     $window_xid
+Window XID (hexadecimal): $(printf "0x%x\n" $window_xid)
+Process PID:              $process_pid
+Process name:             $process_name
+Process owner (UID):      $process_owner
+Process owner (username): $process_owner_username
+Process command:          $process_command"
+      fi
+
+      exit 0
+    ;;
     --help | -h | --usage | -u )
-      echo "Usage: flux [-C <when>] [-c <path>] [-l <path>] [-T <format>] [-Pe/-Pi/-Pv/-Pw <prefix>] [options]
+      echo "Usage: flux [-C <when>] [-c <path>] [-g <how>] [-l <path>] [-T <format>] [-Pe/-Pi/-Pv/-Pw <prefix>] [options]
 
 Options and values:
   -C, --color <when>                  Color mode, either 'always', 'auto' or 'never'
                                       default: 'auto'
   -c, --config <path>                 Specify path to config file
                                       default: '\$XDG_CONFIG_HOME/flux.ini' or '\$HOME/.config/flux.ini' or '/etc/flux.ini'
+  -g, --get <how>                     Display window process info and exit, accepts either 'focus' or 'pick'
   -h, --help                          Display this help and exit
   -H, --hot                           Apply actions to already unfocused windows before handling events
   -l, --log <path>                    Store messages to specified file
