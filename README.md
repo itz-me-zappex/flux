@@ -221,7 +221,7 @@ rm ~/.config/flux.ini
 
 #### Remove user from `flux` group
 ```bash
-gpasswd -d "$USER" flux
+sudo gpasswd -d "$USER" flux
 ```
 
 #### Remove group from system
