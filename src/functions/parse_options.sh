@@ -42,8 +42,8 @@ parse_options(){
         exit 1
       fi
 
-      if ! window_info="$("$select_window_path" "${get,,}")" > /dev/null 2>&1; then
-        message --error "Unable to obtain process info because of bad event or issue with X server!"
+      if ! window_info="$("$select_window_path" "${get,,}" 2>/dev/null)"; then
+        message --error "Unable to obtain process info because of either bad event, issue with X server or inability to grab mouse for picker!"
         exit 1
       else
         window_xid="${window_info/'='*/}"
