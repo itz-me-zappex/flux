@@ -59,12 +59,12 @@ parse_options(){
           exit 1
         fi
 
-        echo "Window XID (decimal):     $window_xid
-Window XID (hexadecimal): $(printf "0x%x\n" $window_xid)
-Process PID:              $process_pid
-Process name:             $process_name
-Process owner (UID):      $process_owner
-Process owner (username): $process_owner_username
+        echo "Window XID (decimal):     "$window_xid"
+Window XID (hexadecimal): $(printf "0x%x\n" "$window_xid")
+Process PID:              "$process_pid"
+Process name:             "$process_name"
+Process owner (UID):      "$process_owner"
+Process owner (username): "$process_owner_username"
 Process command:          "$process_command"
 "
       fi
