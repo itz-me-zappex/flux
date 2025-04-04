@@ -48,7 +48,7 @@ validate_config_keys(){
 
     # Exit with an error if section contains only identifiers
     if [[ -z "${is_section_useful_map["$local_temp_section"]}" ]]; then
-      message --warning "Section '$local_temp_section' is useless because no action is specified!"
+      message --warning "Section '$local_temp_section' is useless because there is no action specified!"
       parse_config_error='1'
     fi
 
