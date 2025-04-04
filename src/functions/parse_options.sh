@@ -65,7 +65,8 @@ Process PID:              $process_pid
 Process name:             $process_name
 Process owner (UID):      $process_owner
 Process owner (username): $process_owner_username
-Process command:          $process_command"
+Process command:          "$process_command"
+"
       fi
 
       exit 0
