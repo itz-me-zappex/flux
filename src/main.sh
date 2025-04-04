@@ -335,8 +335,7 @@ while read -r raw_event; do
           exec_focus
 
           # Enforce fullscreen mode for window if specified in config
-          if [[ -n "${config_key_focus_fullscreen_map["$section"]}" &&
-                -z "$hot" ]]; then
+          if [[ -n "${config_key_focus_fullscreen_map["$section"]}" ]]; then
             if ! "$window_fullscreen_path" "$window_xid" > /dev/null 2>&1; then
               message --warning "Unable to expand to fullscreen window with XID $window_xid of process '$process_name' with PID $process_pid due to focus event!"
             else

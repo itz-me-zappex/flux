@@ -34,8 +34,7 @@ unfocus_request_limit(){
     fi
 
     # Request window minimization if specified in config
-    if [[ -n "${config_key_unfocus_minimize_map["$previous_section"]}" &&
-          -z "$hot" ]]; then
+    if [[ -n "${config_key_unfocus_minimize_map["$previous_section"]}" ]]; then
       request_minimize_map["$previous_process_pid"]='1'
     fi
 
