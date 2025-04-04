@@ -48,43 +48,50 @@ validate_config_keys(){
 
     # Exit with an error if section contains only identifiers
     if [[ -z "${is_section_useful_map["$local_temp_section"]}" ]]; then
-      message --warning "Section '$local_temp_section' contains only identifiers!"
+      message --warning "Section '$local_temp_section' is useless because no action is specified!"
       parse_config_error='1'
     fi
 
     # Exit with an error if there is another section which matches with the same process
-    local local_temp_section2
-    local local_match
-    for local_temp_section2 in "${sections_array[@]}"; do
-      if [[ "$local_temp_section" == "$local_temp_section2" ]]; then
-        continue
-      fi
+    if [[ -n "${config_key_name_map["$local_temp_section"]}" ||
+          -n "${config_key_owner_map["$local_temp_section"]}" ||
+          -n "${config_key_command_map["$local_temp_section"]}" ]]; then
+      local local_temp_section2
+      local local_match
+      for local_temp_section2 in "${sections_array[@]}"; do
+        if [[ "$local_temp_section" == "$local_temp_section2" ||
+              -z "${config_key_name_map["$local_temp_section2"]}" &&
+              -z "${config_key_owner_map["$local_temp_section2"]}" &&
+              -z "${config_key_command_map["$local_temp_section2"]}" ]]; then
+          continue
+        fi
 
-      if [[ -z "${config_key_name_map["$local_temp_section2"]}" ||
-            -z "${config_key_name_map["$local_temp_section"]}" ||
-            "${config_key_name_map["$local_temp_section"]}" == "${config_key_name_map["$local_temp_section2"]}" ]]; then
-        (( local_match++ ))
-      fi
+        if [[ -z "${config_key_name_map["$local_temp_section2"]}" ||
+              -z "${config_key_name_map["$local_temp_section"]}" ||
+              "${config_key_name_map["$local_temp_section"]}" == "${config_key_name_map["$local_temp_section2"]}" ]]; then
+          (( local_match++ ))
+        fi
 
-      if [[ -z "${config_key_owner_map["$local_temp_section2"]}" ||
-            -z "${config_key_owner_map["$local_temp_section"]}" ||
-            "${config_key_owner_map["$local_temp_section"]}" == "${config_key_owner_map["$local_temp_section2"]}" ]]; then
-        (( local_match++ ))
-      fi
+        if [[ -z "${config_key_owner_map["$local_temp_section2"]}" ||
+              -z "${config_key_owner_map["$local_temp_section"]}" ||
+              "${config_key_owner_map["$local_temp_section"]}" == "${config_key_owner_map["$local_temp_section2"]}" ]]; then
+          (( local_match++ ))
+        fi
 
-      if [[ -z "${config_key_command_map["$local_temp_section2"]}" ||
-            -z "${config_key_command_map["$local_temp_section"]}" ||
-            "${config_key_command_map["$local_temp_section"]}" == "${config_key_command_map["$local_temp_section2"]}" ]]; then
-        (( local_match++ ))
-      fi
+        if [[ -z "${config_key_command_map["$local_temp_section2"]}" ||
+              -z "${config_key_command_map["$local_temp_section"]}" ||
+              "${config_key_command_map["$local_temp_section"]}" == "${config_key_command_map["$local_temp_section2"]}" ]]; then
+          (( local_match++ ))
+        fi
 
-      if (( local_match == 3 )); then
-        message --warning "Identifiers in '$local_temp_section2' section are very similar to ones in '$local_temp_section' section!"
-        parse_config_error='1'
-      fi
+        if (( local_match == 3 )); then
+          message --warning "Identifiers in '$local_temp_section2' section are very similar to ones in '$local_temp_section' section!"
+          parse_config_error='1'
+        fi
 
-      unset local_match
-    done
+        unset local_match
+      done
+    fi
 
     # Set 'fps-focus' to '0' (full FPS unlock) if it is not specified
     if [[ -n "${config_key_fps_unfocus_map["$local_temp_section"]}" &&
