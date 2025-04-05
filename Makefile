@@ -49,7 +49,6 @@ all:
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/select-window $(CMODULES_DIR)/select_window.c \
 	$(CFUNCTIONS_DIR)/get_active_window.c \
 	$(CFUNCTIONS_DIR)/get_wm_window.c \
-	$(CFUNCTIONS_DIR)/get_input_focus.c \
 	$(CFUNCTIONS_DIR)/get_window_process.c \
 	$(CFUNCTIONS_DIR)/get_opened_windows.c \
 	$(CFUNCTIONS_DIR)/check_window_existence.c \
