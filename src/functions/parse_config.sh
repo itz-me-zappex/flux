@@ -18,7 +18,7 @@ parse_config(){
             -z "$local_no_init_section" ]]; then
         message --warning "$local_line_count_msg There is '$local_temp_config_line' instead of initial section!"
         local local_no_init_section='1'
-        parse_config_error='1'
+        (( parse_config_error_count++ ))
       elif [[ "$local_temp_config_line" =~ ^\[.*\]$ ]]; then
         # Regexp above means any symbols in square brackes
         # Exit with an error if section repeated
@@ -27,7 +27,7 @@ parse_config(){
           for local_temp_section in "${sections_array[@]}"; do
             if [[ "[$local_temp_section]" == "$local_temp_config_line" ]]; then
               message --warning "$local_line_count_msg Section name '$local_temp_section' is repeated!"
-              parse_config_error='1'
+              (( parse_config_error_count++ ))
             fi
           done
         fi
@@ -85,7 +85,7 @@ parse_config(){
               is_section_useful_map["$local_section"]='1'
             else
               message --warning "$local_line_count_msg Value '$local_config_value' in '$local_config_key' key in '$local_section' section is invalid! Allowed values are between 0 and 100."
-              parse_config_error='1'
+              (( parse_config_error_count++ ))
             fi
           ;;
           delay )
@@ -94,7 +94,7 @@ parse_config(){
               config_key_delay_map["$local_section"]="$local_config_value"
             else
               message --warning "$local_line_count_msg Value '$local_config_value' in '$local_config_key' key in '$local_section' section is neither integer nor float!"
-              parse_config_error='1'
+              (( parse_config_error_count++ ))
             fi
           ;;
           exec-oneshot )
@@ -129,7 +129,7 @@ parse_config(){
             else
               # Exit with an error if specified MangoHud config file does not exist
               message --warning "$local_line_count_msg MangoHud config file '$local_config_value' specified in '$local_config_key' key in '$local_section' section does not exist!"
-              parse_config_error='1'
+              (( parse_config_error_count++ ))
             fi
           ;;
           fps-unfocus )
@@ -141,11 +141,11 @@ parse_config(){
                 is_section_useful_map["$local_section"]='1'
               else
                 message --warning "$local_line_count_msg Value $local_config_value in '$local_config_key' key in '$local_section' section should be greater than zero!"
-                parse_config_error='1'
+                (( parse_config_error_count++ ))
               fi
             else
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' key in '$local_section' section is not an integer!"
-              parse_config_error='1'
+              (( parse_config_error_count++ ))
             fi
           ;;
           fps-focus )
@@ -155,7 +155,7 @@ parse_config(){
               config_key_fps_focus_map["$local_section"]="$local_config_value"
             else
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' key in '$local_section' section is not an integer!"
-              parse_config_error='1'
+              (( parse_config_error_count++ ))
             fi
           ;;
           lazy-exec-focus )
@@ -170,7 +170,7 @@ parse_config(){
             # Exit with an error if value is not boolean
             if ! config_key_idle_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' key in '$local_section' section is not boolean!"
-              parse_config_error='1'
+              (( parse_config_error_count++ ))
             fi
 
             is_section_useful_map["$local_section"]='1'
@@ -179,7 +179,7 @@ parse_config(){
             # Exit with an error if value is not boolean
             if ! config_key_unfocus_minimize_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' key in '$local_section' section is not boolean!"
-              parse_config_error='1'
+              (( parse_config_error_count++ ))
             fi
 
             is_section_useful_map["$local_section"]='1'
@@ -188,14 +188,14 @@ parse_config(){
             # Exit with an error if value is not boolean
             if ! config_key_focus_fullscreen_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' key in '$local_section' section is not boolean!"
-              parse_config_error='1'
+              (( parse_config_error_count++ ))
             fi
 
             is_section_useful_map["$local_section"]='1'
           ;;
           * )
             message --warning "$local_line_count_msg Unknown config key '$local_config_key' in '$local_section' section!"
-            parse_config_error='1'
+            (( parse_config_error_count++ ))
           esac
         fi
       else
@@ -206,7 +206,7 @@ parse_config(){
           message --warning "$local_line_count_msg Unable to define type of line '$local_temp_config_line'!"
         fi
 
-        parse_config_error='1'
+        (( parse_config_error_count++ ))
       fi
     fi
   done < "$config"
