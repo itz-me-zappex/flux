@@ -34,16 +34,69 @@ parse_options(){
 
       shift "$shift"
 
+      get="${get,,}"
+
       if [[ -z "$get" ]]; then
         message --error-opt "Option '--get' is specified without how to obtain window process info!"
         exit 1
-      elif [[ ! "${get,,}" =~ ^('pick'|'focus')$ ]]; then
+      elif [[ ! "$get" =~ ^('pick'|'focus')$ ]]; then
         message --error-opt "Specified action '$get' in '--get' option is not supported!"
         exit 1
       fi
 
-      if ! window_info="$("$select_window_path" "${get,,}" 2>/dev/null)"; then
-        message --error "Unable to obtain process info because of either bad event, issue with X server or inability to grab mouse for picker!"
+
+
+      window_info="$("$select_window_path" "$get" 2>&1)"
+      select_window_exit_code="$?"
+
+      if (( select_window_exit_code > 0 )) ; then
+        case "$select_window_exit_code" in
+        1 )
+          # 'Select_Window()' in 'dsimple.c' calls 'Fatal_Error()' to exit with message in case mouse cannot be grabbed
+          if [[ "$window_info" == *"Can't grab the mouse."* ]]; then
+            message --error "Unable to create window picker because exclusive fullscreen window is focused!"
+          else
+            # Pretty extreme case that can be caused by running module with wrong arguments
+            message --error "Unexpected error occured trying to run module!"
+          fi
+        ;;
+        2 )
+          case "$get" in
+          focus )
+            message --error "Unable to open display to obtain process info of focused window!"
+          ;;
+          pick )
+            message --error "Unable to open display to create window picker!"
+          esac
+        ;;
+        3 )
+          case "$get" in
+          focus )
+            message --error "Unable to obtain process info of focused window because EWMH-compatible window manager is not running!"
+          ;;
+          pick )
+            message --error "Unable to create window picker because EWMH-compatible window manager is not running!"
+          esac
+        ;;
+        4 )
+          case "$get" in
+          focus )
+            message --error "Unable to obtain process info of focused window because it is invalid!"
+          ;;
+          pick )
+            message --error "Unable to obtain process info of picked window because it is invalid!"
+          esac
+        ;;
+        5 )
+          case "$get" in
+          focus )
+            message --error "Unable to obtain process info of focused window!"
+          ;;
+          pick )
+            message --error "Unable to obtain process info of picked window!"
+          esac
+        esac
+
         exit 1
       else
         window_xid="${window_info/'='*/}"
