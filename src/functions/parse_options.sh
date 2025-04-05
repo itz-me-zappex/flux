@@ -49,15 +49,6 @@ parse_options(){
 
       if (( select_window_exit_code > 0 )) ; then
         case "$select_window_exit_code" in
-        1 )
-          # 'Select_Window()' in 'dsimple.c' calls 'Fatal_Error()' to exit with message in case mouse cannot be grabbed
-          if [[ "$window_info" == *"Can't grab the mouse."* ]]; then
-            message --error "Unable to create window picker because exclusive fullscreen window is focused!"
-          else
-            # Pretty extreme case that can be caused by running module with wrong arguments
-            message --error "Unexpected error occured trying to run module!"
-          fi
-        ;;
         2 )
           case "$get" in
           focus )
@@ -77,6 +68,9 @@ parse_options(){
           esac
         ;;
         4 )
+          message --error "Unable to create window picker because pointer is already grabbed by another window!"
+        ;;
+        5 )
           case "$get" in
           focus )
             message --error "Unable to obtain process info of focused window because it is invalid!"
@@ -85,13 +79,22 @@ parse_options(){
             message --error "Unable to obtain process info of picked window because it is invalid!"
           esac
         ;;
-        5 )
+        6 )
           case "$get" in
           focus )
             message --error "Unable to obtain process info of focused window!"
           ;;
           pick )
             message --error "Unable to obtain process info of picked window!"
+          esac
+        ;;
+        * )
+          case "$get" in
+          focus )
+            message --error "Unexpected error occured trying to obtain process info of focused window!"
+          ;;
+          pick )
+            message --error "Unexpected error occured trying to create window picker!"
           esac
         esac
 
