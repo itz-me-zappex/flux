@@ -12,7 +12,6 @@
 
 #include "functions/get_active_window.h"
 #include "functions/get_wm_window.h"
-#include "functions/get_input_focus.h"
 #include "functions/get_window_process.h"
 #include "functions/get_opened_windows.h"
 #include "functions/check_window_existence.h"
@@ -24,6 +23,7 @@
 void usage(const char *errmsg){}
 
 // Use picker to select window or get focused one depending by cmdline argument and print its XID with PID
+// Exit codes here are wrapped in 'flux' to print proper error messages when executing this binary
 int main(int argc, char *argv[]) {
   if (argc != 2) {
     return 1;
@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
   Display *display = XOpenDisplay(NULL);
 
   if (!display) {
-    return 1;
+    return 2;
   }
 
   Window root = DefaultRootWindow(display);
@@ -52,35 +52,27 @@ int main(int argc, char *argv[]) {
 
   if (wm_window == None) {
     XCloseDisplay(display);
-    return 1;
+    return 3;
   }
 
   Window window;
 
   if (should_pick) {
+    // Error here handled in 'flux' by catching 'Can't grab the mouse.' message
     window = Select_Window(display, 1);
-
-    if (window == root || window == None) {
-      window = wm_window;
-    }
   } else {
     window = get_active_window(display, root);
-
-    if (window == None) {
-      window = get_input_focus(display);
-
-      if (window != wm_window) {
-        XCloseDisplay(display);
-        return 1;
-      }
-    }
   }
 
-  bool window_exists = check_window_existence(display, root, window);
+  if (window == root || window == None) {
+    window = wm_window;
+  } else {
+    bool window_exists = check_window_existence(display, root, window);
 
-  if (!window_exists && window != wm_window) {
-    XCloseDisplay(display);
-    return 1;
+    if (!window_exists && window != wm_window) {
+      XCloseDisplay(display);
+      return 4;
+    }
   }
 
   pid_t window_process = get_window_process(display, window);
@@ -89,7 +81,7 @@ int main(int argc, char *argv[]) {
     printf("%ld=%d\n", window, window_process);
   } else {
     XCloseDisplay(display);
-    return 1;
+    return 5;
   }
 
   XCloseDisplay(display);
