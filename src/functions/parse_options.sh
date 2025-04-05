@@ -44,8 +44,6 @@ parse_options(){
         exit 1
       fi
 
-
-
       window_info="$("$select_window_path" "$get" 2>&1)"
       select_window_exit_code="$?"
 
