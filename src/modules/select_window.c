@@ -58,7 +58,17 @@ int main(int argc, char *argv[]) {
   Window window;
 
   if (should_pick) {
-    // Error here handled in 'flux' by catching 'Can't grab the mouse.' message
+    // Attempt to grab mouse to avoid error from third-party 'Select_Window()'
+    int grab_status = XGrabPointer(display, root, True,
+        ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
+        GrabModeAsync, GrabModeAsync,
+        None, None, CurrentTime);
+    if (grab_status != GrabSuccess) {
+      XCloseDisplay(display);
+      return 4;
+    }
+    XUngrabPointer(display, CurrentTime);
+
     window = Select_Window(display, 1);
   } else {
     window = get_active_window(display, root);
@@ -71,7 +81,7 @@ int main(int argc, char *argv[]) {
 
     if (!window_exists && window != wm_window) {
       XCloseDisplay(display);
-      return 4;
+      return 5;
     }
   }
 
@@ -81,7 +91,7 @@ int main(int argc, char *argv[]) {
     printf("%ld=%d\n", window, window_process);
   } else {
     XCloseDisplay(display);
-    return 5;
+    return 6;
   }
 
   XCloseDisplay(display);
