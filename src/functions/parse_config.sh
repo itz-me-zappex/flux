@@ -139,7 +139,7 @@ parse_config(){
               esac
             else
               # Exit with an error if specified MangoHud config file does not exist
-              message --warning "$local_line_count_msg MangoHud config file '$local_config_value' specified in '$local_config_key' key in '$local_section' section does not exist!"
+              message --warning "$local_line_count_msg MangoHud config file '$(shorten_path "$local_config_value")' specified in '$local_config_key' key in '$local_section' section does not exist!"
               (( parse_config_error_count++ ))
             fi
             unset is_section_blank_map["$local_section"]

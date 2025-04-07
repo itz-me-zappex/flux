@@ -130,17 +130,12 @@ validate_config_keys(){
 
   if (( parse_config_error_count > 0 )); then
     if (( parse_config_error_count == 1 )); then
-      local local_error_msg="$parse_config_error_count error"
+      local local_error_msg='1 error'
     else
       local local_error_msg="all $parse_config_error_count errors"
     fi
 
-    # Attempt to shorten path to config to print error message
-    if [[ "$config" == "$PWD"* ]]; then
-      config="${config/"${PWD}/"/}"
-    fi
-
-    message --error "Unable to continue, fix $local_error_msg displayed above in '$config' config file before start!"
+    message --error "Unable to continue, fix $local_error_msg displayed above in '$(shorten_path "$config")' config file before start!"
     exit 1
   fi
 }

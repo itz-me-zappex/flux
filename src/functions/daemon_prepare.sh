@@ -3,12 +3,12 @@ daemon_prepare(){
   # Exit with an error if lock file and process specified there exists
   if [[ -f "$lock_file" ]] &&
      check_pid_existence "$(<"$lock_file")"; then
-    message --error "Multiple instances are not allowed, make sure that daemon is not running before start, if you are really sure, then remove '$lock_file' file."
+    message --error "Multiple instances are not allowed, make sure that daemon is not running before start, if you are really sure, then remove '$(shorten_path "$lock_file")' file."
     exit 1
   else
     # Store PID to lock file to check its existence on next launch (if lock file still exists, e.g. after crash or SIGKILL)
     if ! echo "$$" > "$lock_file"; then
-      message --error "Unable to create lock file '$lock_file' required to prevent multiple instances!"
+      message --error "Unable to create lock file '$(shorten_path "$lock_file")' required to prevent multiple instances!"
       exit 1
     fi
   fi

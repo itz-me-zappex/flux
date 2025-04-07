@@ -64,7 +64,7 @@ safe_exit(){
   # Remove lock file which prevents multiple instances of daemon from running
   if [[ -f "$lock_file" ]] &&
      ! rm "$lock_file" > /dev/null 2>&1; then
-    message --warning "Unable to remove lock file '$lock_file' which prevents multiple instances from running!"
+    message --warning "Unable to remove lock file '$(shorten_path "$lock_file")' which prevents multiple instances from running!"
   fi
 
   # Terminate 'flux-event-reader'

@@ -21,11 +21,11 @@ unset_fps_limit(){
   if mangohud_fps_set "${config_key_mangohud_config_map["$passed_section"]}" "${config_key_mangohud_source_config_map["$passed_section"]}" "${config_key_fps_focus_map["$passed_section"]}"; then
     # Print message depending by FPS limit
     if [[ "${config_key_fps_focus_map["$passed_section"]}" == '0' ]]; then
-      message --info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been FPS unlimited $passed_end_of_msg."
+      message --info "MangoHud config file '$(shorten_path "${config_key_mangohud_config_map["$passed_section"]}")' from section '$passed_section' has been FPS unlimited $passed_end_of_msg."
     elif [[ "${config_key_fps_focus_map["$passed_section"]}" =~ ^[0-9]+$ ]]; then
-      message --info "MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been limited to ${config_key_fps_focus_map["$passed_section"]} FPS $passed_end_of_msg."
+      message --info "MangoHud config file '$(shorten_path "${config_key_mangohud_config_map["$passed_section"]}")' from section '$passed_section' has been limited to ${config_key_fps_focus_map["$passed_section"]} FPS $passed_end_of_msg."
     else
-      message --info "Config key 'fps_limit' in MangoHud config file '${config_key_mangohud_config_map["$passed_section"]}' from section '$passed_section' has been changed to '${config_key_fps_focus_map["$passed_section"]}' $passed_end_of_msg."
+      message --info "Config key 'fps_limit' in MangoHud config file '$(shorten_path "${config_key_mangohud_config_map["$passed_section"]}")' from section '$passed_section' has been changed to '${config_key_fps_focus_map["$passed_section"]}' $passed_end_of_msg."
     fi
   fi
   

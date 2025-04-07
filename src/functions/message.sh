@@ -56,7 +56,7 @@ message(){
     if check_rw "$log"; then
       echo "$local_log_timestamp$local_log_prefix $*" >> "$log"
     else
-      allow_logging='' message --warning "Unable to write message to log file '$log', recreate it or check read-write access!"
+      allow_logging='' message --warning "Unable to write message to log file '$(shorten_path "$log")', recreate it or check read-write access!"
     fi
   fi
 
