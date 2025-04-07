@@ -143,6 +143,4 @@ validate_config_keys(){
     message --error "Unable to continue, fix $local_error_msg displayed above in '$config' config file before start!"
     exit 1
   fi
-
-  unset config
 }

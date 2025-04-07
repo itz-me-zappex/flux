@@ -149,12 +149,14 @@ parse_config
 unset -f parse_config \
 get_realpath \
 simplify_bool
+unset max_cpu_limit
 
 # Config keys validation
 validate_config_keys
 unset -f validate_config_keys
 unset is_section_useful_map \
-is_section_blank_map
+is_section_blank_map \
+config
 
 # Preparation for event reading
 daemon_prepare
