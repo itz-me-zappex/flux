@@ -37,6 +37,9 @@ parse_config(){
         local local_section="${local_temp_config_line/\[/}"
         local local_section="${local_section/%\]/}"
         sections_array+=("$local_section")
+
+        # Needed to detect blank sections, if at least one key specified, this map is unset
+        is_section_blank_map["$local_section"]='1'
       elif [[ "${local_temp_config_line,,}" =~ ^([a-zA-Z0-9]|'-')+([[:space:]]+)?=([[:space:]]+)?* ]]; then
         # Remove equal symbol and key value to keep just key name
         local local_config_key="${local_temp_config_line/%=*/}"
@@ -73,9 +76,11 @@ parse_config(){
           case "$local_config_key" in
           name )
             config_key_name_map["$local_section"]="$local_config_value"
+            unset is_section_blank_map["$local_section"]
           ;;
           owner )
             config_key_owner_map["$local_section"]="$local_config_value"
+            unset is_section_blank_map["$local_section"]
           ;;
           cpu-limit )
             # Exit with an error if CPU limit is specified incorrectly or greater than maximum allowed, regexp - any number with optional '%' symbol
@@ -87,6 +92,7 @@ parse_config(){
               message --warning "$local_line_count_msg Value '$local_config_value' in '$local_config_key' key in '$local_section' section is invalid! Allowed values are between 0 and 100."
               (( parse_config_error_count++ ))
             fi
+            unset is_section_blank_map["$local_section"]
           ;;
           delay )
             # Exit with an error if value is neither an integer nor a float (that is what regexp means)
@@ -96,21 +102,26 @@ parse_config(){
               message --warning "$local_line_count_msg Value '$local_config_value' in '$local_config_key' key in '$local_section' section is neither integer nor float!"
               (( parse_config_error_count++ ))
             fi
+            unset is_section_blank_map["$local_section"]
           ;;
           exec-oneshot )
             config_key_exec_oneshot_map["$local_section"]="$local_config_value"
             is_section_useful_map["$local_section"]='1'
+            unset is_section_blank_map["$local_section"]
           ;;
           exec-focus )
             config_key_exec_focus_map["$local_section"]="$local_config_value"
             is_section_useful_map["$local_section"]='1'
+            unset is_section_blank_map["$local_section"]
           ;;
           exec-unfocus )
             config_key_exec_unfocus_map["$local_section"]="$local_config_value"
             is_section_useful_map["$local_section"]='1'
+            unset is_section_blank_map["$local_section"]
           ;;
           command )
             config_key_command_map["$local_section"]="$local_config_value"
+            unset is_section_blank_map["$local_section"]
           ;;
           mangohud-source-config | mangohud-config )
             # Get absolute path to MangoHud config in case it is specified as relative
@@ -131,6 +142,7 @@ parse_config(){
               message --warning "$local_line_count_msg MangoHud config file '$local_config_value' specified in '$local_config_key' key in '$local_section' section does not exist!"
               (( parse_config_error_count++ ))
             fi
+            unset is_section_blank_map["$local_section"]
           ;;
           fps-unfocus )
             # Exit with an error if value is not integer, that is what regexp means
@@ -147,6 +159,7 @@ parse_config(){
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' key in '$local_section' section is not an integer!"
               (( parse_config_error_count++ ))
             fi
+            unset is_section_blank_map["$local_section"]
           ;;
           fps-focus )
             # Exit with an error if value is neither integer nor list of comma-separated integers
@@ -157,14 +170,17 @@ parse_config(){
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' key in '$local_section' section is not an integer!"
               (( parse_config_error_count++ ))
             fi
+            unset is_section_blank_map["$local_section"]
           ;;
           lazy-exec-focus )
             config_key_lazy_exec_focus_map["$local_section"]="$local_config_value"
             is_section_useful_map["$local_section"]='1'
+            unset is_section_blank_map["$local_section"]
           ;;
           lazy-exec-unfocus )
             config_key_lazy_exec_unfocus_map["$local_section"]="$local_config_value"
             is_section_useful_map["$local_section"]='1'
+            unset is_section_blank_map["$local_section"]
           ;;
           idle )
             # Exit with an error if value is not boolean
@@ -174,6 +190,7 @@ parse_config(){
             fi
 
             is_section_useful_map["$local_section"]='1'
+            unset is_section_blank_map["$local_section"]
           ;;
           unfocus-minimize )
             # Exit with an error if value is not boolean
@@ -183,6 +200,7 @@ parse_config(){
             fi
 
             is_section_useful_map["$local_section"]='1'
+            unset is_section_blank_map["$local_section"]
           ;;
           focus-fullscreen )
             # Exit with an error if value is not boolean
@@ -192,6 +210,7 @@ parse_config(){
             fi
 
             is_section_useful_map["$local_section"]='1'
+            unset is_section_blank_map["$local_section"]
           ;;
           * )
             message --warning "$local_line_count_msg Unknown config key '$local_config_key' in '$local_section' section!"

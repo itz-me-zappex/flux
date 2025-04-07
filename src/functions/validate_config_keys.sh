@@ -3,11 +3,23 @@ validate_config_keys(){
   # Check values in sections and exit with an error if something is wrong or set default values in some keys if those are not specified
   local local_temp_section
   for local_temp_section in "${sections_array[@]}"; do
-    # Exit with an error if neither identifier 'name' nor 'command' is specified
-    if [[ -z "${config_key_name_map["$local_temp_section"]}" &&
-          -z "${config_key_command_map["$local_temp_section"]}" ]]; then
-      message --warning "At least one process identifier required in '$local_temp_section' section!"
+    # Exit with an error if section is blank
+    if [[ -n "${is_section_blank_map["$local_temp_section"]}" ]]; then
+      message --warning "Section '$local_temp_section' is blank!"
       (( parse_config_error_count++ ))
+    else
+      # Exit with an error if neither identifier 'name' nor 'command' is specified
+      if [[ -z "${config_key_name_map["$local_temp_section"]}" &&
+            -z "${config_key_command_map["$local_temp_section"]}" ]]; then
+        message --warning "At least one process identifier required in '$local_temp_section' section!"
+        (( parse_config_error_count++ ))
+      fi
+
+      # Exit with an error if section contains only identifiers
+      if [[ -z "${is_section_useful_map["$local_temp_section"]}" ]]; then
+        message --warning "Section '$local_temp_section' is useless because there is no action specified!"
+        (( parse_config_error_count++ ))
+      fi
     fi
 
     # Exit with an error if MangoHud FPS limit is not specified along with config path
@@ -43,12 +55,6 @@ validate_config_keys(){
     if [[ -n "${config_key_mangohud_source_config_map["$local_temp_section"]}" &&
           -z "${config_key_mangohud_config_map["$local_temp_section"]}" ]]; then
       message --warning "Do not use 'mangohud-source-config' key without 'mangohud-config' key in '$local_temp_section' section!"
-      (( parse_config_error_count++ ))
-    fi
-
-    # Exit with an error if section contains only identifiers
-    if [[ -z "${is_section_useful_map["$local_temp_section"]}" ]]; then
-      message --warning "Section '$local_temp_section' is useless because there is no action specified!"
       (( parse_config_error_count++ ))
     fi
 

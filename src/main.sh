@@ -82,6 +82,9 @@ config_key_idle_map \
 config_key_unfocus_minimize_map \
 config_key_focus_fullscreen_map
 
+# Needed to detect blank sections in config during parsing
+declare -A is_section_blank_map
+
 # Declare associative arrays to store info about backgrounded limits
 declare -A background_freeze_pid_map \
 background_cpu_limit_pid_map \
@@ -150,7 +153,8 @@ simplify_bool
 # Config keys validation
 validate_config_keys
 unset -f validate_config_keys
-unset is_section_useful_map
+unset is_section_useful_map \
+is_section_blank_map
 
 # Preparation for event reading
 daemon_prepare
