@@ -48,7 +48,7 @@ handle_requests(){
           request_fps_limit_map["$local_section"] \
           request_sched_idle_map["$local_process_pid"]
 
-          message --warning "Daemon has insufficient rights for apply limit to process '$local_process_name' with PID $local_process_pid due to window with XID $local_temp_window_xid unfocus event!"
+          message --warning "Daemon has insufficient rights to apply limit for process '$local_process_name' with PID $local_process_pid due to window with XID $local_temp_window_xid unfocus event!"
 
           return 1
         fi
