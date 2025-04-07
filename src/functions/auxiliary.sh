@@ -129,7 +129,8 @@ shorten_path(){
   # Accepts path as a single argument
   local local_path="$1"
 
-  if [[ "$PWD" == "$HOME" ]]; then
+  if [[ "$PWD" == "$HOME" &&
+        "$local_path" == "$HOME"* ]]; then
     # E.g. '/home/zappex/.config/flux.ini' -> '~/.config/flux.ini'
     local_path="${local_path/"$HOME"/'~'}"
   elif [[ "$local_path" == "$PWD"* ]]; then
