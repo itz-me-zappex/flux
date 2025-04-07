@@ -83,25 +83,27 @@ parse_config(){
             unset is_section_blank_map["$local_section"]
           ;;
           cpu-limit )
+            config_key_cpu_limit_map["$local_section"]="${local_config_value/%\%/}"
+            is_section_useful_map["$local_section"]='1'
+
             # Exit with an error if CPU limit is specified incorrectly or greater than maximum allowed, regexp - any number with optional '%' symbol
-            if [[ "$local_config_value" =~ ^[0-9]+(\%)?$ ]] &&
-               (( "${local_config_value/%\%/}" * cpu_threads <= max_cpu_limit )); then
-              config_key_cpu_limit_map["$local_section"]="${local_config_value/%\%/}"
-              is_section_useful_map["$local_section"]='1'
-            else
+            if [[ ! "$local_config_value" =~ ^[0-9]+(\%)?$ ]] &&
+               ! (( "${local_config_value/%\%/}" * cpu_threads <= max_cpu_limit )); then
               message --warning "$local_line_count_msg Value '$local_config_value' in '$local_config_key' key in '$local_section' section is invalid! Allowed values are between 0 and 100."
               (( parse_config_error_count++ ))
             fi
+
             unset is_section_blank_map["$local_section"]
           ;;
           delay )
+            config_key_delay_map["$local_section"]="$local_config_value"
+
             # Exit with an error if value is neither an integer nor a float (that is what regexp means)
-            if [[ "$local_config_value" =~ ^[0-9]+((\.|\,)[0-9]+)?$ ]]; then
-              config_key_delay_map["$local_section"]="$local_config_value"
-            else
+            if [[ ! "$local_config_value" =~ ^[0-9]+((\.|\,)[0-9]+)?$ ]]; then
               message --warning "$local_line_count_msg Value '$local_config_value' in '$local_config_key' key in '$local_section' section is neither integer nor float!"
               (( parse_config_error_count++ ))
             fi
+
             unset is_section_blank_map["$local_section"]
           ;;
           exec-oneshot )
@@ -127,50 +129,51 @@ parse_config(){
             # Get absolute path to MangoHud config in case it is specified as relative
             local local_config_value="$(get_realpath "$local_config_value")"
 
+            # Set path to MangoHud config depending by specified key
+            case "$local_config_key" in
+            mangohud-source-config )
+              config_key_mangohud_source_config_map["$local_section"]="$local_config_value"
+            ;;
+            mangohud-config )
+              config_key_mangohud_config_map["$local_section"]="$local_config_value"
+            esac
+
             # Check for config file existence
-            if [[ -f "$local_config_value" ]]; then
-              # Set path to MangoHud config depending by specified key
-              case "$local_config_key" in
-              mangohud-source-config )
-                config_key_mangohud_source_config_map["$local_section"]="$local_config_value"
-              ;;
-              mangohud-config )
-                config_key_mangohud_config_map["$local_section"]="$local_config_value"
-              esac
-            else
+            if [[ ! -f "$local_config_value" ]]; then
               # Exit with an error if specified MangoHud config file does not exist
               message --warning "$local_line_count_msg MangoHud config file '$(shorten_path "$local_config_value")' specified in '$local_config_key' key in '$local_section' section does not exist!"
               (( parse_config_error_count++ ))
             fi
+
             unset is_section_blank_map["$local_section"]
           ;;
           fps-unfocus )
-            # Exit with an error if value is not integer, that is what regexp means
-            if [[ "$local_config_value" =~ ^[0-9]+$ ]]; then
-              # Exit with an error if value equal to zero
-              if [[ "$local_config_value" != '0' ]]; then
-                config_key_fps_unfocus_map["$local_section"]="$local_config_value"
-                is_section_useful_map["$local_section"]='1'
-              else
-                message --warning "$local_line_count_msg Value $local_config_value in '$local_config_key' key in '$local_section' section should be greater than zero!"
-                (( parse_config_error_count++ ))
-              fi
-            else
+            config_key_fps_unfocus_map["$local_section"]="$local_config_value"
+            is_section_useful_map["$local_section"]='1'
+
+            # Exit with an error if value equal to zero
+            if [[ "$local_config_value" == '0' ]]; then
+              message --warning "$local_line_count_msg Value $local_config_value in '$local_config_key' key in '$local_section' section should be greater than zero!"
+              (( parse_config_error_count++ ))
+            elif [[ ! "$local_config_value" =~ ^[0-9]+$ ]]; then
+              # Exit with an error if value is not integer, that is what regexp means
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' key in '$local_section' section is not an integer!"
               (( parse_config_error_count++ ))
             fi
+
             unset is_section_blank_map["$local_section"]
           ;;
           fps-focus )
+            config_key_fps_focus_map["$local_section"]="$local_config_value"
+            is_section_useful_map["$local_section"]='1'
+
             # Exit with an error if value is neither integer nor list of comma-separated integers
-            if [[ "$local_config_value" =~ ^[0-9]+$ ||
-                  "$local_config_value" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
-              config_key_fps_focus_map["$local_section"]="$local_config_value"
-              is_section_useful_map["$local_section"]='1'
-            else
+            if [[ ! "$local_config_value" =~ ^[0-9]+$ ||
+                  ! "$local_config_value" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' key in '$local_section' section is not an integer!"
               (( parse_config_error_count++ ))
             fi
+
             unset is_section_blank_map["$local_section"]
           ;;
           lazy-exec-focus )
