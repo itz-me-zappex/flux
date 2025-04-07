@@ -123,3 +123,20 @@ colors_interpret(){
   # Value will be stored to variable from command substitution
   echo "$local_variable_value"
 }
+
+# Required to shorten paths in messages if possible
+shorten_path(){
+  # Accepts path as a single argument
+  local local_path="$1"
+
+  if [[ "$PWD" == "$HOME" ]]; then
+    # E.g. '/home/zappex/.config/flux.ini' -> '~/.config/flux.ini'
+    local_path="${local_path/"$HOME"/'~'}"
+  elif [[ "$local_path" == "$PWD"* ]]; then
+    # E.g. '/home/zappex/.config/flux.ini' -> 'flux.ini' (if current directory is '/home/zappex/.config')
+    local_path="${local_path/"$PWD/"/}"
+  fi
+
+  # Value will be printed in message from command substitution
+  echo "$local_path"
+}
