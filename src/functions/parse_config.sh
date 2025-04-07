@@ -166,6 +166,7 @@ parse_config(){
             if [[ "$local_config_value" =~ ^[0-9]+$ ||
                   "$local_config_value" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
               config_key_fps_focus_map["$local_section"]="$local_config_value"
+              is_section_useful_map["$local_section"]='1'
             else
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' key in '$local_section' section is not an integer!"
               (( parse_config_error_count++ ))
