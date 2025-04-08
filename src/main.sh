@@ -1,5 +1,5 @@
 # Version of daemon shown from 'parse_options()' if '--version' is specified
-daemon_version='1.23.4'
+daemon_version='1.24'
 
 # Set path to file containing daemon PID, needed to prevent multiple instances from running
 lock_file='/tmp/flux-lock'

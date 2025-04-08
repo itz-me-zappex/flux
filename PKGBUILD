@@ -1,5 +1,5 @@
 pkgname='flux'
-pkgver='1.23.4'
+pkgver='1.24'
 pkgrel='1'
 pkgdesc='Advanced daemon for X11 desktops and window managers, designed to automatically limit FPS/CPU usage of unfocused windows and run commands on focus and unfocus events. Written in Bash and partially in C.'
 arch=('any')
@@ -34,7 +34,7 @@ install='create-group.install'
 
 build(){
   cd "${srcdir}/${pkgname}-${pkgver}"
-  PREFIX="/usr" make
+  make
 }
 
 package(){
