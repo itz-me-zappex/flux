@@ -59,9 +59,6 @@ all:
 clean:
 	rm -rf $(BUILD_DIR)
 
-groupadd:
-	groupadd -r flux
-
 install:
 	mkdir -p $(PREFIX)/bin/
 	mkdir -p $(PREFIX)/lib/flux/
@@ -71,16 +68,19 @@ install:
 	install -Dm 755 $(BUILD_DIR)/window-fullscreen $(PREFIX)/lib/flux/
 	install -Dm 755 $(BUILD_DIR)/select-window $(PREFIX)/lib/flux/
 
-install-bypass:
-	mkdir -p /etc/security/limits.d/
-	install -Dm 644 $(PWD)/10-flux.conf /etc/security/limits.d/
+	@if [[ $(PREFIX) != '/usr' ]]; then \
+		echo "warning: Unable to install '10-flux.conf' to '/etc/security/limits.d' because that is not '/usr' prefix!" >&2; \
+	fi
 
-groupdel:
-	groupdel flux
+	if [[ $(PREFIX) == '/usr' ]]; then \
+		mkdir -p /etc/security/limits.d/; \
+		install -Dm 644 $(PWD)/10-flux.conf /etc/security/limits.d/; \
+	fi
 
 uninstall:
 	rm $(PREFIX)/bin/flux
 	rm -rf $(PREFIX)/lib/flux/
 
-uninstall-bypass:
-	rm /etc/security/limits.d/10-flux.conf
+	if [[ $(PREFIX) == '/usr' ]]; then \
+		rm /etc/security/limits.d/10-flux.conf; \
+	fi
