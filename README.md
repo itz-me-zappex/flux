@@ -139,11 +139,7 @@ Use this method if you using different distro. Make sure you have installed depe
 |--------|-------------|
 | `clean` | Remove `build/` in repository directory with all files created there after `make`. |
 | `install` | Install daemon to prefix, can be changed using `$PREFIX`, defaults to `/usr/local`. |
-| `install-bypass` | Install `10-flux.conf` config to `/etc/security/limits.d` to bypass scheduling policy changing restrictions for users in `flux` group |
-| `groupadd` | Create `flux` group to which you can add users. |
 | `uninstall` | Remove `bin/flux` and `lib/flux/` from prefix, can be changed using `$PREFIX`, defaults to `/usr/local`. |
-| `uninstall-bypass` | Remove `10-flux.conf` config from `/etc/security/limits.d`. |
-| `groupdel` | Remove `flux` group from system. |
 
 #### Make environment variables
 | Variable | Description |
@@ -167,9 +163,9 @@ tar -xvf flux.tar.gz --one-top-level=flux --strip-components=1 && cd 'flux'
 make
 ```
 
-#### Install daemon to `/usr/local`, bypass limitations related to changing scheduling policies and create `flux` group
+#### Install daemon to `/usr/local`
 ```bash
-sudo make install install-bypass groupadd && sudo usermod -aG flux $USER
+sudo make install
 ```
 
 #### Or you may want to change prefix e.g. in case you want install it locally
@@ -180,6 +176,16 @@ PREFIX="~/.local" make install
 #### Or you may want to keep daemon and modules in single directory, that will work, just
 ```bash
 ./build/flux -h
+```
+
+#### Create `flux` group, needed to bypass scheduling policies change limitations
+```bash
+sudo groupadd -r flux
+```
+
+#### Add current user to `flux` group
+```bash
+sudo usermod -aG flux "$USER"
 ```
 
 ## Uninstallation
