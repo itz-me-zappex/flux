@@ -41,7 +41,7 @@ parse_config(){
 
         # Needed to detect blank sections, if at least one key specified, this map is unset
         is_section_blank_map["$local_section"]='1'
-      elif [[ "${local_temp_config_line,,}" =~ ^([a-zA-Z0-9]|'-')+([[:space:]]+)?=([[:space:]]+)?* ]]; then
+      elif [[ "${local_temp_config_line,,}" =~ ^[a-zA-Z0-9-]+([[:space:]]+)?=([[:space:]]+)?* ]]; then
         # Remove equal symbol and key value to keep just key name
         local local_config_key="${local_temp_config_line/%=*/}"
 
