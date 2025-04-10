@@ -128,7 +128,7 @@ git clone https://github.com/itz-me-zappex/flux.git && cd flux && makepkg -sric
 
 #### Add user to `flux` group to bypass limitations related to changing scheduling policies
 ```bash
-sudo usermod -aG flux $USER
+sudo usermod -aG flux "$USER"
 ```
 
 ### Manual installation using release tarball
