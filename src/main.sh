@@ -188,7 +188,7 @@ while read -r raw_event; do
   # Remember that daemon received events to print proper message on event reading tool termination
   # And to print message about daemon start
   if [[ -z "$display_has_been_opened" ]]; then
-    message --info "Flux has been started."
+    quiet='' message --info "Flux has been started."
     display_has_been_opened='1'
   fi
 
