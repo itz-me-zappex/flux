@@ -16,7 +16,7 @@ unset temp_envvar_line \
 envvar_name
 
 # Version of daemon shown from 'parse_options()' if '--version' is specified
-daemon_version='1.24.1'
+daemon_version='1.24.2'
 
 # Set path to file containing daemon PID, needed to prevent multiple instances from running
 # Hardcoded in 'flux-event-reader' and it is not supposed to be changeable
