@@ -1,5 +1,5 @@
-# Required to get threads count and maximum CPU limit
-calculate_max_limit(){
+# Required to get maximum allowed CPU limit by multiplying threads count to 100
+get_max_cpu_limit(){
   # Count CPU threads
   local local_temp_cpuinfo_line
   cpu_threads='0'

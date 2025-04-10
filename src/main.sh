@@ -156,9 +156,9 @@ unset -f validate_config
 validate_log
 unset -f validate_log
 
-# Calculation of maximum CPU limit
-calculate_max_limit
-unset -f calculate_max_limit
+# Get maximum CPU limit
+get_max_cpu_limit
+unset -f get_max_cpu_limit
 
 # Config parsing
 parse_config
