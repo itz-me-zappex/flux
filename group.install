@@ -11,5 +11,5 @@ post_upgrade(){
 
 post_remove(){
   groupdel flux
-  echo "Group 'flux' has been removed, you may want to remove your user from it by 'sudo gpasswd -d \$USER flux'."
+  echo "Group 'flux' has been removed."
 }

@@ -30,7 +30,7 @@ optdepends=(
 )
 source=("${url}/archive/refs/tags/v${pkgver}.tar.gz")
 sha256sums=('SKIP')
-install='create-group.install'
+install='group.install'
 
 build(){
   cd "${srcdir}/${pkgname}-${pkgver}"
