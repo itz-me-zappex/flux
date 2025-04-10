@@ -19,6 +19,7 @@ envvar_name
 daemon_version='1.24.1'
 
 # Set path to file containing daemon PID, needed to prevent multiple instances from running
+# Hardcoded in 'flux-event-reader' and it is not supposed to be changeable
 lock_file='/tmp/flux-lock'
 
 # Define prefix where daemon has been installed using path to 'flux'
