@@ -352,14 +352,17 @@ while read -r raw_event; do
           # Execute command on focus event if specified in config
           exec_focus
 
-          # Enforce fullscreen mode for window if specified in config
-          if [[ -n "${config_key_focus_fullscreen_map["$section"]}" ]]; then
-            if ! "$window_fullscreen_path" "$window_xid" > /dev/null 2>&1; then
-              message --warning "Unable to expand to fullscreen window with XID $window_xid of process '$process_name' with PID $process_pid due to focus event!"
-            else
-              message --info "Window with XID $window_xid of process '$process_name' with PID $process_pid has been expanded into fullscreen due to focus event."
+          # Send to background because there is 100ms delay before change child window size to match screen in case window is buggy
+          (
+            # Enforce fullscreen mode for window if specified in config
+            if [[ -n "${config_key_focus_fullscreen_map["$section"]}" ]]; then
+              if ! "$window_fullscreen_path" "$window_xid" > /dev/null 2>&1; then
+                message --warning "Unable to expand to fullscreen window with XID $window_xid of process '$process_name' with PID $process_pid due to focus event!"
+              else
+                message --info "Window with XID $window_xid of process '$process_name' with PID $process_pid has been expanded into fullscreen due to focus event."
+              fi
             fi
-          fi
+          ) &
         fi
 
         # Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
