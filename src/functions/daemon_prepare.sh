@@ -8,7 +8,8 @@ daemon_prepare(){
       if [[ -n "$(<"$lock_file")" ]]; then
         # Open file and get daemon PID
         local local_temp_flux_lock_line
-        while read -r local_temp_flux_lock_line; do
+        while read -r local_temp_flux_lock_line ||
+              [[ -n "$local_temp_flux_lock_line" ]]; do
           local local_flux_pid="$local_temp_flux_lock_line"
           break
         done < "$lock_file"

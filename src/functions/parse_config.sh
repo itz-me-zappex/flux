@@ -3,7 +3,8 @@ parse_config(){
   # Parse INI config
   local local_temp_config_line
   local local_line_count
-  while read -r local_temp_config_line; do
+  while read -r local_temp_config_line ||
+        [[ -n "$local_temp_config_line" ]]; do
     # Get current line count and add postfix
     (( local_line_count++ ))
 

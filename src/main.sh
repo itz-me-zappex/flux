@@ -1,5 +1,6 @@
 # Unset environment variables which are lowercase and may cause conflicts
-while read -r temp_envvar_line; do
+while read -r temp_envvar_line ||
+      [[ -n "$temp_envvar_line" ]]; do
   # Remove 'declare -x' from line
   temp_envvar_line="${temp_envvar_line/'declare -x '/}"
 
@@ -184,7 +185,8 @@ configure_prefixes
 events_count='0'
 
 # Read events from 'flux-event-reader' binary
-while read -r raw_event; do
+while read -r raw_event ||
+      [[ -n "$raw_event" ]]; do
   (( events_count++ ))
 
   # Collect events

@@ -3,7 +3,8 @@ get_max_cpu_limit(){
   # Count CPU threads
   local local_temp_cpuinfo_line
   cpu_threads='0'
-  while read -r local_temp_cpuinfo_line; do
+  while read -r local_temp_cpuinfo_line ||
+        [[ -n "$local_temp_cpuinfo_line" ]]; do
     if [[ "$local_temp_cpuinfo_line" == 'processor'* ]]; then
       (( cpu_threads++ ))
     fi

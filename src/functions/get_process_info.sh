@@ -40,7 +40,8 @@ get_process_info(){
         local local_temp_status_line
         local local_column_count
         local local_temp_status_column
-        while read -r local_temp_status_line; do
+        while read -r local_temp_status_line ||
+              [[ -n "$local_temp_status_line" ]]; do
           # Find a line containing UID
           if [[ "$local_temp_status_line" == 'Uid:'* ]]; then
             # Find 3rd column
@@ -73,7 +74,8 @@ get_process_info(){
     # Obtain process owner username from '/etc/passwd' file using UID of process
     if check_ro '/etc/passwd'; then
       local local_temp_passwd_line
-      while read -r local_temp_passwd_line; do
+      while read -r local_temp_passwd_line ||
+            [[ -n "$local_temp_passwd_line" ]]; do
         # Ignore line if it does not contain owner UID
         if [[ "$local_temp_passwd_line" =~ .*\:.*\:"$process_owner"\:.* ]]; then
           process_owner_username="${local_temp_passwd_line/\:*/}"

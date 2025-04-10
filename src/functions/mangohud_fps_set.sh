@@ -21,7 +21,8 @@ mangohud_fps_set(){
     else
       # Replace 'fps_limit' value in config if exists
       local local_temp_config_line
-      while read -r local_temp_config_line; do
+      while read -r local_temp_config_line ||
+            [[ -n "$local_temp_config_line" ]]; do
         # Find 'fps_limit' line, regexp means 'fps_limit[space(s)?]=[space(s)?][integer][anything else]'
         if [[ "$local_temp_config_line" =~ ^fps_limit([[:space:]]+)?=([[:space:]]+)?[0-9]+* ]]; then
           # Set specified FPS limit, shell parameter expansion replaces first number on line with specified new one

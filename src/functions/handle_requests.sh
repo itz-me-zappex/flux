@@ -109,7 +109,8 @@ handle_requests(){
         if [[ -z "$local_chrt_error" ]]; then
           # Read output of 'chrt' tool line-by-line and remember scheduling policy with priority of process to restore it on daemon exit or window focus event
           local local_temp_sched_info_line
-          while read -r local_temp_sched_info_line; do
+          while read -r local_temp_sched_info_line ||
+                [[ -n "$local_temp_sched_info_line" ]]; do
             # Define associative array which should store value depending by what line contains
             case "$local_temp_sched_info_line" in
             *'scheduling policy'* )
