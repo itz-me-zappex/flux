@@ -61,15 +61,41 @@ safe_exit(){
     exec_on_event
   fi
 
-  # Remove lock file which prevents multiple instances of daemon from running
-  if [[ -f "$lock_file" ]] &&
-     ! rm "$lock_file" > /dev/null 2>&1; then
-    message --warning "Unable to remove lock file '$(shorten_path "$lock_file")' which prevents multiple instances from running!"
-  fi
+  # Obtain 'flux-event-reader' PID from lock file to terminate it and remove lock file
+  if [[ -f "$lock_file" ]]; then
+    # Check whether lock file is readable or not
+    if check_ro "$lock_file"; then
+      # Do not get 'flux-event-reader' PID from lock file if it is blank
+      if [[ -n "$(<"$lock_file")" ]]; then
+        # Get 'flux-event-reader' PID (2nd line)
+        local local_temp_flux_lock_line
+        local local_lines_count
+        while read -r local_temp_flux_lock_line; do
+          # Skip first line
+          if (( local_lines_count == 0 )); then
+            (( local_lines_count++ ))
+            continue
+          else
+            local_flux_event_reader_pid="$local_temp_flux_lock_line"
+            break
+          fi
+        done < "$lock_file"
 
-  # Terminate 'flux-event-reader'
-  if check_pid_existence "$flux_event_reader_pid"; then
-    kill "$flux_event_reader_pid" > /dev/null 2>&1
+        # Terminate 'flux-event-reader'
+        if check_pid_existence "$local_flux_event_reader_pid"; then
+          kill "$local_flux_event_reader_pid" > /dev/null 2>&1
+        fi
+      else
+        message --warning "Unable to handle '$(shorten_path "$lock_file")' lock file because it is blank!"
+      fi
+    else
+      message --warning "Unable to read '$(shorten_path "$lock_file")' lock file to obtain 'flux-event-reader' PID!"
+    fi
+
+    # Remove lock file which prevents multiple instances of daemon from running
+    if ! rm "$lock_file" > /dev/null 2>&1; then
+      message --warning "Unable to remove '$(shorten_path "$lock_file")' lock file which normally contains daemon and event reader PIDs and prevents multiple instances from running!"
+    fi
   fi
   
   # Wait a bit to avoid printing message about daemon termination earlier than messages from background functions appear
