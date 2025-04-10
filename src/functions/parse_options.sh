@@ -113,13 +113,21 @@ parse_options(){
           exit 1
         fi
 
-        echo "Window XID (decimal):     "$window_xid"
-Window XID (hexadecimal): $(printf "0x%x\n" "$window_xid")
-Process PID:              "$process_pid"
-Process name:             "$process_name"
-Process owner (UID):      "$process_owner"
-Process owner (username): "$process_owner_username"
-Process command:          "$process_command"
+        case "$get" in
+        focus )
+          echo "Process info and window XID of focused window:"
+        ;;
+        pick )
+          echo "Process info and window XID of picked window:"
+        esac
+
+        echo "  Window XID (decimal): "$window_xid"
+  Window XID (hexadecimal): $(printf "0x%x\n" "$window_xid")
+  Process PID: "$process_pid"
+  Process name: "$process_name"
+  Process owner (UID): "$process_owner"
+  Process owner (username): "$process_owner_username"
+  Process command: "$process_command"
 "
       fi
 
