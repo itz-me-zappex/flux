@@ -49,9 +49,19 @@ int main() {
     return 1;
   }
 
-  // Get and print its own PID, needed to make daemon receive it as event and make it able to terminate this process on exit
+  // Get its own PID and write it to '/tmp/flux-lock', needed to make daemon able terminate this process on exit
   const pid_t event_reader_pid = getpid();
-  printf("%d\n", event_reader_pid);
+
+  // Append PID to file (there is 'flux' PID too)
+  FILE *lock_file = fopen("/tmp/flux-lock", "a");
+
+  if (!lock_file) {
+    XCloseDisplay(display);
+    return 1;
+  } else {
+    fprintf(lock_file, "%d", event_reader_pid);
+    fclose(lock_file);
+  }
 
   // Listen changes in atoms
   XSelectInput(display, root, PropertyChangeMask);
