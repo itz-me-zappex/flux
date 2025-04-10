@@ -8,7 +8,7 @@ while read -r temp_envvar_line ||
   envvar_name="${temp_envvar_line/%=*/}"
 
   # Unset variable if its name written in lowercase
-  if [[ "$envvar_name" =~ ^([a-z]+)$ ]]; then
+  if [[ "$envvar_name" =~ ^([a-z(_)?]+)$ ]]; then
     unset "$envvar_name"
   fi
 done < <(declare -x)
