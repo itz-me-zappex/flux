@@ -1,3 +1,19 @@
+# Unset environment variables which are lowercase and may cause conflicts
+while read -r temp_envvar_line; do
+  # Remove 'declare -x' from line
+  temp_envvar_line="${temp_envvar_line/'declare -x '/}"
+
+  # Get name
+  envvar_name="${temp_envvar_line/%=*/}"
+
+  # Unset variable if its name written in lowercase
+  if [[ "$envvar_name" =~ ^([a-z]+)$ ]]; then
+    unset "$envvar_name"
+  fi
+done < <(declare -x)
+unset temp_envvar_line \
+envvar_name
+
 # Version of daemon shown from 'parse_options()' if '--version' is specified
 daemon_version='1.24'
 
