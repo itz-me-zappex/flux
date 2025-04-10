@@ -70,7 +70,8 @@ safe_exit(){
         # Get 'flux-event-reader' PID (2nd line)
         local local_temp_flux_lock_line
         local local_lines_count
-        while read -r local_temp_flux_lock_line; do
+        while read -r local_temp_flux_lock_line ||
+              [[ -n "$local_temp_flux_lock_line" ]]; do
           # Skip first line
           if (( local_lines_count == 0 )); then
             (( local_lines_count++ ))
