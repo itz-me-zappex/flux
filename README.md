@@ -225,11 +225,6 @@ rm '/tmp/flux-lock'
 rm ~/.config/flux.ini
 ```
 
-#### Remove user from `flux` group
-```bash
-sudo gpasswd -d "$USER" flux
-```
-
 #### Remove group from system
 ```bash
 sudo groupdel flux
