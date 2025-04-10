@@ -31,6 +31,29 @@ handle_closure(){
       local local_terminated_process_owner_username="${cache_process_owner_username_map["$local_temp_terminated_window_xid"]}"
       local local_terminated_process_command="${cache_process_command_map["$local_temp_terminated_window_xid"]}"
 
+      # Skip window XID if there is another window of the same process still exists
+      local local_temp_cached_window_xid
+      for local_temp_cached_window_xid in "${!cache_process_pid_map[@]}"; do
+        if [[ "$local_terminated_process_pid" == "${cache_process_pid_map["$local_temp_cached_window_xid"]}" &&
+              "$local_temp_cached_window_xid" != "$local_temp_terminated_window_xid" ]]; then
+          local local_do_not_handle='1'
+          break
+        fi
+      done
+
+      if [[ -n "$local_do_not_handle" ]]; then
+        unset local_do_not_handle
+
+        # Forget info about window
+        unset cache_process_pid_map["$local_temp_terminated_window_xid"] \
+        cache_process_name_map["$local_temp_terminated_window_xid"] \
+        cache_process_owner_map["$local_temp_terminated_window_xid"] \
+        cache_process_command_map["$local_temp_terminated_window_xid"] \
+        cache_process_owner_username_map["$local_temp_terminated_window_xid"]
+
+        continue
+      fi
+
       # Set end of message with actual window XID to not duplicate it
       local local_end_of_msg="due to window with XID $local_temp_window_xid closure"
 
