@@ -61,7 +61,7 @@ configure_prefixes(){
       eval "$local_log_variable_name"=\'"${!local_variable_name}"\'
 
       # Remove ANSI escapes
-      while [[ "${!local_log_variable_name}" =~ $'\033'\[[0-9(\;)?]+'m' ]]; do
+      while [[ "${!local_log_variable_name}" =~ $'\033'\[[0-9\;]+'m' ]]; do
         eval "$local_log_variable_name"=\'"${!local_log_variable_name//"${BASH_REMATCH[0]}"/}"\'
       done
     done
@@ -74,7 +74,7 @@ configure_prefixes(){
     log_timestamp_format="$timestamp_format"
 
     # Remove ANSI escapes
-    while [[ "$log_timestamp_format" =~ $'\033'\[[0-9(\;)?]+'m' ]]; do
+    while [[ "$log_timestamp_format" =~ $'\033'\[[0-9\;]+'m' ]]; do
       log_timestamp_format="${log_timestamp_format//"${BASH_REMATCH[0]}"/}"
     done
   fi
