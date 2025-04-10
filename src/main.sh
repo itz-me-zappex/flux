@@ -185,12 +185,6 @@ events_count='0'
 
 # Read events from 'flux-event-reader' binary
 while read -r raw_event; do
-  # Remember 'flux-event-reader' PID to terminate it on 'SIGINT'/'SIGTERM' signal
-  if [[ -z "$flux_event_reader_pid" ]]; then
-    flux_event_reader_pid="$raw_event"
-    continue
-  fi
-
   (( events_count++ ))
 
   # Collect events
