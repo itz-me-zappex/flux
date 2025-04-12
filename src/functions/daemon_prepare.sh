@@ -16,7 +16,7 @@ daemon_prepare(){
 
         # Exit with an error if daemon already running
         if check_pid_existence "$local_flux_pid"; then
-          message --error "Multiple instances are not allowed, make sure that daemon is not running before start, if you are really sure, then remove '$(shorten_path "$lock_file")' file."
+          message --error "Multiple instances are not allowed, make sure in that daemon is not running before start, but if you are really sure, then remove '$(shorten_path "$lock_file")' lock file."
           exit 1
         fi
       fi
