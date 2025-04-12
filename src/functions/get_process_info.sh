@@ -30,7 +30,9 @@ get_process_info(){
     else
       # Get process name
       if check_ro "/proc/$process_pid/comm"; then
-        process_name="$(<"/proc/$process_pid/comm")"
+        if ! process_name="$(<"/proc/$process_pid/comm")"; then
+          return 1
+        fi
       else
         return 1
       fi
@@ -40,6 +42,13 @@ get_process_info(){
         local local_temp_status_line
         local local_column_count
         local local_temp_status_column
+
+        # Bufferize to avoid failure from 'read' in case file will be removed during reading
+        local local_status_content
+        if ! local_status_content="$(<"/proc/$process_pid/status")"; then
+          return 1
+        fi
+
         while read -r local_temp_status_line ||
               [[ -n "$local_temp_status_line" ]]; do
           # Find a line containing UID
@@ -56,7 +65,7 @@ get_process_info(){
               fi
             done
           fi
-        done < "/proc/$process_pid/status"
+        done <<< "$local_status_content"
       else
         return 1
       fi
@@ -64,7 +73,9 @@ get_process_info(){
       # Get process command
       if check_ro "/proc/$process_pid/cmdline"; then
         # Read file ignoring '\0' and those are replaced with spaces automatically because of arrays nature :D
-        mapfile -d '' process_command < "/proc/$process_pid/cmdline"
+        if ! mapfile -d '' process_command < "/proc/$process_pid/cmdline"; then
+          return 1
+        fi
         process_command="${process_command[*]}"
       else
         return 1
