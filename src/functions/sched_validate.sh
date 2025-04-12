@@ -12,7 +12,7 @@ sched_validate(){
     chrt --idle --pid 0 "$local_sleep_pid" > /dev/null 2>&1
 
     if ! chrt --other --pid 0 "$local_sleep_pid" > /dev/null 2>&1; then
-      message --warning "Daemon has insufficient rights to restore scheduling policies, including 'other', add your user to 'flux' group and reboot!"
+      message --warning "Daemon has insufficient rights to restore any scheduling policy, add your user to 'flux' group and reboot!"
     else
       sched_change_is_supported='1'
     fi
@@ -29,7 +29,7 @@ sched_validate(){
 
     # Warn user about inablity to restore 'SCHED_DEADLINE' in case daemon runs without root rights
     if (( UID != 0 )); then
-      message --info "Daemon has insufficient rights to restore 'deadline' scheduling policy, if you need that feature, run daemon as root."
+      message --info "Daemon has insufficient rights to restore 'deadline' scheduling policy, if you need that feature, then run daemon as root."
     fi
   fi
 }
