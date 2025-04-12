@@ -115,7 +115,7 @@ colors_interpret(){
   local local_variable_value="${local_variable_value}\033[0m"
 
   # Replace ANSI escapes with their interpreted form
-  while [[ "$local_variable_value" =~ '\'('033'|'e'|'E'|'u001b'|'U001b'|'u001B'|'U001B'|'x1b'|'X1b'|'X1B'|'x1B')\[[0-9(\;)?]+'m' ]]; do
+  while [[ "$local_variable_value" =~ '\'([eE]|[uU]001[bB]|[xX]1[bB]|033)\[[0-9\;]+'m' ]]; do
     local local_ansi_interpretation="$(echo -e "${BASH_REMATCH[0]}")"
     local local_variable_value="${local_variable_value//"${BASH_REMATCH[0]}"/"$local_ansi_interpretation"}"
   done
