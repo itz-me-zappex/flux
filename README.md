@@ -237,32 +237,34 @@ Usage: flux [-C <mode>] [-c <path>] [-g <method>] [-l <path>] [-T <format>] [-Pe
 
 Options and values:
   -C, --color <mode>                  Color mode, either 'always', 'auto' or 'never'
-                                      default: 'auto'
-  -c, --config <path>                 Specify path to config file
-                                      default: '$XDG_CONFIG_HOME/flux.ini' or '$HOME/.config/flux.ini' or '/etc/flux.ini'
-  -g, --get <method>                  Display window process info and exit, accepts either 'focus' or 'pick'
+                                      default: auto
+  -c, --config <path>                 Change path to config file
+                                      default: 1) $XDG_CONFIG_HOME/flux.ini
+                                               2) $HOME/.config/flux.ini
+                                               3) /etc/flux.ini
+  -g, --get <method>                  Display window process info and exit, method either 'focus' or 'pick'
   -h, --help                          Display this help and exit
   -H, --hot                           Apply actions to already unfocused windows before handling events
-  -l, --log <path>                    Store messages to specified file
-  -L, --log-overwrite                 Recreate log file before start, requires '--log'
+  -l, --log <path>                    Enable logging and set path to log file
+  -L, --log-overwrite                 Recreate log file before start, depends on '--log' option
   -n, --notifications                 Display messages as notifications
   -q, --quiet                         Display errors and warnings only
-  -T, --timestamp-format <format>     Set timestamp format, requires '--timestamps'
-                                      default: '[%Y-%m-%dT%H:%M:%S%z]'
-  -t, --timestamps                    Add timestamps to messages
+  -T, --timestamp-format <format>     Set timestamp format, depends on '--timestamps' option
+                                      default: [%Y-%m-%dT%H:%M:%S%z]
+  -t, --timestamps                    Include timestamps in messages
   -u, --usage                         Alias for '--help'
   -v, --verbose                       Detailed output
   -V, --version                       Display release information and exit
 
 Prefixes configuration:
-  -Pe, --prefix-error <prefix>        Set prefix for error messages
-                                      default: '[x]'
-  -Pi, --prefix-info <prefix>         Set prefix for info messages
-                                      default: '[i]'
-  -Pv, --prefix-verbose <prefix>      Set prefix for verbose messages
-                                      default: '[~]'
-  -Pw, --prefix-warning <prefix>      Set prefix for warning messages
-                                      default: '[!]'
+  -Pe, --prefix-error <prefix>        Change prefix for error messages
+                                      default: [x]
+  -Pi, --prefix-info <prefix>         Change prefix for info messages
+                                      default: [i]
+  -Pv, --prefix-verbose <prefix>      Change prefix for verbose messages
+                                      default: [~]
+  -Pw, --prefix-warning <prefix>      Change prefix for warning messages
+                                      default: [!]
 
 Examples:
   flux -Hvt
