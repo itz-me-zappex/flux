@@ -62,6 +62,6 @@ message(){
 
   # Print message as notification if '--notifications' option is specified and those have been allowed (before start event reading)
   if [[ -n "$allow_notifications" ]]; then
-    notify-send --icon="$local_notification_icon" "$(echo "$*")"
+    notify-send --icon="$local_notification_icon" "$*"
   fi
 }
