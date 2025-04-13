@@ -90,7 +90,7 @@ parse_config(){
             # Exit with an error if CPU limit is specified incorrectly or greater than maximum allowed, regexp - any number with optional '%' symbol
             if [[ ! "$local_config_value" =~ ^[0-9]+(\%)?$ ]] &&
                ! (( "${local_config_value/%\%/}" * cpu_threads <= max_cpu_limit )); then
-              message --warning "$local_line_count_msg Value '$local_config_value' in '$local_config_key' key in '$local_section' section is invalid! Allowed values are between 0 and 100."
+              message --warning "$local_line_count_msg Value '$local_config_value' in '$local_config_key' config key in '$local_section' section is invalid! Allowed values are between 0 and 100."
               (( parse_config_error_count++ ))
             fi
 
@@ -101,7 +101,7 @@ parse_config(){
 
             # Exit with an error if value is neither an integer nor a float (that is what regexp means)
             if [[ ! "$local_config_value" =~ ^[0-9]+((\.|\,)[0-9]+)?$ ]]; then
-              message --warning "$local_line_count_msg Value '$local_config_value' in '$local_config_key' key in '$local_section' section is neither integer nor float!"
+              message --warning "$local_line_count_msg Value '$local_config_value' in '$local_config_key' config key in '$local_section' section is neither integer nor float!"
               (( parse_config_error_count++ ))
             fi
 
@@ -142,7 +142,7 @@ parse_config(){
             # Check for config file existence
             if [[ ! -f "$local_config_value" ]]; then
               # Exit with an error if specified MangoHud config file does not exist
-              message --warning "$local_line_count_msg MangoHud config file '$(shorten_path "$local_config_value")' specified in '$local_config_key' key in '$local_section' section does not exist!"
+              message --warning "$local_line_count_msg MangoHud config file '$(shorten_path "$local_config_value")' specified in '$local_config_key' config key in '$local_section' section does not exist!"
               (( parse_config_error_count++ ))
             fi
 
@@ -154,11 +154,11 @@ parse_config(){
 
             # Exit with an error if value equal to zero
             if [[ "$local_config_value" == '0' ]]; then
-              message --warning "$local_line_count_msg Value $local_config_value in '$local_config_key' key in '$local_section' section should be greater than zero!"
+              message --warning "$local_line_count_msg Value $local_config_value in '$local_config_key' config key in '$local_section' section should be greater than zero!"
               (( parse_config_error_count++ ))
             elif [[ ! "$local_config_value" =~ ^[0-9]+$ ]]; then
               # Exit with an error if value is not integer, that is what regexp means
-              message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' key in '$local_section' section is not an integer!"
+              message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key in '$local_section' section is not an integer!"
               (( parse_config_error_count++ ))
             fi
 
@@ -171,7 +171,7 @@ parse_config(){
             # Exit with an error if value is neither integer nor list of comma-separated integers
             if [[ ! "$local_config_value" =~ ^[0-9]+$ ||
                   ! "$local_config_value" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
-              message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' key in '$local_section' section is not an integer!"
+              message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key in '$local_section' section is not an integer!"
               (( parse_config_error_count++ ))
             fi
 
@@ -190,7 +190,7 @@ parse_config(){
           idle )
             # Exit with an error if value is not boolean
             if ! config_key_idle_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
-              message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' key in '$local_section' section is not boolean!"
+              message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key in '$local_section' section is not boolean!"
               (( parse_config_error_count++ ))
             fi
 
@@ -200,7 +200,7 @@ parse_config(){
           unfocus-minimize )
             # Exit with an error if value is not boolean
             if ! config_key_unfocus_minimize_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
-              message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' key in '$local_section' section is not boolean!"
+              message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key in '$local_section' section is not boolean!"
               (( parse_config_error_count++ ))
             fi
 
@@ -210,7 +210,7 @@ parse_config(){
           focus-fullscreen )
             # Exit with an error if value is not boolean
             if ! config_key_focus_fullscreen_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
-              message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' key in '$local_section' section is not boolean!"
+              message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key in '$local_section' section is not boolean!"
               (( parse_config_error_count++ ))
             fi
 
@@ -218,16 +218,16 @@ parse_config(){
             unset is_section_blank_map["$local_section"]
           ;;
           * )
-            message --warning "$local_line_count_msg Unknown config key '$local_config_key' in '$local_section' section!"
+            message --warning "$local_line_count_msg Unknown '$local_config_key' config key in '$local_section' section!"
             (( parse_config_error_count++ ))
           esac
         fi
       else
         # Print error message depending on whether section is defined or not
         if [[ -n "$local_section" ]]; then
-          message --warning "$local_line_count_msg Unable to define type of line '$local_temp_config_line' in '$local_section' section!"
+          message --warning "$local_line_count_msg Unable to define type of '$local_temp_config_line' line in '$local_section' section!"
         else
-          message --warning "$local_line_count_msg Unable to define type of line '$local_temp_config_line'!"
+          message --warning "$local_line_count_msg Unable to define type of '$local_temp_config_line' line!"
         fi
 
         (( parse_config_error_count++ ))
