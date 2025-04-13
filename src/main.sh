@@ -356,17 +356,17 @@ while read -r raw_event ||
           # Execute command on focus event if specified in config
           exec_focus
 
-          # Send to background because there is 100ms delay before change child window size to match screen in case window is buggy
-          (
             # Enforce fullscreen mode for window if specified in config
             if [[ -n "${config_key_focus_fullscreen_map["$section"]}" ]]; then
-              if ! "$window_fullscreen_path" "$window_xid" > /dev/null 2>&1; then
-                message --warning "Unable to expand to fullscreen window with XID $window_xid of process '$process_name' with PID $process_pid due to focus event!"
-              else
-                message --info "Window with XID $window_xid of process '$process_name' with PID $process_pid has been expanded into fullscreen due to focus event."
-              fi
+              # Send to background because there is 100ms delay before change child window size to match screen in case window/process did not do that automatically
+              (
+                if ! "$window_fullscreen_path" "$window_xid" > /dev/null 2>&1; then
+                  message --warning "Unable to expand to fullscreen window with XID $window_xid of process '$process_name' with PID $process_pid due to focus event!"
+                else
+                  message --info "Window with XID $window_xid of process '$process_name' with PID $process_pid has been expanded into fullscreen due to focus event."
+                fi
+              ) &
             fi
-          ) &
         fi
 
         # Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
@@ -377,13 +377,6 @@ while read -r raw_event ||
         previous_process_command="$process_command"
         previous_section="$section"
       else
-        # Define message depending by exit code
-        if (( get_process_info_exit_code == 1 )); then
-          message --warning "Unable to obtain info about process with PID $process_pid of window with XID $window_xid! Probably process has been terminated during check."
-        else
-          message --warning "Unable to obtain owner username of process $process_name with PID $process_pid of window with XID $window_xid!"
-        fi
-
         # Forget info about previous window/process because it is not changed
         unset previous_window_xid \
         previous_process_pid \
@@ -391,6 +384,8 @@ while read -r raw_event ||
         previous_process_owner \
         previous_process_command \
         previous_section
+
+        message --warning "Unable to obtain info about process with PID $process_pid of window with XID $window_xid! Probably process has been terminated during check."
       fi
 
       unset get_process_info_exit_code
