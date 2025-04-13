@@ -112,7 +112,7 @@ colors_interpret(){
   local local_variable_value="${!1}"
 
   # Disable formatting in the end of value
-  local local_variable_value="${local_variable_value}\033[0m"
+  local local_variable_value="${local_variable_value}\e[0m"
 
   # Replace ANSI escapes with their interpreted form
   while [[ "$local_variable_value" =~ '\'([eE]|[uU]001[bB]|[xX]1[bB]|033)\[[0-9\;]+'m' ]]; do

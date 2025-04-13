@@ -2,11 +2,11 @@
 configure_prefixes(){
   # Define whether daemon should disable or enforce colors for default prefixes and timestamp
   if [[ "$color" == 'always' ]]; then
-    prefix_error="$(echo -e "[\033[31mx\033[0m]")" # Red
-    prefix_info="$(echo -e "[\033[32mi\033[0m]")" # Green
-    prefix_verbose="$(echo -e "[\033[34m~\033[0m]")" # Blue
-    prefix_warning="$(echo -e "[\033[33m!\033[0m]")" # Yellow
-    timestamp_format="$(echo -e "[\033[35m%Y-%m-%dT%H:%M:%S%z\033[0m]")" # Pink
+    prefix_error="$(echo -e "[\e[31mx\e[0m]")" # Red
+    prefix_info="$(echo -e "[\e[32mi\e[0m]")" # Green
+    prefix_verbose="$(echo -e "[\e[34m~\e[0m]")" # Blue
+    prefix_warning="$(echo -e "[\e[33m!\e[0m]")" # Yellow
+    timestamp_format="$(echo -e "[\e[35m%Y-%m-%dT%H:%M:%S%z\e[0m]")" # Pink
   elif [[ "$color" == 'never' ]]; then
     prefix_error='[x]'
     prefix_info='[i]'
@@ -61,7 +61,7 @@ configure_prefixes(){
       eval "$local_log_variable_name"=\'"${!local_variable_name}"\'
 
       # Remove ANSI escapes
-      while [[ "${!local_log_variable_name}" =~ $'\033'\[[0-9\;]+'m' ]]; do
+      while [[ "${!local_log_variable_name}" =~ $'\e'\[[0-9\;]+'m' ]]; do
         eval "$local_log_variable_name"=\'"${!local_log_variable_name//"${BASH_REMATCH[0]}"/}"\'
       done
     done
@@ -74,7 +74,7 @@ configure_prefixes(){
     log_timestamp_format="$timestamp_format"
 
     # Remove ANSI escapes
-    while [[ "$log_timestamp_format" =~ $'\033'\[[0-9\;]+'m' ]]; do
+    while [[ "$log_timestamp_format" =~ $'\e'\[[0-9\;]+'m' ]]; do
       log_timestamp_format="${log_timestamp_format//"${BASH_REMATCH[0]}"/}"
     done
   fi
