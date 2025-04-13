@@ -8,7 +8,7 @@ cache_get_process_info(){
 
 # Required to get process info using PID
 get_process_info(){
-  # Prefer using cache with window info if exists
+  # Prefer using cache with process info if exists
   if [[ -n "${cache_process_pid_map["$window_xid"]}" ]]; then
     passed_window_xid="$window_xid" cache_get_process_info
   else
