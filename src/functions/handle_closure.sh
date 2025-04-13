@@ -68,7 +68,6 @@ handle_closure(){
       elif [[ -n "${background_cpu_limit_pid_map["$local_terminated_process_pid"]}" ]]; then
         # Unset CPU limit if limited
         passed_process_pid="$local_terminated_process_pid" \
-        passed_process_name="$local_terminated_process_name" \
         passed_signal='-SIGUSR2' \
         unset_cpu_limit
       elif [[ -n "$local_terminated_section" &&

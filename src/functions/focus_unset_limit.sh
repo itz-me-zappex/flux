@@ -14,7 +14,6 @@ focus_unset_limit(){
   elif [[ -n "${background_cpu_limit_pid_map["$process_pid"]}" ]]; then
     # Unset CPU limit if has been applied
     passed_process_pid="$process_pid" \
-    passed_process_name="$process_name" \
     passed_signal='-SIGUSR1' \
     unset_cpu_limit
   elif [[ -n "${config_key_mangohud_config_map["$section"]}" ]]; then
