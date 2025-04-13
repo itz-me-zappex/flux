@@ -29,56 +29,43 @@ get_process_info(){
       passed_window_xid="$local_matching_window_xid" cache_get_process_info
     else
       # Get process name
-      if check_ro "/proc/$process_pid/comm"; then
-        if ! process_name="$(<"/proc/$process_pid/comm")"; then
-          return 1
-        fi
-      else
+      if ! process_name="$(<"/proc/$process_pid/comm")"; then
+        return 1
+      fi
+
+      # Bufferize to avoid failure from 'read' in case file will be removed during reading
+      local local_status_content
+      if ! local_status_content="$(<"/proc/$process_pid/status")"; then
         return 1
       fi
 
       # Get effective UID of process
-      if check_ro "/proc/$process_pid/status"; then
-        local local_temp_status_line
-        local local_column_count
-        local local_temp_status_column
+      local local_temp_status_line
+      local local_column_count
+      local local_temp_status_column
+      while read -r local_temp_status_line ||
+            [[ -n "$local_temp_status_line" ]]; do
+        # Find a line containing UID
+        if [[ "$local_temp_status_line" == 'Uid:'* ]]; then
+          # Find 3rd column
+          for local_temp_status_column in $local_temp_status_line; do
+            # Increase column count
+            (( local_column_count++ ))
 
-        # Bufferize to avoid failure from 'read' in case file will be removed during reading
-        local local_status_content
-        if ! local_status_content="$(<"/proc/$process_pid/status")"; then
-          return 1
+            # Remember effective UID and break loop
+            if (( local_column_count == 3 )); then
+              process_owner="$local_temp_status_column"
+              break
+            fi
+          done
         fi
+      done <<< "$local_status_content"
 
-        while read -r local_temp_status_line ||
-              [[ -n "$local_temp_status_line" ]]; do
-          # Find a line containing UID
-          if [[ "$local_temp_status_line" == 'Uid:'* ]]; then
-            # Find 3rd column
-            for local_temp_status_column in $local_temp_status_line; do
-              # Increase column count
-              (( local_column_count++ ))
-
-              # Remember effective UID and break loop
-              if (( local_column_count == 3 )); then
-                process_owner="$local_temp_status_column"
-                break
-              fi
-            done
-          fi
-        done <<< "$local_status_content"
-      else
+      # Get process command by reading file ignoring '\0' and those are replaced with spaces automatically because of arrays nature :D
+      if ! mapfile -d '' process_command < "/proc/$process_pid/cmdline"; then
         return 1
-      fi
-
-      # Get process command
-      if check_ro "/proc/$process_pid/cmdline"; then
-        # Read file ignoring '\0' and those are replaced with spaces automatically because of arrays nature :D
-        if ! mapfile -d '' process_command < "/proc/$process_pid/cmdline"; then
-          return 1
-        fi
+      else
         process_command="${process_command[*]}"
-      else
-        return 1
       fi
     fi
 
