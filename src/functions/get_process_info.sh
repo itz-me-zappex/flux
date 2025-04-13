@@ -33,6 +33,14 @@ get_process_info(){
         return 1
       fi
 
+      # Get process command by reading file ignoring '\0' and those are replaced with spaces automatically because of arrays nature :D
+      local local_process_command_array
+      if ! mapfile -d '' local_process_command_array < "/proc/$process_pid/cmdline"; then
+        return 1
+      else
+        process_command="${local_process_command_array[*]}"
+      fi
+
       # Bufferize to avoid failure from 'read' in case file will be removed during reading
       local local_status_content
       if ! local_status_content="$(<"/proc/$process_pid/status")"; then
@@ -61,25 +69,18 @@ get_process_info(){
         fi
       done <<< "$local_status_content"
 
-      # Get process command by reading file ignoring '\0' and those are replaced with spaces automatically because of arrays nature :D
-      if ! mapfile -d '' process_command < "/proc/$process_pid/cmdline"; then
-        return 1
-      else
-        process_command="${process_command[*]}"
-      fi
+      # Obtain process owner username from '/etc/passwd' file using UID of process
+      local local_temp_passwd_line
+      while read -r local_temp_passwd_line ||
+            [[ -n "$local_temp_passwd_line" ]]; do
+        # Ignore line if it does not contain owner UID
+        if [[ "$local_temp_passwd_line" =~ .*\:.*\:"$process_owner"\:.* ]]; then
+          process_owner_username="${local_temp_passwd_line/\:*/}"
+          break
+        fi
+      done < '/etc/passwd'
     fi
 
-    # Obtain process owner username from '/etc/passwd' file using UID of process
-    local local_temp_passwd_line
-    while read -r local_temp_passwd_line ||
-          [[ -n "$local_temp_passwd_line" ]]; do
-      # Ignore line if it does not contain owner UID
-      if [[ "$local_temp_passwd_line" =~ .*\:.*\:"$process_owner"\:.* ]]; then
-        process_owner_username="${local_temp_passwd_line/\:*/}"
-        break
-      fi
-    done < '/etc/passwd'
-    
     # Store process info to cache to speed up its obtainance on next focus event and to use it implicitly using only window XID
     cache_process_pid_map["$window_xid"]="$process_pid"
     cache_process_name_map["$window_xid"]="$process_name"
