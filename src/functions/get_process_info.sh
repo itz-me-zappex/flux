@@ -70,19 +70,15 @@ get_process_info(){
     fi
 
     # Obtain process owner username from '/etc/passwd' file using UID of process
-    if check_ro '/etc/passwd'; then
-      local local_temp_passwd_line
-      while read -r local_temp_passwd_line ||
-            [[ -n "$local_temp_passwd_line" ]]; do
-        # Ignore line if it does not contain owner UID
-        if [[ "$local_temp_passwd_line" =~ .*\:.*\:"$process_owner"\:.* ]]; then
-          process_owner_username="${local_temp_passwd_line/\:*/}"
-          break
-        fi
-      done < '/etc/passwd'
-    else
-      return 2
-    fi
+    local local_temp_passwd_line
+    while read -r local_temp_passwd_line ||
+          [[ -n "$local_temp_passwd_line" ]]; do
+      # Ignore line if it does not contain owner UID
+      if [[ "$local_temp_passwd_line" =~ .*\:.*\:"$process_owner"\:.* ]]; then
+        process_owner_username="${local_temp_passwd_line/\:*/}"
+        break
+      fi
+    done < '/etc/passwd'
     
     # Store process info to cache to speed up its obtainance on next focus event and to use it implicitly using only window XID
     cache_process_pid_map["$window_xid"]="$process_pid"
