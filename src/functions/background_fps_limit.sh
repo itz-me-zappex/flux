@@ -5,7 +5,7 @@ background_fps_limit(){
 
   # Wait before set limit and notify user if delay is specified
   if [[ "$local_delay" != '0' ]]; then
-    message --verbose "MangoHud config file '$(shorten_path "${config_key_mangohud_config_map["$passed_section"]}")' from section '$passed_section' will be FPS limited after $local_delay second(s) due to window with XID $passed_window_xid unfocus event of process '$passed_process_name' with PID $passed_process_pid."
+    message --verbose "MangoHud config file '$(shorten_path "${config_key_mangohud_config_map["$passed_section"]}")' from section '$passed_section' will be FPS limited after $local_delay second(s) due to unfocus event of window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid."
     sleep "$local_delay"
   fi
   
@@ -15,9 +15,9 @@ background_fps_limit(){
     if mangohud_fps_set "${config_key_mangohud_config_map["$passed_section"]}" "${config_key_mangohud_source_config_map["$passed_section"]}" "${config_key_fps_unfocus_map["$passed_section"]}"; then
       # Define message depending by whether delay is specified or not
       if [[ "$local_delay" == '0' ]]; then
-        message --info "MangoHud config file '$(shorten_path "${config_key_mangohud_config_map["$passed_section"]}")' from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS due to window with XID $passed_window_xid unfocus event of process '$passed_process_name' with PID $passed_process_pid."
+        message --info "MangoHud config file '$(shorten_path "${config_key_mangohud_config_map["$passed_section"]}")' from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS due to unfocus event of window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid."
       else
-        message --info "MangoHud config file '$(shorten_path "${config_key_mangohud_config_map["$passed_section"]}")' from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS after $local_delay second(s) due to window with XID $passed_window_xid unfocus event of process '$passed_process_name' with PID $passed_process_pid."
+        message --info "MangoHud config file '$(shorten_path "${config_key_mangohud_config_map["$passed_section"]}")' from section '$passed_section' has been limited to ${config_key_fps_unfocus_map["$passed_section"]} FPS after $local_delay second(s) due to unfocus event of window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid."
       fi
     fi
   else

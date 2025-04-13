@@ -1,7 +1,7 @@
 # Required to unset limit for focused process
 focus_unset_limit(){
   # Set end of message to not duplicate it
-  local local_end_of_msg="due to window with XID $window_xid focus event"
+  local local_end_of_msg="due to focus event of window with XID $window_xid"
 
   # Define type of limit which should be unset
   if [[ -n "${background_freeze_pid_map["$process_pid"]}" ]]; then
@@ -19,7 +19,7 @@ focus_unset_limit(){
   elif [[ -n "${config_key_mangohud_config_map["$section"]}" ]]; then
     # Unset FPS limit or update target config
     passed_section="$section" \
-    passed_end_of_msg="due to window with XID $window_xid focus event of process '$process_name' with PID $process_pid" \
+    passed_end_of_msg="due to focus event of window with XID $window_xid of process '$process_name' with PID $process_pid" \
     unset_fps_limit
   fi
 

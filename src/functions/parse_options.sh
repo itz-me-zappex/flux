@@ -37,10 +37,10 @@ parse_options(){
       get="${get,,}"
 
       if [[ -z "$get" ]]; then
-        message --error-opt "Option '--get' is specified without how to obtain window process info!"
+        message --error-opt "Option '--get' requires a method!"
         exit 1
       elif [[ ! "$get" =~ ^('pick'|'focus')$ ]]; then
-        message --error-opt "Specified action '$get' in '--get' option is not supported!"
+        message --error-opt "Specified method '$get' in '--get' option is not supported!"
         exit 1
       fi
 
@@ -134,14 +134,14 @@ parse_options(){
       exit 0
     ;;
     --help | -h | --usage | -u )
-      echo "Usage: flux [-C <when>] [-c <path>] [-g <how>] [-l <path>] [-T <format>] [-Pe/-Pi/-Pv/-Pw <prefix>] [options]
+      echo "Usage: flux [-C <mode>] [-c <path>] [-g <method>] [-l <path>] [-T <format>] [-Pe/-Pi/-Pv/-Pw <prefix>] [options]
 
 Options and values:
-  -C, --color <when>                  Color mode, either 'always', 'auto' or 'never'
+  -C, --color <mode>                  Color mode, either 'always', 'auto' or 'never'
                                       default: 'auto'
   -c, --config <path>                 Specify path to config file
                                       default: '\$XDG_CONFIG_HOME/flux.ini' or '\$HOME/.config/flux.ini' or '/etc/flux.ini'
-  -g, --get <how>                     Display window process info and exit, accepts either 'focus' or 'pick'
+  -g, --get <method>                  Display window process info and exit, accepts either 'focus' or 'pick'
   -h, --help                          Display this help and exit
   -H, --hot                           Apply actions to already unfocused windows before handling events
   -l, --log <path>                    Store messages to specified file

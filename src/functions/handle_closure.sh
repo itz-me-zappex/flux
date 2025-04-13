@@ -55,7 +55,7 @@ handle_closure(){
       fi
 
       # Set end of message with actual window XID to not duplicate it
-      local local_end_of_msg="due to window with XID $local_temp_window_xid closure"
+      local local_end_of_msg="due to closure of window with XID $local_temp_window_xid"
 
       # Unset applied limits
       if [[ -n "${background_freeze_pid_map["$local_terminated_process_pid"]}" ]]; then
@@ -88,7 +88,7 @@ handle_closure(){
         # Unset FPS limit if there is no any matching windows except target
         if [[ -z "$local_found" ]]; then
           passed_section="$local_terminated_section" \
-          passed_end_of_msg="due to window with XID $local_temp_window_xid closure of process '$local_terminated_process_name' with PID $local_terminated_process_pid" \
+          passed_end_of_msg="due to closure of window with XID $local_temp_window_xid of process '$local_terminated_process_name' with PID $local_terminated_process_pid" \
           unset_fps_limit
         else
           unset local_found
@@ -115,21 +115,21 @@ handle_closure(){
         passed_process_owner="$local_terminated_process_owner" \
         passed_process_owner_username="$local_terminated_process_owner_username" \
         passed_process_command="$local_terminated_process_command" \
-        passed_end_of_msg="due to window with XID $local_temp_window_xid closure of process '$local_terminated_process_name' with PID $local_terminated_process_pid" \
+        passed_end_of_msg="due to closure of window with XID $local_temp_window_xid of process '$local_terminated_process_name' with PID $local_terminated_process_pid" \
         exec_unfocus
       fi
 
       # Unset limit request
       if [[ -n "${request_freeze_map["$local_terminated_process_pid"]}" ]]; then
         unset request_freeze_map["$local_terminated_process_pid"]
-        message --verbose "Freezing of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window with XID $local_temp_terminated_window_xid closure."
+        message --verbose "Freezing of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to closure of window with XID $local_temp_terminated_window_xid."
       elif [[ -n "${request_cpu_limit_map["$local_terminated_process_pid"]}" ]]; then
         unset request_cpu_limit_map["$local_terminated_process_pid"]
-        message --verbose "CPU limiting of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window with XID $local_temp_terminated_window_xid closure."
+        message --verbose "CPU limiting of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to closure of window with XID $local_temp_terminated_window_xid."
       elif [[ -n "$local_terminated_section" &&
               -n "${request_fps_limit_map["$local_terminated_section"]}" ]]; then
         unset request_fps_limit_map["$local_terminated_section"]
-        message --verbose "MangoHud config file '$(shorten_path "${config_key_mangohud_config_map["$local_terminated_section"]}")' FPS limiting from section '$local_terminated_section' has been cancelled due to window with XID $local_temp_terminated_window_xid closure of process '$local_terminated_process_name' with PID $local_terminated_process_pid."
+        message --verbose "MangoHud config file '$(shorten_path "${config_key_mangohud_config_map["$local_terminated_section"]}")' FPS limiting from section '$local_terminated_section' has been cancelled due to closure of window with XID $local_temp_terminated_window_xid of process '$local_terminated_process_name' with PID $local_terminated_process_pid."
       elif [[ -z "${request_sched_idle_map["$local_terminated_process_pid"]}" &&
               -z "${request_minimize_map["$local_terminated_process_pid"]}" ]]; then
         # Print verbose message about window termination if there is no requests
@@ -139,7 +139,7 @@ handle_closure(){
       # Unset 'SCHED_IDLE' request
       if [[ -n "${request_sched_idle_map["$local_terminated_process_pid"]}" ]]; then
         unset request_sched_idle_map["$local_terminated_process_pid"]
-        message --verbose "Changing scheduling policy to 'idle' for process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window with XID $local_temp_terminated_window_xid closure."
+        message --verbose "Changing scheduling policy to 'idle' for process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to closure of window with XID $local_temp_terminated_window_xid."
       fi
 
       # Unset window minimization request

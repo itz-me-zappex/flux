@@ -5,7 +5,7 @@ background_sched_idle(){
 
   # Wait before change scheduling policy and notify user if delay is specified
   if [[ "$local_delay" != '0' ]]; then
-    message --verbose "Scheduling policy of process '$passed_process_name' with PID $passed_process_pid will be changed to 'idle' after $local_delay second(s) due to window with XID $passed_window_xid unfocus event."
+    message --verbose "Scheduling policy of process '$passed_process_name' with PID $passed_process_pid will be changed to 'idle' after $local_delay second(s) due to unfocus event of window with XID $passed_window_xid."
     sleep "$local_delay"
   fi
   
@@ -13,13 +13,13 @@ background_sched_idle(){
   if check_pid_existence "$passed_process_pid"; then
     # Attempt to change scheduling policy to 'SCHED_IDLE' for process
     if ! chrt --idle --pid 0 "$passed_process_pid"; then
-      message --warning "Scheduling policy of process '$passed_process_name' with PID $passed_process_pid cannot be changed to 'idle' due to window with XID $passed_window_xid unfocus event!"
+      message --warning "Scheduling policy of process '$passed_process_name' with PID $passed_process_pid cannot be changed to 'idle' due to unfocus event of window with XID $passed_window_xid!"
     else
       # Define message depending by whether delay is specified or not
       if [[ "$local_delay" == '0' ]]; then
-        message --info "Scheduling policy of process '$passed_process_name' with PID $passed_process_pid has been changed to 'idle' due to window with XID $passed_window_xid unfocus event."
+        message --info "Scheduling policy of process '$passed_process_name' with PID $passed_process_pid has been changed to 'idle' due to unfocus event of window with XID $passed_window_xid."
       else
-        message --info "Scheduling policy of process '$passed_process_name' with PID $passed_process_pid has been changed to 'idle' after $local_delay second(s) due to window with XID $passed_window_xid unfocus event."
+        message --info "Scheduling policy of process '$passed_process_name' with PID $passed_process_pid has been changed to 'idle' after $local_delay second(s) due to unfocus event of window with XID $passed_window_xid."
       fi
     fi
   else
