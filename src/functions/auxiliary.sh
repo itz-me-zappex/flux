@@ -81,12 +81,58 @@ exec_on_event(){
   fi
 }
 
-# Required to convert relative paths to absolute
+# Required to convert relative paths to absolute ones
 get_realpath(){
-  local local_relative_path="$1"
+  local local_path="$1"
+  local IFS='/'
+
+  # 'local' + 'declare -a'
+  local -a local_parts_map \
+  local_stack_map
+
+  # Append passed path to '$PWD' if it contains relative beginning and not begins with home path ('~')
+  # Or if path begins with '~', then replace symbol with home path
+  if [[ "$local_path" != '/'* &&
+        "$local_path" != '~/'* ]]; then
+    local local_path="${PWD}/${local_path}"
+  elif [[ "$local_path" == '~/'* ]]; then
+    local local_path="${local_path/'~'/"$HOME"}"
+  fi
+
+  # Replace double slashes with single one
+  while [[ "$local_path" == *'//'* ]]; do
+    local local_path="${local_path//'//'/'/'}"
+  done
+
+  # Convert path into associative array
+  read -ra local_parts_map <<< "$local_path"
+
+  # Handle levels in relative path
+  local local_temp_part
+  for local_temp_part in "${local_parts_map[@]}"; do
+    case "$local_temp_part" in
+    '.' )
+      # Skip dot as that means current directory
+      continue
+    ;;
+    '..' )
+      # Remove last added element from map
+      local local_stack_count="${#local_stack_map[@]}"
+      if (( local_stack_count > 0 )); then
+        unset local_stack_map[local_stack_count-1]
+      fi
+    ;;
+    * )
+      # Otherwise append to stack
+      local local_stack_map+=("$local_temp_part")
+    esac
+  done
+
+  # Summarize absolute path
+  local local_absolute_path="${local_stack_map[*]}"
 
   # Output will be stored to variable from command substitution
-  realpath -m "${local_relative_path/'~'/"$HOME"}"
+  echo "$local_absolute_path"
 }
 
 # Required to check whether value is boolean or not and simplify it
