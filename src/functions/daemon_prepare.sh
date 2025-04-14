@@ -34,11 +34,11 @@ daemon_prepare(){
   fi
 
   # Exit with an error with lock file directory is not writable
-  if check_rw "$(dirname "$lock_file")"; then
+  if check_rw "${lock_file%/*}"; then
     # Store daemon PID to lock file to check its existence on next launch (if lock file still exists, e.g. after crash or SIGKILL)
     echo "$$" > "$lock_file"
   else
-    message --error "Unable to create lock file '$(shorten_path "$lock_file")' required to prevent multiple instances!"
+    message --error "Unable to create lock file '$(shorten_path "$lock_file")' required to prevent multiple instances because '$(shorten_path "${lock_file%/*}")' directory is not accessible for read-write operations!"
     exit 1
   fi
 
