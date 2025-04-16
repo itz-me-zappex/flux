@@ -56,6 +56,10 @@ all:
 	$(CFUNCTIONS_DIR)/third-party/xprop/dsimple.c \
 	-lX11 -lXRes -lXext
 
+	$(CC) $(CFLAGS) -o $(BUILD_DIR)/flux-cursor-grab $(CMODULES_DIR)/flux_cursor_grab.c \
+	$(CFUNCTIONS_DIR)/get_active_window.c \
+	-lX11
+
 clean:
 	rm -rf $(BUILD_DIR)
 
@@ -67,6 +71,7 @@ install:
 	install -Dm 755 $(BUILD_DIR)/window-minimize $(PREFIX)/lib/flux/
 	install -Dm 755 $(BUILD_DIR)/window-fullscreen $(PREFIX)/lib/flux/
 	install -Dm 755 $(BUILD_DIR)/select-window $(PREFIX)/lib/flux/
+	install -Dm 755 $(BUILD_DIR)/flux-cursor-grab $(PREFIX)/lib/flux/
 
 	@if [[ $(PREFIX) != '/usr' ]]; then \
 		echo "warning: Unable to install '10-flux.conf' to '/etc/security/limits.d' because that is not '/usr' prefix!" >&2; \
