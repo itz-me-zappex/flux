@@ -57,7 +57,8 @@ all:
 	-lX11 -lXRes -lXext
 
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/flux-cursor-grab $(CMODULES_DIR)/flux_cursor_grab.c \
-	$(CFUNCTIONS_DIR)/get_active_window.c \
+	$(CFUNCTIONS_DIR)/get_opened_windows.c \
+	$(CFUNCTIONS_DIR)/check_window_existence.c \
 	-lX11
 
 clean:
