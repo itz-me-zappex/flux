@@ -217,6 +217,16 @@ parse_config(){
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
           ;;
+          focus-cursor-grab )
+            # Exit with an error if value is not boolean
+            if ! config_key_focus_cursor_grab_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
+              message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key in '$local_section' section is not boolean!"
+              (( parse_config_error_count++ ))
+            fi
+
+            is_section_useful_map["$local_section"]='1'
+            unset is_section_blank_map["$local_section"]
+          ;;
           * )
             message --warning "$local_line_count_msg Unknown '$local_config_key' config key in '$local_section' section!"
             (( parse_config_error_count++ ))
