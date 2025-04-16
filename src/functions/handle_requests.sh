@@ -24,15 +24,16 @@ handle_requests(){
 
       # Minimize window if requested
       if [[ -n "${request_minimize_map["$local_process_pid"]}" ]]; then
-        # Unset as it becomes useless
         unset request_minimize_map["$local_process_pid"]
         
-        # Minimize window
-        if ! "$window_minimize_path" "$local_temp_window_xid" > /dev/null 2>&1; then
-          message --warning "Unable to minimize window with XID $local_temp_window_xid of process '$local_process_name' with PID $local_process_pid due to unfocus event!"
-        else
-          message --info "Window with XID $local_temp_window_xid of process '$local_process_name' with PID $local_process_pid has been minimized due to unfocus event."
-        fi
+        # Minimize window, send to background to avoid slowdown because of external binary execution
+        (
+          if ! "$window_minimize_path" "$local_temp_window_xid" > /dev/null 2>&1; then
+            message --warning "Unable to minimize window with XID $local_temp_window_xid of process '$local_process_name' with PID $local_process_pid due to unfocus event!"
+          else
+            message --info "Window with XID $local_temp_window_xid of process '$local_process_name' with PID $local_process_pid has been minimized due to unfocus event."
+          fi
+        ) &
       fi
 
       # Return an error if daemon has insufficient rights to apply limit (except FPS limit, that does not require interaction with process)
@@ -56,7 +57,6 @@ handle_requests(){
 
       # Check for request existence to apply one of limits
       if [[ -n "${request_freeze_map["$local_process_pid"]}" ]]; then
-        # Unset request as it becomes useless
         unset request_freeze_map["$local_process_pid"]
 
         # Freeze process
@@ -69,7 +69,6 @@ handle_requests(){
         # Associate PID of background process with PID of process to interrupt it in case focus event appears earlier than delay ends
         background_freeze_pid_map["$local_process_pid"]="$!"
       elif [[ -n "${request_cpu_limit_map["$local_process_pid"]}" ]]; then
-        # Unset request as it becomes useless
         unset request_cpu_limit_map["$local_process_pid"]
 
         # Apply CPU limit
@@ -83,7 +82,6 @@ handle_requests(){
         background_cpu_limit_pid_map["$local_process_pid"]="$!"
       elif [[ -n "$local_section" &&
               -n "${request_fps_limit_map["$local_section"]}" ]]; then
-        # Unset request as it becomes useless
         unset request_fps_limit_map["$local_section"]
 
         # Set FPS limit
@@ -183,11 +181,12 @@ handle_requests(){
         message --warning "Daemon has insufficient rights to restore scheduling policy for process '$local_process_name' with PID $local_process_pid, changing it to 'idle' due to unfocus event of window with XID $local_temp_window_xid has been cancelled!"
       fi
 
-      # Unset as it becomes useless
       unset request_sched_idle_map["$local_process_pid"]
       
       # Execute unfocus event command
       if [[ -n "${request_exec_unfocus_general_map["$local_process_pid"]}" ]]; then
+        unset request_exec_unfocus_general_map["$local_process_pid"]
+
         passed_window_xid="$local_temp_window_xid" \
         passed_process_pid="$local_process_pid" \
         passed_section="$local_section" \
@@ -197,7 +196,6 @@ handle_requests(){
         passed_process_command="$local_process_command" \
         passed_end_of_msg="due to unfocus event of window with XID $local_temp_window_xid of process '$local_process_name' with PID $local_process_pid" \
         exec_unfocus
-        unset request_exec_unfocus_general_map["$local_process_pid"]
       fi
     fi
   done
