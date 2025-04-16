@@ -40,6 +40,15 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - [Tips and tricks](#tips-and-tricks)
   - [Apply changes in config file](#apply-changes-in-config-file)
   - [Mute process audio on unfocus (Pipewire & Wireplumber)](#mute-process-audio-on-unfocus-pipewire--wireplumber)
+  - [Reduce niceness of process on window appearance (increase priority)](#reduce-niceness-of-process-on-window-appearance-increase-priority)
+  - [Overclock NVIDIA GPU on window focus and revert it on unfocus (assuming only single NVIDIA GPU is installed)](#overclock-nvidia-gpu-on-window-focus-and-revert-it-on-unfocus-assuming-only-single-nvidia-is-installed)
+  - [Change keyboard layout to English on focus (for some games/apps that do not understand cyrillic letters and relying on layout instead of scancodes) and revert it to Russian on unfocus](#change-keyboard-layout-to-english-on-focus-for-some-gamesapps-that-do-not-understand-cyrillic-letters-and-relying-on-layout-instead-of-scancodes-and-revert-it-to-russian-on-unfocus)
+  - [Increase digital vibrance on focus and revert it on unfocus](#increase-digital-vibrance-on-focus-and-revert-it-on-unfocus)
+    - [NVIDIA](#nvidia)
+    - [Mesa (AMD/Intel)](#mesa-amdintelnvidia-with-nouveau)
+  - [Preload shader cache on window appearance to avoid stuttering](#preload-shader-cache-on-window-appearance-to-avoid-stuttering)
+    - [NVIDIA](#nvidia-1)
+    - [Mesa (AMD/Intel/NVIDIA with Nouveau)](#mesa-amdintelnvidia-with-nouveau-1)
   - [Types of limits and which you should use](#types-of-limits-and-which-you-should-use)
 - [Possible questions](#possible-questions)
   - [How does that daemon work?](#how-does-that-daemon-work)
@@ -452,9 +461,46 @@ You may want to use these variables in commands and scripts which running from `
 - As daemon does not parse config on a go, you need to restart daemon with `--hot` option after editing config to make daemon handle already opened windows immediately after start.
 
 ### Mute process audio on unfocus (Pipewire & Wireplumber)
-- Add following lines to section responsible for game:
+- Add following lines to section responsible for target:
   - `exec-focus = wpctl set-mute -p $FLUX_PROCESS_PID 0`
   - `exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1`
+
+### Reduce niceness of process on window appearance (increase priority)
+- Add following line to section responsible for target (niceness `-4` if fine for multimedia tasks, including games):
+  - `exec-oneshot = renice -n -4 $FLUX_PROCESS_PID`
+
+### Overclock NVIDIA GPU on window focus and revert it on unfocus (assuming only single NVIDIA GPU is installed)
+- Add following line to section responsible for target (use your own values):
+  - `lazy-exec-focus = nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=200' && nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=2000'`
+  - `lazy-exec-unfocus = nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=0' && nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=0'`
+Note: Command from `lazy-exec-unfocus` is also executed on daemon termination if window appears focused at that moment.
+
+### Change keyboard layout to English on focus (for some games/apps that do not understand cyrillic letters and relying on layout instead of scancodes) and revert it to Russian on unfocus
+- Add following line to section responsible for target (use your own values):
+  - `lazy-exec-focus = setxkbmap us,ru,ua`
+  - `lazy-exec-focus = setxkbmap ru,ua,us`
+
+### Increase digital vibrance on focus and revert it on unfocus
+#### NVIDIA
+- Add following line to section responsible for target (use your own values):
+  - `lazy-exec-focus = nvidia-settings -a '[gpu:0]/DigitalVibrance=150'`
+  - `lazy-exec-unfocus = nvidia-settings -a '[gpu:0]/DigitalVibrance=0'`
+
+#### Mesa (AMD/Intel)
+Note: Use `vibrant-cli` from [`libvibrant`](<https://github.com/libvibrant/libvibrant>) project.
+- Add following line to section responsible for target (use your own values):
+  - `lazy-exec-focus = vibrant-cli DisplayPort-0 2.3`
+  - `lazy-exec-unfocus = vibrant-cli DisplayPort-0 1`
+
+### Preload shader cache on window appearance to avoid stuttering
+Note: That is how bufferization works, you just need to load file to memory by reading it *somehow* and kernel will not read it from disk again relying on RAM instead.
+#### NVIDIA
+- Add following line to section responsible for target (path may vary depending on system configuration):
+  - `exec-oneshot = find ~/.cache/nvidia -type f -exec cat {} + > /dev/null`
+
+#### Mesa (AMD/Intel/NVIDIA with Nouveau)
+- Add following line to section responsible for target (path may vary depending on system configuration):
+  - `exec-oneshot = find ~/.cache/mesa_shader_cache_db -type f -exec cat {} + > /dev/null`
 
 ### Types of limits and which you should use
 - FPS limits recommended for online and multiplayer games if you do not mind to use MangoHud.
