@@ -34,6 +34,7 @@ case "$flux_path" in
   window_minimize_path="${daemon_prefix}/lib/flux/window-minimize"
   window_fullscreen_path="${daemon_prefix}/lib/flux/window-fullscreen"
   select_window_path="${daemon_prefix}/lib/flux/select-window"
+  flux_cursor_grab="${daemon_prefix}/lib/flux/flux-cursor-grab"
 ;;
 * )
   # Keep just executable directory
@@ -44,6 +45,7 @@ case "$flux_path" in
   window_minimize_path="${daemon_prefix}/window-minimize"
   window_fullscreen_path="${daemon_prefix}/window-fullscreen"
   select_window_path="${daemon_prefix}/select-window"
+  flux_cursor_grab="${daemon_prefix}/flux-cursor-grab"
 esac
 unset flux_path \
 daemon_prefix
@@ -98,7 +100,8 @@ config_key_fps_unfocus_map \
 config_key_fps_focus_map \
 config_key_idle_map \
 config_key_unfocus_minimize_map \
-config_key_focus_fullscreen_map
+config_key_focus_fullscreen_map \
+config_key_focus_cursor_grab_map
 
 # Needed to detect blank sections in config during parsing
 declare -A is_section_blank_map
@@ -107,7 +110,8 @@ declare -A is_section_blank_map
 declare -A background_freeze_pid_map \
 background_cpu_limit_pid_map \
 background_fps_limit_pid_map \
-background_sched_idle_pid_map
+background_sched_idle_pid_map \
+background_focus_cursor_grab_map
 
 # Declare associative arrays to store info about requested limits
 declare -A request_freeze_map \
@@ -332,6 +336,16 @@ while read -r raw_event ||
       # Get process PID of focused window
       process_pid="${event/*'='/}"
 
+      # Cancel cursor grabbing for previously focused window
+      if [[ -n "$previous_window_xid" &&
+            -n "${background_focus_cursor_grab_map["$previous_window_xid"]}" ]]; then
+        passed_window_xid="$previous_window_xid"
+        passed_process_pid="$previous_process_pid" \
+        passed_process_name="$previous_process_name" \
+        passed_end_of_msg="due to unfocus event" \
+        cursor_ungrab
+      fi
+
       # Hide error messages, even standart ones which are appearing directly from Bash (https://unix.stackexchange.com/a/184807)
       exec 3>&2
       exec 2>/dev/null
@@ -356,17 +370,36 @@ while read -r raw_event ||
           # Execute command on focus event if specified in config
           exec_focus
 
-            # Enforce fullscreen mode for window if specified in config
-            if [[ -n "${config_key_focus_fullscreen_map["$section"]}" ]]; then
-              # Send to background because there is 100ms delay before change child window size to match screen in case window/process did not do that automatically
-              (
-                if ! "$window_fullscreen_path" "$window_xid" > /dev/null 2>&1; then
-                  message --warning "Unable to expand to fullscreen window with XID $window_xid of process '$process_name' with PID $process_pid due to focus event!"
-                else
-                  message --info "Window with XID $window_xid of process '$process_name' with PID $process_pid has been expanded into fullscreen due to focus event."
-                fi
-              ) &
-            fi
+          # Enforce fullscreen mode for window if specified in config
+          if [[ -n "${config_key_focus_fullscreen_map["$section"]}" ]]; then
+            # Send to background because there is 100ms delay before change child window size to match screen in case window/process did not do that automatically
+            (
+              if ! "$window_fullscreen_path" "$window_xid" > /dev/null 2>&1; then
+                message --warning "Unable to expand to fullscreen window with XID $window_xid of process '$process_name' with PID $process_pid due to focus event!"
+              else
+                message --info "Window with XID $window_xid of process '$process_name' with PID $process_pid has been expanded into fullscreen due to focus event."
+              fi
+            ) &
+          fi
+
+          # Make window grab cursor if specified in config and that is not implicitly opened window
+          if [[ -n "${config_key_focus_cursor_grab_map["$section"]}" &&
+                -z "$hot" ]]; then
+            # Send to background as that is daemonized process
+            "$flux_cursor_grab" "$window_xid" > /dev/null 2>&1 &
+
+            background_focus_cursor_grab_map["$window_xid"]="$!"
+
+            # Print message about successful cursor grabbing if process still exists
+            (
+              sleep 0.55
+              if check_pid_existence "${background_focus_cursor_grab_map["$window_xid"]}"; then
+                message --info "Cursor for window with XID $window_xid of process '$process_name' with PID $process_pid has been grabbed due to focus event."
+              else
+                message --warning "Unable to grab cursor for window with XID $window_xid of process '$process_name' with PID $process_pid due to focus event!"
+              fi
+            ) &
+          fi
         fi
 
         # Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
