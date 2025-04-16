@@ -41,6 +41,15 @@ safe_exit(){
       passed_end_of_msg="$local_end_of_msg" \
       unset_sched_idle
     fi
+
+    # Cancel cursor grabbing for window
+    if [[ -n "${background_focus_cursor_grab_map["$local_temp_window_xid"]}" ]]; then
+      passed_window_xid="$local_temp_window_xid"
+      passed_process_pid="$local_process_pid" \
+      passed_process_name="$local_process_name" \
+      passed_end_of_msg="$local_end_of_msg" \
+      cursor_ungrab
+    fi
   done
 
   # Execute command from 'lazy-exec-unfocus' if matching section for focused window is found and command is specified
