@@ -69,6 +69,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - Reducing process priority on unfocus and restoring it on focus.
 - Minimizing window on unfocus, useful for borderless windows.
 - Expanding window to fullscreen on focus, useful for games which are handling window mode in weird way, e.g. Forza Horizon 4 changes its mode to windowed after minimization.
+- Ability to make window grab cursor forcefully to prevent it from escaping to second monitor.
 - Commands/scripts execution on focus and unfocus events to make user able extend daemon functionality.
 - Configurable logging.
 - Notifications support.
@@ -335,6 +336,7 @@ A simple INI is used for configuration.
 | `lazy-exec-unfocus` | Same as `exec-unfocus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event), will be executed on daemon termination if focused window matches with section where this key and command is specified. |
 | `unfocus-minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`. Defaults to `false`. |
 | `focus-fullscreen` | Boolean, sends X event to window manager on focus to expand window to fullscreen, useful if game (e.g. Forza Horizon 4) handles window mode in weird way. Defaults to `false`. |
+| `focus-cursor-grab` | Boolean, daemon grabs cursor if possible, binds it to window and because of X11 nature which prevents input to anything but grabbed client - redirects all input into focused window. This hack prevents cursor from escaping to second monitor in some games. Cursor becomes ungrabbed on unfocus event. Defaults to `false`. |
 
 ### Config path
 - Daemon searches for following configuration files by priority:
