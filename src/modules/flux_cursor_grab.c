@@ -31,34 +31,91 @@ bool is_wine_window(Display* display, Window window) {
 }
 
 // Check whether process sleeps or not using '/proc/PID/status'
-bool is_process_sleeping(pid_t pid) {
+bool is_process_cpu_idle(pid_t pid) {
   char path[64];
-  snprintf(path, sizeof(path), "/proc/%d/status", pid);
+  snprintf(path, sizeof(path), "/proc/%d/stat", pid);
+
+  unsigned long utime1, stime1;
+  unsigned long utime2, stime2;
 
   FILE *file = fopen(path, "r");
   if (!file) {
     return false;
   }
 
-  char line[256];
-  while (fgets(line, sizeof(line), file)) {
-    if (strncmp(line, "State:", 6) == 0) {
-      char state;
-      if (sscanf(line, "State:\t%c", &state) == 1) {
-        fclose(file);
-        return state == 'S';
-      }
+  char buf[4096];
+  if (!fgets(buf, sizeof(buf), file)) {
+    fclose(file);
+    return false;
+  }
+  fclose(file);
+
+  char *ptr = strrchr(buf, ')');
+  if (!ptr) {
+    return false;
+  }
+  ptr++;
+
+  // Skip PID, comm and state
+  int field = 3;
+  char *token = strtok(ptr, " ");
+  while (token) {
+    if (field == 14) {
+      utime1 = strtoul(token, NULL, 10);
+    } else if (field == 15) {
+      stime1 = strtoul(token, NULL, 10);
       break;
     }
+    token = strtok(NULL, " ");
+    field++;
   }
 
+  // Wait before 2nd check to get difference
+  usleep(100000);
+
+  file = fopen(path, "r");
+  if (!file) {
+    return false;
+  }
+  if (!fgets(buf, sizeof(buf), file)) {
+    fclose(file);
+    return false;
+  }
   fclose(file);
+
+  ptr = strrchr(buf, ')');
+  if (!ptr) {
+    return false;
+  }
+  ptr++;
+
+  field = 3;
+  token = strtok(ptr, " ");
+  while (token) {
+    if (field == 14) {
+      utime2 = strtoul(token, NULL, 10);
+    } else if (field == 15) {
+      stime2 = strtoul(token, NULL, 10);
+      break;
+    }
+    token = strtok(NULL, " ");
+    field++;
+  }
+
+  // Get difference between 2 checks
+  unsigned long delta = (utime2 + stime2) - (utime1 + stime1);
+  
+  // If nothing changed between two checks or difference is very small, then process hanged
+  if (delta <= 2) {
+    return true;
+  }
+
   return false;
 }
 
 /* Inefficient and consumes a lot of CPU time
- * Needed to make window accept mouse input only for 100ms when waiting for Wine/Proton process to hang after cursor grab (workaround to pass init step)
- * Because process may not hang at all if already initialized and it will ignore mouse input
+ * Needed to make window accept mouse input only for when waiting for Wine/Proton process to hang after cursor grab (workaround to pass init step)
+ * Because process may not hang at all if already initialized and it will ignore mouse input without this crutch
  */
 typedef struct {
   Display* display;
@@ -125,14 +182,12 @@ int main(int argc, char *argv[]) {
   }
 
   /* Handle Wine/Proton games/apps in complicated way to prevent freezing on init because of grabbed cursor
-   * That is an issue only when game starts loading for the first time, Wine/Proton waits for mouse cursor freezing a whole process
+   * That is an issue only when game starts loading for the first time, Wine/Proton waits for mouse cursor and freezes a whole process
    */
   bool wine_window = is_wine_window(display, window);
   if (wine_window) {
     // Check whether process hangs after cursor grab or not
-    bool process_sleeping;
-    int checks_count = 10000;
-    int sleeping_count;
+    bool process_cpu_idle;
     while (true) {
       // Attempt to grab cursor
       grab_status = XGrabPointer(display, window, True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
@@ -154,30 +209,13 @@ int main(int argc, char *argv[]) {
       pthread_create(&forward_input_on_hang_wait_t, NULL, forward_input_on_hang_wait, &FIOHW_args);
 
       // Process may not hang immediately after cursor grabbing, without this delay some games will hang because cursor will not be ungrabbed
-      sleeping_count = 0;
-      for (int i = 0; i < checks_count; i++) {
-        process_sleeping = is_process_sleeping(window_process);
-        if (process_sleeping) {
-          sleeping_count++;
+      for (int i = 0; i < 3; i++) {
+        sleep(1);
+        process_cpu_idle = is_process_cpu_idle(window_process);
+        // If there is a hang, then stop check and ungrab cursor to unfreeze it as fast as possible
+        if (process_cpu_idle) {
+          break;
         }
-        usleep(10);
-      }
-
-      /* Explanation of sleeping percentages (my experience)
-       * (sleeping_percentage > 0.65f && sleeping_percentage != 1.0f):
-       *   0.1 (100%) - Game always sleeps and all stuff runs in another thread, it is absolutely safe to grab cursor in this case and game will not freeze
-       *   0.65 (65%) - Game sleeps more than works, these values are varying between 68% and 90% in my case
-       * (sleeping_percentage < 0.25f && sleeping_percentage > 0.02f):
-       *   0.25 (25%) - Probably game hangs on initialization, in my case there values are varying between 13% and 24%
-       *   0.02 (2%) - Same as above, if game really passed initialization step, I will get values between 30% and 50%
-       *               Also there is a few games (I have one example and that is Geometry Dash) which are sleeping less than 0.1%
-       */
-      float sleeping_percentage = (float)sleeping_count / checks_count;
-      if (sleeping_percentage > 0.65f && sleeping_percentage != 1.0f ||
-          sleeping_percentage < 0.25f && sleeping_percentage > 0.02f) {
-        process_sleeping = true;
-      } else {
-        process_sleeping = false;
       }
 
       // No longer needed
@@ -185,7 +223,7 @@ int main(int argc, char *argv[]) {
       pthread_join(forward_input_on_hang_wait_t, NULL);
 
       // If process hangs after grab, then ungrab cursor and repeat the same until it stop hang (e.g. after loading or Wine/Proton initialization)
-      if (process_sleeping) {
+      if (process_cpu_idle) {
         XUngrabPointer(display, CurrentTime);
         // Without it cursor will not be really ungrabbed and this loop will not break
         XSync(display, False);
