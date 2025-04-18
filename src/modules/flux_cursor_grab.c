@@ -126,9 +126,11 @@ int main(int argc, char *argv[]) {
   // That is an issue only when game starts loading for the first time, Wine/Proton waits for mouse cursor freezing a whole process
   bool wine_window = is_wine_window(display, window);
   if (wine_window) {
-    //printf("Handling Wine/Proton window...\n");
+    printf("Handling Wine/Proton window...\n");
     // Check whether process hangs after cursor grab or not
     bool process_sleeping;
+    int checks_count = 10000;
+    int sleeping_count;
     while (true) {
       // Attempt to grab cursor
       grab_status = XGrabPointer(display, window, True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
@@ -141,7 +143,7 @@ int main(int argc, char *argv[]) {
         XSync(display, False);
       }
 
-      //printf("Pointer has been grabbed.\n");
+      printf("Pointer has been grabbed.\n");
 
       forward_input_on_hang_wait_args FIOHW_args = {
         .display = display,
@@ -149,39 +151,50 @@ int main(int argc, char *argv[]) {
         .stop = false,
       };
 
-      //printf("Running separate thread to forward input during waiting...\n");
+      printf("Running separate thread to forward input during waiting...\n");
       pthread_t t_forward_input_on_hang_wait;
       pthread_create(&t_forward_input_on_hang_wait, NULL, forward_input_on_hang_wait, &FIOHW_args);
 
       // Process may not hang immediately after cursor grabbing, without this delay some games will hang because cursor will not be ungrabbed
-      //printf("Waiting for process to hang...\n");
-      for (int i = 0; i < 3; i++) {
-        // Wait until process hang (3s max)
-        sleep(1);
+      printf("Waiting for process to hang...\n");
+      sleeping_count = 0;
+      for (int i = 0; i < checks_count; i++) {
         process_sleeping = is_process_sleeping(window_process);
         if (process_sleeping) {
-          break;
+          sleeping_count++;
         }
+        usleep(10);
       }
 
-      //printf("Termination of thread responsible for input forwarding...\n");
+      float sleeping_percentage = (float)sleeping_count / checks_count;
+
+      if (sleeping_percentage > 0.65f ||
+          sleeping_percentage < 0.25f && sleeping_percentage > 0.02) {
+        process_sleeping = true;
+      } else {
+        process_sleeping = false;
+      }
+
+      printf("Sleeping percentage: %f\n", sleeping_percentage);
+
+      printf("Termination of thread responsible for input forwarding...\n");
       FIOHW_args.stop = true;
       pthread_join(t_forward_input_on_hang_wait, NULL);
 
       // If process hangs after grab, then ungrab cursor and repeat the same until it stop hang (e.g. after loading or Wine/Proton initialization)
       if (process_sleeping) {
-        //printf("Pointer has been ungrabbed.\n");
+        printf("Pointer has been ungrabbed.\n");
         XUngrabPointer(display, CurrentTime);
         // Without it cursor will not be really ungrabbed and this loop will not break
         XSync(display, False);
         sleep(1);
       } else {
-        //printf("Input handled successfully.\n");
+        printf("Input handled successfully.\n");
         break;
       }
     }
   } else {
-    //printf("Handling native window...\n");
+    printf("Handling native window...\n");
     grab_status = XGrabPointer(display, window, True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
                                GrabModeAsync, GrabModeAsync, window, None, CurrentTime);
 
