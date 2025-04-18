@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
+#include <pthread.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
@@ -55,6 +56,28 @@ bool is_process_sleeping(pid_t pid) {
   return false;
 }
 
+// Inefficient and consumes a lot of CPU time, needed only for 3 seconds (or less) when waiting for Wine/Proton process to hang after cursor grab (process may not hang at all if already initialized)
+typedef struct {
+  Display* display;
+  Window window;
+  volatile bool stop;
+} forward_input_on_hang_wait_args;
+
+void* forward_input_on_hang_wait(void *arg) {
+  forward_input_on_hang_wait_args* args = (forward_input_on_hang_wait_args *)arg;
+  XEvent event;
+
+  while (!args->stop) {
+    while (XPending(args->display)) {
+      XMaskEvent(args->display, ButtonPressMask | ButtonReleaseMask | PointerMotionMask, &event);
+      XSendEvent(args->display, args->window, True, NoEventMask, &event);
+    }
+    usleep(500); // 0.5ms
+  }
+
+  return NULL;
+}
+
 /* Ugly layer between focused window and mouse
  * XGrabPointer() grabs cursor cutting input off window, but that is only one adequate way to prevent cursor from escaping window
  * Because of that, all obtained mouse events here are redirected to window
@@ -63,6 +86,8 @@ int main(int argc, char *argv[]) {
   if (argc != 2) {
     return 1;
   }
+
+  XInitThreads();
 
   Display *display = XOpenDisplay(NULL);
 
@@ -112,11 +137,24 @@ int main(int argc, char *argv[]) {
       if (grab_status != GrabSuccess) {
         XCloseDisplay(display);
         return 1;
+      } else {
+        XSync(display, False);
       }
 
       //printf("Pointer has been grabbed.\n");
 
+      forward_input_on_hang_wait_args FIOHW_args = {
+        .display = display,
+        .window = window,
+        .stop = false,
+      };
+
+      //printf("Running separate thread to forward input during waiting...\n");
+      pthread_t t_forward_input_on_hang_wait;
+      pthread_create(&t_forward_input_on_hang_wait, NULL, forward_input_on_hang_wait, &FIOHW_args);
+
       // Process may not hang immediately after cursor grabbing, without this delay some games will hang because cursor will not be ungrabbed
+      //printf("Waiting for process to hang...\n");
       for (int i = 0; i < 3; i++) {
         // Wait until process hang (3s max)
         sleep(1);
@@ -125,6 +163,10 @@ int main(int argc, char *argv[]) {
           break;
         }
       }
+
+      //printf("Termination of thread responsible for input forwarding...\n");
+      FIOHW_args.stop = true;
+      pthread_join(t_forward_input_on_hang_wait, NULL);
 
       // If process hangs after grab, then ungrab cursor and repeat the same until it stop hang (e.g. after loading or Wine/Proton initialization)
       if (process_sleeping) {
