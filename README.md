@@ -41,8 +41,8 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [Apply changes in config file](#apply-changes-in-config-file)
   - [Mute process audio on unfocus (Pipewire & Wireplumber)](#mute-process-audio-on-unfocus-pipewire--wireplumber)
   - [Reduce niceness of process on window appearance (increase priority)](#reduce-niceness-of-process-on-window-appearance-increase-priority)
-  - [Overclock NVIDIA GPU on window focus and revert it on unfocus (assuming only single NVIDIA GPU is installed)](#overclock-nvidia-gpu-on-window-focus-and-revert-it-on-unfocus-assuming-only-single-nvidia-is-installed)
-  - [Change keyboard layout to English on focus (for some games/apps that do not understand cyrillic letters and relying on layout instead of scancodes) and revert it to Russian on unfocus](#change-keyboard-layout-to-english-on-focus-for-some-gamesapps-that-do-not-understand-cyrillic-letters-and-relying-on-layout-instead-of-scancodes-and-revert-it-to-russian-on-unfocus)
+  - [Overclock NVIDIA GPU on window focus and revert it on unfocus](#overclock-nvidia-gpu-on-window-focus-and-revert-it-on-unfocus)
+  - [Change keyboard layout to English on focus and revert it to Russian on unfocus](#change-keyboard-layout-to-english-on-focus-and-revert-it-to-russian-on-unfocus)
   - [Increase digital vibrance on focus and revert it on unfocus](#increase-digital-vibrance-on-focus-and-revert-it-on-unfocus)
     - [NVIDIA](#nvidia)
     - [Mesa (AMD/Intel)](#mesa-amdintelnvidia-with-nouveau)
@@ -68,7 +68,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - CPU and FPS limiting process on unfocus and unlimiting on focus (FPS limiting requires game running using MangoHud with already existing config file).
 - Reducing process priority on unfocus and restoring it on focus.
 - Minimizing window on unfocus, useful for borderless windows.
-- Expanding window to fullscreen on focus, useful for games which are handling window mode in weird way, e.g. Forza Horizon 4 changes its mode to windowed after minimization.
+- Expanding window to fullscreen on focus, useful for games which are handle a window mode in weird way, e.g. Forza Horizon 4 changes its mode to windowed after minimization.
 - Ability to make window grab cursor forcefully to prevent it from escaping to second monitor.
 - Commands/scripts execution on focus and unfocus events to make user able extend daemon functionality.
 - Configurable logging.
@@ -222,7 +222,7 @@ sudo PREFIX='/usr' make uninstall
 ```
 
 #### Remove unneeded dependencies
-Depends by distro and package manager you use, I highly suggest to remove dependencies selectively and check which packages are using it, to avoid system breakage.
+Depends by distro and package manager you use, I highly suggest to remove dependencies selectively and check which packages are use it, to avoid system breakage.
 
 ### Cleaning up
 #### Lock file (after crash)
@@ -335,7 +335,7 @@ A simple INI is used for configuration.
 | `lazy-exec-focus` | Same as `exec-focus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event). |
 | `lazy-exec-unfocus` | Same as `exec-unfocus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event), will be executed on daemon termination if focused window matches with section where this key and command is specified. |
 | `unfocus-minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`. Defaults to `false`. |
-| `focus-fullscreen` | Boolean, sends X event to window manager on focus to expand window to fullscreen, useful if game (e.g. Forza Horizon 4) handles window mode in weird way. Defaults to `false`. |
+| `focus-fullscreen` | Boolean, sends X event to window manager on focus to expand window to fullscreen, useful if game (e.g. Forza Horizon 4) handles window mode in weird a way. Defaults to `false`. |
 | `focus-cursor-grab` | Boolean, daemon grabs cursor if possible, binds it to window and because of X11 nature which prevents input to anything but grabbed client - redirects all input into focused window. This hack prevents cursor from escaping to second monitor in some games. Cursor becomes ungrabbed on unfocus event. Defaults to `false`. |
 
 ### Config path
@@ -471,37 +471,38 @@ You may want to use these variables in commands and scripts which running from `
 - Add following line to section responsible for target (niceness `-4` if fine for multimedia tasks, including games):
   - `exec-oneshot = renice -n -4 $FLUX_PROCESS_PID`
 
-### Overclock NVIDIA GPU on window focus and revert it on unfocus (assuming only single NVIDIA GPU is installed)
+### Overclock NVIDIA GPU on window focus and revert it on unfocus
+Note: Command from `lazy-exec-unfocus` is also executed on daemon termination if window appears focused at that moment.
 - Add following line to section responsible for target (use your own values):
   - `lazy-exec-focus = nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=200' && nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=2000'`
   - `lazy-exec-unfocus = nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=0' && nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=0'`
-Note: Command from `lazy-exec-unfocus` is also executed on daemon termination if window appears focused at that moment.
 
-### Change keyboard layout to English on focus (for some games/apps that do not understand cyrillic letters and relying on layout instead of scancodes) and revert it to Russian on unfocus
+### Change keyboard layout to English on focus and revert it to Russian on unfocus
+Note: Useful for some games/apps that do not understand cyrillic letters and relying on layout instead of scancodes.
 - Add following line to section responsible for target (use your own values):
   - `lazy-exec-focus = setxkbmap us,ru,ua`
   - `lazy-exec-focus = setxkbmap ru,ua,us`
 
 ### Increase digital vibrance on focus and revert it on unfocus
-#### NVIDIA
 - Add following line to section responsible for target (use your own values):
+
+#### NVIDIA
   - `lazy-exec-focus = nvidia-settings -a '[gpu:0]/DigitalVibrance=150'`
   - `lazy-exec-unfocus = nvidia-settings -a '[gpu:0]/DigitalVibrance=0'`
 
 #### Mesa (AMD/Intel)
 Note: Use `vibrant-cli` from [`libvibrant`](<https://github.com/libvibrant/libvibrant>) project.
-- Add following line to section responsible for target (use your own values):
   - `lazy-exec-focus = vibrant-cli DisplayPort-0 2.3`
   - `lazy-exec-unfocus = vibrant-cli DisplayPort-0 1`
 
 ### Preload shader cache on window appearance to avoid stuttering
 Note: That is how bufferization works, you just need to load file to memory by reading it *somehow* and kernel will not read it from disk again relying on RAM instead.
-#### NVIDIA
 - Add following line to section responsible for target (path may vary depending on system configuration):
+
+#### NVIDIA
   - `exec-oneshot = find ~/.cache/nvidia -type f -exec cat {} + > /dev/null`
 
 #### Mesa (AMD/Intel/NVIDIA with Nouveau)
-- Add following line to section responsible for target (path may vary depending on system configuration):
   - `exec-oneshot = find ~/.cache/mesa_shader_cache_db -type f -exec cat {} + > /dev/null`
 
 ### Types of limits and which you should use
