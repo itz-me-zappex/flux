@@ -106,7 +106,7 @@ bool is_process_cpu_idle(pid_t pid) {
   unsigned long delta = (utime2 + stime2) - (utime1 + stime1);
   
   // If nothing changed between two checks or difference is very small, then process hanged
-  if (delta <= 2) {
+  if (delta <= 3) {
     return true;
   }
 
@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
       pthread_create(&forward_input_on_hang_wait_t, NULL, forward_input_on_hang_wait, &FIOHW_args);
 
       // Process may not hang immediately after cursor grabbing, without this delay some games will hang because cursor will not be ungrabbed
-      for (int i = 0; i < 3; i++) {
+      for (int i = 0; i < 5; i++) {
         sleep(1);
         process_cpu_idle = is_process_cpu_idle(window_process);
         // If there is a hang, then stop check and ungrab cursor to unfreeze it as fast as possible
