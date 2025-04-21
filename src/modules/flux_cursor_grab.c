@@ -11,131 +11,15 @@
 #include "functions/get_opened_windows.h"
 #include "functions/check_window_existence.h"
 #include "functions/get_window_process.h"
+#include "functions/is_wine_window.h"
+#include "functions/is_process_cpu_idle.h"
+#include "functions/forward_input_on_hang_wait.h"
 
-// Check whether that is Wine/Proton window or not by checking '_WINE_HWND_STYLE' atom existence
-bool is_wine_window(Display* display, Window window) {
-  Atom wine_hwnd_style = XInternAtom(display, "_WINE_HWND_STYLE", False);
-  Atom type;
-  unsigned char *data = NULL;
-  unsigned long windows_count, bytes_after;
-  int format;
-  int status = XGetWindowProperty(display, window, wine_hwnd_style, 0, 1, False, XA_CARDINAL,
-                                  &type, &format, &windows_count, &bytes_after, &data);
-  if (data) {
-    XFree(data);
-  }
-  if (status == Success && type != None) {
-    return true;
-  }
-  return false;
-}
-
-// Check whether process sleeps or not using '/proc/PID/status'
-bool is_process_cpu_idle(pid_t pid) {
-  char path[64];
-  snprintf(path, sizeof(path), "/proc/%d/stat", pid);
-
-  unsigned long utime1, stime1;
-  unsigned long utime2, stime2;
-
-  FILE *file = fopen(path, "r");
-  if (!file) {
-    return false;
-  }
-
-  char buf[4096];
-  if (!fgets(buf, sizeof(buf), file)) {
-    fclose(file);
-    return false;
-  }
-  fclose(file);
-
-  char *ptr = strrchr(buf, ')');
-  if (!ptr) {
-    return false;
-  }
-  ptr++;
-
-  // Skip PID, comm and state
-  int field = 3;
-  char *token = strtok(ptr, " ");
-  while (token) {
-    if (field == 14) {
-      utime1 = strtoul(token, NULL, 10);
-    } else if (field == 15) {
-      stime1 = strtoul(token, NULL, 10);
-      break;
-    }
-    token = strtok(NULL, " ");
-    field++;
-  }
-
-  // Wait before 2nd check to get difference
-  usleep(100000);
-
-  file = fopen(path, "r");
-  if (!file) {
-    return false;
-  }
-  if (!fgets(buf, sizeof(buf), file)) {
-    fclose(file);
-    return false;
-  }
-  fclose(file);
-
-  ptr = strrchr(buf, ')');
-  if (!ptr) {
-    return false;
-  }
-  ptr++;
-
-  field = 3;
-  token = strtok(ptr, " ");
-  while (token) {
-    if (field == 14) {
-      utime2 = strtoul(token, NULL, 10);
-    } else if (field == 15) {
-      stime2 = strtoul(token, NULL, 10);
-      break;
-    }
-    token = strtok(NULL, " ");
-    field++;
-  }
-
-  // Get difference between 2 checks
-  unsigned long delta = (utime2 + stime2) - (utime1 + stime1);
-  
-  // If nothing changed between two checks or difference is very small, then process hanged
-  if (delta <= 2) {
-    return true;
-  }
-
-  return false;
-}
-
-/* Inefficient and consumes a lot of CPU time
- * Needed to make window accept mouse input only for when waiting for Wine/Proton process to hang after cursor grab (workaround to pass init step)
- * Because process may not hang at all if already initialized and it will ignore mouse input without this crutch
- */
 typedef struct {
   Display* display;
   Window window;
   volatile bool stop;
 } forward_input_on_hang_wait_args;
-void* forward_input_on_hang_wait(void *arg) {
-  forward_input_on_hang_wait_args* args = (forward_input_on_hang_wait_args *)arg;
-  XEvent event;
-
-  while (!args->stop) {
-    while (XPending(args->display)) {
-      XMaskEvent(args->display, ButtonPressMask | ButtonReleaseMask | PointerMotionMask, &event);
-      XSendEvent(args->display, args->window, True, NoEventMask, &event);
-    }
-    usleep(500);
-  }
-
-  return NULL;
-}
 
 /* Ugly layer between focused window and mouse
  * XGrabPointer() grabs cursor cutting input off window, but that is only one adequate way to prevent cursor from escaping window

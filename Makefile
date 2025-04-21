@@ -60,6 +60,9 @@ all:
 	$(CFUNCTIONS_DIR)/get_opened_windows.c \
 	$(CFUNCTIONS_DIR)/check_window_existence.c \
 	$(CFUNCTIONS_DIR)/get_window_process.c \
+	$(CFUNCTIONS_DIR)/is_wine_window.c \
+	$(CFUNCTIONS_DIR)/is_process_cpu_idle.c \
+	$(CFUNCTIONS_DIR)/forward_input_on_hang_wait.c \
 	-lX11 -lXext -lXRes
 
 clean:
