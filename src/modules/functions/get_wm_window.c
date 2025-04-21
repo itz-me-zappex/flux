@@ -20,7 +20,9 @@ Window get_wm_window(Display* display, Window root) {
     wm_window = None;
   }
 
-  XFree(data);
+  if (data) {
+    XFree(data);
+  }
 
   return wm_window;
 }

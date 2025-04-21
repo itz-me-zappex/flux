@@ -23,7 +23,9 @@ pid_t get_window_process(Display* display, Window window_id) {
     window_process = 0;
   }
 
-  XResClientIdsDestroy(elements, client_ids);
+  if (client_ids) {
+    XResClientIdsDestroy(elements, client_ids);
+  }
 
   return window_process;
 }

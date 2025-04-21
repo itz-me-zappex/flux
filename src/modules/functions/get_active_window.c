@@ -20,7 +20,9 @@ Window get_active_window(Display* display, Window root) {
     active_window = None;
   }
 
-  XFree(data);
+  if (data) {
+    XFree(data);
+  }
 
   return active_window;
 }
