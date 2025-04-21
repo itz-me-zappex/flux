@@ -41,9 +41,15 @@ parse_config(){
 
         # Needed to detect blank sections, if at least one key specified, this map is unset
         is_section_blank_map["$local_section"]='1'
-      elif [[ "${local_temp_config_line,,}" =~ ^[a-zA-Z0-9-]+([[:space:]]+)?=([[:space:]]+)?* ]]; then
+      elif [[ "${local_temp_config_line,,}" =~ ^[a-zA-Z0-9-]+([[:space:]]+)?(\+)?=([[:space:]]+)?* ]]; then
         # Remove equal symbol and key value to keep just key name
-        local local_config_key="${local_temp_config_line/%=*/}"
+        if [[ "${local_temp_config_line,,}" =~ ^[a-zA-Z0-9-]+([[:space:]]+)?\+=([[:space:]]+)?* ]]; then
+          local local_append='1'
+          local local_config_key="${local_temp_config_line/%+=*/}"
+        else
+          unset local_append
+          local local_config_key="${local_temp_config_line/%=*/}"
+        fi
 
         # Remove all spaces before and after string, internal shell parameter expansion required to get spaces supposed to be removed
         local local_config_key="${local_config_key#"${local_config_key%%[![:space:]]*}"}" # Remove spaces in beginning for string
@@ -69,6 +75,13 @@ parse_config(){
             local local_config_value="${local_config_value/\'/}" # Remove first single quote
             local local_config_value="${local_config_value/%\'/}" # And last one
           fi
+        fi
+
+        # Print warning and mark as error if appending to unsupported key
+        if [[ -n "$local_append" &&
+              ! "$local_config_key" =~ ^('exec-oneshot'|'exec-focus'|'exec-unfocus'|'lazy-exec-focus'|'lazy-exec-unfocus') ]]; then
+          message --warning "Appending values in '$local_section' section to '$local_config_key' config key is not supported!"
+          (( parse_config_error_count++ ))
         fi
 
         # Associate value with section if it is not blank
@@ -108,17 +121,32 @@ parse_config(){
             unset is_section_blank_map["$local_section"]
           ;;
           exec-oneshot )
-            config_key_exec_oneshot_map["$local_section"]="$local_config_value"
+            if [[ -z "$local_append" ]]; then
+              config_key_exec_oneshot_map["$local_section"]="$local_config_value"
+            else
+              config_key_exec_oneshot_map["$local_section"]+=$'\n'"$local_config_value"
+            fi
+
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
           ;;
           exec-focus )
-            config_key_exec_focus_map["$local_section"]="$local_config_value"
+            if [[ -z "$local_append" ]]; then
+              config_key_exec_focus_map["$local_section"]="$local_config_value"
+            else
+              config_key_exec_focus_map["$local_section"]+=$'\n'"$local_config_value"
+            fi
+
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
           ;;
           exec-unfocus )
-            config_key_exec_unfocus_map["$local_section"]="$local_config_value"
+            if [[ -z "$local_append" ]]; then
+              config_key_exec_unfocus_map["$local_section"]="$local_config_value"
+            else
+              config_key_exec_unfocus_map["$local_section"]+=$'\n'"$local_config_value"
+            fi
+
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
           ;;
@@ -178,12 +206,22 @@ parse_config(){
             unset is_section_blank_map["$local_section"]
           ;;
           lazy-exec-focus )
-            config_key_lazy_exec_focus_map["$local_section"]="$local_config_value"
+            if [[ -z "$local_append" ]]; then
+              config_key_lazy_exec_focus_map["$local_section"]="$local_config_value"
+            else
+              config_key_lazy_exec_focus_map["$local_section"]+=$'\n'"$local_config_value"
+            fi
+
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
           ;;
           lazy-exec-unfocus )
-            config_key_lazy_exec_unfocus_map["$local_section"]="$local_config_value"
+            if [[ -z "$local_append" ]]; then
+              config_key_lazy_exec_unfocus_map["$local_section"]="$local_config_value"
+            else
+              config_key_lazy_exec_unfocus_map["$local_section"]+=$'\n'"$local_config_value"
+            fi
+
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
           ;;
@@ -231,6 +269,9 @@ parse_config(){
             message --warning "$local_line_count_msg Unknown '$local_config_key' config key in '$local_section' section!"
             (( parse_config_error_count++ ))
           esac
+        else
+          message --warning "Config key '$local_config_key' is specified without value in '$local_section' section!"
+          (( parse_config_error_count++ ))
         fi
       else
         # Print error message depending on whether section is defined or not
