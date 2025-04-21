@@ -200,13 +200,13 @@ int main(int argc, char *argv[]) {
       }
 
       // Run thread which will pass mouse input during 100ms until next loop or window passed init and I will be able redirect input eventually
-      forward_input_on_hang_wait_args FIOHW_args = {
+      forward_input_on_hang_wait_args forward_input_on_hang_wait_t_args = {
         .display = display,
         .window = window,
         .stop = false,
       };
       pthread_t forward_input_on_hang_wait_t;
-      pthread_create(&forward_input_on_hang_wait_t, NULL, forward_input_on_hang_wait, &FIOHW_args);
+      pthread_create(&forward_input_on_hang_wait_t, NULL, forward_input_on_hang_wait, &forward_input_on_hang_wait_t_args);
 
       // Process may not hang immediately after cursor grabbing, without this delay some games will hang because cursor will not be ungrabbed
       for (int i = 0; i < 50; i++) {
@@ -219,7 +219,7 @@ int main(int argc, char *argv[]) {
       }
 
       // No longer needed
-      FIOHW_args.stop = true;
+      forward_input_on_hang_wait_t_args.stop = true;
       pthread_join(forward_input_on_hang_wait_t, NULL);
 
       // If process hangs after grab, then ungrab cursor and repeat the same until it stop hang (e.g. after loading or Wine/Proton initialization)
