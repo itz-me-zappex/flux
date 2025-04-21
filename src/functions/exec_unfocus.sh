@@ -16,21 +16,29 @@ exec_unfocus(){
 
   # Execute command from 'exec-unfocus' key if it has been specified
   if [[ -n "${config_key_exec_unfocus_map["$passed_section"]}" ]]; then
-    passed_command_type='default' \
-    passed_section="$passed_section" \
-    passed_event_command="${config_key_exec_unfocus_map["$passed_section"]}" \
-    passed_end_of_msg="$passed_end_of_msg" \
-    exec_on_event
+    local local_temp_command
+    while read -r local_temp_command ||
+    [[ -n "$local_temp_command" ]]; do
+      passed_command_type='default' \
+      passed_section="$passed_section" \
+      passed_event_command="$local_temp_command" \
+      passed_end_of_msg="$passed_end_of_msg" \
+      exec_on_event
+    done <<< "${config_key_exec_unfocus_map["$passed_section"]}"
   fi
 
   # Execute command from 'lazy-exec-unfocus' key if it has been specified and if '--hot' has been unset by daemon after processing opened windows
   if [[ -n "${config_key_lazy_exec_unfocus_map["$passed_section"]}" &&
         -n "$allow_lazy_commands" ]]; then
-    passed_command_type='lazy' \
-    passed_section="$passed_section" \
-    passed_event_command="${config_key_lazy_exec_unfocus_map["$passed_section"]}" \
-    passed_end_of_msg="$passed_end_of_msg" \
-    exec_on_event
+    local local_temp_command
+    while read -r local_temp_command ||
+    [[ -n "$local_temp_command" ]]; do
+      passed_command_type='lazy' \
+      passed_section="$passed_section" \
+      passed_event_command="$local_temp_command" \
+      passed_end_of_msg="$passed_end_of_msg" \
+      exec_on_event
+    done <<< "${config_key_lazy_exec_unfocus_map["$passed_section"]}"
   fi
   
   # Unset exported variables

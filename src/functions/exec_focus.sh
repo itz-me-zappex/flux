@@ -22,32 +22,44 @@ exec_focus(){
     # Execute command from 'exec-oneshot' key if it has been specified and was not executed before
     if [[ -n "${config_key_exec_oneshot_map["$section"]}" &&
           -z "${is_exec_oneshot_executed_map["$process_pid"]}" ]]; then
-      passed_command_type='default' \
-      passed_section="$section" \
-      passed_event_command="${config_key_exec_oneshot_map["$section"]}" \
-      passed_end_of_msg="due to appearance of window with XID $window_xid of process '$process_name' with PID $process_pid" \
-      exec_on_event
+      local local_temp_command
+      while read -r local_temp_command ||
+      [[ -n "$local_temp_command" ]]; do
+        passed_command_type='default' \
+        passed_section="$section" \
+        passed_event_command="$local_temp_command" \
+        passed_end_of_msg="due to appearance of window with XID $window_xid of process '$process_name' with PID $process_pid" \
+        exec_on_event
+      done <<< "${config_key_exec_oneshot_map["$section"]}"
 
       is_exec_oneshot_executed_map["$process_pid"]='1'
     fi
 
     # Execute command from 'exec-focus' key if it has been specified
     if [[ -n "${config_key_exec_focus_map["$section"]}" ]]; then
-      passed_command_type='default' \
-      passed_section="$section" \
-      passed_event_command="${config_key_exec_focus_map["$section"]}" \
-      passed_end_of_msg="$local_end_of_msg" \
-      exec_on_event
+      local local_temp_command
+      while read -r local_temp_command ||
+      [[ -n "$local_temp_command" ]]; do
+        passed_command_type='default' \
+        passed_section="$section" \
+        passed_event_command="$local_temp_command" \
+        passed_end_of_msg="$local_end_of_msg" \
+        exec_on_event
+      done <<< "${config_key_exec_focus_map["$section"]}"
     fi
 
     # Execute command from 'lazy-exec-focus' key if it has been specified and if '--hot' has been unset by daemon after processing opened windows
     if [[ -n "${config_key_lazy_exec_focus_map["$section"]}" &&
           -z "$hot" ]]; then
-      passed_command_type='lazy' \
-      passed_section="$section" \
-      passed_event_command="${config_key_lazy_exec_focus_map["$section"]}" \
-      passed_end_of_msg="$local_end_of_msg" \
-      exec_on_event
+      local local_temp_command
+      while read -r local_temp_command ||
+      [[ -n "$local_temp_command" ]]; do
+        passed_command_type='lazy' \
+        passed_section="$section" \
+        passed_event_command="$local_temp_command" \
+        passed_end_of_msg="$local_end_of_msg" \
+        exec_on_event
+      done <<< "${config_key_lazy_exec_focus_map["$section"]}"
     fi
     
     # Unset exported variables
