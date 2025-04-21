@@ -353,6 +353,7 @@ As INI is not standartized, I should mention all supported features here.
   - Сase insensitivity of key names.
   - Comments (using `;` and/or `#` symbols).
   - Insensetivity to spaces before and after `=` symbol.
+  - Appending values to config keys using `+=` (only `exec-oneshot`, `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus`).
 - Unsupported
   - Regular expressions.
   - Line continuation (using `\` symbol).
