@@ -1,6 +1,5 @@
 ## flux
 Advanced daemon for X11 desktops and window managers, designed to automatically limit FPS/CPU usage of unfocused windows and run commands on focus and unfocus events. Written in Bash and partially in C.
-
 ## Navigation
 - [Known issues](#known-issues)
 - [Features](#features)
@@ -59,12 +58,10 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [Why not just use Gamescope to set FPS limit on unfocus?](#why-not-just-use-gamescope-to-set-FPS-limit-on-unfocus)
   - [What about Wayland support?](#what-about-wayland-support)
   - [Why did you write it in Bash?](#why-did-you-write-it-in-bash)
-
 ## Known issues
 - Freezing online/multiplayer games by setting `cpu-limit` to `0%` causes disconnects. Use less aggressive CPU limit to allow game to send/receive packets.
 - Stuttery audio in unfocused game if CPU limit is pretty aggressive, that should be expected because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. If you use Pipewire with Wireplumber, you may want to mute process as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
 - Some games under Wine/Proton may not like `flux-cursor-grab`, meaning that if game gets focus without clicking on it with mouse (e.g. after Alt+Tab), cursor will be grabbed and will not work outside of window, but still will be able to escape, that happens for me with Ori and the Will of the Wisps in windowed mode for example. Also cursor grabbing in daemon does not work for all games, because a lot of those grab cursor manually, so cursor grabbing unneeded in this case and you will see warning in log/output that daemon unable to grab cursor, it is okay.
-
 ## Features
 - CPU and FPS limiting process on unfocus and unlimiting on focus (FPS limiting requires game running using MangoHud with already existing config file).
 - Reducing process priority on unfocus and restoring it on focus.
@@ -81,166 +78,134 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - Survives a whole DE/WM restart (not relogin) and continues work without issues.
 - Supports most of X11 DEs/WMs [(EWMH-compatible ones)](<https://specifications.freedesktop.org/wm-spec/latest/>) and does not rely on neither GPU nor its driver.
 - Detects and handles both explicitly (appeared with focus event) and implicitly (appeared without focus event) opened windows.
-
 ## Dependencies
 ### Arch Linux and dereatives
+**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libxres` `libx11` `libxext` `xorgproto`
 
-- Required: `bash` `util-linux` `cpulimit` `coreutils` `libxres` `libx11` `libxext` `xorgproto`
-  
-- Optional: `mangohud` `lib32-mangohud` `libnotify`
+**Optional:** `mangohud` `lib32-mangohud` `libnotify`
 
-- Build: `libxres` `libx11` `libxext` `xorgproto` `make` `gcc`
-
+**Build:** `libxres` `libx11` `libxext` `xorgproto` `make` `gcc`
 ### Debian and dereatives
-  
-- Required: `bash` `cpulimit` `coreutils` `libxres1` `libx11-6` `libxext6`
+**Required:** `bash` `cpulimit` `coreutils` `libxres1` `libx11-6` `libxext6`
 
-- Optional: `mangohud` `mangohud:i386` `libnotify-bin`
+**Optional:** `mangohud` `mangohud:i386` `libnotify-bin`
 
-- Build: `libxres-dev` `libx11-dev` `libxext-dev` `x11proto-dev` `make` `gcc`
-
+**Build:** `libxres-dev` `libx11-dev` `libxext-dev` `x11proto-dev` `make` `gcc`
 ### Void Linux and dereatives
+**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext` `xorgproto`
 
-- Required: `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext` `xorgproto`
+**Optional:** `MangoHud` `MangoHud-32bit` `libnotify`
 
-- Optional: `MangoHud` `MangoHud-32bit` `libnotify`
-
-- Build: `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto` `make` `gcc`
-
+**Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto` `make` `gcc`
 ### Fedora and dereatives
+**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext`
 
-- Required: `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext`
+**Optional:** `mangohud` `mangohud.i686` `libnotify`
 
-- Optional: `mangohud` `mangohud.i686` `libnotify`
-
-- Build: `libXres-devel` `libX11-devel` `libXext-devel` `xorg-x11-proto-devel` `make` `gcc`
-
+**Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorg-x11-proto-devel` `make` `gcc`
 ### OpenSUSE Tumbleweed and dereatives
 
-- Required: `bash` `util-linux` `cpulimit` `coreutils` `libXRes1` `libX11-6` `libXext6`
+**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXRes1` `libX11-6` `libXext6`
 
-- Optional: `mangohud` `mangohud-32bit` `libnotify4`
+**Optional:** `mangohud` `mangohud-32bit` `libnotify4`
 
-- Build: `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto-devel` `make` `gcc`
-
+**Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto-devel` `make` `gcc`
 ## Building and installation
 ### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
-
 #### Install `cpulimit` dependency from AUR
 ```bash
 git clone 'https://aur.archlinux.org/cpulimit.git' && cd 'cpulimit' && makepkg -sric && cd ..
 ```
-
 #### Clone this repository and use PKGBUILD to install daemon
 ```bash
 git clone https://github.com/itz-me-zappex/flux.git && cd flux && makepkg -sric
 ```
-
 #### Add user to `flux` group to bypass limitations related to changing scheduling policies
 ```bash
 sudo usermod -aG flux "$USER"
 ```
-
 ### Manual installation using release tarball
 Use this method if you using different distro. Make sure you have installed dependencies as described [here](#dependencies) before continue.
-
 #### Make options
-| Option | Description |
-|--------|-------------|
-| `clean` | Remove `build/` in repository directory with all files created there after `make`. |
-| `install` | Install daemon to prefix, can be changed using `$PREFIX`, defaults to `/usr/local`. |
+| Option      | Description                                                                                              |
+| ----------- | -------------------------------------------------------------------------------------------------------- |
+| `clean`     | Remove `build/` in repository directory with all files created there after `make`.                       |
+| `install`   | Install daemon to prefix, can be changed using `$PREFIX`, defaults to `/usr/local`.                      |
 | `uninstall` | Remove `bin/flux` and `lib/flux/` from prefix, can be changed using `$PREFIX`, defaults to `/usr/local`. |
-
 #### Make environment variables
-| Variable | Description |
-|----------|-------------|
+| Variable | Description                                                                           |
+| -------- | ------------------------------------------------------------------------------------- |
 | `PREFIX` | Install daemon to `<PREFIX>/bin/` and `<PREFIX>/lib/flux/`, defaults to `/usr/local`. |
-| `CC` | C compiler, defaults to `gcc`. |
-| `CFLAGS` | C compiler options, defaults to `-O2 -s`. |
+| `CC`     | C compiler, defaults to `gcc`.                                                        |
+| `CFLAGS` | C compiler options, defaults to `-O2 -s`.                                             |
 
 #### Download latest release with source
 ```bash
 wget -qO- 'https://api.github.com/repos/itz-me-zappex/flux/releases/latest' | grep '"tarball_url":' | cut -d '"' -f 4 | xargs wget -O flux.tar.gz
 ```
-
 #### Extract archive and change directory
 ```bash
 tar -xvf flux.tar.gz --one-top-level=flux --strip-components=1 && cd 'flux'
 ```
-
 #### Build daemon
 ```bash
 make
 ```
-
 #### Install daemon to `/usr/local`
 ```bash
 sudo make install
 ```
-
 #### Or you may want to change prefix e.g. in case you want install it locally
 ```bash
 PREFIX="~/.local" make install
 ```
-
 #### Or you may want to keep daemon and modules in single directory, that will work, just
 ```bash
 ./build/flux -h
 ```
-
 #### Create `flux` group, needed to bypass scheduling policies change limitations
 ```bash
 sudo groupadd -r flux
 ```
-
 #### Add current user to `flux` group
 ```bash
 sudo usermod -aG flux "$USER"
 ```
-
 ## Uninstallation
 ### Arch Linux and dereatives
 #### Execute following
 ```bash
 sudo pacman -Rnsc flux
 ```
-
 ### Uninstallation using `make`
 #### Download release archive with currently installed version and extract it, e.g
 ```bash
 wget 'https://github.com/itz-me-zappex/flux/archive/refs/tags/v1.23.4.tar.gz' && tar -xvf 'v1.23.4.tar.gz' && cd 'flux-1.23.4'
 ```
-
 #### Uninstall daemon from `/usr/local`
 ```bash
 sudo make uninstall
 ```
-
 #### Or, if it was installed somewhere else, e.g. in `/usr`, then
 ```bash
 sudo PREFIX='/usr' make uninstall
 ```
-
 #### Remove unneeded dependencies
 Depends by distro and package manager you use, I highly suggest to remove dependencies selectively and check which packages are use it, to avoid system breakage.
-
 ### Cleaning up
 #### Lock file (after crash)
 ```bash
 rm '/tmp/flux-lock'
 ```
-
 #### Config file (if not needed anymore), e.g.
 ```bash
 rm ~/.config/flux.ini
 ```
-
 #### Remove group from system
 ```bash
 sudo groupdel flux
 ```
-
 ## Usage
 ### List of available options
 ```
@@ -297,13 +262,10 @@ flux -tT '(\e[1;4;36m%d.%m.%Y\e[0m \e[1;4;31m%H:%M:%S\e[0m)'
 ```
 
 Now you will get timestamps with bold and underlined text with cyan date and red time, order or count of ANSI escape sequences does not matter, so you can turn timestamps into freaking rainbow without causing explosion of the Sun. Same with prefixes. If you do not like `\e` for whatever reason, you can use either `\033`, `\u001b` or `\x1b` instead, those are handled registry independently. More about colors and ANSI escape sequences you can find on `https://www.shellhacks.com/bash-colors` or any other website.
-
 ### Autostart
 Just add command to autostart using your DE/WM settings. Running daemon as root also possible, but that feature almost useless.
-
 ## Configuration
-A simple INI is used for configuration.
-
+**Note:** A simple INI is used for configuration.
 ### Available keys and description
 #### Identifiers
 | Key | Description |
@@ -321,11 +283,11 @@ A simple INI is used for configuration.
 | `idle` | Boolean, set `SCHED_IDLE` scheduling policy for process on unfocus event to greatly reduce its priority. Daemon should run as `@flux` to be able restore `SCHED_RR`/`SCHED_FIFO`/`SCHED_OTHER`/`SCHED_BATCH` scheduling policy and only as root to restore `SCHED_DEADLINE` scheduling policy (if daemon does not have sufficient rights to restore these scheduling policies, it will print warning and will not change anything). Defaults to `false`. |
 
 #### Limits configuration
-| Key | Description |
-|-----|-------------|
-| `delay` | Delay in seconds before applying CPU/FPS limit or setting `SCHED_IDLE`. Defaults to `0`, supports values with floating point. |
-| `mangohud-source-config` | Path to MangoHud config which should be used as a base before apply FPS limit in `mangohud-config`, if not specified, then target behaves as source. Useful if you not looking for duplicate MangoHud config for multiple games. |
-| `mangohud-config` | Path to MangoHud config which should be changed (target), required if you want change FPS limits and requires `fps-unfocus`. Make sure you created specified config, at least just keep it blank, otherwise MangoHud will not be able to load new config on fly and daemon will throw warnings related to config absence. Do not use the same config for multiple sections! |
+| Key                      | Description                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `delay`                  | Delay in seconds before applying CPU/FPS limit or setting `SCHED_IDLE`. Defaults to `0`, supports values with floating point.                                                                                                                                                                                                                                               |
+| `mangohud-source-config` | Path to MangoHud config which should be used as a base before apply FPS limit in `mangohud-config`, if not specified, then target behaves as source. Useful if you not looking for duplicate MangoHud config for multiple games.                                                                                                                                            |
+| `mangohud-config`        | Path to MangoHud config which should be changed (target), required if you want change FPS limits and requires `fps-unfocus`. Make sure you created specified config, at least just keep it blank, otherwise MangoHud will not be able to load new config on fly and daemon will throw warnings related to config absence. Do not use the same config for multiple sections! |
 
 #### Miscellaneous
 | Key | Description |
@@ -340,26 +302,26 @@ A simple INI is used for configuration.
 | `focus-cursor-grab` | Boolean, daemon grabs cursor if possible, binds it to window and because of X11 nature which prevents input to anything but client which owns cursor (`flux-cursor-grab` module in background in this case) - redirects all input into focused window. This ugly layer prevents cursor from escaping to second monitor in some games at cost of *possible* input lag. Cursor is ungrabbed on unfocus event. Defaults to `false`. |
 
 ### Config path
-- Daemon searches for following configuration files by priority:
-  - `$XDG_CONFIG_HOME/flux.ini`
-  - `$HOME/.config/flux.ini`
-  - `/etc/flux.ini`
-
+Daemon searches for following configuration files by priority:
+- `$XDG_CONFIG_HOME/flux.ini`
+- `$HOME/.config/flux.ini`
+- `/etc/flux.ini`
 ### Limitations
 As INI is not standartized, I should mention all supported features here.
-- Supported
-  - Spaces and other symbols in section names.
-  - Single and double quoted strings.
-  - Сase insensitivity of key names.
-  - Comments (using `;` and/or `#` symbols).
-  - Insensetivity to spaces before and after `=` symbol.
-  - Appending values to config keys using `+=` (only `exec-oneshot`, `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus`).
-- Unsupported
-  - Regular expressions.
-  - Line continuation (using `\` symbol).
-  - Inline comments
-  - Anything else that unmentioned here.
 
+**Supported:**
+- Spaces and other symbols in section names.
+- Single and double quoted strings.
+- Сase insensitivity of key names.
+- Comments (using `;` and/or `#` symbols).
+- Insensetivity to spaces before and after `=` symbol.
+- Appending values to config keys using `+=` (only `exec-oneshot`, `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus`).
+
+**Unsupported:**
+- Regular expressions.
+- Line continuation (using `\` symbol).
+- Inline comments
+- Anything else that unmentioned here.
 ### Configuration example
 #### Long examples
 ```ini
@@ -395,7 +357,6 @@ owner = zappex
 cpu-limit = 2%
 idle = true
 ```
-
 #### Short examples
 ```ini
 ; Freeze on unfocus and disable/enable compositor on focus and unfocus respectively
@@ -424,10 +385,8 @@ name = GeometryDash.exe
 cpu-limit = 2%
 idle = true
 ```
-
 ### Environment variables passed to commands and description
 You may want to use these variables in commands and scripts which running from `exec-oneshot`, `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys to extend daemon functionality.
-
 #### Passed to `exec-oneshot`, `exec-focus` and `lazy-exec-focus` config keys
 | Variable | Description |
 |----------|-------------|
@@ -462,77 +421,97 @@ You may want to use these variables in commands and scripts which running from `
 
 ## Tips and tricks
 ### Apply changes in config file
-- As daemon does not parse config on a go, you need to restart daemon with `--hot` option after editing config to make daemon handle already opened windows immediately after start.
-
+As daemon does not parse config on a go, you need to restart daemon with `--hot` option after editing config to make daemon handle already opened windows immediately after start.
 ### Mute process audio on unfocus (Pipewire & Wireplumber)
-- Add following lines to section responsible for target:
-  - `exec-focus = wpctl set-mute -p $FLUX_PROCESS_PID 0`
-  - `exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1`
+Add following lines to section responsible for target:
 
+```ini
+; Unmute on focus
+exec-focus += wpctl set-mute -p $FLUX_PROCESS_PID 0
+
+; Mute on unfocus
+exec-unfocus += wpctl set-mute -p $FLUX_PROCESS_PID 1
+```
 ### Reduce niceness of process on window appearance (increase priority)
-- Add following line to section responsible for target (niceness `-4` if fine for multimedia tasks, including games):
-  - `exec-oneshot = renice -n -4 $FLUX_PROCESS_PID`
+**Note:** Niceness `-4` is fine for multimedia tasks, including games.
 
+Add following line to section responsible for target:
+
+```ini
+; Increase process priority if window opens first time
+exec-oneshot += renice -n -4 $FLUX_PROCESS_PID
+```
 ### Overclock NVIDIA GPU on window focus and revert it on unfocus
-Note: Command from `lazy-exec-unfocus` is also executed on daemon termination if window appears focused at that moment.
-- Add following line to section responsible for target (use your own values):
-  - `lazy-exec-focus = nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=200' && nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=2000'`
-  - `lazy-exec-unfocus = nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=0' && nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=0'`
+**Note:** Command from `lazy-exec-unfocus` is also executed on daemon termination if window appears focused at that moment.
 
+Add following lines to section responsible for target (use your own values):
+
+```ini
+; Overclock GPU on focus and revert on unfocus
+lazy-exec-focus += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=200'
+lazy-exec-focus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=2000'
+lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=0'
+lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=0'
+```
 ### Change keyboard layout to English on focus and revert it to Russian on unfocus
-Note: Useful for some games/apps that do not understand cyrillic letters and relying on layout instead of scancodes.
-- Add following line to section responsible for target (use your own values):
-  - `lazy-exec-focus = setxkbmap us,ru,ua`
-  - `lazy-exec-focus = setxkbmap ru,ua,us`
+**Note:** Useful for some games/apps that do not understand cyrillic letters and rely on layout instead of scancodes.
 
+Add following lines to section responsible for target (use your own values):
+
+```ini
+; Change layout to US on focus and to RU on unfocus
+lazy-exec-focus += setxkbmap us,ru,ua
+lazy-exec-focus += setxkbmap ru,ua,us
+```
 ### Increase digital vibrance on focus and revert it on unfocus
-- Add following line to section responsible for target (use your own values):
+**Note:** Use `vibrant-cli` from [`libvibrant`](<https://github.com/libvibrant/libvibrant>) project if you use AMD or Intel GPU.
 
+Add following lines to section responsible for target (use your own values):
 #### NVIDIA
-  - `lazy-exec-focus = nvidia-settings -a '[gpu:0]/DigitalVibrance=150'`
-  - `lazy-exec-unfocus = nvidia-settings -a '[gpu:0]/DigitalVibrance=0'`
+```ini
+; Increase digital vibrance on focus and revert on unfocus
+lazy-exec-focus += nvidia-settings -a '[gpu:0]/DigitalVibrance=150'
+lazy-exec-unfocus += nvidia-settings -a '[gpu:0]/DigitalVibrance=0'
 
+```
 #### Mesa (AMD/Intel)
-Note: Use `vibrant-cli` from [`libvibrant`](<https://github.com/libvibrant/libvibrant>) project.
-  - `lazy-exec-focus = vibrant-cli DisplayPort-0 2.3`
-  - `lazy-exec-unfocus = vibrant-cli DisplayPort-0 1`
-
+```ini
+; Increase digital vibrance on focus and revert on unfocus
+lazy-exec-focus += vibrant-cli DisplayPort-0 2.3
+lazy-exec-unfocus += vibrant-cli DisplayPort-0 1
+```
 ### Preload shader cache on window appearance to avoid stuttering
-Note: That is how bufferization works, you just need to load file to memory by reading it *somehow* and kernel will not read it from disk again relying on RAM instead.
-- Add following line to section responsible for target (path may vary depending on system configuration):
+**Note:** That is how bufferization works, you just need to load file to memory by reading it *somehow* and kernel will not read it from disk again relying on RAM instead.
 
+Add following line to section responsible for target (path may vary depending on system configuration):
 #### NVIDIA
-  - `exec-oneshot = find ~/.cache/nvidia -type f -exec cat {} + > /dev/null`
-
+```ini
+; Preload shader cache if window opens first time
+exec-oneshot += find ~/.cache/nvidia -type f -exec cat {} + > /dev/null
+```
 #### Mesa (AMD/Intel/NVIDIA with Nouveau)
-  - `exec-oneshot = find ~/.cache/mesa_shader_cache_db -type f -exec cat {} + > /dev/null`
-
+```ini
+; Preload shader cache if window opens first time
+exec-oneshot += find ~/.cache/mesa_shader_cache_db -type f -exec cat {} + > /dev/null
+```
 ### Types of limits and which you should use
 - FPS limits recommended for online and multiplayer games if you do not mind to use MangoHud.
 - CPU limits greater than zero recommended for online/multiplayer games in case you do not use MangoHud and for CPU heavy applications e.g. VirtualBox and Handbrake (with CPU encoding), but you should be ready for stuttery audio which caused by `cpulimit` tool which interrupts process with `SIGSTOP` and `SIGCONT` signals, if you use Pipewire and Wireplumber, you may want to mute process as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
 - CPU limit equal to zero (freezing) recommended for singleplayer games, online games in offline mode and for stuff which consumes resources in background without reason, makes game/app just hang in RAM without consuming neither CPU nor GPU resources.
-
 ## Possible questions
 ### How does that daemon work?
 - Daemon listens changes in `_NET_ACTIVE_WINDOW` and `_NET_CLIENT_LIST_STACKING` atoms, obtains window IDs and using those obtains PIDs by "asking" Xorg server via `XRes` extension, then reads info about processes from files in `/proc/<PID>` to compare it with identifiers in config file and if matching section appears, then it does specified in config file actions.
-
 ### Does that daemon reduce performance?
 - Daemon uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time and just chills out when you doing stuff in single window. Performance loss should not be noticeable even on weak systems.
-
 ### May I get banned in game because of this daemon?
 - Nowadays, anti-cheats are pure garbage, developed by freaks without balls, and you may get banned even for a wrong click or sudden mouse movement, I am not even talking about bans because of broken libs provided with games by developers themselves. But daemon by its nature should not trigger anti-cheat, anyway, I am not responsible for your actions, so use it carefully and do not write me if you got a ban.
-
 ### Why was that daemon developed?
 - Main task is to reduce CPU/GPU usage of games that have been minimized. Almost every engine fails to recognize that game is unfocused and still consumes a lot of CPU and GPU resources, what can make system slow for other tasks like browsing stuff, chatting, transcoding video etc. or even unresponsive at all. With that daemon now I can simply play a game or tinker with virtual machine and then minimize window if needed without carrying about high CPU/GPU usage and suffering from low multitasking performance. Also, daemon does not care about type of software, so you can use it with everything. Inspiried by feature from NVIDIA driver for Windows where user can set FPS limit for minimized software, this tool is not exactly the same, but better than nothing.
-
 ### Why is code so complicated?
 - I try to avoid using external tools in favor of bashisms to reduce CPU usage by daemon and speed up code.
-
 ### Why not just use Gamescope to set FPS limit on unfocus?
 - You can use it if you like, my project is aimed at X11 and systems without Wayland support, as well as at non-interference with application/game window and user input unlike Gamescope does, so you have no need to execute app/game using wrapper (except you need FPS limiting, MangoHud required in this case), just configure daemon and have fun.
-
 ### What about Wayland support?
 - That is impossible, there is no any unified way to read window related events and obtain PIDs of windows on Wayland.
-
 ### Why did you write it in Bash?
 - That is (scripting) language I know pretty good, despite a fact that Bash as all interpretators works slower than compilable languages, it still fits my needs almost perfectly.
