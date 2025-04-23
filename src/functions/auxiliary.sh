@@ -75,9 +75,9 @@ exec_on_event(){
 
   # Notify user about execution
   if [[ "$passed_command_type" == 'default' ]]; then
-    message --info "Command '$(bash -c "echo \"$passed_event_command\"")' from section '$passed_section' has been executed $passed_end_of_msg."
+    message --verbose "${passed_event_type^} command '$(bash -c "echo \"$passed_event_command\"")' from section '$passed_section' has been executed $passed_end_of_msg."
   elif [[ "$passed_command_type" == 'lazy' ]]; then
-    message --info "Lazy command '$(bash -c "echo \"$passed_event_command\"")' from section '$passed_section' has been executed $passed_end_of_msg."
+    message --verbose "Lazy $passed_event_type command '$(bash -c "echo \"$passed_event_command\"")' from section '$passed_section' has been executed $passed_end_of_msg."
   fi
 }
 
