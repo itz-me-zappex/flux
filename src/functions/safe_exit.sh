@@ -70,6 +70,7 @@ safe_exit(){
       passed_section="$previous_section" \
       passed_event_command="$local_temp_command" \
       passed_end_of_msg="$local_end_of_msg" \
+      passed_event_type='unfocus' \
       exec_on_event
     done <<< "${config_key_lazy_exec_unfocus_map["$previous_section"]}"
   fi
