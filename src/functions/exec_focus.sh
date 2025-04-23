@@ -24,7 +24,7 @@ exec_focus(){
           -z "${is_exec_oneshot_executed_map["$process_pid"]}" ]]; then
       local local_temp_command
       while read -r local_temp_command ||
-      [[ -n "$local_temp_command" ]]; do
+            [[ -n "$local_temp_command" ]]; do
         passed_command_type='default' \
         passed_section="$section" \
         passed_event_command="$local_temp_command" \
@@ -40,7 +40,7 @@ exec_focus(){
     if [[ -n "${config_key_exec_focus_map["$section"]}" ]]; then
       local local_temp_command
       while read -r local_temp_command ||
-      [[ -n "$local_temp_command" ]]; do
+            [[ -n "$local_temp_command" ]]; do
         passed_command_type='default' \
         passed_section="$section" \
         passed_event_command="$local_temp_command" \
@@ -55,7 +55,7 @@ exec_focus(){
           -z "$hot" ]]; then
       local local_temp_command
       while read -r local_temp_command ||
-      [[ -n "$local_temp_command" ]]; do
+            [[ -n "$local_temp_command" ]]; do
         passed_command_type='lazy' \
         passed_section="$section" \
         passed_event_command="$local_temp_command" \

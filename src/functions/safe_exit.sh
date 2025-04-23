@@ -60,7 +60,7 @@ safe_exit(){
     # And yes, info about focused window becomes previous immediately after processing it, check event handling in 'main.sh'
     local local_temp_command
     while read -r local_temp_command ||
-    [[ -n "$local_temp_command" ]]; do
+          [[ -n "$local_temp_command" ]]; do
       FLUX_WINDOW_XID="$previous_window_xid" \
       FLUX_PROCESS_PID="$previous_process_pid" \
       FLUX_PROCESS_NAME="$previous_process_name" \
