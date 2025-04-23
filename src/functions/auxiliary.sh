@@ -67,6 +67,11 @@ check_ro(){
 
 # Used in 'exec_focus()' and 'exec_unfocus()' as wrapper to run commands
 exec_on_event(){
+  # Workaround for case when new line character is passed as command (because of appending support using '+=')
+  if [[ -z "$passed_event_command" ]]; then
+    return 0
+  fi
+
   # Run command separately from daemon in background
   passed_section='' \
   passed_event_command='' \
