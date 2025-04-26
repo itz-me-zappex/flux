@@ -79,7 +79,7 @@ install:
 	install -Dm 755 $(BUILD_DIR)/flux-cursor-grab $(PREFIX)/lib/flux/
 
 	@if [[ $(PREFIX) != '/usr' ]]; then \
-		echo "warning: Unable to install '10-flux.conf' to '/etc/security/limits.d' because that is not '/usr' prefix!" >&2; \
+		echo -e "\nwarning: Unable to install '10-flux.conf' to '/etc/security/limits.d' because that is not '/usr' prefix!\n" >&2; \
 	fi
 
 	if [[ $(PREFIX) == '/usr' ]]; then \
