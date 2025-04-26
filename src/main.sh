@@ -50,37 +50,49 @@ esac
 unset flux_path \
 daemon_prefix
 
+# Define default prefixes
+color_prefix_error="$(echo -e "[\e[31mx\e[0m]")" # Red
+color_prefix_info="$(echo -e "[\e[32mi\e[0m]")" # Green
+color_prefix_verbose="$(echo -e "[\e[34m~\e[0m]")" # Blue
+color_prefix_warning="$(echo -e "[\e[33m!\e[0m]")" # Yellow
+color_timestamp_format="$(echo -e "[\e[35m%Y-%m-%dT%H:%M:%S%z\e[0m]")" # Pink
+colorless_prefix_error='[x]'
+colorless_prefix_info='[i]'
+colorless_prefix_verbose='[~]'
+colorless_prefix_warning='[!]'
+colorless_timestamp_format='[%Y-%m-%dT%H:%M:%S%z]'
+
 # Set default prefixes and timestamp format for messages automatically
 if [[ -t 1 &&
       -t 2 ]]; then
   # Assuming stdout/stderr is a terminal
-  prefix_error="$(echo -e "[\e[31mx\e[0m]")" # Red
-  prefix_info="$(echo -e "[\e[32mi\e[0m]")" # Green
-  prefix_verbose="$(echo -e "[\e[34m~\e[0m]")" # Blue
-  prefix_warning="$(echo -e "[\e[33m!\e[0m]")" # Yellow
-  timestamp_format="$(echo -e "[\e[35m%Y-%m-%dT%H:%M:%S%z\e[0m]")" # Pink
+  prefix_error="$color_prefix_error"
+  prefix_info="$color_prefix_info"
+  prefix_verbose="$color_prefix_verbose"
+  prefix_warning="$color_prefix_warning"
+  timestamp_format="$color_timestamp_format"
 
-  log_prefix_error='[x]'
-  log_prefix_info='[i]'
-  log_prefix_verbose='[~]'
-  log_prefix_warning='[!]'
-  log_timestamp_format='[%Y-%m-%dT%H:%M:%S%z]'
+  log_prefix_error="$colorless_prefix_error"
+  log_prefix_info="$colorless_prefix_info"
+  log_prefix_verbose="$colorless_prefix_verbose"
+  log_prefix_warning="$colorless_prefix_warning"
+  log_timestamp_format="$colorless_timestamp_format"
 else
   # For case color mode will not be specified using '--color', needed to handle custom prefixes and timestamp
   color='never'
 
   # Assuming stdout/stderr is redirected
-  prefix_error='[x]'
-  prefix_info='[i]'
-  prefix_verbose='[~]'
-  prefix_warning='[!]'
-  timestamp_format='[%Y-%m-%dT%H:%M:%S%z]'
+  prefix_error="$colorless_prefix_error"
+  prefix_info="$colorless_prefix_info"
+  prefix_verbose="$colorless_prefix_verbose"
+  prefix_warning="$colorless_prefix_warning"
+  timestamp_format="$colorless_timestamp_format"
 
-  log_prefix_error="$prefix_error"
-  log_prefix_info="$prefix_info"
-  log_prefix_verbose="$prefix_verbose"
-  log_prefix_warning="$prefix_warning"
-  log_timestamp_format="$timestamp_format"
+  log_prefix_error="$colorless_prefix_error"
+  log_prefix_info="$colorless_prefix_info"
+  log_prefix_verbose="$colorless_prefix_verbose"
+  log_prefix_warning="$colorless_prefix_warning"
+  log_timestamp_format="$colorless_timestamp_format"
 fi
 
 # Create associative arrays to store values from config

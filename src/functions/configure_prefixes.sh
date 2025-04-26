@@ -2,17 +2,17 @@
 configure_prefixes(){
   # Define whether daemon should disable or enforce colors for default prefixes and timestamp
   if [[ "$color" == 'always' ]]; then
-    prefix_error="$(echo -e "[\e[31mx\e[0m]")" # Red
-    prefix_info="$(echo -e "[\e[32mi\e[0m]")" # Green
-    prefix_verbose="$(echo -e "[\e[34m~\e[0m]")" # Blue
-    prefix_warning="$(echo -e "[\e[33m!\e[0m]")" # Yellow
-    timestamp_format="$(echo -e "[\e[35m%Y-%m-%dT%H:%M:%S%z\e[0m]")" # Pink
+    prefix_error="$color_prefix_error"
+    prefix_info="$color_prefix_info"
+    prefix_verbose="$color_prefix_verbose"
+    prefix_warning="$color_prefix_warning"
+    timestamp_format="$color_timestamp_format"
   elif [[ "$color" == 'never' ]]; then
-    prefix_error='[x]'
-    prefix_info='[i]'
-    prefix_verbose='[~]'
-    prefix_warning='[!]'
-    timestamp_format='[%Y-%m-%dT%H:%M:%S%z]'
+    prefix_error="$colorless_prefix_error"
+    prefix_info="$colorless_prefix_info"
+    prefix_verbose="$colorless_prefix_verbose"
+    prefix_warning="$colorless_prefix_warning"
+    timestamp_format="$colorless_timestamp_format"
   fi
 
   # Inherit log prefixes from default ones if enforced
