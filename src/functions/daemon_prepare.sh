@@ -58,6 +58,16 @@ daemon_prepare(){
 
   # Handle color mode with custom prefixes and timestamp
   configure_prefixes
+  unset color_prefix_error \
+  color_prefix_info \
+  color_prefix_verbose \
+  color_prefix_warning \
+  color_timestamp_format \
+  colorless_prefix_error \
+  colorless_prefix_info \
+  colorless_prefix_verbose \
+  colorless_prefix_warning \
+  colorless_timestamp_format
 
   # Allow notifications if '--notifications' option is specified (checked by 'message()')
   if [[ -n "$notifications" ]]; then
