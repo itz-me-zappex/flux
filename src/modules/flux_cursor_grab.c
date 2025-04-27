@@ -56,6 +56,9 @@ int main(int argc, char *argv[]) {
     XUngrabPointer(display, CurrentTime);
   }
 
+  // Wait a bit to prevent failure in case window gets focus with mouse click
+  usleep(100000);
+
   // Attempt to grab cursor as that is daemonized process and I don't want hook another Bash instance for it to check exit code (which I won't get ever if no error occur)
   int grab_status = XGrabPointer(display, window, True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
                                  GrabModeAsync, GrabModeAsync, window, None, CurrentTime);

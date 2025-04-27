@@ -404,7 +404,7 @@ while read -r raw_event ||
 
             # Print message about successful cursor grabbing if process still exists
             (
-              sleep 0.1
+              sleep 0.2
               if check_pid_existence "${background_focus_cursor_grab_map["$window_xid"]}"; then
                 message --info "Cursor for window with XID $window_xid of process '$process_name' with PID $process_pid has been grabbed due to focus event."
               else
