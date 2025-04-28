@@ -1,5 +1,5 @@
 # Required to set CPU/FPS limits for requested windows
-handle_requests(){
+handle_unfocus(){
   # Get list of existing windows
   local local_windows="${event/'windows_list: '/}"
 

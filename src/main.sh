@@ -331,7 +331,7 @@ while read -r raw_event ||
       handle_closure
 
       # Apply CPU/FPS limits for process which have been requested to be limited
-      handle_requests
+      handle_unfocus
     ;;
     * )
       # Unset info about process to avoid using it by an accident
