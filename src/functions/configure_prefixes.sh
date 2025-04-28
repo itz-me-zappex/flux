@@ -47,7 +47,8 @@ configure_prefixes(){
 
   # Remove colors from prefixes and timestamp in log related variables
   # Those values will be set to main prefixes and timestamp if 'never' is enforced
-  if [[ "$color" != 'always' && -n "$local_is_prefixes_changed" ]]; then
+  if [[ "$color" != 'always' &&
+        -n "$local_is_prefixes_changed" ]]; then
     # Prefixes
     local local_temp_prefix_type
     for local_temp_prefix_type in error info verbose warning; do
@@ -69,7 +70,8 @@ configure_prefixes(){
 
   # Remove colors timestamp in log related variable
   # This value will be set to main timestamp if 'never' is enforced
-  if [[ "$color" != 'always' && -n "$local_is_timestamp_format_changed" ]]; then
+  if [[ "$color" != 'always' &&
+        -n "$local_is_timestamp_format_changed" ]]; then
     # Store value of timestamp variable into log related one
     log_timestamp_format="$timestamp_format"
 

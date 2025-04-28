@@ -20,7 +20,7 @@
 #include "functions/third-party/xprop/dsimple.h"
 
 // To avoid compilation breakage, used in 'xprop' source code
-void usage(const char *errmsg){}
+void usage(const char *errmsg) {}
 
 // Use picker to select window or get focused one depending by cmdline argument and print its XID with PID
 // Exit codes here are wrapped in 'flux' to print proper error messages when executing this binary
@@ -74,12 +74,14 @@ int main(int argc, char *argv[]) {
     window = get_active_window(display, root);
   }
 
-  if (window == root || window == None) {
+  if (window == root ||
+      window == None) {
     window = wm_window;
   } else {
     bool window_exists = check_window_existence(display, root, window);
 
-    if (!window_exists && window != wm_window) {
+    if (!window_exists &&
+        window != wm_window) {
       XCloseDisplay(display);
       return 5;
     }

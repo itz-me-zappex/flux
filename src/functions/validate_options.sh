@@ -59,7 +59,8 @@ validate_options(){
         -z "$color" ]]; then
     message --error-opt "Option '--color' requires a mode value!"
     exit 1
-  elif [[ -n "$color" && ! "${color,,}" =~ ^('always'|'auto'|'never')$ ]]; then
+  elif [[ -n "$color" &&
+          ! "${color,,}" =~ ^('always'|'auto'|'never')$ ]]; then
     message --error-opt "Specified mode '$color' in '--color' option is not supported!"
     exit 1
   else

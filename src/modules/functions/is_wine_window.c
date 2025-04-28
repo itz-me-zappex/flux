@@ -16,7 +16,8 @@ bool is_wine_window(Display* display, Window window) {
     XFree(data);
   }
 
-  if (status == Success && type != None) {
+  if (status == Success &&
+      type != None) {
     return true;
   }
 
