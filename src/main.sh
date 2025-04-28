@@ -348,16 +348,6 @@ while read -r raw_event ||
       # Get process PID of focused window
       process_pid="${event/*'='/}"
 
-      # Cancel cursor grabbing for previously focused window
-      if [[ -n "$previous_window_xid" &&
-            -n "${background_focus_cursor_grab_map["$previous_window_xid"]}" ]]; then
-        passed_window_xid="$previous_window_xid"
-        passed_process_pid="$previous_process_pid" \
-        passed_process_name="$previous_process_name" \
-        passed_end_of_msg="due to unfocus event" \
-        cursor_ungrab
-      fi
-
       # Hide error messages, even standart ones which are appearing directly from Bash (https://unix.stackexchange.com/a/184807)
       exec 3>&2
       exec 2>/dev/null

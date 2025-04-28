@@ -3,6 +3,9 @@ handle_unfocus(){
   # Get list of existing windows
   local local_windows="${event/'windows_list: '/}"
 
+  # Get focused window XID to avoid false positive in case unfocus actions should not happen before handling of focused window
+  local local_focused_window_xid="${focused_window/'='*/}"
+
   # Remove PIDs from list of existing windows
   local local_temp_window
   for local_temp_window in $local_windows; do
@@ -196,6 +199,16 @@ handle_unfocus(){
         passed_process_command="$local_process_command" \
         passed_end_of_msg="due to unfocus event of window with XID $local_temp_window_xid of process '$local_process_name' with PID $local_process_pid" \
         exec_unfocus
+      fi
+
+      # Cancel cursor grabbing for previously focused window
+      if [[ -n "${background_focus_cursor_grab_map["$local_temp_window_xid"]}" &&
+            "$local_focused_window_xid" != "$local_temp_window_xid" ]]; then
+        passed_window_xid="$local_temp_window_xid" \
+        passed_process_pid="$local_process_pid" \
+        passed_process_name="$local_process_name" \
+        passed_end_of_msg="due to unfocus event" \
+        cursor_ungrab
       fi
     fi
   done
