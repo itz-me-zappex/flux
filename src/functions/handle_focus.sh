@@ -31,4 +31,38 @@ handle_focus(){
     passed_end_of_msg="$local_end_of_msg" \
     unset_sched_idle
   fi
+
+  # Execute command on focus event if specified in config
+  exec_focus
+
+  # Enforce fullscreen mode for window if specified in config
+  if [[ -n "${config_key_focus_fullscreen_map["$section"]}" ]]; then
+    # Send to background because there is 100ms delay before change child window size to match screen in case window/process did not do that automatically
+    (
+      if ! "$window_fullscreen_path" "$window_xid" > /dev/null 2>&1; then
+        message --warning "Unable to expand to fullscreen window with XID $window_xid of process '$process_name' with PID $process_pid due to focus event!"
+      else
+        message --info "Window with XID $window_xid of process '$process_name' with PID $process_pid has been expanded into fullscreen due to focus event."
+      fi
+    ) &
+  fi
+
+  # Make window grab cursor if specified in config and that is not implicitly opened window
+  if [[ -n "${config_key_focus_cursor_grab_map["$section"]}" &&
+        -z "$hot" ]]; then
+    # Send to background as that is daemonized process
+    "$flux_cursor_grab" "$window_xid" > /dev/null 2>&1 &
+
+    background_focus_cursor_grab_map["$window_xid"]="$!"
+
+    # Print message about successful cursor grabbing if process still exists
+    (
+      sleep 0.2
+      if check_pid_existence "${background_focus_cursor_grab_map["$window_xid"]}"; then
+        message --info "Cursor for window with XID $window_xid of process '$process_name' with PID $process_pid has been grabbed due to focus event."
+      else
+        message --warning "Unable to grab cursor for window with XID $window_xid of process '$process_name' with PID $process_pid due to focus event!"
+      fi
+    ) &
+  fi
 }
