@@ -1,5 +1,5 @@
 # Required to unset limit for focused process
-focus_unset_limit(){
+handle_focus(){
   # Set end of message to not duplicate it
   local local_end_of_msg="due to focus event of window with XID $window_xid"
 

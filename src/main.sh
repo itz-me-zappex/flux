@@ -377,7 +377,7 @@ while read -r raw_event ||
         # Find matching section for process in config
         if find_matching_section; then
           # Unset CPU/FPS limit for focused process if it has been limited on unfocus
-          focus_unset_limit
+          handle_focus
 
           # Execute command on focus event if specified in config
           exec_focus
