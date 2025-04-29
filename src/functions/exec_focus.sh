@@ -29,7 +29,7 @@ exec_focus(){
         passed_section="$section" \
         passed_event_command="$local_temp_command" \
         passed_end_of_msg="due to appearance of window with XID $window_xid of process '$process_name' with PID $process_pid" \
-        passed_event_type='focus' \
+        passed_event_type='oneshot' \
         exec_on_event
       done <<< "${config_key_exec_oneshot_map["$section"]}"
 
