@@ -3,6 +3,9 @@ background_cpu_limit(){
   # Simplify access to delay specified in config
   local local_delay="${config_key_delay_map["$passed_section"]}"
 
+  # Simplify access to CPU limit value
+  local $local_cpu_limit="${config_key_cpu_limit_map["$passed_section"]}"
+
   # Wait before set limit and notify user if delay is specified
   if [[ "$local_delay" != '0' ]]; then
     message --verbose "Process '$passed_process_name' with PID $passed_process_pid will be CPU limited after $local_delay second(s) due to unfocus event of window with XID $passed_window_xid."
@@ -35,13 +38,13 @@ background_cpu_limit(){
   if check_pid_existence "$passed_process_pid"; then
     # Define message depending by whether delay is specified or not
     if [[ "$local_delay" == '0' ]]; then
-      message --info "Process '$passed_process_name' with PID $passed_process_pid has been CPU limited to ${config_key_cpu_limit_map["$passed_section"]}% due to unfocus event of window with XID $passed_window_xid."
+      message --info "Process '$passed_process_name' with PID $passed_process_pid has been CPU limited to $local_cpu_limit% due to unfocus event of window with XID $passed_window_xid."
     else
-      message --info "Process '$passed_process_name' with PID $passed_process_pid has been CPU limited to ${config_key_cpu_limit_map["$passed_section"]}% after $local_delay second(s) due to unfocus event of window with XID $passed_window_xid."
+      message --info "Process '$passed_process_name' with PID $passed_process_pid has been CPU limited to $local_cpu_limit% after $local_delay second(s) due to unfocus event of window with XID $passed_window_xid."
     fi
 
     # Run in background to make subprocess interruptable
-    cpulimit --lazy --limit="$(( "${config_key_cpu_limit_map["$passed_section"]}" * cpu_threads ))" --pid="$passed_process_pid" > /dev/null 2>&1 &
+    cpulimit --lazy --limit="$(( "$local_cpu_limit" * cpu_threads ))" --pid="$passed_process_pid" > /dev/null 2>&1 &
 
     # Remember PID of 'cpulimit' to terminate it if needed
     local local_cpulimit_pid="$!"
