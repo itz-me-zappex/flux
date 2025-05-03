@@ -65,6 +65,10 @@ all:
 	$(CFUNCTIONS_DIR)/forward_input_on_hang_wait.c \
 	-lX11 -lXext -lXRes
 
+	$(CC) $(CFLAGS) -o $(BUILD_DIR)/validate-x11-session $(CMODULES_DIR)/validate_x11_session.c \
+	$(CFUNCTIONS_DIR)/get_wm_window.c \
+	-lX11
+
 clean:
 	rm -rf $(BUILD_DIR)
 
@@ -77,6 +81,7 @@ install:
 	install -Dm 755 $(BUILD_DIR)/window-fullscreen $(PREFIX)/lib/flux/
 	install -Dm 755 $(BUILD_DIR)/select-window $(PREFIX)/lib/flux/
 	install -Dm 755 $(BUILD_DIR)/flux-cursor-grab $(PREFIX)/lib/flux/
+	install -Dm 755 $(BUILD_DIR)/validate-x11-session $(PREFIX)/lib/flux/
 
 	@if [[ $(PREFIX) != '/usr' ]]; then \
 		echo -e "\nwarning: Unable to install '10-flux.conf' to '/etc/security/limits.d' because that is not '/usr' prefix!\n" >&2; \
