@@ -222,6 +222,10 @@ else
   unset validate_x11_session_exit_code
 fi
 
+# Validate lock file
+validate_lock
+unset -f validate_lock
+
 # Preparation for event reading
 daemon_prepare
 unset -f daemon_prepare \
