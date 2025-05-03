@@ -51,7 +51,7 @@ handle_focus(){
   if [[ -n "${config_key_focus_cursor_grab_map["$section"]}" &&
         -z "$hot" ]]; then
     # Send to background as that is daemonized process
-    "$flux_cursor_grab" "$window_xid" > /dev/null 2>&1 &
+    "$flux_cursor_grab_path" "$window_xid" > /dev/null 2>&1 &
 
     background_focus_cursor_grab_map["$window_xid"]="$!"
 
