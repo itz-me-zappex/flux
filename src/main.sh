@@ -18,6 +18,11 @@ envvar_name
 # Version of daemon shown from 'parse_options()' if '--version' is specified
 daemon_version='1.25.3'
 
+# Set X11 display if not set
+if [[ -z "$DISPLAY" ]]; then
+  export DISPLAY=':0'
+fi
+
 # Set path to file containing daemon PID, needed to prevent multiple instances from running
 # Hardcoded in 'flux-event-reader' and it is not supposed to be changeable
 lock_file='/tmp/flux-lock'
@@ -34,7 +39,8 @@ case "$flux_path" in
   window_minimize_path="${daemon_prefix}/lib/flux/window-minimize"
   window_fullscreen_path="${daemon_prefix}/lib/flux/window-fullscreen"
   select_window_path="${daemon_prefix}/lib/flux/select-window"
-  flux_cursor_grab="${daemon_prefix}/lib/flux/flux-cursor-grab"
+  flux_cursor_grab_path="${daemon_prefix}/lib/flux/flux-cursor-grab"
+  validate_x11_session_path="${daemon_prefix}/lib/flux/validate-x11-session"
 ;;
 * )
   # Keep just executable directory
@@ -45,7 +51,8 @@ case "$flux_path" in
   window_minimize_path="${daemon_prefix}/window-minimize"
   window_fullscreen_path="${daemon_prefix}/window-fullscreen"
   select_window_path="${daemon_prefix}/select-window"
-  flux_cursor_grab="${daemon_prefix}/flux-cursor-grab"
+  flux_cursor_grab_path="${daemon_prefix}/flux-cursor-grab"
+  validate_x11_session_path="${daemon_prefix}/validate-x11-session"
 esac
 unset flux_path \
 daemon_prefix
@@ -192,11 +199,36 @@ unset is_section_useful_map \
 is_section_blank_map \
 config
 
+# Validate X11 session
+validate_x11_session
+validate_x11_session_exit_code="$?"
+
+# Define message depending by exit code
+if (( validate_x11_session_exit_code > 0 )); then
+  case "$validate_x11_session_exit_code" in
+  '1' )
+    message --error "Unable to start daemon, Wayland is not supported!"
+  ;;
+  '2' )
+    message --error "Unable to start daemon, X11 session is not running!"
+  ;;
+  '3' )
+    message --error "Unable to start daemon, EWMH-compatible window manager is not running!"
+  esac
+
+  exit 1
+else
+  unset -f validate_x11_session
+  unset validate_x11_session_exit_code
+fi
+
 # Preparation for event reading
 daemon_prepare
 unset -f daemon_prepare \
 colors_interpret \
 configure_prefixes
+
+quiet='' message --info "Flux has been started."
 
 # Set initial events count
 events_count='0'
@@ -212,13 +244,6 @@ while read -r raw_event ||
     continue
   else
     opened_windows="$raw_event"
-  fi
-
-  # Remember that daemon received events to print proper message on event reading tool termination
-  # And to print message about daemon start
-  if [[ -z "$display_has_been_opened" ]]; then
-    quiet='' message --info "Flux has been started."
-    display_has_been_opened='1'
   fi
 
   # Add opened windows as focus events once if '--hot' is specified, otherwise find implicitly opened windows and add those as focus events
@@ -407,12 +432,8 @@ while read -r raw_event ||
   unset events_array
 done < <("$flux_event_reader_path" 2>/dev/null)
 
-# Exit with an error if loop has been broken and daemon did not exit because of 'SIGTERM' or 'SIGINT'
-if [[ -n "$display_has_been_opened" ]]; then
-  message --warning "Event reader has been terminated!"
-  safe_exit
-  message --error "Flux has been terminated unexpectedly!"
-else
-  message --error "Something is wrong with X11 session or EWMH-compatible window manager is not running!"
-fi
+# Only for case if event reader appears terminated
+message --warning "Event reader has been terminated!"
+safe_exit
+message --error "Flux has been terminated unexpectedly!"
 exit 1
