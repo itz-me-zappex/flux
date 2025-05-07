@@ -6,6 +6,9 @@ background_cpu_limit(){
   # Simplify access to CPU limit value
   local local_cpu_limit="${config_key_cpu_limit_map["$passed_section"]}"
 
+  # Get real CPU limit
+  local local_real_cpu_limit="$(( local_cpu_limit * cpu_threads ))"
+
   # Wait before set limit and notify user if delay is specified
   if [[ "$local_delay" != '0' ]]; then
     message --verbose "Process '$passed_process_name' with PID $passed_process_pid will be CPU limited after $local_delay second(s) due to unfocus event of window with XID $passed_window_xid."
@@ -44,7 +47,7 @@ background_cpu_limit(){
     fi
 
     # Run in background to make subprocess interruptable
-    cpulimit --lazy --limit="$(( "$local_cpu_limit" * cpu_threads ))" --pid="$passed_process_pid" > /dev/null 2>&1 &
+    cpulimit --lazy --limit="$local_real_cpu_limit" --pid="$passed_process_pid" > /dev/null 2>&1 &
 
     # Remember PID of 'cpulimit' to terminate it if needed
     local local_cpulimit_pid="$!"
