@@ -4,7 +4,7 @@ background_cpu_limit(){
   local local_delay="${config_key_delay_map["$passed_section"]}"
 
   # Simplify access to CPU limit value
-  local $local_cpu_limit="${config_key_cpu_limit_map["$passed_section"]}"
+  local local_cpu_limit="${config_key_cpu_limit_map["$passed_section"]}"
 
   # Wait before set limit and notify user if delay is specified
   if [[ "$local_delay" != '0' ]]; then
