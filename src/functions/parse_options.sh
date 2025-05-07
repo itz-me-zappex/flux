@@ -48,52 +48,43 @@ parse_options(){
       select_window_exit_code="$?"
 
       if (( select_window_exit_code > 0 )) ; then
-        case "$select_window_exit_code" in
-        2 )
-          case "$get" in
-          focus )
+        case "$get" in
+        focus )
+          case "$select_window_exit_code" in
+          2 )
             message --error "Unable to open display to obtain process info of focused window!"
           ;;
-          pick )
-            message --error "Unable to open display to create window picker!"
-          esac
-        ;;
-        3 )
-          case "$get" in
-          focus )
+          3 )
             message --error "Unable to obtain process info of focused window because EWMH-compatible window manager is not running!"
           ;;
-          pick )
-            message --error "Unable to create window picker because EWMH-compatible window manager is not running!"
-          esac
-        ;;
-        4 )
-          message --error "Unable to create window picker because pointer is already grabbed by another window!"
-        ;;
-        5 )
-          case "$get" in
-          focus )
+          5 )
             message --error "Unable to obtain process info of focused window because it is invalid!"
           ;;
-          pick )
-            message --error "Unable to obtain process info of picked window because it is invalid!"
-          esac
-        ;;
-        6 )
-          case "$get" in
-          focus )
+          6 )
             message --error "Unable to obtain process info of focused window!"
           ;;
-          pick )
-            message --error "Unable to obtain process info of picked window!"
+          * )
+            message --error "Unexpected error occured trying to obtain process info of focused window!"
           esac
         ;;
-        * )
-          case "$get" in
-          focus )
-            message --error "Unexpected error occured trying to obtain process info of focused window!"
+        pick )
+          case "$select_window_exit_code" in
+          2 )
+            message --error "Unable to open display to create window picker!"
           ;;
-          pick )
+          3 )
+            message --error "Unable to create window picker because EWMH-compatible window manager is not running!"
+          ;;
+          4 )
+            message --error "Unable to create window picker because pointer is already grabbed by another window!"
+          ;;
+          5 )
+            message --error "Unable to obtain process info of picked window because it is invalid!"
+          ;;
+          6 )
+            message --error "Unable to obtain process info of picked window!"
+          ;;
+          * )
             message --error "Unexpected error occured trying to create window picker!"
           esac
         esac
