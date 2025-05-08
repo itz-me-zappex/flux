@@ -44,45 +44,70 @@ parse_options(){
         exit 1
       fi
 
+      # Validate X11 session
+      validate_x11_session
+      validate_x11_session_exit_code="$?"
+
+      # Define message depending by exit code
+      if (( validate_x11_session_exit_code > 0 )); then
+        case "$get" in
+        focus )
+          case "$validate_x11_session_exit_code" in
+          1 )
+            message --error "Unable to obtain PID and XID of focused window, Wayland is not supported!"
+          ;;
+          2 )
+            message --error "Unable to obtain PID and XID of focused window, X11 session is not running!"
+          ;;
+          3 )
+            message --error "Unable to obtain PID and XID of focused window, EWMH-compatible window manager is not running!"
+          esac
+        ;;
+        pick )
+          case "$validate_x11_session_exit_code" in
+          1 )
+            message --error "Unable to create window picker, Wayland is not supported!"
+          ;;
+          2 )
+            message --error "Unable to create window picker, X11 session is not running!"
+          ;;
+          3 )
+            message --error "Unable to create window picker, EWMH-compatible window manager is not running!"
+          esac
+        esac
+
+        exit 1
+      fi
+
+      # Execute module responsible for getting window info and remember output
       window_info="$("$select_window_path" "$get" 2>/dev/null)"
       select_window_exit_code="$?"
 
+      # Define message depending by exit code
       if (( select_window_exit_code > 0 )) ; then
         case "$get" in
         focus )
           case "$select_window_exit_code" in
-          2 )
-            message --error "Unable to open display to obtain process info of focused window!"
-          ;;
           3 )
-            message --error "Unable to obtain process info of focused window because EWMH-compatible window manager is not running!"
+            message --error "Unable to obtain PID and XID of focused window, window is not stacking one!"
           ;;
-          5 )
-            message --error "Unable to obtain process info of focused window because it is invalid!"
-          ;;
-          6 )
-            message --error "Unable to obtain process info of focused window!"
+          4 )
+            message --error "Unable to obtain PID and XID of focused window, probably window has been closed too early!"
           ;;
           * )
-            message --error "Unexpected error occured trying to obtain process info of focused window!"
+            message --error "Unexpected error occured trying to obtain PID and XID of focused window!"
           esac
         ;;
         pick )
           case "$select_window_exit_code" in
           2 )
-            message --error "Unable to open display to create window picker!"
+            message --error "Unable to create window picker, cursor is already grabbed by another window!"
           ;;
           3 )
-            message --error "Unable to create window picker because EWMH-compatible window manager is not running!"
+            message --error "Unable to obtain PID and XID of picked window, window is not stacking one!"
           ;;
           4 )
-            message --error "Unable to create window picker because pointer is already grabbed by another window!"
-          ;;
-          5 )
-            message --error "Unable to obtain process info of picked window because it is invalid!"
-          ;;
-          6 )
-            message --error "Unable to obtain process info of picked window!"
+            message --error "Unable to obtain PID and XID of picked window, probably window has been closed too early!"
           ;;
           * )
             message --error "Unexpected error occured trying to create window picker!"

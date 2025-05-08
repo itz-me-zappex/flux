@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
   Display *display = XOpenDisplay(NULL);
 
   if (!display) {
-    return 2;
+    return 1;
   }
 
   Window root = DefaultRootWindow(display);
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
 
   if (wm_window == None) {
     XCloseDisplay(display);
-    return 3;
+    return 1;
   }
 
   Window window;
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
         None, None, CurrentTime);
     if (grab_status != GrabSuccess) {
       XCloseDisplay(display);
-      return 4;
+      return 2;
     }
     XUngrabPointer(display, CurrentTime);
 
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
     if (!window_exists &&
         window != wm_window) {
       XCloseDisplay(display);
-      return 5;
+      return 3;
     }
   }
 
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
     printf("%ld=%d\n", window, window_process);
   } else {
     XCloseDisplay(display);
-    return 6;
+    return 4;
   }
 
   XCloseDisplay(display);
