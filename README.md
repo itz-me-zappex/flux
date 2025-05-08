@@ -80,32 +80,32 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - Detects and handles both explicitly (appeared with focus event) and implicitly (appeared without focus event) opened windows.
 ## Dependencies
 ### Arch Linux and dereatives
-**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libxres` `libx11` `libxext` `xorgproto`
+**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libxres` `libx11` `libxext` `xorgproto` `less`
 
 **Optional:** `mangohud` `lib32-mangohud` `libnotify`
 
 **Build:** `libxres` `libx11` `libxext` `xorgproto` `make` `gcc`
 ### Debian and dereatives
-**Required:** `bash` `cpulimit` `coreutils` `libxres1` `libx11-6` `libxext6`
+**Required:** `bash` `cpulimit` `coreutils` `libxres1` `libx11-6` `libxext6` `less`
 
 **Optional:** `mangohud` `mangohud:i386` `libnotify-bin`
 
 **Build:** `libxres-dev` `libx11-dev` `libxext-dev` `x11proto-dev` `make` `gcc`
 ### Void Linux and dereatives
-**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext` `xorgproto`
+**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext` `xorgproto` `less`
 
 **Optional:** `MangoHud` `MangoHud-32bit` `libnotify`
 
 **Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto` `make` `gcc`
 ### Fedora and dereatives
-**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext`
+**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext` `less`
 
 **Optional:** `mangohud` `mangohud.i686` `libnotify`
 
 **Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorg-x11-proto-devel` `make` `gcc`
 ### OpenSUSE Tumbleweed and dereatives
 
-**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXRes1` `libX11-6` `libXext6`
+**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXRes1` `libX11-6` `libXext6` `less`
 
 **Optional:** `mangohud` `mangohud-32bit` `libnotify4`
 
