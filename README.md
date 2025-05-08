@@ -283,11 +283,11 @@ Just add command to autostart using your DE/WM settings. Running daemon as root 
 | `idle` | Boolean, set `SCHED_IDLE` scheduling policy for process on unfocus event to greatly reduce its priority. Daemon should run as `@flux` to be able restore `SCHED_RR`/`SCHED_FIFO`/`SCHED_OTHER`/`SCHED_BATCH` scheduling policy and only as root to restore `SCHED_DEADLINE` scheduling policy (if daemon does not have sufficient rights to restore these scheduling policies, it will print warning and will not change anything). Defaults to `false`. |
 
 #### Limits configuration
-| Key                      | Description                                                                                                                                                                                                                                                                                                                                                                 |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `delay`                  | Delay in seconds before applying CPU/FPS limit or setting `SCHED_IDLE`. Defaults to `0`, supports values with floating point.                                                                                                                                                                                                                                               |
-| `mangohud-source-config` | Path to MangoHud config which should be used as a base before apply FPS limit in `mangohud-config`, if not specified, then target behaves as source. Useful if you not looking for duplicate MangoHud config for multiple games.                                                                                                                                            |
-| `mangohud-config`        | Path to MangoHud config which should be changed (target), required if you want change FPS limits and requires `fps-unfocus`. Make sure you created specified config, at least just keep it blank, otherwise MangoHud will not be able to load new config on fly and daemon will throw warnings related to config absence. Do not use the same config for multiple sections! |
+| Key | Description |
+|-----|-------------|
+| `delay` | Delay in seconds before applying CPU/FPS limit or setting `SCHED_IDLE`. Defaults to `0`, supports values with floating point. |
+| `mangohud-source-config` | Path to MangoHud config which should be used as a base before apply FPS limit in `mangohud-config`, if not specified, then target behaves as source. Useful if you not looking for duplicate MangoHud config for multiple games. |
+| `mangohud-config` | Path to MangoHud config which should be changed (target), required if you want change FPS limits and requires `fps-unfocus`. Make sure you created specified config, at least just keep it blank, otherwise MangoHud will not be able to load new config on fly and daemon will throw warnings related to config absence. Do not use the same config for multiple sections! |
 
 #### Miscellaneous
 | Key | Description |
@@ -306,6 +306,7 @@ Daemon searches for following configuration files by priority:
 - `$XDG_CONFIG_HOME/flux.ini`
 - `$HOME/.config/flux.ini`
 - `/etc/flux.ini`
+
 ### Limitations
 As INI is not standartized, I should mention all supported features here.
 
@@ -322,6 +323,7 @@ As INI is not standartized, I should mention all supported features here.
 - Line continuation (using `\` symbol).
 - Inline comments
 - Anything else that unmentioned here.
+
 ### Configuration example
 #### Long examples
 ```ini
