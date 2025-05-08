@@ -80,7 +80,7 @@ parse_config(){
         # Print warning and mark as error if appending to unsupported key
         if [[ -n "$local_append" &&
               ! "$local_config_key" =~ ^('exec-oneshot'|'exec-focus'|'exec-unfocus'|'lazy-exec-focus'|'lazy-exec-unfocus') ]]; then
-          message --warning "Appending values in '$local_section' section to '$local_config_key' config key is not supported!"
+          message --warning "$local_line_count_msg Appending values in '$local_section' section to '$local_config_key' config key is not supported!"
           (( parse_config_error_count++ ))
         fi
 
@@ -270,7 +270,7 @@ parse_config(){
             (( parse_config_error_count++ ))
           esac
         else
-          message --warning "Config key '$local_config_key' is specified without value in '$local_section' section!"
+          message --warning "$local_line_count_msg Config key '$local_config_key' is specified without value in '$local_section' section!"
           (( parse_config_error_count++ ))
         fi
       else
