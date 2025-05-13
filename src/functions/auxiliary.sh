@@ -193,3 +193,13 @@ shorten_path(){
   # Value will be printed in message from command substitution
   echo "$local_path"
 }
+
+# Required to detect whether section is a group or not
+section_is_group(){
+  local local_section="$1"
+  if [[ "$local_section" =~ ^'@'.* ]]; then
+    return 0
+  else
+    return 1
+  fi
+}

@@ -77,10 +77,17 @@ parse_config(){
           fi
         fi
 
-        # Print warning and mark as error if appending to unsupported key
+        # Print warning and mark as an error if appending to unsupported key
         if [[ -n "$local_append" &&
-              ! "$local_config_key" =~ ^('exec-oneshot'|'exec-focus'|'exec-unfocus'|'lazy-exec-focus'|'lazy-exec-unfocus') ]]; then
+              ! "$local_config_key" =~ ^('exec-oneshot'|'exec-focus'|'exec-unfocus'|'lazy-exec-focus'|'lazy-exec-unfocus')$ ]]; then
           message --warning "$local_line_count_msg Appending values in '$local_section' section to '$local_config_key' config key is not supported!"
+          (( parse_config_error_count++ ))
+        fi
+
+        # Print warning and mark as an error if identifiers appear used in group
+        if section_is_group "$local_section" &&
+           [[ "$local_config_key" =~ ^('name'|'owner'|'command')$ ]]; then
+          message --warning "$local_line_count_msg Identifiers, including '$local_config_key' config key are not supported in groups!"
           (( parse_config_error_count++ ))
         fi
 
@@ -263,6 +270,21 @@ parse_config(){
             fi
 
             is_section_useful_map["$local_section"]='1'
+            unset is_section_blank_map["$local_section"]
+          ;;
+          group )
+            config_key_group_map["$local_section"]="$local_config_value"
+            is_section_useful_map["$local_section"]='1'
+
+            # Exit with an error if used inside group or group name is not specified after '@'
+            if section_is_group "$local_section"; then
+              message --warning "$local_line_count_msg Do not use '$local_config_key' config key inside '$local_section' group!"
+              (( parse_config_error_count++ ))
+            elif ! section_is_group "$local_config_value"; then
+              message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key in '$local_section' section is not a group!"
+              (( parse_config_error_count++ ))
+            fi
+
             unset is_section_blank_map["$local_section"]
           ;;
           * )

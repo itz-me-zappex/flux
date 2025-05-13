@@ -120,7 +120,8 @@ config_key_fps_focus_map \
 config_key_idle_map \
 config_key_unfocus_minimize_map \
 config_key_focus_fullscreen_map \
-config_key_focus_cursor_grab_map
+config_key_focus_cursor_grab_map \
+config_key_group_map
 
 # Needed to detect blank sections in config during parsing
 declare -A is_section_blank_map
@@ -192,12 +193,20 @@ get_realpath \
 simplify_bool
 unset max_cpu_limit
 
+# Get values from groups
+handle_groups
+unset -f config_get_group_values
+
 # Config keys validation
 validate_config_keys
 unset -f validate_config_keys
 unset is_section_useful_map \
 is_section_blank_map \
 config
+
+# Unset groups to avoid false positives due to missing identifiers (overwrites sections array)
+unset_groups
+unset -f unset_groups
 
 # Validate X11 session
 validate_x11_session

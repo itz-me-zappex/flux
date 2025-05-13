@@ -9,7 +9,8 @@ validate_config_keys(){
       (( parse_config_error_count++ ))
     else
       # Exit with an error if neither identifier 'name' nor 'command' is specified
-      if [[ -z "${config_key_name_map["$local_temp_section"]}" &&
+      if ! section_is_group "$local_temp_section" &&
+         [[ -z "${config_key_name_map["$local_temp_section"]}" &&
             -z "${config_key_command_map["$local_temp_section"]}" ]]; then
         message --warning "At least one process identifier required in '$local_temp_section' section!"
         (( parse_config_error_count++ ))
