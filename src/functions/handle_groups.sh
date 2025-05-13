@@ -37,7 +37,9 @@ handle_groups(){
         config_key_unfocus_minimize_map["$local_temp_section"]="${config_key_unfocus_minimize_map["$local_group"]}"
         config_key_focus_fullscreen_map["$local_temp_section"]="${config_key_focus_fullscreen_map["$local_group"]}"
         config_key_focus_cursor_grab_map["$local_temp_section"]="${config_key_focus_cursor_grab_map["$local_group"]}"
-        config_key_group_map["$local_temp_section"]="${config_key_group_map["$local_group"]}"
+
+        # Group key specified in section is no longer needed
+        unset config_key_group_map["$local_temp_section"]
       fi
     fi
   done
