@@ -123,6 +123,9 @@ config_key_focus_fullscreen_map \
 config_key_focus_cursor_grab_map \
 config_key_group_map
 
+# Needed to remember line and order of keys in section, used to handle 'group' config key and print line in warnings after parsing (validation)
+declare -A config_keys_order_map
+
 # Needed to detect blank sections in config during parsing
 declare -A is_section_blank_map
 

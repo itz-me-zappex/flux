@@ -203,3 +203,24 @@ section_is_group(){
     return 1
   fi
 }
+
+# Required to get number of line from section using key name
+# get_key_line <section> - section line
+# get_key_line <section> <key> - key line
+get_key_line(){
+  local local_section="$1"
+  local local_key_name="$2"
+
+  # Get section line if key name is not specified
+  if [[ -z "$local_key_name" ]]; then
+    echo "${config_keys_order_map["$local_section"]/' '*/}"
+  else
+    # Get key line
+    local local_temp_key
+    for local_temp_key in ${config_keys_order_map["$local_section"]}; do
+      if [[ "$local_temp_key" == *".$local_key_name" ]]; then
+        echo "${local_temp_key/'.'*/}"
+      fi
+    done
+  fi
+}
