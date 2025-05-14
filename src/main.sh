@@ -205,11 +205,14 @@ validate_config_keys
 unset -f validate_config_keys
 unset is_section_useful_map \
 is_section_blank_map \
-config
+config \
+get_key_line \
+config_keys_order_map
 
 # Unset groups to avoid false positives due to missing identifiers (overwrites sections array)
 unset_groups
-unset -f unset_groups
+unset -f unset_groups \
+section_is_group
 
 # Validate X11 session
 validate_x11_session
