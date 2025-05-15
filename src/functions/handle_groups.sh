@@ -45,38 +45,63 @@ handle_groups(){
         fi
 
         local local_key_line="$(get_key_line "$local_temp_section" 'exec-oneshot')"
-        if [[ -n "${config_key_exec_oneshot_map["$local_group"]}" ]] &&
+        local local_key_value="${config_key_exec_oneshot_map["$local_group"]}"
+        if [[ -n "$local_key_value" ]] &&
            (( local_key_line == 0 )) ||
            (( local_group_key_line > local_key_line )); then
-          config_key_exec_oneshot_map["$local_temp_section"]="${config_key_exec_oneshot_map["$local_group"]}"
+          if [[ "$local_key_value" =~ ^$'\n' ]]; then
+            config_key_exec_oneshot_map["$local_temp_section"]+="$local_key_value"
+          else
+            config_key_exec_oneshot_map["$local_temp_section"]="$local_key_value"
+          fi
         fi
 
         local local_key_line="$(get_key_line "$local_temp_section" 'exec-focus')"
-        if [[ -n "${config_key_exec_focus_map["$local_group"]}" ]] &&
+        local local_key_value="${config_key_exec_focus_map["$local_group"]}"
+        if [[ -n "$local_key_value" ]] &&
            (( local_key_line == 0 )) ||
            (( local_group_key_line > local_key_line )); then
-          config_key_exec_focus_map["$local_temp_section"]="${config_key_exec_focus_map["$local_group"]}"
+          if [[ "$local_key_value" =~ ^$'\n' ]]; then
+            config_key_exec_focus_map["$local_temp_section"]+="$local_key_value"
+          else
+            config_key_exec_focus_map["$local_temp_section"]="$local_key_value"
+          fi
         fi
 
         local local_key_line="$(get_key_line "$local_temp_section" 'exec-unfocus')"
-        if [[ -n "${config_key_exec_unfocus_map["$local_group"]}" ]] &&
+        local local_key_value="${config_key_exec_unfocus_map["$local_group"]}"
+        if [[ -n "$local_key_value" ]] &&
            (( local_key_line == 0 )) ||
            (( local_group_key_line > local_key_line )); then
-          config_key_exec_unfocus_map["$local_temp_section"]="${config_key_exec_unfocus_map["$local_group"]}"
+          if [[ "$local_key_value" =~ ^$'\n' ]]; then
+            config_key_exec_unfocus_map["$local_temp_section"]+="$local_key_value"
+          else
+            config_key_exec_unfocus_map["$local_temp_section"]="$local_key_value"
+          fi
         fi
 
         local local_key_line="$(get_key_line "$local_temp_section" 'lazy-exec-focus')"
-        if [[ -n "${config_key_lazy_exec_focus_map["$local_group"]}" ]] &&
+        local local_key_value="${config_key_lazy_exec_focus_map["$local_group"]}"
+        if [[ -n "$local_key_value" ]] &&
            (( local_key_line == 0 )) ||
            (( local_group_key_line > local_key_line )); then
-          config_key_lazy_exec_focus_map["$local_temp_section"]="${config_key_lazy_exec_focus_map["$local_group"]}"
+          if [[ "$local_key_value" =~ ^$'\n' ]]; then
+            config_key_lazy_exec_focus_map["$local_temp_section"]+="$local_key_value"
+          else
+            config_key_lazy_exec_focus_map["$local_temp_section"]="$local_key_value"
+          fi
         fi
 
         local local_key_line="$(get_key_line "$local_temp_section" 'lazy-exec-unfocus')"
-        if [[ -n "${config_key_lazy_exec_unfocus_map["$local_group"]}" ]] &&
+        local local_key_value="${config_key_lazy_exec_unfocus_map["$local_group"]}"
+        if [[ -n "$local_key_value" ]] &&
            (( local_key_line == 0 )) ||
            (( local_group_key_line > local_key_line )); then
-          config_key_lazy_exec_unfocus_map["$local_temp_section"]="${config_key_lazy_exec_unfocus_map["$local_group"]}"
+          if [[ "$local_key_value" =~ ^$'\n' ]]; then
+            config_key_lazy_exec_unfocus_map["$local_temp_section"]+="$local_key_value"
+          else
+            config_key_lazy_exec_unfocus_map["$local_temp_section"]="$local_key_value"
+          fi
         fi
 
         local local_key_line="$(get_key_line "$local_temp_section" 'mangohud-source-config')"
