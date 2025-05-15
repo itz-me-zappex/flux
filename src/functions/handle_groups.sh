@@ -57,7 +57,7 @@ handle_groups(){
             fi
           elif (( local_group_key_line < local_key_line )) &&
                [[ "$local_key_value" =~ ^$'\n' ]]; then
-            local local_group_key_value+=$'\n'"$local_key_value"
+            local local_group_key_value+="$local_key_value"
             config_key_exec_oneshot_map["$local_temp_section"]="$local_group_key_value"
           fi
         fi
@@ -75,7 +75,7 @@ handle_groups(){
             fi
           elif (( local_group_key_line < local_key_line )) &&
                [[ "$local_key_value" =~ ^$'\n' ]]; then
-            local local_group_key_value+=$'\n'"$local_key_value"
+            local local_group_key_value+="$local_key_value"
             config_key_exec_focus_map["$local_temp_section"]="$local_group_key_value"
           fi
         fi
@@ -93,7 +93,7 @@ handle_groups(){
             fi
           elif (( local_group_key_line < local_key_line )) &&
                [[ "$local_key_value" =~ ^$'\n' ]]; then
-            local local_group_key_value+=$'\n'"$local_key_value"
+            local local_group_key_value+="$local_key_value"
             config_key_exec_unfocus_map["$local_temp_section"]="$local_group_key_value"
           fi
         fi
@@ -111,7 +111,7 @@ handle_groups(){
             fi
           elif (( local_group_key_line < local_key_line )) &&
                [[ "$local_key_value" =~ ^$'\n' ]]; then
-            local local_group_key_value+=$'\n'"$local_key_value"
+            local local_group_key_value+="$local_key_value"
             config_key_lazy_exec_focus_map["$local_temp_section"]="$local_group_key_value"
           fi
         fi
@@ -129,7 +129,7 @@ handle_groups(){
             fi
           elif (( local_group_key_line < local_key_line )) &&
                [[ "$local_key_value" =~ ^$'\n' ]]; then
-            local local_group_key_value+=$'\n'"$local_key_value"
+            local local_group_key_value+="$local_key_value"
             config_key_lazy_exec_unfocus_map["$local_temp_section"]="$local_group_key_value"
           fi
         fi
