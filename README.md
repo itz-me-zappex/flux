@@ -28,6 +28,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
     - [Limits](#limits)
     - [Limits configuration](#limits-configuration)
     - [Miscellaneous](#miscellaneous)
+  - [Groups](#groups)
   - [Config path](#config-path)
   - [Limitations](#limitations)
   - [Configuration example](#configuration-example)
@@ -300,6 +301,64 @@ Just add command to autostart using your DE/WM settings. Running daemon as root 
 | `unfocus-minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`. Defaults to `false`. |
 | `focus-fullscreen` | Boolean, sends X event to window manager on focus to expand window to fullscreen, useful if game (e.g. Forza Horizon 4) handles window mode in weird a way. Defaults to `false`. |
 | `focus-cursor-grab` | Boolean, daemon grabs cursor if possible, binds it to window and because of X11 nature which prevents input to anything but client which owns cursor (`flux-cursor-grab` module in background in this case) - redirects all input into focused window. This ugly layer prevents cursor from escaping to second monitor in some games at cost of *possible* input lag. Cursor is ungrabbed on unfocus event. Defaults to `false`. |
+| `group` | Specify group from which section suppossed to inherit rules. Group declaration should begin with `@` symbol in both its section name and in value of `group` key. |
+
+### Groups
+To avoid repeating yourself, reduce config file size and simplify editing, you may want to create and use groups.
+
+Order of `group` config key matters a lot, if you want to overwrite value from group, specify key below `group = @<group>`, otherwise - above. If you want to append value to key from group, then use `+=` **after** `group` config key.
+
+Group name does not matter, except section should begin with `@` symbol. That is how daemon defines whether that is just a section or group.
+
+Position of group declaration in config file does not matter at all.
+
+Using multiple groups in one section at the same time is not possible.
+
+Group **should not** contain identifiers e.g. `name`, `owner` and/or `command`.
+
+P.S.: Groups inside groups are not supported, I have no idea how to implement this. That could be cool to create groups with appending rules to another one.
+
+To make things more clear, here is an example how to create and use groups:
+```ini
+[@games-overclock]
+exec-focus += wpctl set-mute -p $FLUX_PROCESS_PID 0
+exec-unfocus += wpctl set-mute -p $FLUX_PROCESS_PID 1
+lazy-exec-focus += nvidia-settings -a '[gpu:0]/DigitalVibrance=150'
+lazy-exec-focus += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=200'
+lazy-exec-focus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=2000'
+lazy-exec-unfocus += nvidia-settings -a '[gpu:0]/DigitalVibrance=0'
+lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=0'
+lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=0'
+exec-oneshot += renice -n -4 $FLUX_PROCESS_PID
+exec-oneshot += find ~/.nv -type f -exec cat {} + > /dev/null
+
+[@games]
+exec-focus += wpctl set-mute -p $FLUX_PROCESS_PID 0
+exec-unfocus += wpctl set-mute -p $FLUX_PROCESS_PID 1
+lazy-exec-focus += nvidia-settings -a '[gpu:0]/DigitalVibrance=150'
+lazy-exec-unfocus += nvidia-settings -a '[gpu:0]/DigitalVibrance=0'
+exec-oneshot += renice -n -4 $FLUX_PROCESS_PID
+exec-oneshot += find ~/.nv -type f -exec cat {} + > /dev/null
+
+[Geometry Dash]
+name = GeometryDash.exe
+cpu-limit = 2%
+idle = true
+group = @games-overclock
+
+[Ember Knights]
+name = EmberKnights_64.exe
+cpu-limit = 5%
+idle = true
+unfocus-minimize = true
+group = @games
+
+[Alan Wake]
+name = AlanWake.exe
+cpu-limit = 0%
+group = @games-overclock
+```
+
 
 ### Config path
 Daemon searches for following configuration files by priority:
