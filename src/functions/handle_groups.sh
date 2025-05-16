@@ -184,9 +184,6 @@ handle_groups(){
            (( local_group_key_line > local_key_line )); then
           config_key_focus_cursor_grab_map["$local_temp_section"]="$local_group_key_value"
         fi
-
-        # Group key specified in section is no longer needed
-        unset config_key_group_map["$local_temp_section"]
       fi
     fi
   done

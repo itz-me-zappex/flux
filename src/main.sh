@@ -199,6 +199,7 @@ unset max_cpu_limit
 # Get values from groups
 handle_groups
 unset -f config_get_group_values
+unset config_key_group_map
 
 # Config keys validation
 validate_config_keys
