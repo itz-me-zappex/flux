@@ -1,5 +1,6 @@
 ## flux
 Advanced daemon for X11 desktops and window managers, designed to automatically limit FPS/CPU usage of unfocused windows and run commands on focus and unfocus events. Written in Bash and partially in C.
+
 ## Navigation
 - [Known issues](#known-issues)
 - [Features](#features)
@@ -49,20 +50,20 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [Preload shader cache on window appearance to avoid stuttering](#preload-shader-cache-on-window-appearance-to-avoid-stuttering)
     - [NVIDIA](#nvidia-1)
     - [Mesa (AMD/Intel/NVIDIA with Nouveau)](#mesa-amdintelnvidia-with-nouveau)
-  - [Types of limits and which you should use](#types-of-limits-and-which-you-should-use)
 - [Possible questions](#possible-questions)
-  - [How does that daemon work?](#how-does-that-daemon-work)
-  - [Does that daemon reduce performance?](#does-that-daemon-reduce-performance)
+  - [How does this daemon work?](#how-does-this-daemon-work)
+  - [Does this daemon reduce performance?](#does-this-daemon-reduce-performance)
   - [May I get banned in game because of this daemon?](#may-i-get-banned-in-game-because-of-this-daemon)
-  - [Why was that daemon developed?](#why-was-that-daemon-developed)
+  - [Why was this daemon developed?](#why-was-this-daemon-developed)
   - [Why is code so complicated?](#why-is-code-so-complicated)
-  - [Why not just use Gamescope to set FPS limit on unfocus?](#why-not-just-use-gamescope-to-set-FPS-limit-on-unfocus)
   - [What about Wayland support?](#what-about-wayland-support)
   - [Why did you write it in Bash?](#why-did-you-write-it-in-bash)
+
 ## Known issues
 - Freezing online/multiplayer games by setting `cpu-limit` to `0%` causes disconnects. Use less aggressive CPU limit to allow game to send/receive packets.
 - Stuttery audio in unfocused game if CPU limit is pretty aggressive, that should be expected because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. If you use Pipewire with Wireplumber, you may want to mute process as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
 - Some games under Wine/Proton may not like `flux-cursor-grab`, meaning that if game gets focus without clicking on it with mouse (e.g. after Alt+Tab), cursor will be grabbed and will not work outside of window, but still will be able to escape, that happens for me with Ori and the Will of the Wisps in windowed mode for example. Also cursor grabbing in daemon does not work for all games, because a lot of those grab cursor manually, so cursor grabbing unneeded in this case and you will see warning in log/output that daemon unable to grab cursor, it is okay.
+
 ## Features
 - CPU and FPS limiting process on unfocus and unlimiting on focus (FPS limiting requires game running using MangoHud with already existing config file).
 - Reducing process priority on unfocus and restoring it on focus.
@@ -79,6 +80,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - Survives a whole DE/WM restart (not relogin) and continues work without issues.
 - Supports most of X11 DEs/WMs [(EWMH-compatible ones)](<https://specifications.freedesktop.org/wm-spec/latest/>) and does not rely on neither GPU nor its driver.
 - Detects and handles both explicitly (appeared with focus event) and implicitly (appeared without focus event) opened windows.
+
 ## Dependencies
 ### Arch Linux and dereatives
 **Required:** `bash` `util-linux` `cpulimit` `coreutils` `libxres` `libx11` `libxext` `xorgproto` `less`
@@ -86,60 +88,70 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 **Optional:** `mangohud` `lib32-mangohud` `libnotify`
 
 **Build:** `libxres` `libx11` `libxext` `xorgproto` `make` `gcc`
+
 ### Debian and dereatives
 **Required:** `bash` `cpulimit` `coreutils` `libxres1` `libx11-6` `libxext6` `less`
 
 **Optional:** `mangohud` `mangohud:i386` `libnotify-bin`
 
 **Build:** `libxres-dev` `libx11-dev` `libxext-dev` `x11proto-dev` `make` `gcc`
+
 ### Void Linux and dereatives
 **Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext` `xorgproto` `less`
 
 **Optional:** `MangoHud` `MangoHud-32bit` `libnotify`
 
 **Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto` `make` `gcc`
+
 ### Fedora and dereatives
 **Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext` `less`
 
 **Optional:** `mangohud` `mangohud.i686` `libnotify`
 
 **Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorg-x11-proto-devel` `make` `gcc`
-### OpenSUSE Tumbleweed and dereatives
 
+### OpenSUSE Tumbleweed and dereatives
 **Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXRes1` `libX11-6` `libXext6` `less`
 
 **Optional:** `mangohud` `mangohud-32bit` `libnotify4`
 
 **Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto-devel` `make` `gcc`
+
 ## Building and installation
 ### Arch Linux and dereatives
 Make sure you have installed `base-devel` package before continue.
+
 #### Install `cpulimit` dependency from AUR
 ```bash
 git clone 'https://aur.archlinux.org/cpulimit.git' && cd 'cpulimit' && makepkg -sric && cd ..
 ```
+
 #### Clone this repository and use PKGBUILD to install daemon
 ```bash
 git clone https://github.com/itz-me-zappex/flux.git && cd flux && makepkg -sric
 ```
+
 #### Add user to `flux` group to bypass limitations related to changing scheduling policies
 ```bash
 sudo usermod -aG flux "$USER"
 ```
+
 ### Manual installation using release tarball
 Use this method if you using different distro. Make sure you have installed dependencies as described [here](#dependencies) before continue.
+
 #### Make options
-| Option      | Description                                                                                              |
-| ----------- | -------------------------------------------------------------------------------------------------------- |
-| `clean`     | Remove `build/` in repository directory with all files created there after `make`.                       |
-| `install`   | Install daemon to prefix, can be changed using `$PREFIX`, defaults to `/usr/local`.                      |
+| Option | Description |
+|--------|-------------|
+| `clean` | Remove `build/` in repository directory with all files created there after `make`. |
+| `install` | Install daemon to prefix, can be changed using `$PREFIX`, defaults to `/usr/local`. |
 | `uninstall` | Remove `bin/flux` and `lib/flux/` from prefix, can be changed using `$PREFIX`, defaults to `/usr/local`. |
+
 #### Make environment variables
-| Variable | Description                                                                           |
-| -------- | ------------------------------------------------------------------------------------- |
+| Variable | Description |
+|----------|-------------|
 | `PREFIX` | Install daemon to `<PREFIX>/bin/` and `<PREFIX>/lib/flux/`, defaults to `/usr/local`. |
-| `CC`     | C compiler, defaults to `gcc`.                                                        |
-| `CFLAGS` | C compiler options, defaults to `-O2 -s`.                                             |
+| `CC` | C compiler, defaults to `gcc`. |
+| `CFLAGS` | C compiler options, defaults to `-O2 -s`. |
 
 #### Download latest release with source
 ```bash
@@ -359,7 +371,6 @@ cpu-limit = 0%
 group = @games-overclock
 ```
 
-
 ### Config path
 Daemon searches for following configuration files by priority:
 - `$XDG_CONFIG_HOME/flux.ini`
@@ -395,7 +406,7 @@ cpu-limit = 0%
 lazy-exec-focus = killall picom
 lazy-exec-unfocus = picom
 
-; Set FPS limit to 5, minimize (as that is borderless window) and mute on unfocus, restore FPS to 60, unmute and expand to fullscreen on focus
+; Set FPS limit to 5, minimize (as this is borderless window) and mute on unfocus, restore FPS to 60, unmute and expand to fullscreen on focus
 [Forza Horizon 4]
 name = ForzaHorizon4.exe
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\ForzaHorizon4\ForzaHorizon4.exe 
@@ -533,14 +544,15 @@ Add following lines to section responsible for target (use your own values):
 ; Increase digital vibrance on focus and revert on unfocus
 lazy-exec-focus += nvidia-settings -a '[gpu:0]/DigitalVibrance=150'
 lazy-exec-unfocus += nvidia-settings -a '[gpu:0]/DigitalVibrance=0'
-
 ```
+
 #### Mesa (AMD/Intel)
 ```ini
 ; Increase digital vibrance on focus and revert on unfocus
 lazy-exec-focus += vibrant-cli DisplayPort-0 2.3
 lazy-exec-unfocus += vibrant-cli DisplayPort-0 1
 ```
+
 ### Preload shader cache on window appearance to avoid stuttering
 **Note:** That is how bufferization works, you just need to load file to memory by reading it *somehow* and kernel will not read it from disk again relying on RAM instead.
 
@@ -550,29 +562,30 @@ Add following line to section responsible for target (path may vary depending on
 ; Preload shader cache if window opens first time
 exec-oneshot += find ~/.cache/nvidia -type f -exec cat {} + > /dev/null
 ```
+
 #### Mesa (AMD/Intel/NVIDIA with Nouveau)
 ```ini
 ; Preload shader cache if window opens first time
 exec-oneshot += find ~/.cache/mesa_shader_cache_db -type f -exec cat {} + > /dev/null
 ```
-### Types of limits and which you should use
-- FPS limits recommended for online and multiplayer games if you do not mind to use MangoHud.
-- CPU limits greater than zero recommended for online/multiplayer games in case you do not use MangoHud and for CPU heavy applications e.g. VirtualBox and Handbrake (with CPU encoding), but you should be ready for stuttery audio which caused by `cpulimit` tool which interrupts process with `SIGSTOP` and `SIGCONT` signals, if you use Pipewire and Wireplumber, you may want to mute process as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
-- CPU limit equal to zero (freezing) recommended for singleplayer games, online games in offline mode and for stuff which consumes resources in background without reason, makes game/app just hang in RAM without consuming neither CPU nor GPU resources.
+
 ## Possible questions
-### How does that daemon work?
+### How does this daemon work?
 - Daemon listens changes in `_NET_ACTIVE_WINDOW` and `_NET_CLIENT_LIST_STACKING` atoms, obtains window IDs and using those obtains PIDs by "asking" Xorg server via `XRes` extension, then reads info about processes from files in `/proc/<PID>` to compare it with identifiers in config file and if matching section appears, then it does specified in config file actions.
-### Does that daemon reduce performance?
+
+### Does this daemon reduce performance?
 - Daemon uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time and just chills out when you doing stuff in single window. Performance loss should not be noticeable even on weak systems.
+
 ### May I get banned in game because of this daemon?
 - Nowadays, anti-cheats are pure garbage, developed by freaks without balls, and you may get banned even for a wrong click or sudden mouse movement, I am not even talking about bans because of broken libs provided with games by developers themselves. But daemon by its nature should not trigger anti-cheat, anyway, I am not responsible for your actions, so use it carefully and do not write me if you got a ban.
-### Why was that daemon developed?
-- Main task is to reduce CPU/GPU usage of games that have been minimized. Almost every engine fails to recognize that game is unfocused and still consumes a lot of CPU and GPU resources, what can make system slow for other tasks like browsing stuff, chatting, transcoding video etc. or even unresponsive at all. With that daemon now I can simply play a game or tinker with virtual machine and then minimize window if needed without carrying about high CPU/GPU usage and suffering from low multitasking performance. Also, daemon does not care about type of software, so you can use it with everything. Inspiried by feature from NVIDIA driver for Windows where user can set FPS limit for minimized software, this tool is not exactly the same, but better than nothing.
+
+### Why was this daemon developed?
+- Main task is to reduce CPU/GPU usage of games that have been minimized. Almost every engine fails to recognize that game is unfocused and still consumes a lot of CPU and GPU resources, what can make system slow for other tasks like browsing stuff, chatting, transcoding video etc. or even unresponsive at all. With this daemon now I can simply play a game or tinker with virtual machine and then minimize window if needed without carrying about high CPU/GPU usage and suffering from low multitasking performance. Also, daemon does not care about type of software, so you can use it with everything. Inspiried by feature from NVIDIA driver for Windows where user can set FPS limit for minimized software, this tool is not exactly the same, but better than nothing.
+
 ### Why is code so complicated?
-- I try to avoid using external tools in favor of bashisms to reduce CPU usage by daemon and speed up code.
-### Why not just use Gamescope to set FPS limit on unfocus?
-- You can use it if you like, my project is aimed at X11 and systems without Wayland support, as well as at non-interference with application/game window and user input unlike Gamescope does, so you have no need to execute app/game using wrapper (except you need FPS limiting, MangoHud required in this case), just configure daemon and have fun.
+- I trying to avoid using external tools in favor of bashisms to reduce CPU usage daemon and speed up code.
+
 ### What about Wayland support?
 - That is impossible, there is no any unified way to read window related events and obtain PIDs of windows on Wayland.
 ### Why did you write it in Bash?
-- That is (scripting) language I know pretty good, despite a fact that Bash as all interpretators works slower than compilable languages, it still fits my needs almost perfectly.
+- This is (scripting) language I know pretty good, despite a fact that Bash as all interpretators works slower than compilable languages, it still fits my needs almost perfectly.
