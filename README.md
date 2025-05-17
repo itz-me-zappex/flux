@@ -308,9 +308,9 @@ To avoid repeating yourself, reduce config file size and simplify editing, you m
 
 Order of `group` config key matters a lot, if you want to overwrite value from group, specify key below `group = @<group>`, otherwise - above. If you want to append value to key from group, then use `+=` **after** `group` config key.
 
-Group name does not matter, except section should begin with `@` symbol. That is how daemon defines whether that is just a section or group.
+Group name does not matter, except section name should begin with `@` symbol. That is how daemon defines whether that is just a section or group.
 
-Position of group declaration in config file does not matter at all.
+Position of group declaration section in config file does not matter at all.
 
 Using multiple groups in one section at the same time is not possible.
 
