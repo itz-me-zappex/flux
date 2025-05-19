@@ -3,6 +3,11 @@ handle_groups(){
   # Get section name
   local local_temp_section
   for local_temp_section in "${sections_array[@]}"; do
+    # Do not handle if section repeats (warning already shown from 'parse_config()')
+    if [[ "${sections_array[*]}" =~ "$local_temp_section".*"$local_temp_section" ]]; then
+      continue
+    fi
+
     local local_group="${config_key_group_map["$local_temp_section"]}"
 
     # Skip if 'group' is not specified
@@ -22,7 +27,7 @@ handle_groups(){
 
       # Print warning and mark as an error if group does not exist
       if [[ -z "$local_group_exists" ]]; then
-        message --warning "L$(get_key_line "$local_temp_section" 'group'): Group '$local_group' specified in '$local_temp_section' section does not exist!"
+         message --warning "L$(get_key_line "$local_temp_section" 'group'): Group '$local_group' specified in '$local_temp_section' section does not exist!"
         (( parse_config_error_count++ ))
       else
         unset local_group_exists
