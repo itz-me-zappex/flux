@@ -3,6 +3,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 
 ## Navigation
 - [Known issues](#known-issues)
+- [Screenshot](#screenshot)
 - [Features](#features)
 - [Dependencies](#dependencies)
   - [Arch Linux and dereatives](#arch-linux-and-dereatives)
@@ -63,6 +64,10 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - Freezing online/multiplayer games by setting `cpu-limit` to `0%` causes disconnects. Use less aggressive CPU limit to allow game to send/receive packets.
 - Stuttery audio in unfocused game if CPU limit is pretty aggressive, that should be expected because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. If you use Pipewire with Wireplumber, you may want to mute process as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
 - Some games under Wine/Proton may not like `flux-cursor-grab`, meaning that if game gets focus without clicking on it with mouse (e.g. after Alt+Tab), cursor will be grabbed and will not work outside of window, but still will be able to escape, that happens for me with Ori and the Will of the Wisps in windowed mode for example. Also cursor grabbing in daemon does not work for all games, because a lot of those grab cursor manually, so cursor grabbing unneeded in this case and you will see warning in log/output that daemon unable to grab cursor, it is okay.
+
+## Screenshot
+![](preview.png)
+*Daemon running with handling already opened windows (`-H`) in verbose mode (`-v`) and enabled timestamps (`-t`)*
 
 ## Features
 - CPU and FPS limiting process on unfocus and unlimiting on focus (FPS limiting requires game running using MangoHud with already existing config file).
