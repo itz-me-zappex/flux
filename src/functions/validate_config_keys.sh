@@ -91,8 +91,9 @@ validate_config_keys(){
           (( local_match++ ))
         fi
 
-        if (( local_match == 3 )); then
-          message --warning "L$(get_key_line "$local_temp_section"): Identifiers in '$local_temp_section2' section are very similar to ones in '$local_temp_section' section!"
+        if (( local_match == 3 )) &&
+           (( "$(get_key_line "$local_temp_section2")" > "$(get_key_line "$local_temp_section")" )); then
+          message --warning "L$(get_key_line "$local_temp_section2"): Identifiers in '$local_temp_section2' section are very similar to ones in '$local_temp_section' section!"
           (( parse_config_error_count++ ))
         fi
 
