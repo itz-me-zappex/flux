@@ -22,7 +22,7 @@ handle_groups(){
 
       # Print warning and mark as an error if group does not exist
       if [[ -z "$local_group_exists" ]]; then
-        message --warning "Group '$local_group' specified in '$local_temp_section' section does not exist!"
+        message --warning "L$(get_key_line "$local_temp_section" 'group'): Group '$local_group' specified in '$local_temp_section' section does not exist!"
         (( parse_config_error_count++ ))
       else
         unset local_group_exists
