@@ -538,7 +538,7 @@ Add following lines to section responsible for target (use your own values):
 ```ini
 ; Change layout to US on focus and to RU on unfocus
 lazy-exec-focus += setxkbmap us,ru,ua
-lazy-exec-focus += setxkbmap ru,ua,us
+lazy-exec-unfocus += setxkbmap ru,ua,us
 ```
 ### Increase digital vibrance on focus and revert it on unfocus
 **Note:** Use `vibrant-cli` from [`libvibrant`](<https://github.com/libvibrant/libvibrant>) project if you use AMD or Intel GPU.
