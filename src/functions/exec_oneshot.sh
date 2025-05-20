@@ -1,18 +1,6 @@
 # Required to execute command from 'exec-oneshot' config key
 exec_oneshot(){
-  # Export environment variables to interact with those using commands/scripts in 'exec-oneshot' config key
-  export FLUX_WINDOW_XID="$window_xid" \
-  FLUX_PROCESS_PID="$process_pid" \
-  FLUX_PROCESS_NAME="$process_name" \
-  FLUX_PROCESS_OWNER="$process_owner" \
-  FLUX_PROCESS_OWNER_USERNAME="$process_owner_username" \
-  FLUX_PROCESS_COMMAND="$process_command" \
-  FLUX_PREV_WINDOW_XID="$previous_window_xid" \
-  FLUX_PREV_PROCESS_PID="$previous_process_pid" \
-  FLUX_PREV_PROCESS_NAME="$previous_process_name" \
-  FLUX_PREV_PROCESS_OWNER="$previous_process_owner" \
-  FLUX_PREV_PROCESS_OWNER_USERNAME="$previous_process_owner_username" \
-  FLUX_PREV_PROCESS_COMMAND="$previous_process_command"
+  export_focus_envvars
 
   # Execute command from 'exec-oneshot' key if it has been specified and was not executed before
   if [[ -n "${config_key_exec_oneshot_map["$section"]}" &&
@@ -32,16 +20,5 @@ exec_oneshot(){
   fi
   
   # Unset exported variables
-  unset FLUX_WINDOW_XID \
-  FLUX_PROCESS_PID \
-  FLUX_PROCESS_NAME \
-  FLUX_PROCESS_OWNER \
-  FLUX_PROCESS_OWNER_USERNAME \
-  FLUX_PROCESS_COMMAND \
-  FLUX_PREV_WINDOW_XID \
-  FLUX_PREV_PROCESS_PID \
-  FLUX_PREV_PROCESS_NAME \
-  FLUX_PREV_PROCESS_OWNER \
-  FLUX_PREV_PROCESS_OWNER_USERNAME \
-  FLUX_PREV_PROCESS_COMMAND
+  unset_focus_envvars
 }
