@@ -32,6 +32,9 @@ handle_focus(){
     unset_sched_idle
   fi
 
+  # Execute command on window appearance event if specified in config ('exec-oneshot')
+  exec_oneshot
+
   # Execute command on focus event if specified in config
   exec_focus
 
