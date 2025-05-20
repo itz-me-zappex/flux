@@ -224,3 +224,67 @@ get_key_line(){
     done
   fi
 }
+
+# Needed to use environment variables with previous and focused window info in commands from 'exec-focus', `lazy-exec-focus` and 'exec-oneshot'
+export_focus_envvars(){
+  export FLUX_WINDOW_XID="$window_xid" \
+  FLUX_PROCESS_PID="$process_pid" \
+  FLUX_PROCESS_NAME="$process_name" \
+  FLUX_PROCESS_OWNER="$process_owner" \
+  FLUX_PROCESS_OWNER_USERNAME="$process_owner_username" \
+  FLUX_PROCESS_COMMAND="$process_command" \
+  FLUX_PREV_WINDOW_XID="$previous_window_xid" \
+  FLUX_PREV_PROCESS_PID="$previous_process_pid" \
+  FLUX_PREV_PROCESS_NAME="$previous_process_name" \
+  FLUX_PREV_PROCESS_OWNER="$previous_process_owner" \
+  FLUX_PREV_PROCESS_OWNER_USERNAME="$previous_process_owner_username" \
+  FLUX_PREV_PROCESS_COMMAND="$previous_process_command"
+}
+
+# Needed to unset environment variables with previous and focused window info used in commands from 'exec-focus', `lazy-exec-focus` and 'exec-oneshot'
+unset_focus_envvars(){
+  unset FLUX_WINDOW_XID \
+  FLUX_PROCESS_PID \
+  FLUX_PROCESS_NAME \
+  FLUX_PROCESS_OWNER \
+  FLUX_PROCESS_OWNER_USERNAME \
+  FLUX_PROCESS_COMMAND \
+  FLUX_PREV_WINDOW_XID \
+  FLUX_PREV_PROCESS_PID \
+  FLUX_PREV_PROCESS_NAME \
+  FLUX_PREV_PROCESS_OWNER \
+  FLUX_PREV_PROCESS_OWNER_USERNAME \
+  FLUX_PREV_PROCESS_COMMAND
+}
+
+# Needed to use environment variables with previous and focused window info in commands from 'exec-unfocus', `lazy-exec-unfocus` and 'exec-closure'
+export_unfocus_envvars(){
+  export FLUX_NEW_WINDOW_XID="$window_xid" \
+  FLUX_NEW_PROCESS_PID="$process_pid" \
+  FLUX_NEW_PROCESS_NAME="$process_name" \
+  FLUX_NEW_PROCESS_OWNER="$process_owner" \
+  FLUX_NEW_PROCESS_OWNER_USERNAME="$process_owner_username" \
+  FLUX_NEW_PROCESS_COMMAND="$process_command" \
+  FLUX_WINDOW_XID="$passed_window_xid" \
+  FLUX_PROCESS_PID="$passed_process_pid" \
+  FLUX_PROCESS_NAME="$passed_process_name" \
+  FLUX_PROCESS_OWNER="$passed_process_owner" \
+  FLUX_PROCESS_OWNER_USERNAME="$passed_process_owner_username" \
+  FLUX_PROCESS_COMMAND="$passed_process_command"
+}
+
+# Needed to unset environment variables with previous and focused window info used in commands from 'exec-unfocus', `lazy-exec-unfocus` and 'exec-closure'
+unset_unfocus_envvars(){
+  unset FLUX_NEW_WINDOW_XID \
+  FLUX_NEW_PROCESS_PID \
+  FLUX_NEW_PROCESS_NAME \
+  FLUX_NEW_PROCESS_OWNER \
+  FLUX_NEW_PROCESS_OWNER_USERNAME \
+  FLUX_NEW_PROCESS_COMMAND \
+  FLUX_WINDOW_XID \
+  FLUX_PROCESS_PID \
+  FLUX_PROCESS_NAME \
+  FLUX_PROCESS_OWNER \
+  FLUX_PROCESS_OWNER_USERNAME \
+  FLUX_PROCESS_COMMAND
+}
