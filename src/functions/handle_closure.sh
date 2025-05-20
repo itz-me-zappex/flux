@@ -105,9 +105,7 @@ handle_closure(){
       fi
 
       # Execute unfocus event command
-      if [[ -n "${request_exec_unfocus_general_map["$local_terminated_process_pid"]}" ]]; then
-        unset request_exec_unfocus_general_map["$local_terminated_process_pid"]
-
+      if [[ -n "${config_key_exec_closure_map["$local_terminated_section"]}" ]]; then
         passed_window_xid="$local_temp_terminated_window_xid" \
         passed_process_pid="$local_terminated_process_pid" \
         passed_section="$local_terminated_section" \
@@ -115,8 +113,7 @@ handle_closure(){
         passed_process_owner="$local_terminated_process_owner" \
         passed_process_owner_username="$local_terminated_process_owner_username" \
         passed_process_command="$local_terminated_process_command" \
-        passed_end_of_msg="due to closure of window with XID $local_temp_terminated_window_xid of process '$local_terminated_process_name' with PID $local_terminated_process_pid" \
-        exec_unfocus
+        exec_closure
       fi
 
       # Cancel cursor grabbing for previously focused window
@@ -161,6 +158,9 @@ handle_closure(){
 
       # Unset 'exec-oneshot' config key execution mark
       unset is_exec_oneshot_executed_map["$local_terminated_process_pid"]
+
+      # Unset request for 'exec-unfocus' and 'lazy-exec-unfocus' execution
+      unset request_exec_unfocus_general_map["$local_terminated_process_pid"]
 
       # Remove data related to terminated window from cache
       unset cache_process_pid_map["$local_temp_terminated_window_xid"] \
