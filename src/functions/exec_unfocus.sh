@@ -1,5 +1,8 @@
 # Required to execute command from 'exec-unfocus' and 'lazy-exec-unfocus' config keys
 exec_unfocus(){
+  # Set end of message to not duplicate it
+  local local_end_of_msg="due to unfocus event of window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid"
+
   # Export environment variables to interact with them using commands/scripts in 'exec-unfocus' and 'lazy-exec-unfocus' config keys
   export FLUX_NEW_WINDOW_XID="$window_xid" \
   FLUX_NEW_PROCESS_PID="$process_pid" \
@@ -22,7 +25,7 @@ exec_unfocus(){
       passed_command_type='default' \
       passed_section="$passed_section" \
       passed_event_command="$local_temp_command" \
-      passed_end_of_msg="$passed_end_of_msg" \
+      passed_end_of_msg="$local_end_of_msg" \
       passed_event_type='unfocus' \
       exec_on_event
     done <<< "${config_key_exec_unfocus_map["$passed_section"]}"
@@ -37,7 +40,7 @@ exec_unfocus(){
       passed_command_type='lazy' \
       passed_section="$passed_section" \
       passed_event_command="$local_temp_command" \
-      passed_end_of_msg="$passed_end_of_msg" \
+      passed_end_of_msg="$local_end_of_msg" \
       passed_event_type='unfocus' \
       exec_on_event
     done <<< "${config_key_lazy_exec_unfocus_map["$passed_section"]}"
