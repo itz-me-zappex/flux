@@ -395,8 +395,8 @@ As INI is not standartized, I should mention all supported features here.
 
 **Unsupported:**
 - Regular expressions.
-- Line continuation (using `\` symbol).
-- Inline comments
+- Line continuation.
+- Inline comments.
 - Anything else that unmentioned here.
 
 ### Configuration example
