@@ -104,8 +104,9 @@ handle_closure(){
         unset_sched_idle
       fi
 
-      # Execute unfocus event command
-      if [[ -n "${config_key_exec_closure_map["$local_terminated_section"]}" ]]; then
+      # Execute closure event command
+      if [[ -n "$local_terminated_section" &&
+            -n "${config_key_exec_closure_map["$local_terminated_section"]}" ]]; then
         passed_window_xid="$local_temp_terminated_window_xid" \
         passed_process_pid="$local_terminated_process_pid" \
         passed_section="$local_terminated_section" \
