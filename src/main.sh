@@ -122,7 +122,10 @@ config_key_idle_map \
 config_key_unfocus_minimize_map \
 config_key_focus_fullscreen_map \
 config_key_focus_cursor_grab_map \
-config_key_group_map
+config_key_group_map \
+config_key_exec_exit_map \
+config_key_exec_exit_focus_map \
+config_key_exec_exit_unfocus_map
 
 # Needed to remember line and order of keys in section, used to handle 'group' config key and print line in warnings after parsing (validation)
 declare -A config_keys_order_map

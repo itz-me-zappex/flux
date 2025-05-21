@@ -82,7 +82,7 @@ parse_config(){
 
         # Print warning and mark as an error if appending to unsupported key
         if [[ -n "$local_append" &&
-              ! "$local_config_key" =~ ^('exec-closure'|'exec-oneshot'|'exec-focus'|'exec-unfocus'|'lazy-exec-focus'|'lazy-exec-unfocus')$ ]]; then
+              ! "$local_config_key" =~ ^('exec-exit'|'exec-exit-focus'|'exec-exit-unfocus'|'exec-closure'|'exec-oneshot'|'exec-focus'|'exec-unfocus'|'lazy-exec-focus'|'lazy-exec-unfocus')$ ]]; then
           message --warning "$local_line_count_msg Appending values in '$local_section' section to '$local_config_key' config key is not supported!"
           (( parse_config_error_count++ ))
         fi
@@ -133,6 +133,39 @@ parse_config(){
 
             unset is_section_blank_map["$local_section"]
             config_keys_order_map["$local_section"]+=" $local_line_count.delay"
+          ;;
+          exec-exit )
+            if [[ -z "$local_append" ]]; then
+              config_key_exec_exit_map["$local_section"]="$local_config_value"
+            else
+              config_key_exec_exit_map["$local_section"]+=$'\n'"$local_config_value"
+            fi
+
+            is_section_useful_map["$local_section"]='1'
+            unset is_section_blank_map["$local_section"]
+            config_keys_order_map["$local_section"]+=" $local_line_count.exec-exit"
+          ;;
+          exec-exit-focus )
+            if [[ -z "$local_append" ]]; then
+              config_key_exec_exit_focus_map["$local_section"]="$local_config_value"
+            else
+              config_key_exec_exit_focus_map["$local_section"]+=$'\n'"$local_config_value"
+            fi
+
+            is_section_useful_map["$local_section"]='1'
+            unset is_section_blank_map["$local_section"]
+            config_keys_order_map["$local_section"]+=" $local_line_count.exec-exit-focus"
+          ;;
+          exec-exit-unfocus )
+            if [[ -z "$local_append" ]]; then
+              config_key_exec_exit_unfocus_map["$local_section"]="$local_config_value"
+            else
+              config_key_exec_exit_unfocus_map["$local_section"]+=$'\n'"$local_config_value"
+            fi
+
+            is_section_useful_map["$local_section"]='1'
+            unset is_section_blank_map["$local_section"]
+            config_keys_order_map["$local_section"]+=" $local_line_count.exec-exit-unfocus"
           ;;
           exec-closure )
             if [[ -z "$local_append" ]]; then
