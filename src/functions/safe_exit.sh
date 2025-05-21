@@ -54,7 +54,10 @@ safe_exit(){
     # Execute commands from 'exec-exit', 'exec-exit-focus' and 'exec-exit-unfocus' if possible
     # Previous section here is matching section for focused window
     # It just moved to previous because of end of loop before next event in 'src/main.sh'
+    passed_window_xid="$local_temp_window_xid" \
+    passed_process_pid="$local_process_pid" \
     passed_section="$local_section" \
+    passed_process_name="$local_process_name" \
     passed_focused_section="$previous_section" \
     passed_end_of_msg="$local_end_of_msg" \
     exec_exit
