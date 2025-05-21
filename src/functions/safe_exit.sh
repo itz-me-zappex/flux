@@ -50,30 +50,15 @@ safe_exit(){
       passed_end_of_msg="$local_end_of_msg" \
       cursor_ungrab
     fi
-  done
 
-  # Execute command from 'lazy-exec-unfocus' if matching section for focused window is found and command is specified
-  if [[ -n "$previous_section" &&
-        -n "${config_key_lazy_exec_unfocus_map["$previous_section"]}" ]]; then
-    # Pass environment variables to interact with them using commands/scripts in 'lazy-exec-unfocus' config key
-    # There is no need to pass '$FLUX_NEW_*' because there is no focus event and info about new window respectively
-    # And yes, info about focused window becomes previous immediately after processing it, check event handling in 'main.sh'
-    local local_temp_command
-    while read -r local_temp_command ||
-          [[ -n "$local_temp_command" ]]; do
-      FLUX_WINDOW_XID="$previous_window_xid" \
-      FLUX_PROCESS_PID="$previous_process_pid" \
-      FLUX_PROCESS_NAME="$previous_process_name" \
-      FLUX_PROCESS_OWNER="$previous_process_owner" \
-      FLUX_PROCESS_COMMAND="$previous_process_command" \
-      passed_command_type='lazy' \
-      passed_section="$previous_section" \
-      passed_event_command="$local_temp_command" \
-      passed_end_of_msg="$local_end_of_msg" \
-      passed_event_type='unfocus' \
-      exec_on_event
-    done <<< "${config_key_lazy_exec_unfocus_map["$previous_section"]}"
-  fi
+    # Execute commands from 'exec-exit', 'exec-exit-focus' and 'exec-exit-unfocus' if possible
+    # Previous section here is matching section for focused window
+    # It just moved to previous because of end of loop before next event in 'src/main.sh'
+    passed_section="$local_section" \
+    passed_focused_section="$previous_section" \
+    passed_end_of_msg="$local_end_of_msg" \
+    exec_exit
+  done
 
   # Obtain 'flux-event-reader' PID from lock file to terminate it and remove lock file
   if [[ -f "$lock_file" ]]; then
