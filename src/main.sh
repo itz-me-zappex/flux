@@ -16,7 +16,7 @@ unset temp_envvar_line \
 envvar_name
 
 # Version of daemon shown from 'parse_options()' if '--version' is specified
-daemon_version='1.27'
+daemon_version='1.27.1'
 
 # Set X11 display if not set
 if [[ -z "$DISPLAY" ]]; then
