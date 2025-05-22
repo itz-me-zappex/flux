@@ -10,6 +10,9 @@ safe_exit(){
     local local_process_pid="${cache_process_pid_map["$local_temp_window_xid"]}"
     local local_section="${cache_section_map["$local_process_pid"]}"
     local local_process_name="${cache_process_name_map["$local_temp_window_xid"]}"
+    local local_process_command="${cache_process_command_map["$local_temp_window_xid"]}"
+    local local_process_owner="${cache_process_owner_map["$local_temp_window_xid"]}"
+    local local_process_owner_username="${cache_process_owner_username_map["$local_temp_window_xid"]}"
 
     # Define type of limit which should be unset
     if [[ -n "${background_freeze_pid_map["$local_process_pid"]}" ]]; then
@@ -58,6 +61,9 @@ safe_exit(){
     passed_process_pid="$local_process_pid" \
     passed_section="$local_section" \
     passed_process_name="$local_process_name" \
+    passed_process_owner="$local_process_owner" \
+    passed_process_owner_username="$local_process_owner_username" \
+    passed_process_command="$local_process_command" \
     passed_focused_section="$previous_section" \
     passed_end_of_msg="$local_end_of_msg" \
     exec_exit
