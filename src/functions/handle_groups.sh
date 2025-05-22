@@ -49,6 +49,74 @@ handle_groups(){
           config_key_delay_map["$local_temp_section"]="$local_group_key_value"
         fi
 
+        local local_key_line="$(get_key_line "$local_temp_section" 'exec-exit')"
+        local local_group_key_value="${config_key_exec_exit_map["$local_group"]}"
+        local local_key_value="${config_key_exec_exit_map["$local_temp_section"]}"
+        if [[ -n "$local_group_key_value" ]]; then
+          if (( local_group_key_line > local_key_line )); then
+            if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
+              config_key_exec_exit_map["$local_temp_section"]+="$local_group_key_value"
+            else
+              config_key_exec_exit_map["$local_temp_section"]="$local_group_key_value"
+            fi
+          elif (( local_group_key_line < local_key_line )) &&
+               [[ "$local_key_value" =~ ^$'\n' ]]; then
+            local local_group_key_value+="$local_key_value"
+            config_key_exec_exit_map["$local_temp_section"]="$local_group_key_value"
+          fi
+        fi
+
+        local local_key_line="$(get_key_line "$local_temp_section" 'exec-exit-focus')"
+        local local_group_key_value="${config_key_exec_exit_focus_map["$local_group"]}"
+        local local_key_value="${config_key_exec_exit_focus_map["$local_temp_section"]}"
+        if [[ -n "$local_group_key_value" ]]; then
+          if (( local_group_key_line > local_key_line )); then
+            if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
+              config_key_exec_exit_focus_map["$local_temp_section"]+="$local_group_key_value"
+            else
+              config_key_exec_exit_focus_map["$local_temp_section"]="$local_group_key_value"
+            fi
+          elif (( local_group_key_line < local_key_line )) &&
+               [[ "$local_key_value" =~ ^$'\n' ]]; then
+            local local_group_key_value+="$local_key_value"
+            config_key_exec_exit_focus_map["$local_temp_section"]="$local_group_key_value"
+          fi
+        fi
+
+        local local_key_line="$(get_key_line "$local_temp_section" 'exec-exit-unfocus')"
+        local local_group_key_value="${config_key_exec_exit_unfocus_map["$local_group"]}"
+        local local_key_value="${config_key_exec_exit_unfocus_map["$local_temp_section"]}"
+        if [[ -n "$local_group_key_value" ]]; then
+          if (( local_group_key_line > local_key_line )); then
+            if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
+              config_key_exec_exit_unfocus_map["$local_temp_section"]+="$local_group_key_value"
+            else
+              config_key_exec_exit_unfocus_map["$local_temp_section"]="$local_group_key_value"
+            fi
+          elif (( local_group_key_line < local_key_line )) &&
+               [[ "$local_key_value" =~ ^$'\n' ]]; then
+            local local_group_key_value+="$local_key_value"
+            config_key_exec_exit_unfocus_map["$local_temp_section"]="$local_group_key_value"
+          fi
+        fi
+
+        local local_key_line="$(get_key_line "$local_temp_section" 'exec-closure')"
+        local local_group_key_value="${config_key_exec_closure_map["$local_group"]}"
+        local local_key_value="${config_key_exec_closure_map["$local_temp_section"]}"
+        if [[ -n "$local_group_key_value" ]]; then
+          if (( local_group_key_line > local_key_line )); then
+            if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
+              config_key_exec_closure_map["$local_temp_section"]+="$local_group_key_value"
+            else
+              config_key_exec_closure_map["$local_temp_section"]="$local_group_key_value"
+            fi
+          elif (( local_group_key_line < local_key_line )) &&
+               [[ "$local_key_value" =~ ^$'\n' ]]; then
+            local local_group_key_value+="$local_key_value"
+            config_key_exec_closure_map["$local_temp_section"]="$local_group_key_value"
+          fi
+        fi
+
         local local_key_line="$(get_key_line "$local_temp_section" 'exec-oneshot')"
         local local_group_key_value="${config_key_exec_oneshot_map["$local_group"]}"
         local local_key_value="${config_key_exec_oneshot_map["$local_temp_section"]}"
