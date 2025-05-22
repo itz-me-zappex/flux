@@ -44,9 +44,9 @@ parse_config(){
 
         # Remember section line
         config_keys_order_map["$local_section"]+="$local_line_count"
-      elif [[ "${local_temp_config_line,,}" =~ ^[a-zA-Z0-9-]+([[:space:]]+)?(\+)?=([[:space:]]+)?* ]]; then
+      elif [[ "${local_temp_config_line,,}" =~ ^[^[:space:]]+([[:space:]]+)?(\+)?=([[:space:]]+)?* ]]; then
         # Remove equal symbol and key value to keep just key name
-        if [[ "${local_temp_config_line,,}" =~ ^[a-zA-Z0-9-]+([[:space:]]+)?\+=([[:space:]]+)?* ]]; then
+        if [[ "${local_temp_config_line,,}" =~ ^[^[:space:]]+([[:space:]]+)?\+=([[:space:]]+)?* ]]; then
           local local_append='1'
           local local_config_key="${local_temp_config_line/%+=*/}"
         else
