@@ -37,8 +37,8 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
     - [Long examples](#long-examples)
     - [Short examples](#short-examples)
   - [Environment variables passed to commands and description](#environment-variables-passed-to-commands-and-description)
-    - [Passed to `exec-oneshot`, `exec-focus` and `lazy-exec-focus` config keys](#passed-to-exec-oneshot-exec-focus-and-lazy-exec-focus-config-keys)
-    - [Passed to `exec-unfocus` and `lazy-exec-unfocus` config keys](#passed-to-exec-unfocus-and-lazy-exec-unfocus-config-keys)
+    - [On focus or window appearance](#on-focus-or-window-appearance)
+    - [On unfocus, closure or daemon termination](#on-unfocus-closure-or-daemon-termination)
 - [Tips and tricks](#tips-and-tricks)
   - [Apply changes in config file](#apply-changes-in-config-file)
   - [Mute process audio on unfocus (Pipewire & Wireplumber)](#mute-process-audio-on-unfocus-pipewire--wireplumber)
@@ -80,7 +80,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - Notifications support.
 - Multiple identifiers you can set to avoid false positives.
 - Easy INI config.
-- Ability to use window and process info through environment variables which daemon passes to scripts/commands in `exec-oneshot`, `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys.
+- Supports scripting, window and process info passed via environment variables to commands in execution related config keys.
 - Works with processes running in sandbox with PID namespaces (e.g. Firejail).
 - Survives a whole DE/WM restart (not relogin) and continues work without issues.
 - Supports most of X11 DEs/WMs [(EWMH-compatible ones)](<https://specifications.freedesktop.org/wm-spec/latest/>) and does not rely on neither GPU nor its driver.
@@ -311,10 +311,14 @@ Just add command to autostart using your DE/WM settings. Running daemon as root 
 | Key | Description |
 |-----|-------------|
 | `exec-oneshot` | Command to execute on window appearance event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
+| `exec-closure` | Command to execute on window closure event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
+| `exec-exit` | Command to execute when daemon receives `SIGINT` or `SIGTERM` signal, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
+| `exec-exit-focus` | Same as `exec-exit`, but command appears executed only if matching window appears focused at the moment of daemon termination. |
+| `exec-exit-unfocus` | Same as `exec-exit`, but command appears executed only if matching window appears unfocused at the moment of daemon termination. |
 | `exec-focus` | Command to execute on focus event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
 | `exec-unfocus` | Command to execute on unfocus event or window closure, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
 | `lazy-exec-focus` | Same as `exec-focus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event). |
-| `lazy-exec-unfocus` | Same as `exec-unfocus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event), will be executed on daemon termination if focused window matches with section where this key and command is specified. |
+| `lazy-exec-unfocus` | Same as `exec-unfocus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event). |
 | `unfocus-minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`. Defaults to `false`. |
 | `focus-fullscreen` | Boolean, sends X event to window manager on focus to expand window to fullscreen, useful if game (e.g. Forza Horizon 4) handles window mode in weird a way. Defaults to `false`. |
 | `focus-cursor-grab` | Boolean, daemon grabs cursor if possible, binds it to window and because of X11 nature which prevents input to anything but client which owns cursor (`flux-cursor-grab` module in background in this case) - redirects all input into focused window. This ugly layer prevents cursor from escaping to second monitor in some games at cost of *possible* input lag. Cursor is ungrabbed on unfocus event. Defaults to `false`. |
@@ -464,7 +468,7 @@ idle = true
 ```
 ### Environment variables passed to commands and description
 You may want to use these variables in commands and scripts which running from `exec-oneshot`, `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys to extend daemon functionality.
-#### Passed to `exec-oneshot`, `exec-focus` and `lazy-exec-focus` config keys
+#### On focus or window appearance
 | Variable | Description |
 |----------|-------------|
 | `FLUX_WINDOW_XID` | Decimal XID of focused window. |
@@ -480,7 +484,7 @@ You may want to use these variables in commands and scripts which running from `
 | `FLUX_PREV_PROCESS_OWNER_USERNAME` | Effective process owner username of unfocused window. |
 | `FLUX_PREV_PROCESS_COMMAND` | Command used to run process of unfocused window. |
 
-#### Passed to `exec-unfocus` and `lazy-exec-unfocus` config keys
+#### On unfocus, closure or daemon termination
 | Variable | Description |
 |----------|-------------|
 | `FLUX_WINDOW_XID` | Decimal XID of unfocused window. |
