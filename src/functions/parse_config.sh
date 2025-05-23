@@ -360,11 +360,8 @@ parse_config(){
             config_key_group_map["$local_section"]="$local_config_value"
             is_section_useful_map["$local_section"]='1'
 
-            # Exit with an error if used inside group or group name is not specified after '@'
-            if section_is_group "$local_section"; then
-              message --warning "$local_line_count_msg Do not use '$local_config_key' config key inside$local_section_msg!"
-              (( parse_config_error_count++ ))
-            elif ! section_is_group "$local_config_value"; then
+            # Exit with an error if group specified without '@' at the beginning of name
+            if ! section_is_group "$local_config_value"; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key$local_section_msg is not a group!"
               (( parse_config_error_count++ ))
             fi
