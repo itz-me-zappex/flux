@@ -1,5 +1,11 @@
 # Required to validate config keys
 validate_config_keys(){
+  # Exit with an error if there is no any section specified
+  if [[ -z "${sections_array[*]}" ]]; then
+    message --warning "L0: Config file does not contain any section!"
+    (( parse_config_error_count++ ))
+  fi
+
   # Check values in sections and exit with an error if something is wrong or set default values in some keys if those are not specified
   local local_temp_section_or_group
   for local_temp_section_or_group in "${groups_array[@]}" "${sections_array[@]}"; do
