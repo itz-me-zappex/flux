@@ -20,254 +20,251 @@ handle_groups(){
       continue
     fi
 
-    # Check whether section contains 'group' config key or not
-    if [[ -n "$local_group" ]]; then
-      # Check whether group exits or not
-      local local_temp_group
-      for local_temp_group in "${groups_array[@]}"; do
-        if [[ "$local_temp_group" == "$local_group" ]]; then
-          local local_group_exists='1'
-        fi
-      done
+    # Check whether group exits or not
+    local local_temp_group
+    for local_temp_group in "${groups_array[@]}"; do
+      if [[ "$local_temp_group" == "$local_group" ]]; then
+        local local_group_exists='1'
+      fi
+    done
 
-      # Print warning and mark as an error if group does not exist
-      if [[ -z "$local_group_exists" ]]; then
-        if section_is_group "$local_temp_section_or_group"; then
-          local local_section_type_msg='group'
-        else
-          local local_section_type_msg='section'
-        fi
-
-         message --warning "L$(get_key_line "$local_temp_section_or_group" 'group'): Group '$local_group' specified in '$local_temp_section_or_group' $local_section_type_msg does not exist!"
-        (( parse_config_error_count++ ))
+    # Print warning and mark as an error if group does not exist
+    if [[ -z "$local_group_exists" ]]; then
+      if section_is_group "$local_temp_section_or_group"; then
+        local local_section_type_msg='group'
       else
-        unset local_group_exists
+        local local_section_type_msg='section'
+      fi
 
-        local local_group_key_line="$(get_key_line "$local_temp_section_or_group" 'group')"
+      message --warning "L$(get_key_line "$local_temp_section_or_group" 'group'): Group '$local_group' specified in '$local_temp_section_or_group' $local_section_type_msg does not exist!"
+      (( parse_config_error_count++ ))
+    else
+      unset local_group_exists
 
-        # Store values from group to section
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'cpu-limit')"
-        local local_group_key_value="${config_key_cpu_limit_map["$local_group"]}"
-        if [[ -n "$local_group_key_value" ]] &&
-           (( local_group_key_line > local_key_line )); then
-          config_key_cpu_limit_map["$local_temp_section_or_group"]="$local_group_key_value"
-        fi
+      local local_group_key_line="$(get_key_line "$local_temp_section_or_group" 'group')"
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'delay')"
-        local local_group_key_value="${config_key_delay_map["$local_group"]}"
-        if [[ -n "$local_group_key_value" ]] &&
-           (( local_group_key_line > local_key_line )); then
-          config_key_delay_map["$local_temp_section_or_group"]="$local_group_key_value"
-        fi
+      # Store values from group to section
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'cpu-limit')"
+      local local_group_key_value="${config_key_cpu_limit_map["$local_group"]}"
+      if [[ -n "$local_group_key_value" ]] &&
+         (( local_group_key_line > local_key_line )); then
+        config_key_cpu_limit_map["$local_temp_section_or_group"]="$local_group_key_value"
+      fi
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'exec-exit')"
-        local local_group_key_value="${config_key_exec_exit_map["$local_group"]}"
-        local local_key_value="${config_key_exec_exit_map["$local_temp_section_or_group"]}"
-        if [[ -n "$local_group_key_value" ]]; then
-          if (( local_group_key_line > local_key_line )); then
-            if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
-              config_key_exec_exit_map["$local_temp_section_or_group"]+="$local_group_key_value"
-            else
-              config_key_exec_exit_map["$local_temp_section_or_group"]="$local_group_key_value"
-            fi
-          elif (( local_group_key_line < local_key_line )) &&
-               [[ "$local_key_value" =~ ^$'\n' ]]; then
-            local local_group_key_value+="$local_key_value"
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'delay')"
+      local local_group_key_value="${config_key_delay_map["$local_group"]}"
+      if [[ -n "$local_group_key_value" ]] &&
+         (( local_group_key_line > local_key_line )); then
+        config_key_delay_map["$local_temp_section_or_group"]="$local_group_key_value"
+      fi
+
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'exec-exit')"
+      local local_group_key_value="${config_key_exec_exit_map["$local_group"]}"
+      local local_key_value="${config_key_exec_exit_map["$local_temp_section_or_group"]}"
+      if [[ -n "$local_group_key_value" ]]; then
+        if (( local_group_key_line > local_key_line )); then
+          if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
+            config_key_exec_exit_map["$local_temp_section_or_group"]+="$local_group_key_value"
+          else
             config_key_exec_exit_map["$local_temp_section_or_group"]="$local_group_key_value"
           fi
+        elif (( local_group_key_line < local_key_line )) &&
+             [[ "$local_key_value" =~ ^$'\n' ]]; then
+          local local_group_key_value+="$local_key_value"
+          config_key_exec_exit_map["$local_temp_section_or_group"]="$local_group_key_value"
         fi
+      fi
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'exec-exit-focus')"
-        local local_group_key_value="${config_key_exec_exit_focus_map["$local_group"]}"
-        local local_key_value="${config_key_exec_exit_focus_map["$local_temp_section_or_group"]}"
-        if [[ -n "$local_group_key_value" ]]; then
-          if (( local_group_key_line > local_key_line )); then
-            if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
-              config_key_exec_exit_focus_map["$local_temp_section_or_group"]+="$local_group_key_value"
-            else
-              config_key_exec_exit_focus_map["$local_temp_section_or_group"]="$local_group_key_value"
-            fi
-          elif (( local_group_key_line < local_key_line )) &&
-               [[ "$local_key_value" =~ ^$'\n' ]]; then
-            local local_group_key_value+="$local_key_value"
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'exec-exit-focus')"
+      local local_group_key_value="${config_key_exec_exit_focus_map["$local_group"]}"
+      local local_key_value="${config_key_exec_exit_focus_map["$local_temp_section_or_group"]}"
+      if [[ -n "$local_group_key_value" ]]; then
+        if (( local_group_key_line > local_key_line )); then
+          if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
+            config_key_exec_exit_focus_map["$local_temp_section_or_group"]+="$local_group_key_value"
+          else
             config_key_exec_exit_focus_map["$local_temp_section_or_group"]="$local_group_key_value"
           fi
+        elif (( local_group_key_line < local_key_line )) &&
+             [[ "$local_key_value" =~ ^$'\n' ]]; then
+          local local_group_key_value+="$local_key_value"
+          config_key_exec_exit_focus_map["$local_temp_section_or_group"]="$local_group_key_value"
         fi
+      fi
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'exec-exit-unfocus')"
-        local local_group_key_value="${config_key_exec_exit_unfocus_map["$local_group"]}"
-        local local_key_value="${config_key_exec_exit_unfocus_map["$local_temp_section_or_group"]}"
-        if [[ -n "$local_group_key_value" ]]; then
-          if (( local_group_key_line > local_key_line )); then
-            if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
-              config_key_exec_exit_unfocus_map["$local_temp_section_or_group"]+="$local_group_key_value"
-            else
-              config_key_exec_exit_unfocus_map["$local_temp_section_or_group"]="$local_group_key_value"
-            fi
-          elif (( local_group_key_line < local_key_line )) &&
-               [[ "$local_key_value" =~ ^$'\n' ]]; then
-            local local_group_key_value+="$local_key_value"
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'exec-exit-unfocus')"
+      local local_group_key_value="${config_key_exec_exit_unfocus_map["$local_group"]}"
+      local local_key_value="${config_key_exec_exit_unfocus_map["$local_temp_section_or_group"]}"
+      if [[ -n "$local_group_key_value" ]]; then
+        if (( local_group_key_line > local_key_line )); then
+          if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
+            config_key_exec_exit_unfocus_map["$local_temp_section_or_group"]+="$local_group_key_value"
+          else
             config_key_exec_exit_unfocus_map["$local_temp_section_or_group"]="$local_group_key_value"
           fi
+        elif (( local_group_key_line < local_key_line )) &&
+             [[ "$local_key_value" =~ ^$'\n' ]]; then
+          local local_group_key_value+="$local_key_value"
+          config_key_exec_exit_unfocus_map["$local_temp_section_or_group"]="$local_group_key_value"
         fi
+      fi
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'exec-closure')"
-        local local_group_key_value="${config_key_exec_closure_map["$local_group"]}"
-        local local_key_value="${config_key_exec_closure_map["$local_temp_section_or_group"]}"
-        if [[ -n "$local_group_key_value" ]]; then
-          if (( local_group_key_line > local_key_line )); then
-            if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
-              config_key_exec_closure_map["$local_temp_section_or_group"]+="$local_group_key_value"
-            else
-              config_key_exec_closure_map["$local_temp_section_or_group"]="$local_group_key_value"
-            fi
-          elif (( local_group_key_line < local_key_line )) &&
-               [[ "$local_key_value" =~ ^$'\n' ]]; then
-            local local_group_key_value+="$local_key_value"
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'exec-closure')"
+      local local_group_key_value="${config_key_exec_closure_map["$local_group"]}"
+      local local_key_value="${config_key_exec_closure_map["$local_temp_section_or_group"]}"
+      if [[ -n "$local_group_key_value" ]]; then
+        if (( local_group_key_line > local_key_line )); then
+          if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
+            config_key_exec_closure_map["$local_temp_section_or_group"]+="$local_group_key_value"
+          else
             config_key_exec_closure_map["$local_temp_section_or_group"]="$local_group_key_value"
           fi
+        elif (( local_group_key_line < local_key_line )) &&
+             [[ "$local_key_value" =~ ^$'\n' ]]; then
+          local local_group_key_value+="$local_key_value"
+          config_key_exec_closure_map["$local_temp_section_or_group"]="$local_group_key_value"
         fi
+      fi
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'exec-oneshot')"
-        local local_group_key_value="${config_key_exec_oneshot_map["$local_group"]}"
-        local local_key_value="${config_key_exec_oneshot_map["$local_temp_section_or_group"]}"
-        if [[ -n "$local_group_key_value" ]]; then
-          if (( local_group_key_line > local_key_line )); then
-            if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
-              config_key_exec_oneshot_map["$local_temp_section_or_group"]+="$local_group_key_value"
-            else
-              config_key_exec_oneshot_map["$local_temp_section_or_group"]="$local_group_key_value"
-            fi
-          elif (( local_group_key_line < local_key_line )) &&
-               [[ "$local_key_value" =~ ^$'\n' ]]; then
-            local local_group_key_value+="$local_key_value"
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'exec-oneshot')"
+      local local_group_key_value="${config_key_exec_oneshot_map["$local_group"]}"
+      local local_key_value="${config_key_exec_oneshot_map["$local_temp_section_or_group"]}"
+      if [[ -n "$local_group_key_value" ]]; then
+        if (( local_group_key_line > local_key_line )); then
+          if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
+            config_key_exec_oneshot_map["$local_temp_section_or_group"]+="$local_group_key_value"
+          else
             config_key_exec_oneshot_map["$local_temp_section_or_group"]="$local_group_key_value"
           fi
+        elif (( local_group_key_line < local_key_line )) &&
+             [[ "$local_key_value" =~ ^$'\n' ]]; then
+          local local_group_key_value+="$local_key_value"
+          config_key_exec_oneshot_map["$local_temp_section_or_group"]="$local_group_key_value"
         fi
+      fi
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'exec-focus')"
-        local local_group_key_value="${config_key_exec_focus_map["$local_group"]}"
-        local local_key_value="${config_key_exec_focus_map["$local_temp_section_or_group"]}"
-        if [[ -n "$local_group_key_value" ]]; then
-          if (( local_group_key_line > local_key_line )); then
-            if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
-              config_key_exec_focus_map["$local_temp_section_or_group"]+="$local_group_key_value"
-            else
-              config_key_exec_focus_map["$local_temp_section_or_group"]="$local_group_key_value"
-            fi
-          elif (( local_group_key_line < local_key_line )) &&
-               [[ "$local_key_value" =~ ^$'\n' ]]; then
-            local local_group_key_value+="$local_key_value"
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'exec-focus')"
+      local local_group_key_value="${config_key_exec_focus_map["$local_group"]}"
+      local local_key_value="${config_key_exec_focus_map["$local_temp_section_or_group"]}"
+      if [[ -n "$local_group_key_value" ]]; then
+        if (( local_group_key_line > local_key_line )); then
+          if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
+            config_key_exec_focus_map["$local_temp_section_or_group"]+="$local_group_key_value"
+          else
             config_key_exec_focus_map["$local_temp_section_or_group"]="$local_group_key_value"
           fi
+        elif (( local_group_key_line < local_key_line )) &&
+             [[ "$local_key_value" =~ ^$'\n' ]]; then
+          local local_group_key_value+="$local_key_value"
+          config_key_exec_focus_map["$local_temp_section_or_group"]="$local_group_key_value"
         fi
+      fi
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'exec-unfocus')"
-        local local_group_key_value="${config_key_exec_unfocus_map["$local_group"]}"
-        local local_key_value="${config_key_exec_unfocus_map["$local_temp_section_or_group"]}"
-        if [[ -n "$local_group_key_value" ]]; then
-          if (( local_group_key_line > local_key_line )); then
-            if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
-              config_key_exec_unfocus_map["$local_temp_section_or_group"]+="$local_group_key_value"
-            else
-              config_key_exec_unfocus_map["$local_temp_section_or_group"]="$local_group_key_value"
-            fi
-          elif (( local_group_key_line < local_key_line )) &&
-               [[ "$local_key_value" =~ ^$'\n' ]]; then
-            local local_group_key_value+="$local_key_value"
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'exec-unfocus')"
+      local local_group_key_value="${config_key_exec_unfocus_map["$local_group"]}"
+      local local_key_value="${config_key_exec_unfocus_map["$local_temp_section_or_group"]}"
+      if [[ -n "$local_group_key_value" ]]; then
+        if (( local_group_key_line > local_key_line )); then
+          if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
+            config_key_exec_unfocus_map["$local_temp_section_or_group"]+="$local_group_key_value"
+          else
             config_key_exec_unfocus_map["$local_temp_section_or_group"]="$local_group_key_value"
           fi
+        elif (( local_group_key_line < local_key_line )) &&
+             [[ "$local_key_value" =~ ^$'\n' ]]; then
+          local local_group_key_value+="$local_key_value"
+          config_key_exec_unfocus_map["$local_temp_section_or_group"]="$local_group_key_value"
         fi
+      fi
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'lazy-exec-focus')"
-        local local_group_key_value="${config_key_lazy_exec_focus_map["$local_group"]}"
-        local local_key_value="${config_key_lazy_exec_focus_map["$local_temp_section_or_group"]}"
-        if [[ -n "$local_group_key_value" ]]; then
-          if (( local_group_key_line > local_key_line )); then
-            if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
-              config_key_lazy_exec_focus_map["$local_temp_section_or_group"]+="$local_group_key_value"
-            else
-              config_key_lazy_exec_focus_map["$local_temp_section_or_group"]="$local_group_key_value"
-            fi
-          elif (( local_group_key_line < local_key_line )) &&
-               [[ "$local_key_value" =~ ^$'\n' ]]; then
-            local local_group_key_value+="$local_key_value"
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'lazy-exec-focus')"
+      local local_group_key_value="${config_key_lazy_exec_focus_map["$local_group"]}"
+      local local_key_value="${config_key_lazy_exec_focus_map["$local_temp_section_or_group"]}"
+      if [[ -n "$local_group_key_value" ]]; then
+        if (( local_group_key_line > local_key_line )); then
+          if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
+            config_key_lazy_exec_focus_map["$local_temp_section_or_group"]+="$local_group_key_value"
+          else
             config_key_lazy_exec_focus_map["$local_temp_section_or_group"]="$local_group_key_value"
           fi
+        elif (( local_group_key_line < local_key_line )) &&
+             [[ "$local_key_value" =~ ^$'\n' ]]; then
+          local local_group_key_value+="$local_key_value"
+          config_key_lazy_exec_focus_map["$local_temp_section_or_group"]="$local_group_key_value"
         fi
+      fi
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'lazy-exec-unfocus')"
-        local local_group_key_value="${config_key_lazy_exec_unfocus_map["$local_group"]}"
-        local local_key_value="${config_key_lazy_exec_unfocus_map["$local_temp_section_or_group"]}"
-        if [[ -n "$local_group_key_value" ]]; then
-          if (( local_group_key_line > local_key_line )); then
-            if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
-              config_key_lazy_exec_unfocus_map["$local_temp_section_or_group"]+="$local_group_key_value"
-            else
-              config_key_lazy_exec_unfocus_map["$local_temp_section_or_group"]="$local_group_key_value"
-            fi
-          elif (( local_group_key_line < local_key_line )) &&
-               [[ "$local_key_value" =~ ^$'\n' ]]; then
-            local local_group_key_value+="$local_key_value"
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'lazy-exec-unfocus')"
+      local local_group_key_value="${config_key_lazy_exec_unfocus_map["$local_group"]}"
+      local local_key_value="${config_key_lazy_exec_unfocus_map["$local_temp_section_or_group"]}"
+      if [[ -n "$local_group_key_value" ]]; then
+        if (( local_group_key_line > local_key_line )); then
+          if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
+            config_key_lazy_exec_unfocus_map["$local_temp_section_or_group"]+="$local_group_key_value"
+          else
             config_key_lazy_exec_unfocus_map["$local_temp_section_or_group"]="$local_group_key_value"
           fi
+        elif (( local_group_key_line < local_key_line )) &&
+             [[ "$local_key_value" =~ ^$'\n' ]]; then
+          local local_group_key_value+="$local_key_value"
+          config_key_lazy_exec_unfocus_map["$local_temp_section_or_group"]="$local_group_key_value"
         fi
+      fi
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'mangohud-source-config')"
-        local local_group_key_value="${config_key_mangohud_source_config_map["$local_group"]}"
-        if [[ -n "$local_group_key_value" ]] &&
-           (( local_group_key_line > local_key_line )); then
-          config_key_mangohud_source_config_map["$local_temp_section_or_group"]="$local_group_key_value"
-        fi
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'mangohud-source-config')"
+      local local_group_key_value="${config_key_mangohud_source_config_map["$local_group"]}"
+      if [[ -n "$local_group_key_value" ]] &&
+         (( local_group_key_line > local_key_line )); then
+        config_key_mangohud_source_config_map["$local_temp_section_or_group"]="$local_group_key_value"
+      fi
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'mangohud-config')"
-        local local_group_key_value="${config_key_mangohud_config_map["$local_group"]}"
-        if [[ -n "$local_group_key_value" ]] &&
-           (( local_group_key_line > local_key_line )); then
-          config_key_mangohud_config_map["$local_temp_section_or_group"]="$local_group_key_value"
-        fi
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'mangohud-config')"
+      local local_group_key_value="${config_key_mangohud_config_map["$local_group"]}"
+      if [[ -n "$local_group_key_value" ]] &&
+         (( local_group_key_line > local_key_line )); then
+        config_key_mangohud_config_map["$local_temp_section_or_group"]="$local_group_key_value"
+      fi
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'fps-unfocus')"
-        local local_group_key_value="${config_key_fps_unfocus_map["$local_group"]}"
-        if [[ -n "$local_group_key_value" ]] &&
-           (( local_group_key_line > local_key_line )); then
-          config_key_fps_unfocus_map["$local_temp_section_or_group"]="$local_group_key_value"
-        fi
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'fps-unfocus')"
+      local local_group_key_value="${config_key_fps_unfocus_map["$local_group"]}"
+      if [[ -n "$local_group_key_value" ]] &&
+         (( local_group_key_line > local_key_line )); then
+        config_key_fps_unfocus_map["$local_temp_section_or_group"]="$local_group_key_value"
+      fi
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'fps-focus')"
-        local local_group_key_value="${config_key_fps_focus_map["$local_group"]}"
-        if [[ -n "$local_group_key_value" ]] &&
-           (( local_group_key_line > local_key_line )); then
-          config_key_fps_focus_map["$local_temp_section_or_group"]="$local_group_key_value"
-        fi
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'fps-focus')"
+      local local_group_key_value="${config_key_fps_focus_map["$local_group"]}"
+      if [[ -n "$local_group_key_value" ]] &&
+         (( local_group_key_line > local_key_line )); then
+        config_key_fps_focus_map["$local_temp_section_or_group"]="$local_group_key_value"
+      fi
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'idle')"
-        local local_group_key_value="${config_key_idle_map["$local_group"]}"
-        if [[ -n "$local_group_key_value" ]] &&
-           (( local_group_key_line > local_key_line )); then
-          config_key_idle_map["$local_temp_section_or_group"]="$local_group_key_value"
-        fi
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'idle')"
+      local local_group_key_value="${config_key_idle_map["$local_group"]}"
+      if [[ -n "$local_group_key_value" ]] &&
+         (( local_group_key_line > local_key_line )); then
+        config_key_idle_map["$local_temp_section_or_group"]="$local_group_key_value"
+      fi
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'unfocus-minimize')"
-        local local_group_key_value="${config_key_unfocus_minimize_map["$local_group"]}"
-        if [[ -n "$local_group_key_value" ]] &&
-           (( local_group_key_line > local_key_line )); then
-          config_key_unfocus_minimize_map["$local_temp_section_or_group"]="$local_group_key_value"
-        fi
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'unfocus-minimize')"
+      local local_group_key_value="${config_key_unfocus_minimize_map["$local_group"]}"
+      if [[ -n "$local_group_key_value" ]] &&
+         (( local_group_key_line > local_key_line )); then
+        config_key_unfocus_minimize_map["$local_temp_section_or_group"]="$local_group_key_value"
+      fi
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'focus-fullscreen')"
-        local local_group_key_value="${config_key_focus_fullscreen_map["$local_group"]}"
-        if [[ -n "$local_group_key_value" ]] &&
-           (( local_group_key_line > local_key_line )); then
-          config_key_focus_fullscreen_map["$local_temp_section_or_group"]="$local_group_key_value"
-        fi
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'focus-fullscreen')"
+      local local_group_key_value="${config_key_focus_fullscreen_map["$local_group"]}"
+      if [[ -n "$local_group_key_value" ]] &&
+         (( local_group_key_line > local_key_line )); then
+        config_key_focus_fullscreen_map["$local_temp_section_or_group"]="$local_group_key_value"
+      fi
 
-        local local_key_line="$(get_key_line "$local_temp_section_or_group" 'focus-cursor-grab')"
-        local local_group_key_value="${config_key_focus_cursor_grab_map["$local_group"]}"
-        if [[ -n "$local_group_key_value" ]] &&
-           (( local_group_key_line > local_key_line )); then
-          config_key_focus_cursor_grab_map["$local_temp_section_or_group"]="$local_group_key_value"
-        fi
+      local local_key_line="$(get_key_line "$local_temp_section_or_group" 'focus-cursor-grab')"
+      local local_group_key_value="${config_key_focus_cursor_grab_map["$local_group"]}"
+      if [[ -n "$local_group_key_value" ]] &&
+         (( local_group_key_line > local_key_line )); then
+        config_key_focus_cursor_grab_map["$local_temp_section_or_group"]="$local_group_key_value"
       fi
     fi
   done
