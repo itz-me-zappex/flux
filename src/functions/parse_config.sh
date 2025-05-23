@@ -49,11 +49,13 @@ parse_config(){
         local local_section="${local_temp_config_line/\[/}"
         local local_section="${local_section/%\]/}"
 
-        # Splitting groups and section is needed to make groups inside groups work
+        # Splitting groups and section is needed to make groups inside groups work, also I need to define type of section to show in message
         if section_is_group "$local_section"; then
           groups_array+=("$local_section")
+          local local_section_msg=" in '$local_section' group"
         else
           sections_array+=("$local_section")
+          local local_section_msg=" in '$local_section' section"
         fi
 
         # Needed to detect blank sections, if at least one key specified, this map is unset
@@ -61,8 +63,6 @@ parse_config(){
 
         # Remember section line
         config_keys_order_map["$local_section"]+="$local_line_count"
-
-        local local_section_msg=" in '$local_section' section"
       elif [[ "${local_temp_config_line,,}" =~ ^[^[:space:]]+([[:space:]]+)?(\+)?=([[:space:]]+)?* ]]; then
         # Remove equal symbol and key value to keep just key name
         if [[ "${local_temp_config_line,,}" =~ ^[^[:space:]]+([[:space:]]+)?\+=([[:space:]]+)?* ]]; then
