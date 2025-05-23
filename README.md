@@ -316,7 +316,7 @@ Just add command to autostart using your DE/WM settings. Running daemon as root 
 | `exec-exit-focus` | Same as `exec-exit`, but command appears executed only if matching window appears focused at the moment of daemon termination. |
 | `exec-exit-unfocus` | Same as `exec-exit`, but command appears executed only if matching window appears unfocused at the moment of daemon termination. |
 | `exec-focus` | Command to execute on focus event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
-| `exec-unfocus` | Command to execute on unfocus event or window closure, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
+| `exec-unfocus` | Command to execute on unfocus event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
 | `lazy-exec-focus` | Same as `exec-focus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event). |
 | `lazy-exec-unfocus` | Same as `exec-unfocus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event). |
 | `unfocus-minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`. Defaults to `false`. |
@@ -337,22 +337,10 @@ Using multiple groups in one section at the same time is not possible.
 
 Group **should not** contain identifiers e.g. `name`, `owner` and/or `command`.
 
-P.S.: Groups inside groups are not supported, I have no idea how to implement this. That could be cool to create groups with appending rules to another one.
+You can use `group` config key inside groups.
 
 To make things more clear, here is an example how to create and use groups:
 ```ini
-[@games-overclock]
-exec-focus += wpctl set-mute -p $FLUX_PROCESS_PID 0
-exec-unfocus += wpctl set-mute -p $FLUX_PROCESS_PID 1
-lazy-exec-focus += nvidia-settings -a '[gpu:0]/DigitalVibrance=150'
-lazy-exec-focus += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=200'
-lazy-exec-focus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=2000'
-lazy-exec-unfocus += nvidia-settings -a '[gpu:0]/DigitalVibrance=0'
-lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=0'
-lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=0'
-exec-oneshot += renice -n -4 $FLUX_PROCESS_PID
-exec-oneshot += find ~/.nv -type f -exec cat {} + > /dev/null
-
 [@games]
 exec-focus += wpctl set-mute -p $FLUX_PROCESS_PID 0
 exec-unfocus += wpctl set-mute -p $FLUX_PROCESS_PID 1
@@ -360,6 +348,21 @@ lazy-exec-focus += nvidia-settings -a '[gpu:0]/DigitalVibrance=150'
 lazy-exec-unfocus += nvidia-settings -a '[gpu:0]/DigitalVibrance=0'
 exec-oneshot += renice -n -4 $FLUX_PROCESS_PID
 exec-oneshot += find ~/.nv -type f -exec cat {} + > /dev/null
+exec-closure += nvidia-settings -a '[gpu:0]/DigitalVibrance=0'
+exec-exit += nvidia-settings -a '[gpu:0]/DigitalVibrance=0'
+exec-exit += renice -n 0 $FLUX_PROCESS_PID
+exec-exit += wpctl set-mute -p $FLUX_PROCESS_PID 0
+
+[@games-overclock]
+group = @games
+lazy-exec-focus += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=200'
+lazy-exec-focus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=2000'
+lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=0'
+lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=0'
+exec-closure += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=0'
+exec-closure += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=0'
+exec-exit += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=0'
+exec-exit += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=0'
 
 [Geometry Dash]
 name = GeometryDash.exe
@@ -414,6 +417,8 @@ owner = zappex
 cpu-limit = 0%
 lazy-exec-focus = killall picom
 lazy-exec-unfocus = picom
+exec-closure = picom
+exec-exit = picom
 
 ; Set FPS limit to 5, minimize (as this is borderless window) and mute on unfocus, restore FPS to 60, unmute and expand to fullscreen on focus
 [Forza Horizon 4]
@@ -426,6 +431,7 @@ fps-unfocus = 5
 fps-focus = 60
 exec-focus = wpctl set-mute -p $FLUX_PROCESS_PID 0
 exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1
+exec-exit = wpctl set-mute -p $FLUX_PROCESS_PID 0
 idle = true
 unfocus-minimize = true
 focus-fullscreen = true
@@ -446,8 +452,10 @@ name = witcher3.exe
 cpu-limit = 0%
 lazy-exec-focus = killall picom
 lazy-exec-unfocus = picom
+exec-closure = picom
+exec-exit = picom
 
-; Set FPS limit to 5, minimize (as that is borderless window) and mute on unfocus, restore FPS to 60, unmute and expand to fullscreen on focus
+; Set FPS limit to 5, minimize (as this is borderless window) and mute on unfocus, restore FPS to 60, unmute and expand to fullscreen on focus
 [Forza Horizon 4]
 name = ForzaHorizon4.exe
 mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
@@ -456,6 +464,7 @@ fps-unfocus = 5
 fps-focus = 60
 exec-focus = wpctl set-mute -p $FLUX_PROCESS_PID 0
 exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1
+exec-exit = wpctl set-mute -p $FLUX_PROCESS_PID 0
 idle = true
 unfocus-minimize = true
 focus-fullscreen = true
