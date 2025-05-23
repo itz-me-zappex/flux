@@ -22,7 +22,7 @@ parse_config(){
         (( parse_config_error_count++ ))
       elif [[ "$local_temp_config_line" =~ ^\[.*\]$ ]]; then
         # Regexp above means any symbols in square brackes
-        # Exit with an error if section repeated
+        # Exit with an error if section is repeated
         if [[ -n "${sections_array[*]}" ]]; then
           local local_temp_section
           for local_temp_section in "${sections_array[@]}"; do
@@ -33,11 +33,28 @@ parse_config(){
           done
         fi
 
+        # Exit with an error if group is repeated
+        if [[ -n "${groups_array[*]}" ]]; then
+          local local_temp_group
+          for local_temp_group in "${groups_array[@]}"; do
+            if [[ "[$local_temp_group]" == "$local_temp_config_line" ]]; then
+              message --warning "$local_line_count_msg Group name '$local_temp_group' is repeated!"
+              (( parse_config_error_count++ ))
+            fi
+          done
+        fi
+
         # Remove square brackets from section name and add it to array
         # Array required to check for repeating sections and find matching rule(s) for process in config
         local local_section="${local_temp_config_line/\[/}"
         local local_section="${local_section/%\]/}"
-        sections_array+=("$local_section")
+
+        # Splitting groups and section is needed to make groups inside groups work
+        if section_is_group "$local_section"; then
+          groups_array+=("$local_section")
+        else
+          sections_array+=("$local_section")
+        fi
 
         # Needed to detect blank sections, if at least one key specified, this map is unset
         is_section_blank_map["$local_section"]='1'
