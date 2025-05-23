@@ -220,6 +220,7 @@ get_key_line(){
     for local_temp_key in ${config_keys_order_map["$local_section"]}; do
       if [[ "$local_temp_key" == *".$local_key_name" ]]; then
         echo "${local_temp_key/'.'*/}"
+        break
       fi
     done
   fi
