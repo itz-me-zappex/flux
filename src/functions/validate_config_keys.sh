@@ -31,39 +31,49 @@ validate_config_keys(){
     fi
 
     # Exit with an error if MangoHud FPS limit is not specified along with config path
-    if [[ -n "${config_key_fps_unfocus_map["$local_temp_section_or_group"]}" &&
-          -z "${config_key_mangohud_config_map["$local_temp_section_or_group"]}" ]]; then
-      message --warning "L$local_fps_focus_line: Value ${config_key_fps_unfocus_map["$local_temp_section_or_group"]} in 'fps-unfocus' key in '$local_temp_section_or_group' section is specified without 'mangohud-config' key!"
-      (( parse_config_error_count++ ))
+    if [[ -n "$local_fps_focus_line" ]]; then
+      if [[ -n "${config_key_fps_unfocus_map["$local_temp_section_or_group"]}" &&
+            -z "${config_key_mangohud_config_map["$local_temp_section_or_group"]}" ]]; then
+        message --warning "L$local_fps_focus_line: Value ${config_key_fps_unfocus_map["$local_temp_section_or_group"]} in 'fps-unfocus' key in '$local_temp_section_or_group' section is specified without 'mangohud-config' key!"
+        (( parse_config_error_count++ ))
+      fi
     fi
 
     # Exit with an error if MangoHud FPS limit is specified along with CPU limit
-    if [[ -n "${config_key_fps_unfocus_map["$local_temp_section_or_group"]}" &&
-          -n "${config_key_cpu_limit_map["$local_temp_section_or_group"]}" &&
-          "${config_key_cpu_limit_map["$local_temp_section_or_group"]}" != '100' ]]; then
-      message --warning "L$local_fps_unfocus_line: Do not use FPS limit along with CPU limit in '$local_temp_section_or_group' section!"
-      (( parse_config_error_count++ ))
+    if [[ -n "$local_fps_unfocus_line" ]]; then
+      if [[ -n "${config_key_fps_unfocus_map["$local_temp_section_or_group"]}" &&
+            -n "${config_key_cpu_limit_map["$local_temp_section_or_group"]}" &&
+            "${config_key_cpu_limit_map["$local_temp_section_or_group"]}" != '100' ]]; then
+        message --warning "L$local_fps_unfocus_line: Do not use FPS limit along with CPU limit in '$local_temp_section_or_group' section!"
+        (( parse_config_error_count++ ))
+      fi
     fi
 
     # Exit with an error if 'fps-focus' is specified without 'fps-unfocus'
-    if [[ -n "${config_key_fps_focus_map["$local_temp_section_or_group"]}" &&
-          -z "${config_key_fps_unfocus_map["$local_temp_section_or_group"]}" ]]; then
-      message --warning "L$local_fps_focus_line: Do not use 'fps-focus' key without 'fps-unfocus' key in '$local_temp_section_or_group' section!"
-      (( parse_config_error_count++ ))
+    if [[ -n "$local_fps_focus_line" ]]; then
+      if [[ -n "${config_key_fps_focus_map["$local_temp_section_or_group"]}" &&
+            -z "${config_key_fps_unfocus_map["$local_temp_section_or_group"]}" ]]; then
+        message --warning "L$local_fps_focus_line: Do not use 'fps-focus' key without 'fps-unfocus' key in '$local_temp_section_or_group' section!"
+        (( parse_config_error_count++ ))
+      fi
     fi
 
     # Exit with an error if 'mangohud-config' is specified without 'fps-unfocus'
-    if [[ -n "${config_key_mangohud_config_map["$local_temp_section_or_group"]}" &&
-          -z "${config_key_fps_unfocus_map["$local_temp_section_or_group"]}" ]]; then
-      message --warning "L$local_mangohud_config_line: Do not use 'mangohud-config' key without 'fps-unfocus' key in '$local_temp_section_or_group' section!"
-      (( parse_config_error_count++ ))
+    if [[ -n "$local_mangohud_config_line" ]]; then
+      if [[ -n "${config_key_mangohud_config_map["$local_temp_section_or_group"]}" &&
+            -z "${config_key_fps_unfocus_map["$local_temp_section_or_group"]}" ]]; then
+        message --warning "L$local_mangohud_config_line: Do not use 'mangohud-config' key without 'fps-unfocus' key in '$local_temp_section_or_group' section!"
+        (( parse_config_error_count++ ))
+      fi
     fi
 
     # Exit with an error if 'mangohud-source-config' is specified without 'mangohud-config'
-    if [[ -n "${config_key_mangohud_source_config_map["$local_temp_section_or_group"]}" &&
-          -z "${config_key_mangohud_config_map["$local_temp_section_or_group"]}" ]]; then
-      message --warning "L$local_mangohud_source_config_line: Do not use 'mangohud-source-config' key without 'mangohud-config' key in '$local_temp_section_or_group' section!"
-      (( parse_config_error_count++ ))
+    if [[ -n "$local_mangohud_source_config_line" ]]; then
+      if [[ -n "${config_key_mangohud_source_config_map["$local_temp_section_or_group"]}" &&
+            -z "${config_key_mangohud_config_map["$local_temp_section_or_group"]}" ]]; then
+        message --warning "L$local_mangohud_source_config_line: Do not use 'mangohud-source-config' key without 'mangohud-config' key in '$local_temp_section_or_group' section!"
+        (( parse_config_error_count++ ))
+      fi
     fi
 
     # Exit with an error if there is another section which matches with the same process
