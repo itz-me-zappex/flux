@@ -16,22 +16,31 @@ validate_config_keys(){
     local local_mangohud_config_line="$(get_key_line "$local_temp_section_or_group" 'mangohud-config')"
     local local_mangohud_source_config_line="$(get_key_line "$local_temp_section_or_group" 'mangohud-source-config')"
 
+    # Define type of section to show in message
+    if section_is_group "$local_temp_section_or_group"; then
+      local local_section_msg=" in '$local_temp_section_or_group' group"
+      local local_section_msg_head='Group'
+    else
+      local local_section_msg=" in '$local_temp_section_or_group' section"
+      local local_section_msg_head='Section'
+    fi
+
     # Exit with an error if section is blank
     if [[ -n "${is_section_blank_map["$local_temp_section_or_group"]}" ]]; then
-      message --warning "L$local_section_or_group_line: Section '$local_temp_section_or_group' is blank!"
+      message --warning "L$local_section_or_group_line: $local_section_msg_head '$local_temp_section_or_group' is blank!"
       (( parse_config_error_count++ ))
     else
       # Exit with an error if neither identifier 'name' nor 'command' is specified
       if ! section_is_group "$local_temp_section_or_group" &&
          [[ -z "${config_key_name_map["$local_temp_section_or_group"]}" &&
             -z "${config_key_command_map["$local_temp_section_or_group"]}" ]]; then
-        message --warning "L$local_section_or_group_line: At least one process identifier required in '$local_temp_section_or_group' section!"
+        message --warning "L$local_section_or_group_line: At least one process identifier required$local_section_msg!"
         (( parse_config_error_count++ ))
       fi
 
       # Exit with an error if section contains only identifiers
       if [[ -z "${is_section_useful_map["$local_temp_section_or_group"]}" ]]; then
-        message --warning "L$local_section_or_group_line: Section '$local_temp_section_or_group' is useless because there is no action specified!"
+        message --warning "L$local_section_or_group_line: $local_section_msg_head '$local_temp_section_or_group' is useless because there is no action specified!"
         (( parse_config_error_count++ ))
       fi
     fi
@@ -40,7 +49,7 @@ validate_config_keys(){
     if [[ -n "$local_fps_focus_line" ]]; then
       if [[ -n "${config_key_fps_unfocus_map["$local_temp_section_or_group"]}" &&
             -z "${config_key_mangohud_config_map["$local_temp_section_or_group"]}" ]]; then
-        message --warning "L$local_fps_focus_line: Value ${config_key_fps_unfocus_map["$local_temp_section_or_group"]} in 'fps-unfocus' key in '$local_temp_section_or_group' section is specified without 'mangohud-config' key!"
+        message --warning "L$local_fps_focus_line: Value ${config_key_fps_unfocus_map["$local_temp_section_or_group"]} in 'fps-unfocus' key$local_section_msg is specified without 'mangohud-config' key!"
         (( parse_config_error_count++ ))
       fi
     fi
@@ -50,7 +59,7 @@ validate_config_keys(){
       if [[ -n "${config_key_fps_unfocus_map["$local_temp_section_or_group"]}" &&
             -n "${config_key_cpu_limit_map["$local_temp_section_or_group"]}" &&
             "${config_key_cpu_limit_map["$local_temp_section_or_group"]}" != '100' ]]; then
-        message --warning "L$local_fps_unfocus_line: Do not use FPS limit along with CPU limit in '$local_temp_section_or_group' section!"
+        message --warning "L$local_fps_unfocus_line: Do not use FPS limit along with CPU limit$local_section_msg!"
         (( parse_config_error_count++ ))
       fi
     fi
@@ -59,7 +68,7 @@ validate_config_keys(){
     if [[ -n "$local_fps_focus_line" ]]; then
       if [[ -n "${config_key_fps_focus_map["$local_temp_section_or_group"]}" &&
             -z "${config_key_fps_unfocus_map["$local_temp_section_or_group"]}" ]]; then
-        message --warning "L$local_fps_focus_line: Do not use 'fps-focus' key without 'fps-unfocus' key in '$local_temp_section_or_group' section!"
+        message --warning "L$local_fps_focus_line: Do not use 'fps-focus' key without 'fps-unfocus' key$local_section_msg!"
         (( parse_config_error_count++ ))
       fi
     fi
@@ -68,7 +77,7 @@ validate_config_keys(){
     if [[ -n "$local_mangohud_config_line" ]]; then
       if [[ -n "${config_key_mangohud_config_map["$local_temp_section_or_group"]}" &&
             -z "${config_key_fps_unfocus_map["$local_temp_section_or_group"]}" ]]; then
-        message --warning "L$local_mangohud_config_line: Do not use 'mangohud-config' key without 'fps-unfocus' key in '$local_temp_section_or_group' section!"
+        message --warning "L$local_mangohud_config_line: Do not use 'mangohud-config' key without 'fps-unfocus' key$local_section_msg!"
         (( parse_config_error_count++ ))
       fi
     fi
@@ -77,7 +86,7 @@ validate_config_keys(){
     if [[ -n "$local_mangohud_source_config_line" ]]; then
       if [[ -n "${config_key_mangohud_source_config_map["$local_temp_section_or_group"]}" &&
             -z "${config_key_mangohud_config_map["$local_temp_section_or_group"]}" ]]; then
-        message --warning "L$local_mangohud_source_config_line: Do not use 'mangohud-source-config' key without 'mangohud-config' key in '$local_temp_section_or_group' section!"
+        message --warning "L$local_mangohud_source_config_line: Do not use 'mangohud-source-config' key without 'mangohud-config' key$local_section_msg!"
         (( parse_config_error_count++ ))
       fi
     fi
@@ -119,7 +128,7 @@ validate_config_keys(){
 
           if (( local_match == 3 )) &&
              (( local_section_line_temp > local_section_or_group_line )); then
-            message --warning "L$local_section_line_temp: Identifiers in '$local_temp_section' section are very similar to ones in '$local_temp_section_or_group' section!"
+            message --warning "L$local_section_line_temp: Identifiers in '$local_temp_section' section are very similar to ones$local_section_msg!"
             (( parse_config_error_count++ ))
           fi
 
