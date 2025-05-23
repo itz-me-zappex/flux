@@ -15,8 +15,9 @@ handle_groups(){
 
     local local_group="${config_key_group_map["$local_temp_section_or_group"]}"
 
-    # Skip if 'group' is not specified
-    if [[ -z "$local_group" ]]; then
+    # Skip if 'group' is not specified or does not begin with '@' (warning already shown from 'parse_config()')
+    if [[ -z "$local_group" ]] ||
+       ! section_is_group "$local_group"; then
       continue
     fi
 
