@@ -133,6 +133,11 @@ declare -A config_keys_order_map
 # Needed to detect blank sections in config during parsing
 declare -A is_section_blank_map
 
+# Needed to remember whether regexp should be used to find matching identifiers or not
+declare -A config_key_regexp_name_map \
+config_key_regexp_command_map \
+config_key_regexp_owner_map
+
 # Declare associative arrays to store info about backgrounded limits
 declare -A background_freeze_pid_map \
 background_cpu_limit_pid_map \

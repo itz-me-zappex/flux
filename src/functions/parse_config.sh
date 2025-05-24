@@ -62,13 +62,19 @@ parse_config(){
 
         # Remember section line
         config_keys_order_map["$local_section"]+="$config_line_count"
-      elif [[ "${local_temp_config_line,,}" =~ ^[^[:space:]]+([[:space:]]+)?(\+)?=([[:space:]]+)?* ]]; then
+      elif [[ "${local_temp_config_line,,}" =~ ^[^[:space:]]+([[:space:]]+)?(\+|\~)?=([[:space:]]+)?* ]]; then
         # Remove equal symbol and key value to keep just key name
         if [[ "${local_temp_config_line,,}" =~ ^[^[:space:]]+([[:space:]]+)?\+=([[:space:]]+)?* ]]; then
           local local_append='1'
+          unset local_regexp
           local local_config_key="${local_temp_config_line/%+=*/}"
+        elif [[ "${local_temp_config_line,,}" =~ ^[^[:space:]]+([[:space:]]+)?\~=([[:space:]]+)?* ]]; then
+          local local_regexp='1'
+          unset local_append
+          local local_config_key="${local_temp_config_line/%\~=*/}"
         else
           unset local_append
+          unset local_regexp
           local local_config_key="${local_temp_config_line/%=*/}"
         fi
 
@@ -105,6 +111,13 @@ parse_config(){
           (( parse_config_error_count++ ))
         fi
 
+        # Print warning and mark as an error if regexp used in unsupported key
+        if [[ -n "$local_regexp" &&
+              ! "$local_config_key" =~ ^('name'|'command'|'owner')$ ]]; then
+          message --warning "$local_line_count_msg Regexp$local_section_msg in '$local_config_key' config key is not supported!"
+          (( parse_config_error_count++ ))
+        fi
+
         # Print warning and mark as an error if identifiers appear used in group
         if section_is_group "$local_section" &&
            [[ "$local_config_key" =~ ^('name'|'owner'|'command')$ ]]; then
@@ -120,11 +133,13 @@ parse_config(){
             config_key_name_map["$local_section"]="$local_config_value"
             unset is_section_blank_map["$local_section"]
             config_keys_order_map["$local_section"]+=" $config_line_count.name"
+            config_key_regexp_name_map["$local_section"]="$local_regexp"
           ;;
           owner )
             config_key_owner_map["$local_section"]="$local_config_value"
             unset is_section_blank_map["$local_section"]
             config_keys_order_map["$local_section"]+=" $config_line_count.owner"
+            config_key_regexp_owner_map["$local_section"]="$local_regexp"
           ;;
           cpu-limit )
             config_key_cpu_limit_map["$local_section"]="${local_config_value/%\%/}"
@@ -233,6 +248,7 @@ parse_config(){
             config_key_command_map["$local_section"]="$local_config_value"
             unset is_section_blank_map["$local_section"]
             config_keys_order_map["$local_section"]+=" $config_line_count.exec-command"
+            config_key_regexp_command_map["$local_section"]="$local_regexp"
           ;;
           mangohud-source-config | mangohud-config )
             # Get absolute path to MangoHud config in case it is specified as relative
