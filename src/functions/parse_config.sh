@@ -2,13 +2,12 @@
 parse_config(){
   # Parse INI config
   local local_temp_config_line
-  local local_line_count
   while read -r local_temp_config_line ||
         [[ -n "$local_temp_config_line" ]]; do
     # Get current line count and add postfix
-    (( local_line_count++ ))
+    (( config_line_count++ ))
 
-    local local_line_count_msg="L${local_line_count}:"
+    local local_line_count_msg="L${config_line_count}:"
 
     # Skip cycle if line is commented or blank, regexp means comments which beginning from ';' or '#' symbols
     if [[ ! "$local_temp_config_line" =~ ^(\;|\#) &&
@@ -62,7 +61,7 @@ parse_config(){
         is_section_blank_map["$local_section"]='1'
 
         # Remember section line
-        config_keys_order_map["$local_section"]+="$local_line_count"
+        config_keys_order_map["$local_section"]+="$config_line_count"
       elif [[ "${local_temp_config_line,,}" =~ ^[^[:space:]]+([[:space:]]+)?(\+)?=([[:space:]]+)?* ]]; then
         # Remove equal symbol and key value to keep just key name
         if [[ "${local_temp_config_line,,}" =~ ^[^[:space:]]+([[:space:]]+)?\+=([[:space:]]+)?* ]]; then
@@ -120,12 +119,12 @@ parse_config(){
           name )
             config_key_name_map["$local_section"]="$local_config_value"
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.name"
+            config_keys_order_map["$local_section"]+=" $config_line_count.name"
           ;;
           owner )
             config_key_owner_map["$local_section"]="$local_config_value"
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.owner"
+            config_keys_order_map["$local_section"]+=" $config_line_count.owner"
           ;;
           cpu-limit )
             config_key_cpu_limit_map["$local_section"]="${local_config_value/%\%/}"
@@ -139,7 +138,7 @@ parse_config(){
             fi
 
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.cpu-limit"
+            config_keys_order_map["$local_section"]+=" $config_line_count.cpu-limit"
           ;;
           delay )
             config_key_delay_map["$local_section"]="$local_config_value"
@@ -151,7 +150,7 @@ parse_config(){
             fi
 
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.delay"
+            config_keys_order_map["$local_section"]+=" $config_line_count.delay"
           ;;
           exec-exit )
             if [[ -z "$local_append" ]]; then
@@ -162,7 +161,7 @@ parse_config(){
 
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.exec-exit"
+            config_keys_order_map["$local_section"]+=" $config_line_count.exec-exit"
           ;;
           exec-exit-focus )
             if [[ -z "$local_append" ]]; then
@@ -173,7 +172,7 @@ parse_config(){
 
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.exec-exit-focus"
+            config_keys_order_map["$local_section"]+=" $config_line_count.exec-exit-focus"
           ;;
           exec-exit-unfocus )
             if [[ -z "$local_append" ]]; then
@@ -184,7 +183,7 @@ parse_config(){
 
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.exec-exit-unfocus"
+            config_keys_order_map["$local_section"]+=" $config_line_count.exec-exit-unfocus"
           ;;
           exec-closure )
             if [[ -z "$local_append" ]]; then
@@ -195,7 +194,7 @@ parse_config(){
 
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.exec-closure"
+            config_keys_order_map["$local_section"]+=" $config_line_count.exec-closure"
           ;;
           exec-oneshot )
             if [[ -z "$local_append" ]]; then
@@ -206,7 +205,7 @@ parse_config(){
 
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.exec-oneshot"
+            config_keys_order_map["$local_section"]+=" $config_line_count.exec-oneshot"
           ;;
           exec-focus )
             if [[ -z "$local_append" ]]; then
@@ -217,7 +216,7 @@ parse_config(){
 
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.exec-focus"
+            config_keys_order_map["$local_section"]+=" $config_line_count.exec-focus"
           ;;
           exec-unfocus )
             if [[ -z "$local_append" ]]; then
@@ -228,12 +227,12 @@ parse_config(){
 
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.exec-unfocus"
+            config_keys_order_map["$local_section"]+=" $config_line_count.exec-unfocus"
           ;;
           command )
             config_key_command_map["$local_section"]="$local_config_value"
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.exec-command"
+            config_keys_order_map["$local_section"]+=" $config_line_count.exec-command"
           ;;
           mangohud-source-config | mangohud-config )
             # Get absolute path to MangoHud config in case it is specified as relative
@@ -243,11 +242,11 @@ parse_config(){
             case "$local_config_key" in
             mangohud-source-config )
               config_key_mangohud_source_config_map["$local_section"]="$local_config_value"
-              config_keys_order_map["$local_section"]+=" $local_line_count.mangohud-source-config"
+              config_keys_order_map["$local_section"]+=" $config_line_count.mangohud-source-config"
             ;;
             mangohud-config )
               config_key_mangohud_config_map["$local_section"]="$local_config_value"
-              config_keys_order_map["$local_section"]+=" $local_line_count.mangohud-source"
+              config_keys_order_map["$local_section"]+=" $config_line_count.mangohud-source"
             esac
 
             # Check for config file existence
@@ -274,7 +273,7 @@ parse_config(){
             fi
 
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.fps-unfocus"
+            config_keys_order_map["$local_section"]+=" $config_line_count.fps-unfocus"
           ;;
           fps-focus )
             config_key_fps_focus_map["$local_section"]="$local_config_value"
@@ -288,7 +287,7 @@ parse_config(){
             fi
 
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.fps-focus"
+            config_keys_order_map["$local_section"]+=" $config_line_count.fps-focus"
           ;;
           lazy-exec-focus )
             if [[ -z "$local_append" ]]; then
@@ -299,7 +298,7 @@ parse_config(){
 
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.lazy-exec-focus"
+            config_keys_order_map["$local_section"]+=" $config_line_count.lazy-exec-focus"
           ;;
           lazy-exec-unfocus )
             if [[ -z "$local_append" ]]; then
@@ -310,7 +309,7 @@ parse_config(){
 
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.lazy-exec-unfocus"
+            config_keys_order_map["$local_section"]+=" $config_line_count.lazy-exec-unfocus"
           ;;
           idle )
             # Exit with an error if value is not boolean
@@ -321,7 +320,7 @@ parse_config(){
 
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.idle"
+            config_keys_order_map["$local_section"]+=" $config_line_count.idle"
           ;;
           unfocus-minimize )
             # Exit with an error if value is not boolean
@@ -332,7 +331,7 @@ parse_config(){
 
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.unfocus-minimize"
+            config_keys_order_map["$local_section"]+=" $config_line_count.unfocus-minimize"
           ;;
           focus-fullscreen )
             # Exit with an error if value is not boolean
@@ -343,7 +342,7 @@ parse_config(){
 
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.focus-fullscreen"
+            config_keys_order_map["$local_section"]+=" $config_line_count.focus-fullscreen"
           ;;
           focus-cursor-grab )
             # Exit with an error if value is not boolean
@@ -354,7 +353,7 @@ parse_config(){
 
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.focus-cursor-grab"
+            config_keys_order_map["$local_section"]+=" $config_line_count.focus-cursor-grab"
           ;;
           group )
             config_key_group_map["$local_section"]="$local_config_value"
@@ -367,7 +366,7 @@ parse_config(){
             fi
 
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $local_line_count.group"
+            config_keys_order_map["$local_section"]+=" $config_line_count.group"
           ;;
           * )
             message --warning "$local_line_count_msg Unknown '$local_config_key' config key$local_section_msg!"

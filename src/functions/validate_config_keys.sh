@@ -2,7 +2,7 @@
 validate_config_keys(){
   # Exit with an error if there is no any section specified
   if [[ -z "${sections_array[*]}" ]]; then
-    message --warning "L0: Config file does not contain any section!"
+    message --warning "L$config_line_count: Config file does not contain any section!"
     (( parse_config_error_count++ ))
   fi
 

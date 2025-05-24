@@ -212,7 +212,8 @@ unset is_section_useful_map \
 is_section_blank_map \
 config \
 get_key_line \
-config_keys_order_map
+config_keys_order_map \
+config_line_count
 
 # Unset groups to avoid false positives due to missing identifiers (overwrites sections array)
 unset_groups
