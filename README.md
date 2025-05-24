@@ -25,14 +25,15 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [Colorful output](#colorful-output)
   - [Autostart](#autostart)
 - [Configuration](#configuration)
+  - [Limitations](#limitations)
   - [Available keys and description](#available-keys-and-description)
     - [Identifiers](#identifiers)
     - [Limits](#limits)
     - [Limits configuration](#limits-configuration)
     - [Miscellaneous](#miscellaneous)
   - [Groups](#groups)
+  - [Regular expressions](#regular-expressions)
   - [Config path](#config-path)
-  - [Limitations](#limitations)
   - [Configuration example](#configuration-example)
   - [Environment variables passed to commands and description](#environment-variables-passed-to-commands-and-description)
     - [On focus or window appearance](#on-focus-or-window-appearance)
@@ -278,10 +279,30 @@ flux -tT '(\e[1;4;36m%d.%m.%Y\e[0m \e[1;4;31m%H:%M:%S\e[0m)'
 ```
 
 Now you will get timestamps with bold and underlined text with cyan date and red time, order or count of ANSI escape sequences does not matter, so you can turn timestamps into freaking rainbow without causing explosion of the Sun. Same with prefixes. If you do not like `\e` for whatever reason, you can use either `\033`, `\u001b` or `\x1b` instead, those are handled registry independently. More about colors and ANSI escape sequences you can find on `https://www.shellhacks.com/bash-colors` or any other website.
+
 ### Autostart
 Just add command to autostart using your DE/WM settings. Running daemon as root also possible, but that feature almost useless.
+
 ## Configuration
 **Note:** A simple INI is used for configuration.
+
+### Limitations
+As INI is not standartized, I should mention all supported features here.
+
+**Supported:**
+- Spaces and other symbols in section names.
+- Single and double quoted strings.
+- Сase insensitivity of key names.
+- Comments (using `;` and/or `#` symbols).
+- Insensetivity to spaces before and after `=` symbol.
+- Appending values to config keys using `+=` (only `exec-oneshot`, `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus`).
+- Regular expressions using `~=` (only `name`, `command` and `owner`).
+
+**Unsupported:**
+- Line continuation.
+- Inline comments.
+- Anything else that unmentioned here.
+
 ### Available keys and description
 #### Identifiers
 | Key | Description |
@@ -373,28 +394,28 @@ cpu-limit = 0%
 group = @games-overclock
 ```
 
+### Regular expressions
+To simplify config file editing and reduce its config size, you may want to use regexp e.g. to avoid extremely long strings (like in Minecraft's command which has `java` as process name) or to make section matchable with multimple process names.
+
+```ini
+; Section matches with both 'vkcube' and 'glxgears' processes
+[vkcube and glxgears]
+name ~= ^(vkcube|glxgears)$
+cpu-limit = 0%
+
+; Minecraft has extremely long command and process name is just 'java', so
+[Minecraft]
+name = java
+;command = /usr/lib/jvm/java-17-openjdk/bin/java -Xms512m -Xmx8192m -Duser.language=en -Djava.library.path...minecraft-1.20.4-client.jar org.prismlauncher.EntryPoint
+command ~= minecraft
+cpu-limit = 5%
+```
+
 ### Config path
 Daemon searches for following configuration files by priority:
 - `$XDG_CONFIG_HOME/flux.ini`
 - `$HOME/.config/flux.ini`
 - `/etc/flux.ini`
-
-### Limitations
-As INI is not standartized, I should mention all supported features here.
-
-**Supported:**
-- Spaces and other symbols in section names.
-- Single and double quoted strings.
-- Сase insensitivity of key names.
-- Comments (using `;` and/or `#` symbols).
-- Insensetivity to spaces before and after `=` symbol.
-- Appending values to config keys using `+=` (only `exec-oneshot`, `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus`).
-
-**Unsupported:**
-- Regular expressions.
-- Line continuation.
-- Inline comments.
-- Anything else that unmentioned here.
 
 ### Configuration example
 ```ini
