@@ -34,8 +34,6 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [Config path](#config-path)
   - [Limitations](#limitations)
   - [Configuration example](#configuration-example)
-    - [Long examples](#long-examples)
-    - [Short examples](#short-examples)
   - [Environment variables passed to commands and description](#environment-variables-passed-to-commands-and-description)
     - [On focus or window appearance](#on-focus-or-window-appearance)
     - [On unfocus, closure or daemon termination](#on-unfocus-closure-or-daemon-termination)
@@ -311,14 +309,14 @@ Just add command to autostart using your DE/WM settings. Running daemon as root 
 | Key | Description |
 |-----|-------------|
 | `exec-oneshot` | Command to execute on window appearance event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
-| `exec-closure` | Command to execute on window closure event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
-| `exec-exit` | Command to execute when daemon receives `SIGINT` or `SIGTERM` signal, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
+| `exec-closure` | Command to execute on window closure event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. Defaults to `lazy-exec-unfocus` value if not specified. |
+| `exec-exit` | Command to execute when daemon receives `SIGINT` or `SIGTERM` signal, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. Defaults to `lazy-exec-unfocus` value if not specified. |
 | `exec-exit-focus` | Same as `exec-exit`, but command appears executed only if matching window appears focused at the moment of daemon termination. |
 | `exec-exit-unfocus` | Same as `exec-exit`, but command appears executed only if matching window appears unfocused at the moment of daemon termination. |
 | `exec-focus` | Command to execute on focus event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
 | `exec-unfocus` | Command to execute on unfocus event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
 | `lazy-exec-focus` | Same as `exec-focus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event). |
-| `lazy-exec-unfocus` | Same as `exec-unfocus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event). |
+| `lazy-exec-unfocus` | Same as `exec-unfocus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event). Used as `exec-exit` and/or `exec-closure` automatically if one/two of those is/are not specified. |
 | `unfocus-minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`. Defaults to `false`. |
 | `focus-fullscreen` | Boolean, sends X event to window manager on focus to expand window to fullscreen, useful if game (e.g. Forza Horizon 4) handles window mode in weird a way. Defaults to `false`. |
 | `focus-cursor-grab` | Boolean, daemon grabs cursor if possible, binds it to window and because of X11 nature which prevents input to anything but client which owns cursor (`flux-cursor-grab` module in background in this case) - redirects all input into focused window. This ugly layer prevents cursor from escaping to second monitor in some games at cost of *possible* input lag. Cursor is ungrabbed on unfocus event. Defaults to `false`. |
@@ -348,10 +346,6 @@ lazy-exec-focus += nvidia-settings -a '[gpu:0]/DigitalVibrance=150'
 lazy-exec-unfocus += nvidia-settings -a '[gpu:0]/DigitalVibrance=0'
 exec-oneshot += renice -n -4 $FLUX_PROCESS_PID
 exec-oneshot += find ~/.nv -type f -exec cat {} + > /dev/null
-exec-closure += nvidia-settings -a '[gpu:0]/DigitalVibrance=0'
-exec-exit += nvidia-settings -a '[gpu:0]/DigitalVibrance=0'
-exec-exit += renice -n 0 $FLUX_PROCESS_PID
-exec-exit += wpctl set-mute -p $FLUX_PROCESS_PID 0
 
 [@games-overclock]
 group = @games
@@ -359,10 +353,6 @@ lazy-exec-focus += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=2
 lazy-exec-focus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=2000'
 lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=0'
 lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=0'
-exec-closure += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=0'
-exec-closure += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=0'
-exec-exit += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=0'
-exec-exit += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=0'
 
 [Geometry Dash]
 name = GeometryDash.exe
@@ -407,8 +397,11 @@ As INI is not standartized, I should mention all supported features here.
 - Anything else that unmentioned here.
 
 ### Configuration example
-#### Long examples
 ```ini
+; ----------------------------------------------------------------------------------------------- ;
+; --- Config keys 'command' and 'owner' are optional in this case, so you can use just 'name' --- ;
+; ----------------------------------------------------------------------------------------------- ;
+
 ; Freeze on unfocus and disable/enable compositor on focus and unfocus respectively
 [The Witcher 3: Wild Hunt]
 name = witcher3.exe
@@ -417,8 +410,6 @@ owner = zappex
 cpu-limit = 0%
 lazy-exec-focus = killall picom
 lazy-exec-unfocus = picom
-exec-closure = picom
-exec-exit = picom
 
 ; Set FPS limit to 5, minimize (as this is borderless window) and mute on unfocus, restore FPS to 60, unmute and expand to fullscreen on focus
 [Forza Horizon 4]
@@ -444,37 +435,7 @@ owner = zappex
 cpu-limit = 2%
 idle = true
 ```
-#### Short examples
-```ini
-; Freeze on unfocus and disable/enable compositor on focus and unfocus respectively
-[The Witcher 3: Wild Hunt]
-name = witcher3.exe
-cpu-limit = 0%
-lazy-exec-focus = killall picom
-lazy-exec-unfocus = picom
-exec-closure = picom
-exec-exit = picom
 
-; Set FPS limit to 5, minimize (as this is borderless window) and mute on unfocus, restore FPS to 60, unmute and expand to fullscreen on focus
-[Forza Horizon 4]
-name = ForzaHorizon4.exe
-mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
-mangohud-source-config = ~/.config/MangoHud/MangoHud.conf
-fps-unfocus = 5
-fps-focus = 60
-exec-focus = wpctl set-mute -p $FLUX_PROCESS_PID 0
-exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1
-exec-exit = wpctl set-mute -p $FLUX_PROCESS_PID 0
-idle = true
-unfocus-minimize = true
-focus-fullscreen = true
-
-; Reduce CPU usage and reduce priority when unfocused, needed to keep game able download music and assets
-[Geometry Dash]
-name = GeometryDash.exe
-cpu-limit = 2%
-idle = true
-```
 ### Environment variables passed to commands and description
 You may want to use these variables in commands and scripts which running from `exec-oneshot`, `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys to extend daemon functionality.
 #### On focus or window appearance
