@@ -166,6 +166,17 @@ validate_config_keys(){
             -n "${config_key_idle_map["$local_temp_section_or_group"]}" ]]; then
         should_validate_sched='1'
       fi
+
+      # Inherit `exec-exit` and `exec-closure` from `lazy-exec-unfocus` if not specified
+      if [[ -n "${config_key_lazy_exec_unfocus_map["$local_temp_section_or_group"]}" ]]; then
+        if [[ -z "${config_key_exec_exit_map["$local_temp_section_or_group"]}" ]]; then
+          config_key_exec_exit_map["$local_temp_section_or_group"]="${config_key_lazy_exec_unfocus_map["$local_temp_section_or_group"]}"
+        fi
+
+        if [[ -z "${config_key_exec_closure_map["$local_temp_section_or_group"]}" ]]; then
+          config_key_exec_closure_map["$local_temp_section_or_group"]="${config_key_lazy_exec_unfocus_map["$local_temp_section_or_group"]}"
+        fi
+      fi
     fi
   done
 
