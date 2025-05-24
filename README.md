@@ -25,6 +25,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [Colorful output](#colorful-output)
   - [Autostart](#autostart)
 - [Configuration](#configuration)
+  - [Config path](#config-path)
   - [Limitations](#limitations)
   - [Available keys and description](#available-keys-and-description)
     - [Identifiers](#identifiers)
@@ -33,7 +34,6 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
     - [Miscellaneous](#miscellaneous)
   - [Groups](#groups)
   - [Regular expressions](#regular-expressions)
-  - [Config path](#config-path)
   - [Configuration example](#configuration-example)
   - [Environment variables passed to commands and description](#environment-variables-passed-to-commands-and-description)
     - [On focus or window appearance](#on-focus-or-window-appearance)
@@ -286,6 +286,12 @@ Just add command to autostart using your DE/WM settings. Running daemon as root 
 ## Configuration
 **Note:** A simple INI is used for configuration.
 
+### Config path
+Daemon searches for following configuration files by priority:
+- `$XDG_CONFIG_HOME/flux.ini`
+- `$HOME/.config/flux.ini`
+- `/etc/flux.ini`
+
 ### Limitations
 As INI is not standartized, I should mention all supported features here.
 
@@ -410,12 +416,6 @@ name = java
 command ~= minecraft
 cpu-limit = 5%
 ```
-
-### Config path
-Daemon searches for following configuration files by priority:
-- `$XDG_CONFIG_HOME/flux.ini`
-- `$HOME/.config/flux.ini`
-- `/etc/flux.ini`
 
 ### Configuration example
 ```ini
