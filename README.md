@@ -31,6 +31,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
     - [Identifiers](#identifiers)
     - [Limits](#limits)
     - [Limits configuration](#limits-configuration)
+    - [Scripting](#scripting)
     - [Miscellaneous](#miscellaneous)
   - [Groups](#groups)
   - [Regular expressions](#regular-expressions)
@@ -69,21 +70,19 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 *Daemon running with handling already opened windows (`-H`) in verbose mode (`-v`) and enabled timestamps (`-t`)*
 
 ## Features
-- CPU and FPS limiting process on unfocus and unlimiting on focus (FPS limiting requires game running using MangoHud with already existing config file).
-- Reducing process priority on unfocus and restoring it on focus.
-- Minimizing window on unfocus, useful for borderless windows.
-- Expanding window to fullscreen on focus, useful for games which are handle a window mode in weird way, e.g. Forza Horizon 4 changes its mode to windowed after minimization.
-- Ability to make window grab cursor forcefully to prevent it from escaping to second monitor.
-- Commands/scripts execution on focus and unfocus events to make user able extend daemon functionality.
-- Configurable logging.
+- Apply CPU or FPS limit to process on unfocus and unlimit on focus, FPS limiting requires game running using MangoHud with already existing config file.
+- Reduce process priority on unfocus and restore it on focus.
+- Minimize window on unfocus, useful for borderless windows.
+- Expand window to fullscreen on focus, useful for games which are handle a window mode in weird way, e.g. Forza Horizon 4 changes its mode to windowed after minimization.
+- Force window to grab cursor to prevent it from escaping to second monitor as example.
+- Execute commands and scripts on focus, unfocus and window closure events to extend daemon functionality. Daemon provides info about window and process through environment variables.
+- Logging support.
 - Notifications support.
-- Multiple identifiers you can set to avoid false positives.
-- Easy INI config.
-- Supports scripting, window and process info passed via environment variables to commands in execution related config keys.
-- Works with processes running in sandbox with PID namespaces (e.g. Firejail).
-- Survives a whole DE/WM restart (not relogin) and continues work without issues.
+- Flexible identifiers support to avoid false positives, including regular expressions.
+- Works with processes running in sandbox with PID namespaces, through Firejail for example.
+- Survives DE/WM restart and continues work without issues.
 - Supports most of X11 DEs/WMs [(EWMH-compatible ones)](<https://specifications.freedesktop.org/wm-spec/latest/>) and does not rely on neither GPU nor its driver.
-- Detects and handles both explicitly (appeared with focus event) and implicitly (appeared without focus event) opened windows.
+- Detects and handles both explicitly and implicitly opened windows (appeared with and without focus event respectively).
 
 ## Dependencies
 ### Arch Linux and dereatives
@@ -331,8 +330,9 @@ As INI is not standartized, I should mention all supported features here.
 | `delay` | Delay in seconds before applying CPU/FPS limit or setting `SCHED_IDLE`. Defaults to `0`, supports values with floating point. |
 | `mangohud-source-config` | Path to MangoHud config which should be used as a base before apply FPS limit in `mangohud-config`, if not specified, then target behaves as source. Useful if you not looking for duplicate MangoHud config for multiple games. |
 | `mangohud-config` | Path to MangoHud config which should be changed (target), required if you want change FPS limits and requires `fps-unfocus`. Make sure you created specified config, at least just keep it blank, otherwise MangoHud will not be able to load new config on fly and daemon will throw warnings related to config absence. Do not use the same config for multiple sections! |
+| `group` | Specify group from which section suppossed to inherit rules. Group declaration should begin with `@` symbol in both its section name and in value of `group` key. |
 
-#### Miscellaneous
+#### Scripting
 | Key | Description |
 |-----|-------------|
 | `exec-oneshot` | Command to execute on window appearance event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
@@ -344,10 +344,13 @@ As INI is not standartized, I should mention all supported features here.
 | `exec-unfocus` | Command to execute on unfocus event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
 | `lazy-exec-focus` | Same as `exec-focus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event). |
 | `lazy-exec-unfocus` | Same as `exec-unfocus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event). Used as `exec-exit` and/or `exec-closure` automatically if one/two of those is/are not specified. |
+
+#### Miscellaneous
+| Key | Description |
+|-----|-------------|
 | `unfocus-minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`. Defaults to `false`. |
 | `focus-fullscreen` | Boolean, sends X event to window manager on focus to expand window to fullscreen, useful if game (e.g. Forza Horizon 4) handles window mode in weird a way. Defaults to `false`. |
 | `focus-cursor-grab` | Boolean, daemon grabs cursor if possible, binds it to window and because of X11 nature which prevents input to anything but client which owns cursor (`flux-cursor-grab` module in background in this case) - redirects all input into focused window. This ugly layer prevents cursor from escaping to second monitor in some games at cost of *possible* input lag. Cursor is ungrabbed on unfocus event. Defaults to `false`. |
-| `group` | Specify group from which section suppossed to inherit rules. Group declaration should begin with `@` symbol in both its section name and in value of `group` key. |
 
 ### Groups
 To avoid repeating yourself, reduce config file size and simplify editing, you may want to create and use groups.
