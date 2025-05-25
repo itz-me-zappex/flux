@@ -10,11 +10,11 @@ validate_config_keys(){
   local local_temp_section_or_group
   for local_temp_section_or_group in "${groups_array[@]}" "${sections_array[@]}"; do
     # Get key lines of ones which will be checked for an errors
-    local local_section_or_group_line="$(get_key_line "$local_temp_section_or_group")"
-    local local_fps_focus_line="$(get_key_line "$local_temp_section_or_group" 'fps-focus')"
-    local local_fps_unfocus_line="$(get_key_line "$local_temp_section_or_group" 'fps-unfocus')"
-    local local_mangohud_config_line="$(get_key_line "$local_temp_section_or_group" 'mangohud-config')"
-    local local_mangohud_source_config_line="$(get_key_line "$local_temp_section_or_group" 'mangohud-source-config')"
+    get_key_line "$local_temp_section_or_group" ; local local_section_or_group_line="$get_key_line_result"
+    get_key_line "$local_temp_section_or_group" 'fps-focus' ; local local_fps_focus_line="$get_key_line_result"
+    get_key_line "$local_temp_section_or_group" 'fps-unfocus' ; local local_fps_unfocus_line="$get_key_line_result"
+    get_key_line "$local_temp_section_or_group" 'mangohud-config' ; local local_mangohud_config_line="$get_key_line_result"
+    get_key_line "$local_temp_section_or_group" 'mangohud-source-config' ; local local_mangohud_source_config_line="$get_key_line_result"
 
     # Define type of section to show in message
     if section_is_group "$local_temp_section_or_group"; then
@@ -124,7 +124,7 @@ validate_config_keys(){
             (( local_match++ ))
           fi
 
-          local local_section_line_temp="$(get_key_line "$local_temp_section")"
+          get_key_line "$local_temp_section" ; local local_section_line_temp="$get_key_line_result"
 
           if (( local_match == 3 )) &&
              (( local_section_line_temp > local_section_or_group_line )); then
