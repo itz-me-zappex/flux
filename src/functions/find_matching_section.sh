@@ -23,7 +23,9 @@ find_matching_section(){
             fi
           else
             # Use regexp to define whether process name matches with one from section or not
-            if [[ "$process_name" =~ ${config_key_name_map["$local_temp_section"]} ]]; then
+            if [[ "$process_name" =~ ${config_key_name_map["$local_temp_section"]} ||
+                  "'$process_name'" =~ ${config_key_name_map["$local_temp_section"]} ||
+                  "\"$process_name\"" =~ ${config_key_name_map["$local_temp_section"]} ]]; then
               (( local_match++ ))
             fi
           fi
@@ -41,7 +43,11 @@ find_matching_section(){
             fi
           else
             if [[ "$process_owner" =~ ${config_key_owner_map["$local_temp_section"]} ||
-                  "$process_owner_username" =~ ${config_key_owner_map["$local_temp_section"]} ]]; then
+                  "'$process_owner'" =~ ${config_key_owner_map["$local_temp_section"]} ||
+                  "\"$process_owner\"" =~ ${config_key_owner_map["$local_temp_section"]} ||
+                  "$process_owner_username" =~ ${config_key_owner_map["$local_temp_section"]} ||
+                  "'$process_owner_username'" =~ ${config_key_owner_map["$local_temp_section"]} ||
+                  "\"$process_owner_username\"" =~ ${config_key_owner_map["$local_temp_section"]} ]]; then
               (( local_match++ ))
             fi
           fi
@@ -57,7 +63,9 @@ find_matching_section(){
               (( local_match++ ))
             fi
           else
-            if [[ "$process_command" =~ ${config_key_command_map["$local_temp_section"]} ]]; then
+            if [[ "$process_command" =~ ${config_key_command_map["$local_temp_section"]} ||
+                  "'$process_command'" =~ ${config_key_command_map["$local_temp_section"]} ||
+                  "\"$process_command\"" =~ ${config_key_command_map["$local_temp_section"]} ]]; then
               (( local_match++ ))
             fi
           fi
