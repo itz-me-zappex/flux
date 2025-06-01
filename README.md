@@ -61,9 +61,14 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [Why did you write it in Bash?](#why-did-you-write-it-in-bash)
 
 ## Known issues
-- Freezing online/multiplayer games by setting `cpu-limit` to `0%` causes disconnects. Use less aggressive CPU limit to allow game to send/receive packets.
-- Stuttery audio in unfocused game if CPU limit is pretty aggressive, that should be expected because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. If you use Pipewire with Wireplumber, you may want to mute process as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
-- Some games under Wine/Proton may not like `flux-cursor-grab`, meaning that if game gets focus without clicking on it with mouse (e.g. after Alt+Tab), cursor will be grabbed and will not work outside of window, but still will be able to escape, that happens for me with Ori and the Will of the Wisps in windowed mode for example. Also cursor grabbing in daemon does not work for all games, because a lot of those grab cursor manually, so cursor grabbing unneeded in this case and you will see warning in log/output that daemon unable to grab cursor, it is okay.
+- Freezing online/multiplayer games by setting `cpu-limit` to `0%` causes disconnects.
+  - Use less aggressive CPU limit to allow game to send/receive packets.
+- Stuttery audio in unfocused game if CPU limit is pretty aggressive, that should be expected because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage.
+  - If you use Pipewire with Wireplumber, you may want to mute process as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
+- Some games under Wine/Proton may not like `flux-cursor-grab`, meaning that if game gets focus without clicking on it with mouse (e.g. after Alt+Tab), cursor will be grabbed and will not work outside of window, but still will be able to escape (e.g. in "Ori and the Will of the Wisps" in windowed mode). Also cursor grabbing in daemon does not work for all games, because a lot of those grab cursor manually.
+  - Do not use `focus-cursor-grab` config keys in such cases.
+- Process name mismatch when using info from `--get` option. That may happen because process may change its name at runtime. For example, in "S.T.A.L.K.E.R." trilogy and its derivatives (e.g. "S.T.A.L.K.E.R.: Anomaly"), process initially starts as `xrEngine.exe`, but after engine initialization, it changes its name to `X-Ray Primary t` (shortened from `X-Ray Primary thread` due to the 16-byte limit of `/proc/<PID>/comm`). Daemon reads process name and other info once and caches it internally (into associative arrays) to reduce CPU usage and improve performance. As a result, if daemon detects process during initialization (e.g. with `xrEngine.exe` name), it will continue to associate it with that name. However, if daemon is restarted with `--hot` option after name has been already changed, it will now detect updated name, which will match with what is returned by `--get`.
+  - Use regexp in `name` config key like `^('X-RAY Primary t'|'xrEngine.exe'|'AnomalyDX11AVX.'|'XR_3DA.exe')$`. You may want to start daemon in verbose mode to find message about mismatch containing process name catched at engine initialization step.
 
 ## Screenshot
 ![](preview.png)
@@ -160,68 +165,84 @@ Use this method if you using different distro. Make sure you have installed depe
 ```bash
 wget -qO- 'https://api.github.com/repos/itz-me-zappex/flux/releases/latest' | grep '"tarball_url":' | cut -d '"' -f 4 | xargs wget -O flux.tar.gz
 ```
+
 #### Extract archive and change directory
 ```bash
 tar -xvf flux.tar.gz --one-top-level=flux --strip-components=1 && cd 'flux'
 ```
+
 #### Build daemon
 ```bash
 make
 ```
+
 #### Install daemon to `/usr/local`
 ```bash
 sudo make install
 ```
+
 #### Or you may want to change prefix e.g. in case you want install it locally
 ```bash
 PREFIX="~/.local" make install
 ```
+
 #### Or you may want to keep daemon and modules in single directory, that will work, just
 ```bash
 ./build/flux -h
 ```
+
 #### Create `flux` group, needed to bypass scheduling policies change limitations
 ```bash
 sudo groupadd -r flux
 ```
+
 #### Add current user to `flux` group
 ```bash
 sudo usermod -aG flux "$USER"
 ```
+
 ## Uninstallation
 ### Arch Linux and dereatives
 #### Execute following
 ```bash
 sudo pacman -Rnsc flux
 ```
+
 ### Uninstallation using `make`
 #### Download release archive with currently installed version and extract it, e.g
 ```bash
 wget 'https://github.com/itz-me-zappex/flux/archive/refs/tags/v1.23.4.tar.gz' && tar -xvf 'v1.23.4.tar.gz' && cd 'flux-1.23.4'
 ```
+
 #### Uninstall daemon from `/usr/local`
 ```bash
 sudo make uninstall
 ```
+
 #### Or, if it was installed somewhere else, e.g. in `/usr`, then
 ```bash
 sudo PREFIX='/usr' make uninstall
 ```
+
 #### Remove unneeded dependencies
 Depends by distro and package manager you use, I highly suggest to remove dependencies selectively and check which packages are use it, to avoid system breakage.
+
 ### Cleaning up
 #### Lock file (after crash)
 ```bash
 rm '/tmp/flux-lock'
 ```
+
 #### Config file (if not needed anymore), e.g.
 ```bash
 rm ~/.config/flux.ini
 ```
+
 #### Remove group from system
 ```bash
 sudo groupdel flux
 ```
+
 ## Usage
 ### List of available options
 ```
@@ -497,6 +518,7 @@ You may want to use these variables in commands and scripts which running from `
 ## Tips and tricks
 ### Apply changes in config file
 As daemon does not parse config on a go, you need to restart daemon with `--hot` option after editing config to make daemon handle already opened windows immediately after start.
+
 ### Mute process audio on unfocus (Pipewire & Wireplumber)
 Add following lines to section responsible for target:
 
@@ -507,6 +529,7 @@ exec-focus += wpctl set-mute -p $FLUX_PROCESS_PID 0
 ; Mute on unfocus
 exec-unfocus += wpctl set-mute -p $FLUX_PROCESS_PID 1
 ```
+
 ### Reduce niceness of process on window appearance (increase priority)
 **Note:** Niceness `-4` is fine for multimedia tasks, including games.
 
@@ -516,6 +539,7 @@ Add following line to section responsible for target:
 ; Increase process priority if window opens first time
 exec-oneshot += renice -n -4 $FLUX_PROCESS_PID
 ```
+
 ### Overclock NVIDIA GPU on window focus and revert it on unfocus
 **Note:** Command from `lazy-exec-unfocus` is also executed on daemon termination if window appears focused at that moment.
 
@@ -528,6 +552,7 @@ lazy-exec-focus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset
 lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=0'
 lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=0'
 ```
+
 ### Change keyboard layout to English on focus and revert it to Russian on unfocus
 **Note:** Useful for some games/apps that do not understand cyrillic letters and rely on layout instead of scancodes.
 
@@ -538,6 +563,7 @@ Add following lines to section responsible for target (use your own values):
 lazy-exec-focus += setxkbmap us,ru,ua
 lazy-exec-unfocus += setxkbmap ru,ua,us
 ```
+
 ### Increase digital vibrance on focus and revert it on unfocus
 **Note:** Use `vibrant-cli` from [`libvibrant`](<https://github.com/libvibrant/libvibrant>) project if you use AMD or Intel GPU.
 
