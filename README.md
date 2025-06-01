@@ -327,7 +327,7 @@ As INI is not standartized, I should mention all supported features here.
 #### Limits configuration
 | Key | Description |
 |-----|-------------|
-| `delay` | Delay in seconds before applying CPU/FPS limit or setting `SCHED_IDLE`. Defaults to `0`, supports values with floating point. |
+| `delay` | Delay in seconds before applying CPU/FPS limit and setting `SCHED_IDLE`. Defaults to `0`, supports values with floating point. |
 | `mangohud-source-config` | Path to MangoHud config which should be used as a base before apply FPS limit in `mangohud-config`, if not specified, then target behaves as source. Useful if you not looking for duplicate MangoHud config for multiple games. |
 | `mangohud-config` | Path to MangoHud config which should be changed (target), required if you want change FPS limits and requires `fps-unfocus`. Make sure you created specified config, at least just keep it blank, otherwise MangoHud will not be able to load new config on fly and daemon will throw warnings related to config absence. Do not use the same config for multiple sections! |
 | `group` | Specify group from which section suppossed to inherit rules. Group declaration should begin with `@` symbol in both its section name and in value of `group` key. |
@@ -404,7 +404,7 @@ group = @games-overclock
 ```
 
 ### Regular expressions
-To simplify config file editing and reduce its config size, you may want to use regexp e.g. to avoid extremely long strings (like in Minecraft's command which has `java` as process name) or to make section matchable with multimple process names.
+To simplify config file editing and reduce its config size, you may want to use regexp e.g. to avoid extremely long strings (like in Minecraft's command which has `java` as process name) or to make section matchable with multiple process names.
 
 ```ini
 ; Section matches with both 'vkcube' and 'glxgears' processes
