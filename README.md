@@ -56,18 +56,18 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [Does this daemon reduce performance?](#does-this-daemon-reduce-performance)
   - [May I get banned in game because of this daemon?](#may-i-get-banned-in-game-because-of-this-daemon)
   - [Why was this daemon developed?](#why-was-this-daemon-developed)
-  - [Why is code so complicated?](#why-is-code-so-complicated)
+  - [Why code is so complicated?](#why-is-code-so-complicated)
   - [What about Wayland support?](#what-about-wayland-support)
   - [Why did you write it in Bash?](#why-did-you-write-it-in-bash)
 
 ## Known issues
 - Freezing online/multiplayer games by setting `cpu-limit` to `0%` causes disconnects.
   - Use less aggressive CPU limit to allow game to send/receive packets.
-- Stuttery audio in unfocused game if CPU limit is pretty aggressive, that should be expected because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage.
+- Stuttery audio in unfocused game if CPU limit is pretty aggressive. That should be expected, because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage.
   - If you use Pipewire with Wireplumber, you may want to mute process as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
 - Some games under Wine/Proton may not like `flux-cursor-grab`, meaning that if game gets focus without clicking on it with mouse (e.g. after Alt+Tab), cursor will be grabbed and will not work outside of window, but still will be able to escape (e.g. in "Ori and the Will of the Wisps" in windowed mode). Also cursor grabbing in daemon does not work for all games, because a lot of those grab cursor manually.
-  - Do not use `focus-cursor-grab` config keys in such cases.
-- Process name mismatch when using info from `--get` option. That may happen because process may change its name at runtime. For example, in "S.T.A.L.K.E.R." trilogy and its derivatives (e.g. "S.T.A.L.K.E.R.: Anomaly"), process initially starts as `xrEngine.exe`, but after engine initialization, it changes its name to `X-Ray Primary t` (shortened from `X-Ray Primary thread` due to the 16-byte limit of `/proc/<PID>/comm`). Daemon reads process name and other info once and caches it internally (into associative arrays) to reduce CPU usage and improve performance. As a result, if daemon detects process during initialization (e.g. with `xrEngine.exe` name), it will continue to associate it with that name. However, if daemon is restarted with `--hot` option after name has been already changed, it will now detect updated name, which will match with what is returned by `--get`.
+  - Do not use `focus-cursor-grab` config key in such cases.
+- Process name mismatch when using info from `--get` option. That may happen because process may change its name at runtime. For example, in "S.T.A.L.K.E.R." trilogy and its derivatives (e.g. "S.T.A.L.K.E.R.: Anomaly"), process initially starts as `xrEngine.exe`, but after engine initialization, it changes its name to `X-Ray Primary t`. Daemon reads process name and other info once and puts it into associative arrays to reduce CPU usage and improve performance. As a result, if daemon detects process during initialization step, it will continue to associate it with this name. However, if daemon becomes restarted with `--hot` option after name has been changed, it will now detect updated name, which will match with what is returned by `--get`.
   - Use regexp in `name` config key like `^('X-RAY Primary t'|'xrEngine.exe'|'AnomalyDX11AVX.'|'XR_3DA.exe')$`. You may want to start daemon in verbose mode to find message about mismatch containing process name catched at engine initialization step.
 
 ## Screenshot
@@ -145,7 +145,7 @@ sudo usermod -aG flux "$USER"
 ```
 
 ### Manual installation using release tarball
-Use this method if you using different distro. Make sure you have installed dependencies as described [here](#dependencies) before continue.
+Use this method if you use other distro. Make sure you have installed dependencies as described [here](#dependencies) before continue.
 
 #### Make options
 | Option | Description |
@@ -225,7 +225,7 @@ sudo PREFIX='/usr' make uninstall
 ```
 
 #### Remove unneeded dependencies
-Depends by distro and package manager you use, I highly suggest to remove dependencies selectively and check which packages are use it, to avoid system breakage.
+Depends by distro and package manager you use, I highly suggest to remove dependencies selectively and check which packages are use it to avoid system breakage.
 
 ### Cleaning up
 #### Lock file (after crash)
@@ -291,14 +291,14 @@ Examples:
 Daemon supports colors in prefixes and timestamps, those are configurable and I did everything to prevent user from shooting into his third "leg". There is a bunch of logic implemented to avoid that:
   - Daemon will not interpret anything but ANSI escape sequences (e.g. `\e[31mHello, world!\e[0m`), so output breakage because of something like `\n` or `\r` simply impossible, those are just shown as text.
   - Daemon adds additional `\e[0m` to end of prefix/timestamp, that prevents output breakage by isolating formatting inside variables.
-  - If colors specified by user in custom prefixes/timestamp and `--color` set to `auto` (or unset), daemon disables those when writes message to log file or output appears redirected to file (`stdout` and `stderr`), if `--color` set to `never` - disables colors completely, if `always` - enforces colors even for logging and redirection.
+  - Even if timestamp/prefix specified by user contains ANSI escape sequences, daemon still removes those keeping only text if output becomes redirected or if `--color` forced to `none`.
 
 To configure colors in custom prefix/timestamp, you need to use ANSI escape sequence inside of prefix/timestamp as specified below:
 ```bash
 flux -tT '(\e[1;4;36m%d.%m.%Y\e[0m \e[1;4;31m%H:%M:%S\e[0m)'
 ```
 
-Now you will get timestamps with bold and underlined text with cyan date and red time, order or count of ANSI escape sequences does not matter, so you can turn timestamps into freaking rainbow without causing explosion of the Sun. Same with prefixes. If you do not like `\e` for whatever reason, you can use either `\033`, `\u001b` or `\x1b` instead, those are handled registry independently. More about colors and ANSI escape sequences you can find on `https://www.shellhacks.com/bash-colors` or any other website.
+Now you have timestamp with bold and underlined text with cyan date and red time. Order or count of ANSI escape sequences does not matter, so you can turn timestamps into freaking rainbow without causing explosion of the Sun. Same is applicable to prefixes. If you do not like `\e` for whatever reason, you can use either `\033`, `\u001b` or `\x1b` instead, those are handled registry independently. More about colors and ANSI escape sequences you can find on `https://www.shellhacks.com/bash-colors` or on another website.
 
 ### Autostart
 Just add command to autostart using your DE/WM settings. Running daemon as root also possible, but that feature almost useless.
@@ -321,8 +321,8 @@ As INI is not standartized, I should mention all supported features here.
 - Сase insensitivity of key names.
 - Comments (using `;` and/or `#` symbols).
 - Insensetivity to spaces before and after `=` symbol.
-- Appending values to config keys using `+=` (only `exec-oneshot`, `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus`).
-- Regular expressions using `~=` (only `name`, `command` and `owner`).
+- Appending values to config keys using `+=`. Works only in `exec-oneshot`, `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys.
+- Regular expressions using `~=`. Works only in `name`, `command` and `owner` config keys.
 
 **Unsupported:**
 - Line continuation.
@@ -388,7 +388,7 @@ Group **should not** contain identifiers e.g. `name`, `owner` and/or `command`.
 
 You can use `group` config key inside groups.
 
-To make things more clear, here is an example how to create and use groups:
+To make things more clear, here is an example of how to create and use groups:
 ```ini
 [@games]
 exec-focus += wpctl set-mute -p $FLUX_PROCESS_PID 0
@@ -428,7 +428,7 @@ group = @games-overclock
 To simplify config file editing and reduce its config size, you may want to use regexp e.g. to avoid extremely long strings (like in Minecraft's command which has `java` as process name) or to make section matchable with multiple process names.
 
 ```ini
-; Section matches with both 'vkcube' and 'glxgears' processes
+; Section matches both 'vkcube' and 'glxgears' processes
 [vkcube and glxgears]
 name ~= ^(vkcube|glxgears)$
 cpu-limit = 0%
@@ -517,7 +517,7 @@ You may want to use these variables in commands and scripts which running from `
 
 ## Tips and tricks
 ### Apply changes in config file
-As daemon does not parse config on a go, you need to restart daemon with `--hot` option after editing config to make daemon handle already opened windows immediately after start.
+As daemon does not parse config on a go, you need to restart daemon with `--hot` option after config file editing to make it handle already opened windows immediately after start.
 
 ### Mute process audio on unfocus (Pipewire & Wireplumber)
 Add following lines to section responsible for target:
@@ -611,7 +611,7 @@ exec-oneshot += find ~/.cache/mesa_shader_cache_db -type f -exec cat {} + > /dev
 ### Why was this daemon developed?
 - Main task is to reduce CPU/GPU usage of games that have been minimized. Almost every engine fails to recognize that game is unfocused and still consumes a lot of CPU and GPU resources, what can make system slow for other tasks like browsing stuff, chatting, transcoding video etc. or even unresponsive at all. With this daemon now I can simply play a game or tinker with virtual machine and then minimize window if needed without carrying about high CPU/GPU usage and suffering from low multitasking performance. Also, daemon does not care about type of software, so you can use it with everything. Inspiried by feature from NVIDIA driver for Windows where user can set FPS limit for minimized software, this tool is not exactly the same, but better than nothing.
 
-### Why is code so complicated?
+### Why code is so complicated?
 - I trying to avoid using external tools in favor of bashisms to reduce CPU usage daemon and speed up code.
 
 ### What about Wayland support?
