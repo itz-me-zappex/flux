@@ -14,18 +14,7 @@
 #include "functions/is_wine_window.h"
 #include "functions/is_process_cpu_idle.h"
 #include "functions/forward_input_on_hang_wait.h"
-
-// Wait for cursor ungrab to grab it successfully
-void wait_for_cursor_ungrab(Display* display, Window window) {
-  while (true) {
-    usleep(250000);
-    int grab_status = XGrabPointer(display, window, True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
-                                   GrabModeAsync, GrabModeAsync, window, None, CurrentTime);
-    if (grab_status == GrabSuccess) {
-      break;
-    }
-  }
-}
+#include "functions/wait_for_cursor_ungrab.h"
 
 /* Ugly layer between focused window and mouse
  * XGrabPointer() grabs cursor cutting input off window, but that is only one adequate way to prevent cursor from escaping window
