@@ -24,7 +24,7 @@ if [[ -z "$DISPLAY" ]]; then
 fi
 
 # Set path to file containing daemon PID, needed to prevent multiple instances from running
-# Hardcoded in 'flux-event-reader' and it is not supposed to be changeable
+# Hardcoded in 'flux-listener' and it is not supposed to be changeable
 lock_file='/tmp/flux-lock'
 
 # Define prefix where daemon has been installed using path to 'flux'
@@ -35,7 +35,7 @@ case "$flux_path" in
   daemon_prefix="${flux_path/%'/bin/flux'/}"
 
   # Define paths to modules
-  flux_event_reader_path="${daemon_prefix}/lib/flux/flux-event-reader"
+  flux_listener_path="${daemon_prefix}/lib/flux/flux-listener"
   window_minimize_path="${daemon_prefix}/lib/flux/window-minimize"
   window_fullscreen_path="${daemon_prefix}/lib/flux/window-fullscreen"
   select_window_path="${daemon_prefix}/lib/flux/select-window"
@@ -47,7 +47,7 @@ case "$flux_path" in
   daemon_prefix="${flux_path/%'/flux'/}"
 
   # Define paths to modules
-  flux_event_reader_path="${daemon_prefix}/flux-event-reader"
+  flux_listener_path="${daemon_prefix}/flux-listener"
   window_minimize_path="${daemon_prefix}/window-minimize"
   window_fullscreen_path="${daemon_prefix}/window-fullscreen"
   select_window_path="${daemon_prefix}/select-window"
@@ -264,7 +264,7 @@ quiet='' message --info "Flux has been started."
 # Set initial events count
 events_count='0'
 
-# Read events from 'flux-event-reader' binary
+# Read events from 'flux-listener' binary
 while read -r raw_event ||
       [[ -n "$raw_event" ]]; do
   (( events_count++ ))
@@ -461,7 +461,7 @@ while read -r raw_event ||
   
   # Unset events
   unset events_array
-done < <("$flux_event_reader_path" 2>/dev/null)
+done < <("$flux_listener_path" 2>/dev/null)
 
 # Only for case if event reader appears terminated
 message --warning "Event reader has been terminated!"

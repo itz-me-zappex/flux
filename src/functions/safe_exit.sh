@@ -69,13 +69,13 @@ safe_exit(){
     exec_exit
   done
 
-  # Obtain 'flux-event-reader' PID from lock file to terminate it and remove lock file
+  # Obtain 'flux-listener' PID from lock file to terminate it and remove lock file
   if [[ -f "$lock_file" ]]; then
     # Check whether lock file is readable or not
     if check_ro "$lock_file"; then
-      # Do not get 'flux-event-reader' PID from lock file if it is blank
+      # Do not get 'flux-listener' PID from lock file if it is blank
       if [[ -n "$(<"$lock_file")" ]]; then
-        # Get 'flux-event-reader' PID (2nd line)
+        # Get 'flux-listener' PID (2nd line)
         local local_temp_flux_lock_line
         local local_lines_count
         while read -r local_temp_flux_lock_line ||
@@ -85,20 +85,20 @@ safe_exit(){
             (( local_lines_count++ ))
             continue
           else
-            local_flux_event_reader_pid="$local_temp_flux_lock_line"
+            local_flux_listener_pid="$local_temp_flux_lock_line"
             break
           fi
         done < "$lock_file"
 
-        # Terminate 'flux-event-reader'
-        if check_pid_existence "$local_flux_event_reader_pid"; then
-          kill "$local_flux_event_reader_pid" > /dev/null 2>&1
+        # Terminate 'flux-listener'
+        if check_pid_existence "$local_flux_listener_pid"; then
+          kill "$local_flux_listener_pid" > /dev/null 2>&1
         fi
       else
         message --warning "Unable to handle '$(shorten_path "$lock_file")' lock file because it is blank!"
       fi
     else
-      message --warning "Unable to read '$(shorten_path "$lock_file")' lock file to obtain 'flux-event-reader' PID!"
+      message --warning "Unable to read '$(shorten_path "$lock_file")' lock file to obtain 'flux-listener' PID!"
     fi
 
     # Remove lock file which prevents multiple instances of daemon from running

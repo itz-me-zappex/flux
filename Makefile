@@ -27,7 +27,7 @@ all:
 
 	chmod +x $(FLUX_BUILD)
 
-	$(CC) $(CFLAGS) -o $(BUILD_DIR)/flux-event-reader $(CMODULES_DIR)/flux_event_reader.c \
+	$(CC) $(CFLAGS) -o $(BUILD_DIR)/flux-listener $(CMODULES_DIR)/flux_listener.c \
 	-lX11 -lXext -lXRes
 
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/window-minimize $(CMODULES_DIR)/window_minimize.c \
@@ -54,7 +54,7 @@ install:
 	mkdir -p $(PREFIX)/bin/
 	mkdir -p $(PREFIX)/lib/flux/
 	install -Dm 755 $(FLUX_BUILD) $(PREFIX)/bin/
-	install -Dm 755 $(BUILD_DIR)/flux-event-reader $(PREFIX)/lib/flux/
+	install -Dm 755 $(BUILD_DIR)/flux-listener $(PREFIX)/lib/flux/
 	install -Dm 755 $(BUILD_DIR)/window-minimize $(PREFIX)/lib/flux/
 	install -Dm 755 $(BUILD_DIR)/window-fullscreen $(PREFIX)/lib/flux/
 	install -Dm 755 $(BUILD_DIR)/select-window $(PREFIX)/lib/flux/
