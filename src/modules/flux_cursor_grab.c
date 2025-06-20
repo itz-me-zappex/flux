@@ -15,12 +15,6 @@
 #include "functions/is_process_cpu_idle.h"
 #include "functions/forward_input_on_hang_wait.h"
 
-typedef struct {
-  Display* display;
-  Window window;
-  volatile bool stop;
-} forward_input_on_hang_wait_args;
-
 /* Ugly layer between focused window and mouse
  * XGrabPointer() grabs cursor cutting input off window, but that is only one adequate way to prevent cursor from escaping window
  * Because of that, all obtained mouse events here are redirected to window
@@ -33,7 +27,6 @@ int main(int argc, char *argv[]) {
   XInitThreads();
 
   Display *display = XOpenDisplay(NULL);
-
   if (!display) {
     return 1;
   }
@@ -42,7 +35,6 @@ int main(int argc, char *argv[]) {
   Window window = strtoul(argv[1], NULL, 0);
 
   bool window_exists = check_window_existence(display, root, window);
-
   if (!window_exists) {
     XCloseDisplay(display);
     return 1;
@@ -62,7 +54,6 @@ int main(int argc, char *argv[]) {
   // Attempt to grab cursor as that is daemonized process and I don't want hook another Bash instance for it to check exit code (which I won't get ever if no error occur)
   int grab_status = XGrabPointer(display, window, True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
                                  GrabModeAsync, GrabModeAsync, window, None, CurrentTime);
-
   if (grab_status != GrabSuccess) {
     XCloseDisplay(display);
     return 1;

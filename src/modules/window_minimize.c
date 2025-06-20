@@ -23,7 +23,6 @@ int main(int argc, char *argv[]) {
   Window window = strtoul(argv[1], NULL, 0);
 
   bool window_exists = check_window_existence(display, root, window);
-
   if (window_exists) {
     XIconifyWindow(display, window, DefaultScreen(display));
     XFlush(display);

@@ -30,9 +30,7 @@ int main(int argc, char *argv[]) {
   }
 
   char *argument = argv[1];
-
   bool should_pick;
-
   if (strcmp(argument, "pick") == 0) {
     should_pick = true;
   } else if (strcmp(argument, "focus") == 0) {
@@ -42,7 +40,6 @@ int main(int argc, char *argv[]) {
   }
 
   Display *display = XOpenDisplay(NULL);
-
   if (!display) {
     return 1;
   }

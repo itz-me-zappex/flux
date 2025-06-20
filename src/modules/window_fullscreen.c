@@ -24,7 +24,6 @@ int main(int argc, char *argv[]) {
   Window window = strtoul(argv[1], NULL, 0);
 
   bool window_exists = check_window_existence(display, root, window);
-
   if (!window_exists) {
     XCloseDisplay(display);
     return 1;
@@ -32,7 +31,6 @@ int main(int argc, char *argv[]) {
 
   Atom net_wm_state = XInternAtom(display, "_NET_WM_STATE", False);
   Atom net_wm_state_fullscreen = XInternAtom(display, "_NET_WM_STATE_FULLSCREEN", False);
-
   if (net_wm_state == None ||
       net_wm_state_fullscreen == None) {
     XCloseDisplay(display);
@@ -61,7 +59,6 @@ int main(int argc, char *argv[]) {
   Window parent;
   Window *childs;
   unsigned int child_count;
-
   if (XQueryTree(display, window, &root, &parent, &childs, &child_count)) {
     if (child_count > 0) {
       Window child = childs[0];

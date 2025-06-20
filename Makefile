@@ -28,45 +28,23 @@ all:
 	chmod +x $(FLUX_BUILD)
 
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/flux-event-reader $(CMODULES_DIR)/flux_event_reader.c \
-	$(CFUNCTIONS_DIR)/check_wm_restart.c \
-	$(CFUNCTIONS_DIR)/get_active_window.c \
-	$(CFUNCTIONS_DIR)/get_input_focus.c \
-	$(CFUNCTIONS_DIR)/get_opened_windows.c \
-	$(CFUNCTIONS_DIR)/get_window_process.c \
-	$(CFUNCTIONS_DIR)/get_wm_window.c \
 	-lX11 -lXext -lXRes
 
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/window-minimize $(CMODULES_DIR)/window_minimize.c \
-	$(CFUNCTIONS_DIR)/get_opened_windows.c \
-	$(CFUNCTIONS_DIR)/check_window_existence.c \
 	-lX11
 
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/window-fullscreen $(CMODULES_DIR)/window_fullscreen.c \
-	$(CFUNCTIONS_DIR)/get_opened_windows.c \
-	$(CFUNCTIONS_DIR)/check_window_existence.c \
 	-lX11
 
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/select-window $(CMODULES_DIR)/select_window.c \
-	$(CFUNCTIONS_DIR)/get_active_window.c \
-	$(CFUNCTIONS_DIR)/get_wm_window.c \
-	$(CFUNCTIONS_DIR)/get_window_process.c \
-	$(CFUNCTIONS_DIR)/get_opened_windows.c \
-	$(CFUNCTIONS_DIR)/check_window_existence.c \
 	$(CFUNCTIONS_DIR)/third-party/xprop/clientwin.c \
 	$(CFUNCTIONS_DIR)/third-party/xprop/dsimple.c \
 	-lX11 -lXRes -lXext
 
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/flux-cursor-grab $(CMODULES_DIR)/flux_cursor_grab.c \
-	$(CFUNCTIONS_DIR)/get_opened_windows.c \
-	$(CFUNCTIONS_DIR)/check_window_existence.c \
-	$(CFUNCTIONS_DIR)/get_window_process.c \
-	$(CFUNCTIONS_DIR)/is_wine_window.c \
-	$(CFUNCTIONS_DIR)/is_process_cpu_idle.c \
-	$(CFUNCTIONS_DIR)/forward_input_on_hang_wait.c \
 	-lX11 -lXext -lXRes
 
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/validate-x11-session $(CMODULES_DIR)/validate_x11_session.c \
-	$(CFUNCTIONS_DIR)/get_wm_window.c \
 	-lX11
 
 clean:

@@ -15,14 +15,8 @@
 
 // Daemon
 int main() {
-  // Use line buffer to make output readable from command substitution in Bash
-  setlinebuf(stdout);
-
-  // Store obtained data here
-  Window active_window;
-  pid_t active_window_process;
-  pid_t opened_window_process;
-  Window wm_window;
+  Window active_window, wm_window;
+  pid_t active_window_process, opened_window_process;
   Window *opened_windows = NULL;
   unsigned long opened_windows_count, previous_opened_windows_count;
 
@@ -30,31 +24,23 @@ int main() {
   unsigned long active_window_xor, opened_windows_xor, wm_window_xor;
   unsigned long previous_active_window_xor, previous_opened_windows_xor, previous_wm_window_xor;
 
-  // Attempt to open display
   Display *display = XOpenDisplay(NULL);
   if (!display) {
     return 1;
   }
 
-  // Declare needed atoms
-  Atom net_active_window = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
-  Atom net_client_list_stacking = XInternAtom(display, "_NET_CLIENT_LIST_STACKING", False);
-
-  // Get root window
   Window root = DefaultRootWindow(display);
 
   // Exit with an error if window manager is not running
-  if (get_wm_window(display, root) == None) {
+  wm_window = get_wm_window(display, root);
+  if (wm_window == None) {
     XCloseDisplay(display);
     return 1;
   }
 
-  // Get its own PID and write it to '/tmp/flux-lock', needed to make daemon able terminate this process on exit
+  // Get its own PID and append it to '/tmp/flux-lock', needed to make daemon able terminate this process on exit
   const pid_t event_reader_pid = getpid();
-
-  // Append PID to file (there is 'flux' PID too)
   FILE *lock_file = fopen("/tmp/flux-lock", "a");
-
   if (!lock_file) {
     XCloseDisplay(display);
     return 1;
@@ -63,28 +49,33 @@ int main() {
     fclose(lock_file);
   }
 
-  // Listen changes in atoms
-  XSelectInput(display, root, PropertyChangeMask);
-  XEvent event;
-
   // Simulate event to handle current atoms state immediately
   bool fake_event = true;
 
-  // Mark needed to remember and handle WM restart
+  // This is needed to remember and handle WM restart
   bool wm_restart_mark = false;
+
+  // Use line buffer to make output readable from command substitution in Bash
+  setlinebuf(stdout);
+
+  Atom net_active_window = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
+  Atom net_client_list_stacking = XInternAtom(display, "_NET_CLIENT_LIST_STACKING", False);
+
+  XSelectInput(display, root, PropertyChangeMask);
+  XEvent event;
 
   // Handle changes in atom states
   while (true) {
-    // Do not wait for event if there is fake one
     if (!fake_event) {
       XNextEvent(display, &event);
-      // Handle only needed events
+      // Skip unneeded events
       if (event.type != PropertyNotify &&
           event.xproperty.atom != net_active_window &&
           event.xproperty.atom != net_client_list_stacking) {
         continue;
       }
     } else if (fake_event) {
+      // Do not wait for real event if there is fake one
       fake_event = false;
     }
 
@@ -98,7 +89,6 @@ int main() {
         // Remember that WM has been restarted as this event appears only once
         wm_restart_mark = true;
 
-        // Skip event
         continue;
       } else {
         // Wait for 100ms before handle event and unset pending events after delay
@@ -118,9 +108,10 @@ int main() {
     wm_window_xor = 0;
 
     // Freeing here because of a bunch of 'continue' below
-    XFree(opened_windows);
+    if (opened_windows) {
+      XFree(opened_windows);
+    }
 
-    // Get list of opened windows from '_NET_CLIENT_LIST_STACKING'
     opened_windows = get_opened_windows(display, root, &opened_windows_count);
 
     // Skip event if list of opened windows appears blank
@@ -139,20 +130,18 @@ int main() {
       }
     }
 
-    // Get window XID from '_NET_ACTIVE_WINDOW'
     active_window = get_active_window(display, root);
-    // Get window manager XID from '_NET_SUPPORTING_WM_CHECK'
     wm_window = get_wm_window(display, root);
-    // Fallback
+
+    // Fallback, use 'XGetInputFocus()' if '_NET_ACTIVE_WINDOW' is zero
     if (active_window == None) {
-      // Use 'XGetInputFocus()' if '_NET_ACTIVE_WINDOW' is zero
       active_window = get_input_focus(display);
-      // Skip loop if 'XGetInputFocus()' did not return window manager XID
+
       if (active_window != wm_window) {
         continue;
       }
     }
-    // Used to check difference between previous and current states
+
     active_window_xor ^= active_window;
     wm_window_xor ^= wm_window;
     for (unsigned long i = 0; i < opened_windows_count; i++) {
@@ -163,12 +152,11 @@ int main() {
     if (active_window_xor != previous_active_window_xor ||
         opened_windows_xor != previous_opened_windows_xor ||
         wm_window_xor != previous_wm_window_xor) {
-      // Get and print info about focused window
-      active_window_process = get_window_process(display, active_window);
-      // Skip event if XRes returned zero PID for active window
+      active_window_process = get_window_process(display, active_window);      
       if (active_window_process != 0) {
         printf("%ld=%d\n", active_window, active_window_process);
       } else {
+        // Skip event if XRes returned zero PID for active window
         continue;
       }
 
@@ -177,6 +165,7 @@ int main() {
         if (opened_windows[i] != None &&
             opened_windows[i] != active_window) {
           opened_window_process = get_window_process(display, opened_windows[i]);
+
           // Do not print info about window if XRes returned zero PID
           if (opened_window_process != 0) {
             printf("%ld=%d ", opened_windows[i], opened_window_process);

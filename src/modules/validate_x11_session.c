@@ -14,8 +14,8 @@ int main() {
   }
 
   Window root = DefaultRootWindow(display);
-  Window wm_window = get_wm_window(display, root);
 
+  Window wm_window = get_wm_window(display, root);
   if (wm_window == None) {
     XCloseDisplay(display);
     return 2;
