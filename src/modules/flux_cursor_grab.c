@@ -15,12 +15,36 @@
 #include "functions/is_process_cpu_idle.h"
 #include "functions/forward_input_on_hang_wait.h"
 
+// Wait for cursor ungrab to grab it successfully
+void wait_for_cursor_ungrab(Display* display, Window window) {
+  // Attempt to grab cursor
+  int grab_status = XGrabPointer(display, window, True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
+                                 GrabModeAsync, GrabModeAsync, window, None, CurrentTime);
+  if (grab_status != GrabSuccess) {
+    printf("cursor_already_grabbed\n");
+
+    // Wait until cursor become ungrabbed
+    while (true) {
+      usleep(500000);
+      int grab_status = XGrabPointer(display, window, True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
+                                     GrabModeAsync, GrabModeAsync, window, None, CurrentTime);
+      if (grab_status == GrabSuccess) {
+        break;
+      }
+    }
+  }
+}
+
 /* Ugly layer between focused window and mouse
  * XGrabPointer() grabs cursor cutting input off window, but that is only one adequate way to prevent cursor from escaping window
  * Because of that, all obtained mouse events here are redirected to window
  */
 int main(int argc, char *argv[]) {
+  // Use line buffer to make output readable from command substitution in Bash
+  setlinebuf(stdout);
+
   if (argc != 2) {
+    printf("error\n");
     return 1;
   }
 
@@ -28,6 +52,7 @@ int main(int argc, char *argv[]) {
 
   Display *display = XOpenDisplay(NULL);
   if (!display) {
+    printf("error\n");
     return 1;
   }
 
@@ -37,45 +62,31 @@ int main(int argc, char *argv[]) {
   bool window_exists = check_window_existence(display, root, window);
   if (!window_exists) {
     XCloseDisplay(display);
+    printf("error\n");
     return 1;
   }
 
   pid_t window_process = get_window_process(display, window);
   if (window_process == 0) {
     XCloseDisplay(display);
+    printf("error\n");
     return 1;
   } else {
     XUngrabPointer(display, CurrentTime);
   }
 
-  // Wait a bit to prevent failure in case window gets focus with mouse click
-  usleep(100000);
-
-  // Attempt to grab cursor as that is daemonized process and I don't want hook another Bash instance for it to check exit code (which I won't get ever if no error occur)
-  int grab_status = XGrabPointer(display, window, True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
-                                 GrabModeAsync, GrabModeAsync, window, None, CurrentTime);
-  if (grab_status != GrabSuccess) {
-    XCloseDisplay(display);
-    return 1;
-  }
+  wait_for_cursor_ungrab(display, window);
 
   /* Handle Wine/Proton games/apps in complicated way to prevent freezing on init because of grabbed cursor
    * That is an issue only when game starts loading for the first time, Wine/Proton waits for mouse cursor and freezes a whole process
    */
   bool wine_window = is_wine_window(display, window);
   if (wine_window) {
+    printf("wine_window\n");
     // Check whether process hangs after cursor grab or not
     bool process_cpu_idle;
     while (true) {
-      // Attempt to grab cursor
-      grab_status = XGrabPointer(display, window, True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
-                                 GrabModeAsync, GrabModeAsync, window, None, CurrentTime);
-      if (grab_status != GrabSuccess) {
-        XCloseDisplay(display);
-        return 1;
-      } else {
-        XSync(display, False);
-      }
+      wait_for_cursor_ungrab(display, window);
 
       // Run thread which will pass mouse input during 100ms until next loop or window passed init and I will be able redirect input eventually
       forward_input_on_hang_wait_args forward_input_on_hang_wait_t_args = {
@@ -111,17 +122,12 @@ int main(int argc, char *argv[]) {
       }
     }
   } else {
-    // Just grab cursor and go below
-    grab_status = XGrabPointer(display, window, True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
-                               GrabModeAsync, GrabModeAsync, window, None, CurrentTime);
-
-    if (grab_status != GrabSuccess) {
-      XCloseDisplay(display);
-      return 1;
-    }
+    printf("window\n");
+    wait_for_cursor_ungrab(display, window);
   }
 
   // Send mouse related events to window in realtime
+  printf("success\n");
   XEvent event;
   while (true) {
     XMaskEvent(display, ButtonPressMask | ButtonReleaseMask | PointerMotionMask, &event);
