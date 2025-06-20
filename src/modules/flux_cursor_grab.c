@@ -17,20 +17,12 @@
 
 // Wait for cursor ungrab to grab it successfully
 void wait_for_cursor_ungrab(Display* display, Window window) {
-  // Attempt to grab cursor
-  int grab_status = XGrabPointer(display, window, True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
-                                 GrabModeAsync, GrabModeAsync, window, None, CurrentTime);
-  if (grab_status != GrabSuccess) {
-    printf("cursor_already_grabbed\n");
-
-    // Wait until cursor become ungrabbed
-    while (true) {
-      usleep(500000);
-      int grab_status = XGrabPointer(display, window, True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
-                                     GrabModeAsync, GrabModeAsync, window, None, CurrentTime);
-      if (grab_status == GrabSuccess) {
-        break;
-      }
+  while (true) {
+    usleep(250000);
+    int grab_status = XGrabPointer(display, window, True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
+                                   GrabModeAsync, GrabModeAsync, window, None, CurrentTime);
+    if (grab_status == GrabSuccess) {
+      break;
     }
   }
 }
@@ -75,7 +67,13 @@ int main(int argc, char *argv[]) {
     XUngrabPointer(display, CurrentTime);
   }
 
-  wait_for_cursor_ungrab(display, window);
+  // Attempt to grab cursor
+  int grab_status = XGrabPointer(display, window, True, ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
+                                 GrabModeAsync, GrabModeAsync, window, None, CurrentTime);
+  if (grab_status != GrabSuccess) {
+    printf("cursor_already_grabbed\n");
+    wait_for_cursor_ungrab(display, window);
+  }
 
   /* Handle Wine/Proton games/apps in complicated way to prevent freezing on init because of grabbed cursor
    * That is an issue only when game starts loading for the first time, Wine/Proton waits for mouse cursor and freezes a whole process
