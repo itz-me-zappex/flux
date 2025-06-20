@@ -7,14 +7,8 @@
 #include <string.h>
 #include <unistd.h>
 
-// Check whether process sleeps or not using '/proc/PID/status'
-bool is_process_cpu_idle(pid_t pid) {
-  char path[64];
-  snprintf(path, sizeof(path), "/proc/%d/stat", pid);
-
-  unsigned long utime1, stime1;
-  unsigned long utime2, stime2;
-
+// Get utime and stime
+bool get_cpu_time(char *path, unsigned long *utime, unsigned long *stime) {
   FILE *file = fopen(path, "r");
   if (!file) {
     return false;
@@ -37,51 +31,36 @@ bool is_process_cpu_idle(pid_t pid) {
   char *token = strtok(ptr, " ");
   while (token) {
     if (field == 14) {
-      utime1 = strtoul(token, NULL, 10);
+      *utime = strtoul(token, NULL, 10);
     } else if (field == 15) {
-      stime1 = strtoul(token, NULL, 10);
+      *stime = strtoul(token, NULL, 10);
       break;
     }
     token = strtok(NULL, " ");
     field++;
   }
+}
 
-  // Wait before 2nd check to get difference
-  usleep(100000);
+// Check whether process sleeps or not using '/proc/PID/status'
+bool is_process_cpu_idle(pid_t pid) {
+  char path[64];
+  snprintf(path, sizeof(path), "/proc/%d/stat", pid);
 
-  file = fopen(path, "r");
-  if (!file) {
+  unsigned long utime1, stime1;
+  unsigned long utime2, stime2;
+
+  if (!get_cpu_time(path, &utime1, &stime1)) {
     return false;
-  }
-  if (!fgets(buf, sizeof(buf), file)) {
-    fclose(file);
-    return false;
-  }
-  fclose(file);
-
-  ptr = strrchr(buf, ')');
-  if (!ptr) {
-    return false;
-  }
-  ptr++;
-
-  field = 3;
-  token = strtok(ptr, " ");
-  while (token) {
-    if (field == 14) {
-      utime2 = strtoul(token, NULL, 10);
-    } else if (field == 15) {
-      stime2 = strtoul(token, NULL, 10);
-      break;
+  } else {
+    usleep(100000);
+    if (!get_cpu_time(path, &utime2, &stime2)) {
+      return false;
     }
-    token = strtok(NULL, " ");
-    field++;
   }
 
-  // Get difference between 2 checks
   unsigned long delta = (utime2 + stime2) - (utime1 + stime1);
   
-  // If nothing changed between two checks or difference is very small, then process hanged
+  // If nothing changed between two checks or difference is very small, then process is hanged
   if (delta <= 2) {
     return true;
   }
