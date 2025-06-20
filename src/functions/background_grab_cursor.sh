@@ -5,10 +5,7 @@ background_grab_cursor(){
         [[ -n "$local_flux_cursor_grab_line" ]]; do
     case "$local_flux_cursor_grab_line" in
     'cursor_already_grabbed' )
-      if [[ -z "$local_cursor_already_grabbed_warning_is_shown" ]]; then
-        message --warning "Waiting for when cursor become ungrabbed to assign it to window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid due to focus event..."
-        local local_cursor_already_grabbed_warning_is_shown='1'
-      fi
+      message --warning "Waiting for when cursor become ungrabbed to assign it to window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid due to focus event..."
     ;;
     'error' )
       message --warning "Unable to grab cursor for window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid due to focus event!"
