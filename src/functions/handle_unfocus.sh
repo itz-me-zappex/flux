@@ -201,7 +201,7 @@ handle_unfocus(){
       fi
 
       # Cancel cursor grabbing for previously focused window
-      if [[ -n "${background_focus_cursor_grab_map["$local_temp_window_xid"]}" &&
+      if [[ -n "${background_focus_grab_cursor_map["$local_temp_window_xid"]}" &&
             "$local_focused_window_xid" != "$local_temp_window_xid" ]]; then
         passed_window_xid="$local_temp_window_xid" \
         passed_process_pid="$local_process_pid" \

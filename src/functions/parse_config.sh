@@ -360,16 +360,16 @@ parse_config(){
             unset is_section_blank_map["$local_section"]
             config_keys_order_map["$local_section"]+=" $config_line_count.focus-fullscreen"
           ;;
-          focus-cursor-grab )
+          focus-grab-cursor )
             # Exit with an error if value is not boolean
-            if ! config_key_focus_cursor_grab_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
+            if ! config_key_focus_grab_cursor_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key$local_section_msg is not boolean!"
               (( parse_config_error_count++ ))
             fi
 
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $config_line_count.focus-cursor-grab"
+            config_keys_order_map["$local_section"]+=" $config_line_count.focus-grab-cursor"
           ;;
           group )
             config_key_group_map["$local_section"]="$local_config_value"

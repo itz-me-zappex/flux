@@ -17,7 +17,7 @@ unset_groups(){
     config_key_idle_map["$local_temp_group"] \
     config_key_unfocus_minimize_map["$local_temp_group"] \
     config_key_focus_fullscreen_map["$local_temp_group"] \
-    config_key_focus_cursor_grab_map["$local_temp_group"] \
+    config_key_focus_grab_cursor_map["$local_temp_group"] \
     config_key_group_map["$local_temp_group"] \
     config_key_exec_exit_map["$local_temp_group"] \
     config_key_exec_exit_focus_map["$local_temp_group"] \

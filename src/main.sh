@@ -121,7 +121,7 @@ config_key_fps_focus_map \
 config_key_idle_map \
 config_key_unfocus_minimize_map \
 config_key_focus_fullscreen_map \
-config_key_focus_cursor_grab_map \
+config_key_focus_grab_cursor_map \
 config_key_group_map \
 config_key_exec_exit_map \
 config_key_exec_exit_focus_map \
@@ -143,7 +143,7 @@ declare -A background_freeze_pid_map \
 background_cpu_limit_pid_map \
 background_fps_limit_pid_map \
 background_sched_idle_pid_map \
-background_focus_cursor_grab_map
+background_focus_grab_cursor_map
 
 # Declare associative arrays to store info about requested limits
 declare -A request_freeze_map \

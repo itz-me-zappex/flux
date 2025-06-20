@@ -115,7 +115,7 @@ handle_closure(){
       exec_closure
 
       # Cancel cursor grabbing for previously focused window
-      if [[ -n "${background_focus_cursor_grab_map["$local_temp_terminated_window_xid"]}" ]]; then
+      if [[ -n "${background_focus_grab_cursor_map["$local_temp_terminated_window_xid"]}" ]]; then
         local local_cursor_has_been_ungrabbed='1'
 
         passed_window_xid="$local_temp_terminated_window_xid" \

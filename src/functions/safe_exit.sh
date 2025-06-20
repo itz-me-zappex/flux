@@ -46,7 +46,7 @@ safe_exit(){
     fi
 
     # Cancel cursor grabbing for window
-    if [[ -n "${background_focus_cursor_grab_map["$local_temp_window_xid"]}" ]]; then
+    if [[ -n "${background_focus_grab_cursor_map["$local_temp_window_xid"]}" ]]; then
       passed_window_xid="$local_temp_window_xid"
       passed_process_pid="$local_process_pid" \
       passed_process_name="$local_process_name" \
