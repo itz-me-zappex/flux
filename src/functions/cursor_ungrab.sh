@@ -11,7 +11,7 @@ cursor_ungrab(){
   fi
 
   # FIXME: Should be done in less aggressive way
-  killall flux-cursor-grab
+  killall flux-grab-cursor
 
   unset background_focus_grab_cursor_map["$passed_window_xid"]
 }

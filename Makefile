@@ -41,7 +41,7 @@ all:
 	$(CFUNCTIONS_DIR)/third-party/xprop/dsimple.c \
 	-lX11 -lXRes -lXext
 
-	$(CC) $(CFLAGS) -o $(BUILD_DIR)/flux-cursor-grab $(CMODULES_DIR)/flux_cursor_grab.c \
+	$(CC) $(CFLAGS) -o $(BUILD_DIR)/flux-grab-cursor $(CMODULES_DIR)/flux_grab_cursor.c \
 	-lX11 -lXext -lXRes
 
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/validate-x11-session $(CMODULES_DIR)/validate_x11_session.c \
@@ -58,7 +58,7 @@ install:
 	install -Dm 755 $(BUILD_DIR)/window-minimize $(PREFIX)/lib/flux/
 	install -Dm 755 $(BUILD_DIR)/window-fullscreen $(PREFIX)/lib/flux/
 	install -Dm 755 $(BUILD_DIR)/select-window $(PREFIX)/lib/flux/
-	install -Dm 755 $(BUILD_DIR)/flux-cursor-grab $(PREFIX)/lib/flux/
+	install -Dm 755 $(BUILD_DIR)/flux-grab-cursor $(PREFIX)/lib/flux/
 	install -Dm 755 $(BUILD_DIR)/validate-x11-session $(PREFIX)/lib/flux/
 
 	@if [[ $(PREFIX) != '/usr' ]]; then \

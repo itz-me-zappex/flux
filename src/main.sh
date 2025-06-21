@@ -39,7 +39,7 @@ case "$flux_path" in
   window_minimize_path="${daemon_prefix}/lib/flux/window-minimize"
   window_fullscreen_path="${daemon_prefix}/lib/flux/window-fullscreen"
   select_window_path="${daemon_prefix}/lib/flux/select-window"
-  flux_cursor_grab_path="${daemon_prefix}/lib/flux/flux-cursor-grab"
+  flux_grab_cursor_path="${daemon_prefix}/lib/flux/flux-grab-cursor"
   validate_x11_session_path="${daemon_prefix}/lib/flux/validate-x11-session"
 ;;
 * )
@@ -51,7 +51,7 @@ case "$flux_path" in
   window_minimize_path="${daemon_prefix}/window-minimize"
   window_fullscreen_path="${daemon_prefix}/window-fullscreen"
   select_window_path="${daemon_prefix}/select-window"
-  flux_cursor_grab_path="${daemon_prefix}/flux-cursor-grab"
+  flux_grab_cursor_path="${daemon_prefix}/flux-grab-cursor"
   validate_x11_session_path="${daemon_prefix}/validate-x11-session"
 esac
 unset flux_path \

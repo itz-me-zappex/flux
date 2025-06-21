@@ -1,9 +1,9 @@
 # Required to run binary responsible for cursor grabbing, runs in background via '&'
 background_grab_cursor(){
-  local local_flux_cursor_grab_line
-  while read -r local_flux_cursor_grab_line ||
-        [[ -n "$local_flux_cursor_grab_line" ]]; do
-    case "$local_flux_cursor_grab_line" in
+  local local_flux_grab_cursor_line
+  while read -r local_flux_grab_cursor_line ||
+        [[ -n "$local_flux_grab_cursor_line" ]]; do
+    case "$local_flux_grab_cursor_line" in
     'cursor_already_grabbed' )
       message --warning "Waiting for when cursor become ungrabbed to assign it to window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid due to focus event..."
     ;;
@@ -20,5 +20,5 @@ background_grab_cursor(){
     'success' )
       message --info "Cursor for window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid has been grabbed due to focus event."
     esac
-  done < <("$flux_cursor_grab_path" "$passed_window_xid" 2>/dev/null)
+  done < <("$flux_grab_cursor_path" "$passed_window_xid" 2>/dev/null)
 }
