@@ -72,8 +72,14 @@ int main(int argc, char *argv[]) {
     printf("wine_window\n");
     // Check whether process hangs after cursor grab or not
     bool process_cpu_idle;
+    bool first_loop = true;
     while (true) {
-      wait_for_cursor_ungrab(display, window);
+      // Cursor is already grabbed, no need to wait until it become ungrabbed due to hang
+      if (first_loop) {
+        first_loop = false;
+      } else {
+        wait_for_cursor_ungrab(display, window);
+      }
 
       // Run thread which will pass mouse input during 100ms until next loop or window passed init and I will be able redirect input eventually
       forward_input_on_hang_wait_args forward_input_on_hang_wait_t_args = {
@@ -100,6 +106,7 @@ int main(int argc, char *argv[]) {
 
       // If process hangs after grab, then ungrab cursor and repeat the same until it stop hang (e.g. after loading or Wine/Proton initialization)
       if (process_cpu_idle) {
+        printf("wine_hang\n");
         XUngrabPointer(display, CurrentTime);
         // Without it cursor will not be really ungrabbed and this loop will not break
         XSync(display, False);
