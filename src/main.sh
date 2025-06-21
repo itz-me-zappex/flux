@@ -27,6 +27,9 @@ fi
 # Hardcoded in 'flux-listener' and it is not supposed to be changeable
 lock_file='/tmp/flux-lock'
 
+# Needed to read output of 'flux-grab-cursor' binary
+flux_grab_cursor_fifo="/tmp/flux-grab-cursor-fifo"
+
 # Define prefix where daemon has been installed using path to 'flux'
 flux_path="$(get_realpath "$0")"
 case "$flux_path" in

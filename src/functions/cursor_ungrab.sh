@@ -10,8 +10,7 @@ cursor_ungrab(){
     fi
   fi
 
-  # FIXME: Should be done in less aggressive way
-  killall flux-grab-cursor
+  rm "$flux_grab_cursor_fifo" > /dev/null 2>&1
 
   unset background_focus_grab_cursor_map["$passed_window_xid"]
 }

@@ -1,5 +1,11 @@
 # Required to run binary responsible for cursor grabbing, runs in background via '&'
 background_grab_cursor(){
+  # Needed to kill process when this function receives termination-related signal
+  mkfifo "$flux_grab_cursor_fifo"
+  "$flux_grab_cursor_path" "$passed_window_xid" > "$flux_grab_cursor_fifo" &
+  local local_flux_grab_cursor_pid="$!"
+  trap 'kill "$local_flux_grab_cursor_pid"' SIGINT SIGTERM
+
   local local_flux_grab_cursor_line
   while read -r local_flux_grab_cursor_line ||
         [[ -n "$local_flux_grab_cursor_line" ]]; do
@@ -23,5 +29,5 @@ background_grab_cursor(){
     'success' )
       message --info "Cursor for window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid has been grabbed fully due to focus event."
     esac
-  done < <("$flux_grab_cursor_path" "$passed_window_xid" 2>/dev/null)
+  done < "$flux_grab_cursor_fifo"
 }
