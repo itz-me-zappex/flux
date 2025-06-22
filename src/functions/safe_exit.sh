@@ -82,7 +82,17 @@ safe_exit(){
     message --warning "Unable to remove '$(shorten_path "$flux_listener_fifo")' FIFO file, which is used to read events from 'flux-listener' process!"
   elif [[ -e "$flux_listener_fifo" &&
           ! -p "$flux_listener_fifo" ]]; then
-    message --warning "Unable to remove '$(shorten_path "$flux_listener_fifo")', FIFO file is expected!"
+    message --warning "Unable to remove '$(shorten_path "$flux_listener_fifo")', FIFO file is expected, which is used to read events from 'flux-listener' process!"
+  fi
+
+  # Remove FIFO file of 'flux-grab-cursor'
+  if [[ -p "$flux_grab_cursor_fifo" ]]; then
+    if ! rm "$flux_grab_cursor_fifo" > /dev/null 2>&1; then
+      message --warning "Unable to remove '$(shorten_path "$flux_grab_cursor_fifo")' FIFO file, which is used to track status of cursor grabbing!"
+    fi
+  elif [[ -e "$flux_grab_cursor_fifo" &&
+          ! -p "$flux_grab_cursor_fifo" ]]; then
+    message --warning "Unable to remove '$(shorten_path "$flux_grab_cursor_fifo")', FIFO file is expected, which is used to track status of cursor grabbing!"
   fi
 
   # Remove lock file which prevents multiple instances of daemon from running
@@ -91,7 +101,7 @@ safe_exit(){
     message --warning "Unable to remove '$(shorten_path "$flux_lock_file_path")' lock file, which should contain daemon PID and prevents multiple instances from running!"
   elif [[ -e "$flux_lock_file_path" &&
           ! -f "$flux_lock_file_path" ]]; then
-    message --warning "Unable to remove '$(shorten_path "$flux_lock_file_path")', file is expected!"
+    message --warning "Unable to remove '$(shorten_path "$flux_lock_file_path")', file is expected, which should contain daemon PID and prevents multiple instances from running!"
   fi
   
   # Wait a bit to avoid printing message about daemon termination earlier than messages from background functions appear
