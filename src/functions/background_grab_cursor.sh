@@ -1,15 +1,18 @@
 # Required to run binary responsible for cursor grabbing, runs in background via '&'
 background_grab_cursor(){
-  # Needed to kill 'flux-grab-cursor' process when this function receives 'SIGINT'/'SIGTERM'
-  if ! mkfifo "$flux_grab_cursor_fifo" > /dev/null 2>&1; then
-    message --warning "Unable to create '$(shorten_path "$flux_grab_cursor_fifo")' FIFO file, which is needed to track cursor grabbing status!"
+  # Do not grab cursor if something is wrong with named pipe
+  if [[ -e "$flux_grab_cursor_fifo" &&
+        ! -p "$flux_grab_cursor_fifo" ]]; then
+    message --warning "Unable to grab cursor for window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid due to focus event, '$(shorten_path "$flux_grab_cursor_fifo")' is not a FIFO file!"
+    return 1
+  elif [[ ! -e "$flux_grab_cursor_fifo" ]]; then
+    message --warning "Unable to grab cursor for window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid due to focus event, '$(shorten_path "$flux_grab_cursor_fifo")' FIFO file does not exist!"
     return 1
   else
     "$flux_grab_cursor_path" "$passed_window_xid" > "$flux_grab_cursor_fifo" &
     local local_flux_grab_cursor_pid="$!"
+    trap 'kill "$local_flux_grab_cursor_pid"' SIGINT SIGTERM
   fi
-
-  trap 'kill "$local_flux_grab_cursor_pid"' SIGINT SIGTERM
 
   local local_flux_grab_cursor_line
   while read -r local_flux_grab_cursor_line ||
