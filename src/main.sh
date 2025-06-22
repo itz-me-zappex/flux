@@ -254,18 +254,13 @@ else
   unset validate_x11_session_exit_code
 fi
 
+# Create FIFO files
+create_fifo_files
+unset -f create_fifo_files
+
 # Validate lock file
 validate_lock
 unset -f validate_lock
-
-# Needed to kill 'flux-listener' process when daemon receives 'SIGINT'/'SIGTERM'
-if ! mkfifo "$flux_listener_fifo" > /dev/null 2>&1; then
-  message --error "Unable to create '$(shorten_path "$flux_listener_fifo")' FIFO file, which is needed to read events from 'flux-listener' process!"
-  exit 1
-else
-  "$flux_listener_path" > "$flux_listener_fifo" &
-  flux_listener_pid="$!"
-fi
 
 # Preparation for event reading
 daemon_prepare
@@ -273,12 +268,10 @@ unset -f daemon_prepare \
 colors_interpret \
 configure_prefixes
 
-quiet='' message --info "Flux has been started."
-
-# Set initial events count
-events_count='0'
-
 # Read events from 'flux-listener' binary
+"$flux_listener_path" > "$flux_listener_fifo" &
+flux_listener_pid="$!"
+quiet='' message --info "Flux has been started."
 while read -r raw_event ||
       [[ -n "$raw_event" ]]; do
   (( events_count++ ))
