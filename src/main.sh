@@ -27,10 +27,10 @@ fi
 flux_lock_file_path='/tmp/flux-lock'
 
 # Needed to read output of 'flux-listener'
-flux_listener_fifo='/tmp/flux-listener-fifo'
+flux_listener_fifo_path='/tmp/flux-listener-fifo'
 
 # Needed to read output of 'flux-grab-cursor'
-flux_grab_cursor_fifo='/tmp/flux-grab-cursor-fifo'
+flux_grab_cursor_fifo_path='/tmp/flux-grab-cursor-fifo'
 
 # Define prefix where daemon has been installed using path to 'flux'
 flux_path="$(get_realpath "$0")"
@@ -269,7 +269,7 @@ colors_interpret \
 configure_prefixes
 
 # Read events from 'flux-listener' binary
-"$flux_listener_path" > "$flux_listener_fifo" &
+"$flux_listener_path" > "$flux_listener_fifo_path" &
 flux_listener_pid="$!"
 quiet='' message --info "Flux has been started."
 while read -r raw_event ||
@@ -468,7 +468,7 @@ while read -r raw_event ||
   
   # Unset events
   unset events_array
-done < "$flux_listener_fifo"
+done < "$flux_listener_fifo_path"
 
 # Only for case if event reader appears terminated
 message --warning "Event reader has been terminated!"

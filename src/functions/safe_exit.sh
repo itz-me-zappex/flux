@@ -77,22 +77,22 @@ safe_exit(){
   fi
 
   # Remove FIFO file of 'flux-listener'
-  if [[ -p "$flux_listener_fifo" ]] &&
-     ! rm "$flux_listener_fifo" > /dev/null 2>&1; then
-    message --warning "Unable to remove '$(shorten_path "$flux_listener_fifo")' FIFO file, which is used to read events from 'flux-listener' process!"
-  elif [[ -e "$flux_listener_fifo" &&
-          ! -p "$flux_listener_fifo" ]]; then
-    message --warning "Unable to remove '$(shorten_path "$flux_listener_fifo")', FIFO file is expected, which is used to read events from 'flux-listener' process!"
+  if [[ -p "$flux_listener_fifo_path" ]] &&
+     ! rm "$flux_listener_fifo_path" > /dev/null 2>&1; then
+    message --warning "Unable to remove '$(shorten_path "$flux_listener_fifo_path")' FIFO file, which is used to read events from 'flux-listener' process!"
+  elif [[ -e "$flux_listener_fifo_path" &&
+          ! -p "$flux_listener_fifo_path" ]]; then
+    message --warning "Unable to remove '$(shorten_path "$flux_listener_fifo_path")', FIFO file is expected, which is used to read events from 'flux-listener' process!"
   fi
 
   # Remove FIFO file of 'flux-grab-cursor'
-  if [[ -p "$flux_grab_cursor_fifo" ]]; then
-    if ! rm "$flux_grab_cursor_fifo" > /dev/null 2>&1; then
-      message --warning "Unable to remove '$(shorten_path "$flux_grab_cursor_fifo")' FIFO file, which is used to track status of cursor grabbing!"
+  if [[ -p "$flux_grab_cursor_fifo_path" ]]; then
+    if ! rm "$flux_grab_cursor_fifo_path" > /dev/null 2>&1; then
+      message --warning "Unable to remove '$(shorten_path "$flux_grab_cursor_fifo_path")' FIFO file, which is used to track status of cursor grabbing!"
     fi
-  elif [[ -e "$flux_grab_cursor_fifo" &&
-          ! -p "$flux_grab_cursor_fifo" ]]; then
-    message --warning "Unable to remove '$(shorten_path "$flux_grab_cursor_fifo")', FIFO file is expected, which is used to track status of cursor grabbing!"
+  elif [[ -e "$flux_grab_cursor_fifo_path" &&
+          ! -p "$flux_grab_cursor_fifo_path" ]]; then
+    message --warning "Unable to remove '$(shorten_path "$flux_grab_cursor_fifo_path")', FIFO file is expected, which is used to track status of cursor grabbing!"
   fi
 
   # Remove lock file which prevents multiple instances of daemon from running

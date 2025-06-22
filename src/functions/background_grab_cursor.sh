@@ -1,15 +1,15 @@
 # Required to run binary responsible for cursor grabbing, runs in background via '&'
 background_grab_cursor(){
   # Do not grab cursor if something is wrong with named pipe
-  if [[ -e "$flux_grab_cursor_fifo" &&
-        ! -p "$flux_grab_cursor_fifo" ]]; then
-    message --warning "Unable to grab cursor for window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid due to focus event, '$(shorten_path "$flux_grab_cursor_fifo")' is not a FIFO file!"
+  if [[ -e "$flux_grab_cursor_fifo_path" &&
+        ! -p "$flux_grab_cursor_fifo_path" ]]; then
+    message --warning "Unable to grab cursor for window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid due to focus event, '$(shorten_path "$flux_grab_cursor_fifo_path")' is not a FIFO file!"
     return 1
-  elif [[ ! -e "$flux_grab_cursor_fifo" ]]; then
-    message --warning "Unable to grab cursor for window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid due to focus event, '$(shorten_path "$flux_grab_cursor_fifo")' FIFO file does not exist!"
+  elif [[ ! -e "$flux_grab_cursor_fifo_path" ]]; then
+    message --warning "Unable to grab cursor for window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid due to focus event, '$(shorten_path "$flux_grab_cursor_fifo_path")' FIFO file does not exist!"
     return 1
   else
-    "$flux_grab_cursor_path" "$passed_window_xid" > "$flux_grab_cursor_fifo" &
+    "$flux_grab_cursor_path" "$passed_window_xid" > "$flux_grab_cursor_fifo_path" &
     local local_flux_grab_cursor_pid="$!"
     trap 'kill "$local_flux_grab_cursor_pid"' SIGINT SIGTERM
   fi
@@ -37,5 +37,5 @@ background_grab_cursor(){
     'success' )
       message --info "Cursor for window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid has been grabbed fully due to focus event."
     esac
-  done < "$flux_grab_cursor_fifo"
+  done < "$flux_grab_cursor_fifo_path"
 }
