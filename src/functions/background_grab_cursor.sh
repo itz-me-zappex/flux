@@ -1,9 +1,14 @@
 # Required to run binary responsible for cursor grabbing, runs in background via '&'
 background_grab_cursor(){
   # Needed to kill 'flux-grab-cursor' process when this function receives 'SIGINT'/'SIGTERM'
-  mkfifo "$flux_grab_cursor_fifo"
-  "$flux_grab_cursor_path" "$passed_window_xid" > "$flux_grab_cursor_fifo" &
-  local local_flux_grab_cursor_pid="$!"
+  if ! mkfifo "$flux_grab_cursor_fifo" > /dev/null 2>&1; then
+    message --warning "Unable to create '$(shorten_path "$flux_grab_cursor_fifo")' FIFO file, which is needed to track cursor grabbing status!"
+    return 1
+  else
+    "$flux_grab_cursor_path" "$passed_window_xid" > "$flux_grab_cursor_fifo" &
+    local local_flux_grab_cursor_pid="$!"
+  fi
+
   trap 'kill "$local_flux_grab_cursor_pid"' SIGINT SIGTERM
 
   local local_flux_grab_cursor_line
