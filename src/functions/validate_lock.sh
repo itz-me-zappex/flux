@@ -34,7 +34,7 @@ validate_lock(){
     # Store daemon PID to lock file to check its existence on next launch (if lock file still exists, e.g. after crash or SIGKILL)
     echo "$$" > "$flux_lock_file_path"
   else
-    message --error "Unable to create '$(shorten_path "$flux_lock_file_path")' lock file required to prevent multiple instances from running, '$(shorten_path "$flux_temp_dir_path")' directory is not accessible for read-write operations!"
+    message --error "Unable to create '$(shorten_path "$flux_lock_file_path")' lock file, '$(shorten_path "$flux_temp_dir_path")' directory is not accessible for read-write operations!"
     exit 1
   fi
 }

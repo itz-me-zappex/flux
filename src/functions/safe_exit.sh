@@ -79,10 +79,10 @@ safe_exit(){
   # Remove temporary directory
   if [[ -d "$flux_temp_dir_path" ]] &&
      ! rm -rf "$flux_temp_dir_path" > /dev/null 2>&1; then
-    message --warning "Unable to remove '$(shorten_path "$flux_listener_fifo_path")' temporary directory, which is used to store temporary files like lock and FIFO files!"
+    message --warning "Unable to remove '$(shorten_path "$flux_listener_fifo_path")' temporary directory!"
   elif [[ -e "$flux_temp_dir_path" &&
           ! -d "$flux_temp_dir_path" ]]; then
-    message --warning "Unable to remove '$(shorten_path "$flux_listener_fifo_path")', directory is expected, which is used to store temporary files like lock and FIFO files!"
+    message --warning "Unable to remove '$(shorten_path "$flux_listener_fifo_path")', directory is expected!"
   fi
   
   # Wait a bit to avoid printing message about daemon termination earlier than messages from background functions appear
