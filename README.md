@@ -65,10 +65,10 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - Use less aggressive CPU limit to allow game to send/receive packets.
 - Stuttery audio in unfocused game if CPU limit is pretty aggressive. That should be expected, because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage.
   - If you use Pipewire with Wireplumber, you may want to mute process as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
-- Some games under Wine/Proton may not like `flux-grab-cursor`, meaning that if game gets focus without clicking on it with mouse (e.g. after Alt+Tab), cursor will be grabbed and will not work outside of window, but still will be able to escape (e.g. in "Ori and the Will of the Wisps" in windowed mode).
-  - Whether do not use `focus-cursor-grab` config key in such cases or ignore an issue, there is nothing I can do with this.
-- Daemon says that is waits for cursor ungrab "without any reason", that happens in case game grabs cursor manually.
-  - Do not use `focus-cursor-grab` config key in such cases.
+- In some games, with `focus-grab-cursor` set to `true`, cursor still able to escape, but does not work outside of window. As example - "Ori and the Will of the Wisps" game on Unity engine in windowed mode.
+  - Whether do not use `focus-grab-cursor` config key in such cases or ignore an issue, I can not do anything with this.
+- Daemon says that it waits for cursor ungrab "without any reason". That may happen in case game grabs cursor manually.
+  - Do not use `focus-grab-cursor` config key in such cases, as it becomes useless.
 - Process name mismatch when using info from `--get` option. That may happen because process may change its name at runtime. For example, in "S.T.A.L.K.E.R." trilogy and its derivatives (e.g. "S.T.A.L.K.E.R.: Anomaly"), process initially starts as `xrEngine.exe`, but after engine initialization, it changes its name to `X-Ray Primary t`. Daemon reads process name and other info once and puts it into associative arrays to reduce CPU usage and improve performance. As a result, if daemon detects process during initialization step, it will continue to associate it with this name. However, if daemon becomes restarted with `--hot` option after name has been changed, it will now detect updated name, which will match with what is returned by `--get`.
   - Use regexp in `name` config key like `^('X-RAY Primary t'|'xrEngine.exe'|'AnomalyDX11AVX.'|'XR_3DA.exe')$`. You may want to start daemon in verbose mode to find message about mismatch containing process name catched at engine initialization step.
 
