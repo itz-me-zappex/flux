@@ -38,17 +38,6 @@ int main() {
     return 1;
   }
 
-  // Get its own PID and append it to '/tmp/flux-lock', needed to make daemon able terminate this process on exit
-  const pid_t event_reader_pid = getpid();
-  FILE *lock_file = fopen("/tmp/flux-lock", "a");
-  if (!lock_file) {
-    XCloseDisplay(display);
-    return 1;
-  } else {
-    fprintf(lock_file, "%d", event_reader_pid);
-    fclose(lock_file);
-  }
-
   // Simulate event to handle current atoms state immediately
   bool fake_event = true;
 
