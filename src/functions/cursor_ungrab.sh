@@ -10,7 +10,14 @@ cursor_ungrab(){
     fi
   fi
 
-  rm "$flux_grab_cursor_fifo" > /dev/null 2>&1
+  if [[ -p "$flux_grab_cursor_fifo" ]]; then
+    if ! rm "$flux_grab_cursor_fifo" > /dev/null 2>&1; then
+      message --warning "Unable to remove '$(shorten_path "$flux_grab_cursor_fifo")' FIFO file, which is used to track status of cursor grabbing!"
+    fi
+  elif [[ -e "$flux_grab_cursor_fifo" &&
+          ! -p "$flux_grab_cursor_fifo" ]]; then
+    message --warning "Unable to remove '$(shorten_path "$flux_grab_cursor_fifo")', FIFO file is expected!"
+  fi
 
   unset background_focus_grab_cursor_map["$passed_window_xid"]
 }
