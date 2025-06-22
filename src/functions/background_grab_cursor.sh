@@ -26,13 +26,13 @@ background_grab_cursor(){
       break
     ;;
     'wine_window' )
-      message --verbose "Window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid seems to be related to Wine/Proton, workarounding hangs caused by cursor grabbing..."
+      message --info "Window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid seems to be related to Wine/Proton, attempt to grab cursor and redirect input to there workarounding hangs caused because of that..."
     ;;
     'wine_hang' )
       message --verbose "Detected hang of Wine/Proton process '$passed_process_name' with PID $passed_process_pid of window with XID $passed_window_xid caused by cursor grabbing, still workarounding..."
     ;;
     'window' )
-      message --verbose "Trying to grab cursor and redirect input to window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid due to focus event..."
+      message --info "Attempt to grab cursor and redirect input to window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid due to focus event..."
     ;;
     'success' )
       message --info "Cursor for window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid has been grabbed fully due to focus event."
