@@ -9,9 +9,13 @@ validate_lock(){
     fi
 
     # Exit with an error if daemon already running
-    if check_pid_existence "$(<"$flux_lock_file_path")"; then
-      message --error "Multiple instances are not allowed, make sure that daemon is not running before start, but if you are really sure, then remove '$(shorten_path "$flux_lock_file_path")' lock file."
-      exit 1
+    local local_pid_from_lock_file="$(<"$flux_lock_file_path")"
+    if check_pid_existence "$local_pid_from_lock_file"; then
+      local local_process_name_from_lock_file="$(<"/proc/$local_pid_from_lock_file/comm")"
+      if [[ "$local_process_name_from_lock_file" == 'flux' ]]; then
+        message --error "Multiple instances are not allowed, make sure that daemon is not running before start!"
+        exit 1
+      fi
     fi
 
     # Exit with an error if lock file exists but not accessible for writing
