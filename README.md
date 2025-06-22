@@ -230,9 +230,9 @@ sudo PREFIX='/usr' make uninstall
 Depends by distro and package manager you use, I highly suggest to remove dependencies selectively and check which packages are use it to avoid system breakage.
 
 ### Cleaning up
-#### Lock file (after crash)
+#### Temporary directory (after crash)
 ```bash
-rm '/tmp/flux-lock'
+rm -rf '/tmp/flux'
 ```
 
 #### Config file (if not needed anymore), e.g.
