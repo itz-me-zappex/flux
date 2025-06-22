@@ -23,14 +23,16 @@ if [[ -z "$DISPLAY" ]]; then
   export DISPLAY=':0'
 fi
 
+# Set path to temporary directory
+flux_temp_dir_path='/tmp/flux'
+flux_temp_fifo_dir_path="$flux_temp_dir_path/fifo"
+
 # Set path to file containing daemon PID, needed to prevent multiple instances from running
-flux_lock_file_path='/tmp/flux-lock'
+flux_lock_file_path="$flux_temp_dir_path/flux.lock"
 
-# Needed to read output of 'flux-listener'
-flux_listener_fifo_path='/tmp/flux-listener-fifo'
-
-# Needed to read output of 'flux-grab-cursor'
-flux_grab_cursor_fifo_path='/tmp/flux-grab-cursor-fifo'
+# Needed to read output of respective binaries
+flux_listener_fifo_path="$flux_temp_fifo_dir_path/flux-listener"
+flux_grab_cursor_fifo_path="$flux_temp_fifo_dir_path/flux-grab-cursor"
 
 # Define prefix where daemon has been installed using path to 'flux'
 flux_path="$(get_realpath "$0")"
@@ -253,6 +255,10 @@ else
   unset -f validate_x11_session
   unset validate_x11_session_exit_code
 fi
+
+# Create temporary directories
+create_temp_dirs
+unset -f create_temp_dirs
 
 # Create FIFO files
 create_fifo_files
