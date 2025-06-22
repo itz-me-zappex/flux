@@ -24,11 +24,13 @@ if [[ -z "$DISPLAY" ]]; then
 fi
 
 # Set path to file containing daemon PID, needed to prevent multiple instances from running
-# Hardcoded in 'flux-listener' and it is not supposed to be changeable
-lock_file='/tmp/flux-lock'
+flux_lock_file_path='/tmp/flux-lock'
 
-# Needed to read output of 'flux-grab-cursor' binary
-flux_grab_cursor_fifo="/tmp/flux-grab-cursor-fifo"
+# Needed to read output of 'flux-listener'
+flux_listener_fifo='/tmp/flux-listener-fifo'
+
+# Needed to read output of 'flux-grab-cursor'
+flux_grab_cursor_fifo='/tmp/flux-grab-cursor-fifo'
 
 # Define prefix where daemon has been installed using path to 'flux'
 flux_path="$(get_realpath "$0")"
@@ -256,6 +258,11 @@ fi
 validate_lock
 unset -f validate_lock
 
+# Needed to kill 'flux-listener' process when daemon receives 'SIGINT'/'SIGTERM'
+mkfifo "$flux_listener_fifo"
+"$flux_listener_path" > "$flux_listener_fifo" &
+flux_listener_pid="$!"
+
 # Preparation for event reading
 daemon_prepare
 unset -f daemon_prepare \
@@ -464,7 +471,7 @@ while read -r raw_event ||
   
   # Unset events
   unset events_array
-done < <("$flux_listener_path" 2>/dev/null)
+done < "$flux_listener_fifo"
 
 # Only for case if event reader appears terminated
 message --warning "Event reader has been terminated!"
