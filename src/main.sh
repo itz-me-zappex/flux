@@ -259,9 +259,13 @@ validate_lock
 unset -f validate_lock
 
 # Needed to kill 'flux-listener' process when daemon receives 'SIGINT'/'SIGTERM'
-mkfifo "$flux_listener_fifo"
-"$flux_listener_path" > "$flux_listener_fifo" &
-flux_listener_pid="$!"
+if ! mkfifo "$flux_listener_fifo" > /dev/null 2>&1; then
+  message --error "Unable to create '$(shorten_path "$flux_listener_fifo")' FIFO file, which is needed to read events from 'flux-listener' process!"
+  exit 1
+else
+  "$flux_listener_path" > "$flux_listener_fifo" &
+  flux_listener_pid="$!"
+fi
 
 # Preparation for event reading
 daemon_prepare
