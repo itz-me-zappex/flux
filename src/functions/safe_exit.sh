@@ -76,32 +76,13 @@ safe_exit(){
     fi
   fi
 
-  # Remove FIFO file of 'flux-listener'
-  if [[ -p "$flux_listener_fifo_path" ]] &&
-     ! rm "$flux_listener_fifo_path" > /dev/null 2>&1; then
-    message --warning "Unable to remove '$(shorten_path "$flux_listener_fifo_path")' FIFO file, which is used to read events from 'flux-listener' process!"
-  elif [[ -e "$flux_listener_fifo_path" &&
-          ! -p "$flux_listener_fifo_path" ]]; then
-    message --warning "Unable to remove '$(shorten_path "$flux_listener_fifo_path")', FIFO file is expected, which is used to read events from 'flux-listener' process!"
-  fi
-
-  # Remove FIFO file of 'flux-grab-cursor'
-  if [[ -p "$flux_grab_cursor_fifo_path" ]]; then
-    if ! rm "$flux_grab_cursor_fifo_path" > /dev/null 2>&1; then
-      message --warning "Unable to remove '$(shorten_path "$flux_grab_cursor_fifo_path")' FIFO file, which is used to track status of cursor grabbing!"
-    fi
-  elif [[ -e "$flux_grab_cursor_fifo_path" &&
-          ! -p "$flux_grab_cursor_fifo_path" ]]; then
-    message --warning "Unable to remove '$(shorten_path "$flux_grab_cursor_fifo_path")', FIFO file is expected, which is used to track status of cursor grabbing!"
-  fi
-
-  # Remove lock file which prevents multiple instances of daemon from running
-  if [[ -f "$flux_lock_file_path" ]] &&
-     ! rm "$flux_lock_file_path" > /dev/null 2>&1; then
-    message --warning "Unable to remove '$(shorten_path "$flux_lock_file_path")' lock file, which should contain daemon PID and prevents multiple instances from running!"
-  elif [[ -e "$flux_lock_file_path" &&
-          ! -f "$flux_lock_file_path" ]]; then
-    message --warning "Unable to remove '$(shorten_path "$flux_lock_file_path")', file is expected, which should contain daemon PID and prevents multiple instances from running!"
+  # Remove temporary directory
+  if [[ -d "$flux_temp_dir_path" ]] &&
+     ! rm -rf "$flux_temp_dir_path" > /dev/null 2>&1; then
+    message --warning "Unable to remove '$(shorten_path "$flux_listener_fifo_path")' temporary directory, which is used to store temporary files like lock and FIFO files!"
+  elif [[ -e "$flux_temp_dir_path" &&
+          ! -d "$flux_temp_dir_path" ]]; then
+    message --warning "Unable to remove '$(shorten_path "$flux_listener_fifo_path")', directory is expected, which is used to store temporary files like lock and FIFO files!"
   fi
   
   # Wait a bit to avoid printing message about daemon termination earlier than messages from background functions appear
