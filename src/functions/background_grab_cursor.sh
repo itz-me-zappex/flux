@@ -1,6 +1,6 @@
 # Required to run binary responsible for cursor grabbing, runs in background via '&'
 background_grab_cursor(){
-  # Needed to kill process when this function receives termination-related signal
+  # Needed to kill 'flux-grab-cursor' process when this function receives 'SIGINT'/'SIGTERM'
   mkfifo "$flux_grab_cursor_fifo"
   "$flux_grab_cursor_path" "$passed_window_xid" > "$flux_grab_cursor_fifo" &
   local local_flux_grab_cursor_pid="$!"
