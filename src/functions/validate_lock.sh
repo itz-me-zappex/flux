@@ -30,20 +30,11 @@ validate_lock(){
   fi
 
   # Exit with an error if lock file directory is not writable
-  local local_lock_file_dir="${flux_lock_file_path%/*}"
-  if [[ -d "$local_lock_file_dir" ]]; then
-    if check_rw "$local_lock_file_dir"; then
-      # Store daemon PID to lock file to check its existence on next launch (if lock file still exists, e.g. after crash or SIGKILL)
-      echo "$$" > "$flux_lock_file_path"
-    else
-      message --error "Unable to create '$(shorten_path "$flux_lock_file_path")' lock file required to prevent multiple instances from running, '$(shorten_path "$local_lock_file_dir")' directory is not accessible for read-write operations!"
-      exit 1
-    fi
-  elif [[ -e "$local_lock_file_dir" &&
-          ! -d "$local_lock_file_dir" ]]; then
-    message --error "Unable to create '$(shorten_path "$flux_lock_file_path")' lock file, '$(shorten_path "$local_lock_file_dir")' is expected to be directory!"
-    exit 1
+  if check_rw "$flux_temp_dir_path"; then
+    # Store daemon PID to lock file to check its existence on next launch (if lock file still exists, e.g. after crash or SIGKILL)
+    echo "$$" > "$flux_lock_file_path"
   else
-    message --error "Unable to create '$(shorten_path "$flux_lock_file_path")' lock file, '$(shorten_path "$local_lock_file_dir")' directory does not exist!"
+    message --error "Unable to create '$(shorten_path "$flux_lock_file_path")' lock file required to prevent multiple instances from running, '$(shorten_path "$flux_temp_dir_path")' directory is not accessible for read-write operations!"
+    exit 1
   fi
 }
