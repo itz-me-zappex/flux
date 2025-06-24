@@ -161,12 +161,6 @@ validate_config_keys(){
         config_key_mangohud_source_config_map["$local_temp_section_or_group"]="${config_key_mangohud_config_map["$local_temp_section_or_group"]}"
       fi
 
-      # Request check for ability to change and restore scheduling policies if specified in config
-      if [[ -z "$should_validate_sched" &&
-            -n "${config_key_idle_map["$local_temp_section_or_group"]}" ]]; then
-        should_validate_sched='1'
-      fi
-
       # Inherit `exec-exit` and `exec-closure` from `lazy-exec-unfocus` if not specified
       if [[ -n "${config_key_lazy_exec_unfocus_map["$local_temp_section_or_group"]}" ]]; then
         if [[ -z "${config_key_exec_exit_map["$local_temp_section_or_group"]}" ]]; then
@@ -176,6 +170,18 @@ validate_config_keys(){
         if [[ -z "${config_key_exec_closure_map["$local_temp_section_or_group"]}" ]]; then
           config_key_exec_closure_map["$local_temp_section_or_group"]="${config_key_lazy_exec_unfocus_map["$local_temp_section_or_group"]}"
         fi
+      fi
+
+      # Request check for ability to change and restore scheduling policies if specified in config
+      if [[ -z "$should_validate_sched" &&
+            -n "${config_key_idle_map["$local_temp_section_or_group"]}" ]]; then
+        should_validate_sched='1'
+      fi
+
+      # Request creation of FIFO file for 'flux-grab-cursor' if specified in config
+      if [[ -z "$should_create_fifo_for_flux_grab_cursor" &&
+            -n "${config_key_focus_grab_cursor_map["$local_temp_section_or_group"]}" ]]; then
+        should_create_fifo_for_flux_grab_cursor='1'
       fi
     fi
   done
