@@ -235,26 +235,7 @@ section_is_group
 
 # Validate X11 session
 validate_x11_session
-validate_x11_session_exit_code="$?"
-
-# Define message depending by exit code
-if (( validate_x11_session_exit_code > 0 )); then
-  case "$validate_x11_session_exit_code" in
-  1 )
-    message --error "Unable to start daemon, Wayland is not supported!"
-  ;;
-  2 )
-    message --error "Unable to start daemon, X11 session is not running!"
-  ;;
-  3 )
-    message --error "Unable to start daemon, EWMH-compatible window manager is not running!"
-  esac
-
-  exit 1
-else
-  unset -f validate_x11_session
-  unset validate_x11_session_exit_code
-fi
+unset -f validate_x11_session
 
 # Create temporary directories
 create_temp_dirs
