@@ -15,33 +15,26 @@ done < <(declare -x)
 unset temp_envvar_line \
 envvar_name
 
-# Version of daemon shown from 'parse_options()' if '--version' is specified
 daemon_version='1.29.2'
 
-# Set X11 display if not set
 if [[ -z "$DISPLAY" ]]; then
   export DISPLAY=':0'
 fi
 
-# Set path to temporary directory
+# Set path to temporary directory and files
 flux_temp_dir_path='/tmp/flux'
-flux_temp_fifo_dir_path="$flux_temp_dir_path/fifo"
-
-# Set path to file containing daemon PID, needed to prevent multiple instances from running
-flux_lock_file_path="$flux_temp_dir_path/flux.lock"
-
-# Needed to read output of respective binaries
-flux_listener_fifo_path="$flux_temp_fifo_dir_path/flux-listener"
-flux_grab_cursor_fifo_path="$flux_temp_fifo_dir_path/flux-grab-cursor"
+flux_lock_file_path="${flux_temp_dir_path}/flux.lock"
+flux_temp_fifo_dir_path="${flux_temp_dir_path}/fifo"
+flux_listener_fifo_path="${flux_temp_fifo_dir_path}/flux-listener"
+flux_grab_cursor_fifo_path="${flux_temp_fifo_dir_path}/flux-grab-cursor"
 
 # Define prefix where daemon has been installed using path to 'flux'
 flux_path="$(get_realpath "$0")"
 case "$flux_path" in
 *'/bin/flux'* )
-  # Keep just prefix path
+  # Keep only prefix path
   daemon_prefix="${flux_path/%'/bin/flux'/}"
 
-  # Define paths to modules
   flux_listener_path="${daemon_prefix}/lib/flux/flux-listener"
   window_minimize_path="${daemon_prefix}/lib/flux/window-minimize"
   window_fullscreen_path="${daemon_prefix}/lib/flux/window-fullscreen"
@@ -50,10 +43,9 @@ case "$flux_path" in
   validate_x11_session_path="${daemon_prefix}/lib/flux/validate-x11-session"
 ;;
 * )
-  # Keep just executable directory
+  # Keep only executable directory
   daemon_prefix="${flux_path/%'/flux'/}"
 
-  # Define paths to modules
   flux_listener_path="${daemon_prefix}/flux-listener"
   window_minimize_path="${daemon_prefix}/window-minimize"
   window_fullscreen_path="${daemon_prefix}/window-fullscreen"
@@ -92,7 +84,7 @@ if [[ -t 1 &&
   log_prefix_warning="$colorless_prefix_warning"
   log_timestamp_format="$colorless_timestamp_format"
 else
-  # For case color mode will not be specified using '--color', needed to handle custom prefixes and timestamp
+  # In case color mode will not be specified using '--color' config key, needed to handle both custom prefixes and timestamp
   color='never'
 
   # Assuming stdout/stderr is redirected
@@ -109,7 +101,7 @@ else
   log_timestamp_format="$colorless_timestamp_format"
 fi
 
-# Create associative arrays to store values from config
+# Needed to store values from config
 declare -A config_key_name_map \
 config_key_owner_map \
 config_key_cpu_limit_map \
@@ -182,42 +174,34 @@ declare -A is_section_useful_map
 # Needed to remember that 'exec-oneshot' command has been executed
 declare -A is_exec_oneshot_executed_map
 
-# Options parsing and forget cmdline options
 parse_options "$@"
 shift "${#@}"
 unset -f parse_options \
 option_repeat_check \
 cmdline_get
 
-# Options validation
 validate_options
 unset -f validate_options
 
-# Config validation
 validate_config
 unset -f validate_config
 
-# Log validation
 validate_log
 unset -f validate_log
 
-# Get maximum CPU limit
 get_max_cpu_limit
 unset -f get_max_cpu_limit
 
-# Config parsing
 parse_config
 unset -f parse_config \
 get_realpath \
 simplify_bool
 unset max_cpu_limit
 
-# Get values from groups
 handle_groups
 unset -f config_get_group_values
 unset config_key_group_map
 
-# Config keys validation
 validate_config_keys
 unset -f validate_config_keys
 unset is_section_useful_map \
@@ -228,28 +212,22 @@ config_keys_order_map \
 config_line_count \
 get_key_line_result
 
-# Unset groups to avoid false positives due to missing identifiers (overwrites sections array)
 unset_groups
 unset -f unset_groups \
 section_is_group
 
-# Validate X11 session
 validate_x11_session
 unset -f validate_x11_session
 
-# Create temporary directories
 create_temp_dirs
 unset -f create_temp_dirs
 
-# Create FIFO files
 create_fifo_files
 unset -f create_fifo_files
 
-# Validate lock file
 validate_lock
 unset -f validate_lock
 
-# Preparation for event reading
 daemon_prepare
 unset -f daemon_prepare \
 colors_interpret \
@@ -262,14 +240,13 @@ quiet='' message --info "Flux has been started."
 while read -r raw_event ||
       [[ -n "$raw_event" ]]; do
   (( events_count++ ))
-
-  # Collect events
   if (( events_count == 1 )); then
     focused_window="$raw_event"
     continue
   else
     opened_windows="$raw_event"
   fi
+  events_count='0'
 
   # Add opened windows as focus events once if '--hot' is specified, otherwise find implicitly opened windows and add those as focus events
   if [[ -n "$hot" ]]; then
@@ -284,7 +261,6 @@ while read -r raw_event ||
     # Add event to unset '--hot'
     events_array+=('unset_hot')
   else
-    # Do not do anything if list of opened windows from previous event is blank
     if [[ -n "$previous_opened_windows" ]]; then
       # Attempt to find implicitly opened windows
       for temp_window in $opened_windows; do
@@ -319,13 +295,10 @@ while read -r raw_event ||
     previous_focused_window="$focused_window"
   fi
 
-  # Add opened windows list as event to array to find terminated windows and check requests
+  # Needed find terminated windows and check requests
   events_array+=("windows_list: $opened_windows")
 
-  # Reset events count
-  events_count='0'
-
-  # Remember list of previously opened windows to find implicitly opened ones next time
+  # Needed to find implicitly opened windows next time
   previous_opened_windows="$opened_windows"
 
   # Handle events
@@ -377,10 +350,7 @@ while read -r raw_event ||
       explicit_section
     ;;
     'windows_list'* )
-      # Unset CPU/FPS limits for processes of terminated windows and remove info about those from cache and execute commands
       handle_closure
-
-      # Apply CPU/FPS limits for processes which have been requested to be limited and execute commands
       handle_unfocus
     ;;
     * )
@@ -392,17 +362,13 @@ while read -r raw_event ||
       process_command \
       section
 
-      # Get window XID
       window_xid="${event/'='*/}"
-
-      # Get process PID of focused window
       process_pid="${event/*'='/}"
 
       # Hide error messages, even standart ones which are appearing directly from Bash (https://unix.stackexchange.com/a/184807)
       exec 3>&2
       exec 2>/dev/null
 
-      # Attempt to obtain info about process using window XID
       get_process_info
       get_process_info_exit_code="$?"
 
@@ -412,15 +378,12 @@ while read -r raw_event ||
       # Request CPU/FPS limit for unfocused process if it matches with section
       unfocus_request_limit
 
-      # Actions depending by exit code of 'get_process_info()'
       if (( get_process_info_exit_code == 0 )); then
-        # Find matching section for process in config
         if find_matching_section; then
-          # Unset CPU/FPS limit for process of focused window if it has been limited on unfocus and execute commands
           handle_focus
         fi
 
-        # Remember info about process for next event to run commands on unfocus event and apply CPU/FPS limit, also for pass variables to command in 'exec-unfocus' key
+        # Remember info about process until next event to run commands on unfocus and apply CPU/FPS limit, and, to pass variables to command in 'exec-unfocus' key
         previous_window_xid="$window_xid"
         previous_process_pid="$process_pid"
         previous_process_name="$process_name"
@@ -443,21 +406,18 @@ while read -r raw_event ||
     esac
   done
 
-  # Allow lazy commands
   if [[ -z "$hot" ]]; then
     allow_lazy_commands='1'
   fi
 
-  # Unset request lock
   if [[ -n "$disallow_request" ]]; then
     unset disallow_request
   fi
-  
-  # Unset events
+
   unset events_array
 done < "$flux_listener_fifo_path"
 
-# Only for case if event reader appears terminated
+# Only for case if event reader becomes terminated
 message --warning "Event reader has been terminated!"
 safe_exit
 message --error "Flux has been terminated unexpectedly!"
