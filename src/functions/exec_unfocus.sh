@@ -1,6 +1,5 @@
 # Required to execute command from 'exec-unfocus' and 'lazy-exec-unfocus' config keys
 exec_unfocus(){
-  # Set end of message to not duplicate it
   local local_end_of_msg="due to unfocus event of window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_process_pid"
 
   export_unfocus_envvars
