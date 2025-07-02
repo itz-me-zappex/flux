@@ -1,12 +1,10 @@
 # Required to unset applied limits for windows on SIGTERM/SIGINT signal
 safe_exit(){
-  # Specify end of message passed to functions
   local local_end_of_msg='due to daemon termination'
 
   # Get list of all cached windows
   local local_temp_window_xid
   for local_temp_window_xid in "${!cache_process_pid_map[@]}"; do
-    # Simplify access to cached process info
     local local_process_pid="${cache_process_pid_map["$local_temp_window_xid"]}"
     local local_section="${cache_section_map["$local_process_pid"]}"
     local local_process_name="${cache_process_name_map["$local_temp_window_xid"]}"

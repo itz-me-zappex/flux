@@ -1,6 +1,5 @@
 # Required to unset limit for focused process
 handle_focus(){
-  # Set end of message to not duplicate it
   local local_end_of_msg="due to focus event of window with XID $window_xid"
 
   # Define type of limit which should be unset
@@ -32,12 +31,10 @@ handle_focus(){
     unset_sched_idle
   fi
 
-  # Execute command on window appearance event if specified in config ('exec-oneshot')
   exec_oneshot
-
-  # Execute command on focus event if specified in config
   exec_focus
 
+  # TODO: Move to separate function
   # Enforce fullscreen mode for window if specified in config
   if [[ -n "${config_key_focus_fullscreen_map["$section"]}" ]]; then
     # Send to background because there is 100ms delay before change child window size to match screen in case window/process did not do that automatically
@@ -50,15 +47,13 @@ handle_focus(){
     ) &
   fi
 
-  # Make window grab cursor if specified in config and that is not implicitly opened window
+  # Run subprocess which pins cursor to window if specified in config and that is not implicitly opened window
   if [[ -n "${config_key_focus_grab_cursor_map["$section"]}" &&
         -z "$hot" ]]; then
     passed_window_xid="$window_xid" \
     passed_process_name="$process_name" \
     passed_process_pid="$process_pid" \
     background_grab_cursor &
-
-    # Associate PID of background process with PID of process to interrupt it on unfocus event
     background_focus_grab_cursor_map["$window_xid"]="$!"
   fi
 }

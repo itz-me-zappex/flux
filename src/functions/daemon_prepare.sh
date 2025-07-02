@@ -26,19 +26,18 @@ daemon_prepare(){
   colorless_prefix_warning \
   colorless_timestamp_format
 
-  # Allow notifications if '--notifications' option is specified (checked by 'message()')
+  # Allow notifications if '--notifications' option is specified, checked by 'message()'
   if [[ -n "$notifications" ]]; then
     allow_notifications='1'
     unset notifications
   fi
 
-  # Allow timestamps to be displayed
+  # Allow timestamps to be displayed, checked by 'message()'
   if [[ -n "$timestamps" ]]; then
     allow_timestamps='1'
     unset timestamps
   fi
 
-  # Check whether daemon able change and restore scheduling policies
   if [[ -n "$should_validate_sched" ]]; then
     sched_validate
     unset should_validate_sched

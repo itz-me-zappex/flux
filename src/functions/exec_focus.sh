@@ -1,13 +1,10 @@
 # Required to execute command from 'exec-focus' and 'lazy-exec-focus' config keys
 exec_focus(){
-  # Set end of message to not duplicate it
   local local_end_of_msg="due to focus event of window with XID $window_xid of process '$process_name' with PID $process_pid"
 
-  # Do not do anything if focused window process PID is exacly the same as previous one
   if (( process_pid != previous_process_pid )); then
     export_focus_envvars
 
-    # Execute command from 'exec-focus' key if it has been specified
     if [[ -n "${config_key_exec_focus_map["$section"]}" ]]; then
       local local_temp_command
       while read -r local_temp_command ||
@@ -21,7 +18,7 @@ exec_focus(){
       done <<< "${config_key_exec_focus_map["$section"]}"
     fi
 
-    # Execute command from 'lazy-exec-focus' key if it has been specified and if '--hot' has been unset by daemon after processing opened windows
+    # Only after handling implicitly opened windows
     if [[ -n "${config_key_lazy_exec_focus_map["$section"]}" &&
           -z "$hot" ]]; then
       local local_temp_command

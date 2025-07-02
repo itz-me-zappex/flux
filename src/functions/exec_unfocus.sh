@@ -5,7 +5,6 @@ exec_unfocus(){
 
   export_unfocus_envvars
 
-  # Execute command from 'exec-unfocus' key if it has been specified
   if [[ -n "${config_key_exec_unfocus_map["$passed_section"]}" ]]; then
     local local_temp_command
     while read -r local_temp_command ||
@@ -19,7 +18,7 @@ exec_unfocus(){
     done <<< "${config_key_exec_unfocus_map["$passed_section"]}"
   fi
 
-  # Execute command from 'lazy-exec-unfocus' key if it has been specified and if '--hot' has been unset by daemon after processing opened windows
+  # On next loop after handling implicitly opened windows
   if [[ -n "${config_key_lazy_exec_unfocus_map["$passed_section"]}" &&
         -n "$allow_lazy_commands" ]]; then
     local local_temp_command

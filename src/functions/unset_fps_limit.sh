@@ -1,15 +1,11 @@
 # Required to terminate FPS limit background process or unset FPS limit if window becomes focused or terminated
 unset_fps_limit(){
-  # Simplify access to PID of background process with delayed setting of FPS limit
   local local_background_fps_limit_pid="${background_fps_limit_pid_map["$passed_section"]}"
-
-  # Simplify access to delay config key value
   local local_config_delay="${config_key_delay_map["$passed_section"]}"
 
   # Check for existence of FPS limit background process
   if [[ "$local_config_delay" != '0' ]] &&
      check_pid_existence "$local_background_fps_limit_pid"; then
-    # Attempt to terminate background process
     if ! kill "$local_background_fps_limit_pid" > /dev/null 2>&1; then
       message --warning "Unable to cancel delayed for $local_config_delay second(s) FPS unlimiting of section '$passed_section' $passed_end_of_msg!"
     else
@@ -28,7 +24,6 @@ unset_fps_limit(){
       message --info "Config key 'fps_limit' in MangoHud config file '$(shorten_path "${config_key_mangohud_config_map["$passed_section"]}")' from section '$passed_section' has been changed to '${config_key_fps_focus_map["$passed_section"]}' $passed_end_of_msg."
     fi
   fi
-  
-  # Unset details about FPS limiting
+
   unset background_fps_limit_pid_map["$passed_section"]
 }

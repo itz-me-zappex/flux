@@ -25,6 +25,7 @@ handle_unfocus(){
       local local_process_owner_username="${cache_process_owner_username_map["$local_temp_window_xid"]}"
       local local_process_command="${cache_process_command_map["$local_temp_window_xid"]}"
 
+      # TODO: Move to separate function?
       # Minimize window if requested
       if [[ -n "${request_minimize_map["$local_process_pid"]}" ]]; then
         unset request_minimize_map["$local_process_pid"]
@@ -68,8 +69,6 @@ handle_unfocus(){
         passed_process_pid="$local_process_pid" \
         passed_window_xid="$local_temp_window_xid" \
         background_freeze &
-
-        # Associate PID of background process with PID of process to interrupt it in case focus event appears earlier than delay ends
         background_freeze_pid_map["$local_process_pid"]="$!"
       elif [[ -n "${request_cpu_limit_map["$local_process_pid"]}" ]]; then
         unset request_cpu_limit_map["$local_process_pid"]
@@ -80,8 +79,6 @@ handle_unfocus(){
         passed_process_pid="$local_process_pid" \
         passed_window_xid="$local_temp_window_xid" \
         background_cpu_limit &
-
-        # Associate PID of background process with PID of process to interrupt it on focus event
         background_cpu_limit_pid_map["$local_process_pid"]="$!"
       elif [[ -n "$local_section" &&
               -n "${request_fps_limit_map["$local_section"]}" ]]; then
@@ -93,8 +90,6 @@ handle_unfocus(){
         passed_process_pid="$local_process_pid" \
         passed_window_xid="$local_temp_window_xid" \
         background_fps_limit &
-
-        # Associate PID of background process with section to interrupt in case focus event appears earlier than delay ends
         background_fps_limit_pid_map["$local_section"]="$!"
       fi
 
@@ -160,8 +155,6 @@ handle_unfocus(){
             passed_process_pid="$local_process_pid" \
             passed_window_xid="$local_temp_window_xid" \
             background_sched_idle &
-
-            # Associate PID of background process with PID of process to interrupt it on focus event
             background_sched_idle_pid_map["$local_process_pid"]="$!"
           else
             message --warning "Process '$local_process_name' with PID $local_process_pid already has scheduling policy set to 'idle', changing it due to unfocus event of window with XID $local_temp_window_xid has been cancelled!"

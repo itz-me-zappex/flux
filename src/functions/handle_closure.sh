@@ -9,7 +9,7 @@ handle_closure(){
     local local_existing_window_xids_array+=("${local_temp_existing_window/'='*/}")
   done
 
-  # Obtain list of terminated windows and remove PIDs
+  # Obtain list of terminated window XIDs
   local local_temp_window_xid
   for local_temp_window_xid in "${!cache_process_pid_map[@]}"; do
     # Add window XID to array with terminated windows if it does not exist in '_NET_CLIENT_LIST_STACKING'
@@ -23,7 +23,6 @@ handle_closure(){
   for local_temp_terminated_window_xid in "${local_terminated_window_xids_array[@]}"; do
     # Skip window XID if info about it does not exist in cache
     if [[ -n "${cache_process_pid_map["$local_temp_terminated_window_xid"]}" ]]; then
-      # Simplify access to cached info about terminated window
       local local_terminated_process_pid="${cache_process_pid_map["$local_temp_terminated_window_xid"]}"
       local local_terminated_section="${cache_section_map["$local_terminated_process_pid"]}"
       local local_terminated_process_name="${cache_process_name_map["$local_temp_terminated_window_xid"]}"
@@ -54,7 +53,6 @@ handle_closure(){
         continue
       fi
 
-      # Set end of message with actual window XID to not duplicate it
       local local_end_of_msg="due to closure of window with XID $local_temp_terminated_window_xid"
 
       # Unset applied limits
@@ -75,7 +73,6 @@ handle_closure(){
         # Do not remove FPS limit if one of existing windows matches with the same section
         local local_temp_existing_window_xid
         for local_temp_existing_window_xid in "${local_existing_window_xids_array[@]}"; do
-          # Simplify access to PID of terminated process using cache
           local local_existing_process_pid="${cache_process_pid_map["$local_temp_existing_window_xid"]}"
 
           # Mark to not unset FPS limit if there is another window which matches with same section
@@ -154,10 +151,7 @@ handle_closure(){
         message --verbose "Window with XID $local_temp_terminated_window_xid minimization of process '$local_terminated_process_name' with PID $local_terminated_process_pid has been cancelled due to window closure."
       fi
 
-      # Unset 'exec-oneshot' config key execution mark
       unset is_exec_oneshot_executed_map["$local_terminated_process_pid"]
-
-      # Unset request for 'exec-unfocus' and 'lazy-exec-unfocus' execution
       unset request_exec_unfocus_general_map["$local_terminated_process_pid"]
 
       # Remove data related to terminated window from cache

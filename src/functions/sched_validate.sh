@@ -10,13 +10,11 @@ sched_validate(){
     sleep 999 &
     local local_sleep_pid="$!"
     chrt --idle --pid 0 "$local_sleep_pid" > /dev/null 2>&1
-
     if ! chrt --other --pid 0 "$local_sleep_pid" > /dev/null 2>&1; then
       message --warning "Daemon has insufficient rights to change scheduling policies! To make 'idle' config key work, add your user to 'flux' group and reboot."
     else
       sched_change_is_supported='1'
     fi
-
     kill "$local_sleep_pid" > /dev/null 2>&1
 
     # Attempt to execute command with realtime scheduling policy to check whether daemon can restore it on focus or not

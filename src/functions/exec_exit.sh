@@ -1,13 +1,11 @@
 # Required to execute command from 'exec-exit', 'exec-exit-focus' and 'exec-exit-unfocus' config keys
 exec_exit(){
-  # Return if currently handled window did not match any section
   if [[ -z "$passed_section" ]]; then
     return 0
   fi
 
   export_unfocus_envvars
 
-  # Execute command from 'exec-exit' key if it has been specified
   if [[ -n "${config_key_exec_exit_map["$passed_section"]}" ]]; then
     local local_temp_command
     while read -r local_temp_command ||
@@ -21,7 +19,6 @@ exec_exit(){
     done <<< "${config_key_exec_exit_map["$passed_section"]}"
   fi
 
-  # Execute command from 'exec-exit-focus' key if it has been specified and window is focused
   if [[ "$passed_focused_section" == "$passed_section" &&
         -n "${config_key_exec_exit_focus_map["$passed_section"]}" ]]; then
     local local_temp_command
@@ -36,7 +33,6 @@ exec_exit(){
     done <<< "${config_key_exec_exit_focus_map["$passed_section"]}"
   fi
 
-  # Execute command from 'exec-exit-unfocus' key if it has been specified and window is unfocused
   if [[ "$passed_focused_section" != "$passed_section" && 
         -n "${config_key_exec_exit_unfocus_map["$passed_section"]}" ]]; then
     local local_temp_command

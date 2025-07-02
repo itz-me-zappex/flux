@@ -2,7 +2,6 @@
 exec_oneshot(){
   export_focus_envvars
 
-  # Execute command from 'exec-oneshot' key if it has been specified and was not executed before
   if [[ -n "${config_key_exec_oneshot_map["$section"]}" &&
         -z "${is_exec_oneshot_executed_map["$process_pid"]}" ]]; then
     local local_temp_command
@@ -18,7 +17,6 @@ exec_oneshot(){
 
     is_exec_oneshot_executed_map["$process_pid"]='1'
   fi
-  
-  # Unset exported variables
+
   unset_focus_envvars
 }

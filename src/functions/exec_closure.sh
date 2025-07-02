@@ -1,13 +1,11 @@
 # Required to execute command from 'exec-closure' config key
 exec_closure(){
-  # Return if currently handled window did not match any section
   if [[ -z "$passed_section" ]]; then
     return 0
   fi
 
   export_unfocus_envvars
 
-  # Execute command from 'exec-closure' key if it has been specified
   if [[ -n "${config_key_exec_closure_map["$passed_section"]}" ]]; then
     local local_temp_command
     while read -r local_temp_command ||

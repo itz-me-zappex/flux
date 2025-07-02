@@ -52,10 +52,7 @@ configure_prefixes(){
     # Prefixes
     local local_temp_prefix_type
     for local_temp_prefix_type in error info verbose warning; do
-      # Get variable name
       local local_variable_name="prefix_$local_temp_prefix_type"
-
-      # Get log related variable name
       local local_log_variable_name="log_$local_variable_name"
 
       # Store value of current variable to log related variable
@@ -83,14 +80,12 @@ configure_prefixes(){
 
   # Define whether daemon should enforce colorless or colorful prefixes and timestamp
   if [[ "$color" == 'never' ]]; then
-    # Use colorless (log specific) as default too
     prefix_error="$log_prefix_error"
     prefix_info="$log_prefix_info"
     prefix_verbose="$log_prefix_verbose"
     prefix_warning="$log_prefix_warning"
     timestamp_format="$log_timestamp_format"
   elif [[ "$color" == 'always' ]]; then
-    # Use colorful for logging too
     log_prefix_error="$prefix_error"
     log_prefix_info="$prefix_info"
     log_prefix_verbose="$prefix_verbose"
