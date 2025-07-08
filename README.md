@@ -36,9 +36,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [Groups](#groups)
   - [Regular expressions](#regular-expressions)
   - [Configuration example](#configuration-example)
-  - [Environment variables passed to commands and description](#environment-variables-passed-to-commands-and-description)
-    - [On focus or window appearance](#on-focus-or-window-appearance)
-    - [On unfocus, closure or daemon termination](#on-unfocus-closure-or-daemon-termination)
+  - [Environment variables passed to commands](#environment-variables-passed-to-commands)
 - [Tips and tricks](#tips-and-tricks)
   - [Apply changes in config file](#apply-changes-in-config-file)
   - [Mute process audio on unfocus (Pipewire & Wireplumber)](#mute-process-audio-on-unfocus-pipewire--wireplumber)
@@ -306,7 +304,7 @@ Now you have timestamp with bold and underlined text with cyan date and red time
 Just add command to autostart using your DE/WM settings. Running daemon as root also possible, but that feature almost useless.
 
 ## Configuration
-**Note:** A simple INI is used for configuration.
+A simple INI is used for configuration.
 
 ### Config path
 Daemon searches for following configuration files by priority:
@@ -393,11 +391,11 @@ You can use `group` config key inside groups.
 To make things more clear, here is an example of how to create and use groups:
 ```ini
 [@games]
-exec-focus += wpctl set-mute -p $FLUX_PROCESS_PID 0
-exec-unfocus += wpctl set-mute -p $FLUX_PROCESS_PID 1
+exec-focus += wpctl set-mute -p $FOCUSED_PID 0
+exec-unfocus += wpctl set-mute -p $UNFOCUSED_PID 1
 lazy-exec-focus += nvidia-settings -a '[gpu:0]/DigitalVibrance=150'
 lazy-exec-unfocus += nvidia-settings -a '[gpu:0]/DigitalVibrance=0'
-exec-oneshot += renice -n -4 $FLUX_PROCESS_PID
+exec-oneshot += renice -n -4 $FOCUSED_PID
 exec-oneshot += find ~/.nv -type f -exec cat {} + > /dev/null
 
 [@games-overclock]
@@ -467,9 +465,9 @@ mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
 mangohud-source-config = ~/.config/MangoHud/MangoHud.conf
 fps-unfocus = 5
 fps-focus = 60
-exec-focus = wpctl set-mute -p $FLUX_PROCESS_PID 0
-exec-unfocus = wpctl set-mute -p $FLUX_PROCESS_PID 1
-exec-exit = wpctl set-mute -p $FLUX_PROCESS_PID 0
+exec-focus = wpctl set-mute -p $FOCUSED_PID 0
+exec-unfocus = wpctl set-mute -p $UNFOCUSED_PID 1
+exec-exit = wpctl set-mute -p $FOCUSED_PID 0
 idle = true
 unfocus-minimize = true
 focus-fullscreen = true
@@ -483,39 +481,23 @@ cpu-limit = 2%
 idle = true
 ```
 
-### Environment variables passed to commands and description
-You may want to use these variables in commands and scripts which running from `exec-oneshot`, `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys to extend daemon functionality.
-#### On focus or window appearance
-| Variable | Description |
-|----------|-------------|
-| `FLUX_WINDOW_XID` | Decimal XID of focused window. |
-| `FLUX_PROCESS_PID` | Process PID of focused window. |
-| `FLUX_PROCESS_NAME` | Process name of focused window. |
-| `FLUX_PROCESS_OWNER` | Effective process UID of focused window. |
-| `FLUX_PROCESS_OWNER_USERNAME` | Effective process owner username of focused window. |
-| `FLUX_PROCESS_COMMAND` | Command used to run process of focused window. |
-| `FLUX_PREV_WINDOW_XID` | Decimal XID of unfocused window. |
-| `FLUX_PREV_PROCESS_PID` | Process PID of unfocused window. |
-| `FLUX_PREV_PROCESS_NAME` | Process name of unfocused window. |
-| `FLUX_PREV_PROCESS_OWNER` | Effective process UID of unfocused window. |
-| `FLUX_PREV_PROCESS_OWNER_USERNAME` | Effective process owner username of unfocused window. |
-| `FLUX_PREV_PROCESS_COMMAND` | Command used to run process of unfocused window. |
+### Environment variables passed to commands
+You can use these variables in you commands and scripts that running from execution config keys to avoid obtaining window XID and process info twice.
 
-#### On unfocus, closure or daemon termination
 | Variable | Description |
 |----------|-------------|
-| `FLUX_WINDOW_XID` | Decimal XID of unfocused window. |
-| `FLUX_PROCESS_PID` | Process PID of unfocused window. |
-| `FLUX_PROCESS_NAME` | Process name of unfocused window. |
-| `FLUX_PROCESS_OWNER` | Effective process UID of unfocused window. |
-| `FLUX_PROCESS_OWNER_USERNAME` | Effective process owner username of unfocused window. |
-| `FLUX_PROCESS_COMMAND` | Command used to run process of unfocused window. |
-| `FLUX_NEW_WINDOW_XID` | Decimal XID of focused window. |
-| `FLUX_NEW_PROCESS_PID` | Process PID of focused window. |
-| `FLUX_NEW_PROCESS_NAME` | Process name of focused window. |
-| `FLUX_NEW_PROCESS_OWNER` | Effective process UID of focused window. |
-| `FLUX_NEW_PROCESS_OWNER_USERNAME` | Effective process owner username of focused window. |
-| `FLUX_NEW_PROCESS_COMMAND` | Command used to run process of focused window. |
+| `FOCUSED_WINDOW_XID` | Decimal XID of focused window. |
+| `FOCUSED_PID` | Process PID of focused window. |
+| `FOCUSED_PROCESS_NAME` | Process name of focused window. |
+| `FOCUSED_PROCESS_OWNER` | Effective process UID of focused window. |
+| `FOCUSED_PROCESS_OWNER_USERNAME` | Effective process owner username of focused window. |
+| `FOCUSED_PROCESS_COMMAND` | Command used to run process of focused window. |
+| `UNFOCUSED_WINDOW_XID` | Decimal XID of unfocused window. |
+| `UNFOCUSED_PID` | Process PID of unfocused window. |
+| `UNFOCUSED_PROCESS_NAME` | Process name of unfocused window. |
+| `UNFOCUSED_PROCESS_OWNER` | Effective process UID of unfocused window. |
+| `UNFOCUSED_PROCESS_OWNER_USERNAME` | Effective process owner username of unfocused window. |
+| `UNFOCUSED_PROCESS_COMMAND` | Command used to run process of unfocused window. |
 
 ## Tips and tricks
 ### Apply changes in config file
@@ -526,24 +508,24 @@ Add following lines to section responsible for target:
 
 ```ini
 ; Unmute on focus
-exec-focus += wpctl set-mute -p $FLUX_PROCESS_PID 0
+exec-focus += wpctl set-mute -p $FOCUSED_PID 0
 
 ; Mute on unfocus
-exec-unfocus += wpctl set-mute -p $FLUX_PROCESS_PID 1
+exec-unfocus += wpctl set-mute -p $UNFOCUSED_PID 1
 ```
 
 ### Reduce niceness of process on window appearance (increase priority)
-**Note:** Niceness `-4` is fine for multimedia tasks, including games.
+Niceness `-4` is fine for multimedia tasks, including games.
 
 Add following line to section responsible for target:
 
 ```ini
 ; Increase process priority if window opens first time
-exec-oneshot += renice -n -4 $FLUX_PROCESS_PID
+exec-oneshot += renice -n -4 $FOCUSED_PID
 ```
 
 ### Overclock NVIDIA GPU on window focus and revert it on unfocus
-**Note:** Command from `lazy-exec-unfocus` is also executed on daemon termination if window appears focused at that moment.
+Command from `lazy-exec-unfocus` is also executed on daemon termination if window appears focused at that moment.
 
 Add following lines to section responsible for target (use your own values):
 
@@ -556,7 +538,7 @@ lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffs
 ```
 
 ### Change keyboard layout to English on focus and revert it to Russian on unfocus
-**Note:** Useful for some games/apps that do not understand cyrillic letters and rely on layout instead of scancodes.
+Useful for some games/apps that do not understand cyrillic letters and rely on layout instead of scancodes.
 
 Add following lines to section responsible for target (use your own values):
 
@@ -567,7 +549,7 @@ lazy-exec-unfocus += setxkbmap ru,ua,us
 ```
 
 ### Increase digital vibrance on focus and revert it on unfocus
-**Note:** Use `vibrant-cli` from [`libvibrant`](<https://github.com/libvibrant/libvibrant>) project if you use AMD or Intel GPU.
+Use `vibrant-cli` from [`libvibrant`](<https://github.com/libvibrant/libvibrant>) project if you use AMD or Intel GPU.
 
 Add following lines to section responsible for target (use your own values):
 #### NVIDIA
@@ -585,7 +567,7 @@ lazy-exec-unfocus += vibrant-cli DisplayPort-0 1
 ```
 
 ### Preload shader cache on window appearance to avoid stuttering
-**Note:** That is how bufferization works, you just need to load file to memory by reading it *somehow* and kernel will not read it from disk again relying on RAM instead.
+That is how bufferization works, you just need to load file to memory by reading it *somehow* and kernel will not read it from disk again relying on RAM instead.
 
 Add following line to section responsible for target (path may vary depending on system configuration):
 #### NVIDIA
