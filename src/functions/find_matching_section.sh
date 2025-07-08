@@ -1,9 +1,9 @@
 # Required to find matching section for process
 find_matching_section(){
   # Find matching section if was not found previously and store it to cache
-  if [[ -z "${cache_section_map["$process_pid"]}" ]]; then
+  if [[ -z "${cache_section_map["$pid"]}" ]]; then
     # Avoid searching for matching section if it was not found previously
-    if [[ -z "${cache_mismatch_map["$process_pid"]}" ]]; then
+    if [[ -z "${cache_mismatch_map["$pid"]}" ]]; then
       # Attempt to find a matching section in config
       local local_temp_section
       local local_match
@@ -71,7 +71,7 @@ find_matching_section(){
         # Mark section as matching if matching section is found
         if (( local_match == 3 )); then
           section="$local_temp_section"
-          cache_section_map["$process_pid"]="$local_temp_section"
+          cache_section_map["$pid"]="$local_temp_section"
           break
         fi
 
@@ -80,11 +80,11 @@ find_matching_section(){
 
       # Mark process as mismatched if matching section was not found
       if [[ -z "$section" ]]; then
-        cache_mismatch_map["$process_pid"]='1'
+        cache_mismatch_map["$pid"]='1'
       fi
     fi
   else
-    section="${cache_section_map["$process_pid"]}"
+    section="${cache_section_map["$pid"]}"
   fi
 
   if [[ -n "$hot" ]]; then
@@ -94,9 +94,9 @@ find_matching_section(){
   fi
   
   if [[ -n "$section" ]]; then
-    message --verbose "Process '$process_name' with PID $process_pid of $local_window_type_text with XID $window_xid matches section '$section'."
+    message --verbose "Process '$process_name' with PID $pid of $local_window_type_text with XID $window_xid matches section '$section'."
   else
-    message --verbose "Process '$process_name' with PID $process_pid of $local_window_type_text with XID $window_xid does not match any section."
+    message --verbose "Process '$process_name' with PID $pid of $local_window_type_text with XID $window_xid does not match any section."
     return 1
   fi
 }

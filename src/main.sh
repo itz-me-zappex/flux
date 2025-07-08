@@ -153,7 +153,7 @@ request_minimize_map \
 request_exec_unfocus_general_map
 
 # Declare associative arrays to store info about windows to avoid obtaining it every time to speed up code and reduce CPU-usage
-declare -A cache_process_pid_map \
+declare -A cache_pid_map \
 cache_process_name_map \
 cache_process_owner_map \
 cache_process_command_map \
@@ -324,7 +324,7 @@ while read -r raw_event ||
       # Remember focused window info to set it as previous after handling implicitly opened windows
       # Needed to make daemon able to handle requests after first unfocus event (after handling implicitly opened windows)
       explicit_window_xid="$window_xid"
-      explicit_process_pid="$process_pid"
+      explicit_pid="$pid"
       explicit_process_name="$process_name"
       explicit_process_owner="$process_owner"
       explicit_process_command="$process_command"
@@ -336,14 +336,14 @@ while read -r raw_event ||
 
       # Restore info about focused window after handling implicitly opened windows
       previous_window_xid="$explicit_window_xid"
-      previous_process_pid="$explicit_process_pid"
+      previous_pid="$explicit_pid"
       previous_process_name="$explicit_process_name"
       previous_process_owner="$explicit_process_owner"
       previous_process_command="$explicit_process_command"
       previous_section="$explicit_section"
 
       unset explicit_window_xid \
-      explicit_process_pid \
+      explicit_pid \
       explicit_process_name \
       explicit_process_owner \
       explicit_process_command \
@@ -356,14 +356,14 @@ while read -r raw_event ||
     * )
       # Unset info about process to avoid using it by an accident
       unset window_xid \
-      process_pid \
+      pid \
       process_name \
       process_owner \
       process_command \
       section
 
       window_xid="${event/'='*/}"
-      process_pid="${event/*'='/}"
+      pid="${event/*'='/}"
 
       # Hide error messages, even standart ones which are appearing directly from Bash (https://unix.stackexchange.com/a/184807)
       exec 3>&2
@@ -385,7 +385,7 @@ while read -r raw_event ||
 
         # Remember info about process until next event to run commands on unfocus and apply CPU/FPS limit, and, to pass variables to command in 'exec-unfocus' key
         previous_window_xid="$window_xid"
-        previous_process_pid="$process_pid"
+        previous_pid="$pid"
         previous_process_name="$process_name"
         previous_process_owner="$process_owner"
         previous_process_command="$process_command"
@@ -393,13 +393,13 @@ while read -r raw_event ||
       else
         # Forget info about previous window/process because it is not changed
         unset previous_window_xid \
-        previous_process_pid \
+        previous_pid \
         previous_process_name \
         previous_process_owner \
         previous_process_command \
         previous_section
 
-        message --warning "Unable to obtain info about process with PID $process_pid of window with XID $window_xid! Probably process has been terminated during check."
+        message --warning "Unable to obtain info about process with PID $pid of window with XID $window_xid! Probably process has been terminated during check."
       fi
 
       unset get_process_info_exit_code

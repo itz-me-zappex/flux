@@ -231,13 +231,13 @@ get_key_line(){
 # Needed to use environment variables with previous and focused window info in commands from 'exec-focus', `lazy-exec-focus` and 'exec-oneshot'
 export_focus_envvars(){
   export FOCUSED_WINDOW_XID="$window_xid" \
-  FOCUSED_PROCESS_PID="$process_pid" \
+  FOCUSED_PID="$pid" \
   FOCUSED_PROCESS_NAME="$process_name" \
   FOCUSED_PROCESS_OWNER="$process_owner" \
   FOCUSED_PROCESS_OWNER_USERNAME="$process_owner_username" \
   FOCUSED_PROCESS_COMMAND="$process_command" \
   UNFOCUSED_WINDOW_XID="$previous_window_xid" \
-  UNFOCUSED_PROCESS_PID="$previous_process_pid" \
+  UNFOCUSED_PID="$previous_pid" \
   UNFOCUSED_PROCESS_NAME="$previous_process_name" \
   UNFOCUSED_PROCESS_OWNER="$previous_process_owner" \
   UNFOCUSED_PROCESS_OWNER_USERNAME="$previous_process_owner_username" \
@@ -247,13 +247,13 @@ export_focus_envvars(){
 # Needed to use environment variables with previous and focused window info in commands from 'exec-unfocus', `lazy-exec-unfocus` and 'exec-closure'
 export_unfocus_envvars(){
   export FOCUSED_WINDOW_XID="$window_xid" \
-  FOCUSED_PROCESS_PID="$process_pid" \
+  FOCUSED_PID="$pid" \
   FOCUSED_PROCESS_NAME="$process_name" \
   FOCUSED_PROCESS_OWNER="$process_owner" \
   FOCUSED_PROCESS_OWNER_USERNAME="$process_owner_username" \
   FOCUSED_PROCESS_COMMAND="$process_command" \
   UNFOCUSED_WINDOW_XID="$passed_window_xid" \
-  UNFOCUSED_PROCESS_PID="$passed_process_pid" \
+  UNFOCUSED_PID="$passed_pid" \
   UNFOCUSED_PROCESS_NAME="$passed_process_name" \
   UNFOCUSED_PROCESS_OWNER="$passed_process_owner" \
   UNFOCUSED_PROCESS_OWNER_USERNAME="$passed_process_owner_username" \
@@ -263,13 +263,13 @@ export_unfocus_envvars(){
 # Needed to unset environment variables which were exported to commands in execution related config keys
 unset_envvars(){
   unset FOCUSED_WINDOW_XID \
-  FOCUSED_PROCESS_PID \
+  FOCUSED_PID \
   FOCUSED_PROCESS_NAME \
   FOCUSED_PROCESS_OWNER \
   FOCUSED_PROCESS_OWNER_USERNAME \
   FOCUSED_PROCESS_COMMAND \
   UNFOCUSED_WINDOW_XID \
-  UNFOCUSED_PROCESS_PID \
+  UNFOCUSED_PID \
   UNFOCUSED_PROCESS_NAME \
   UNFOCUSED_PROCESS_OWNER \
   UNFOCUSED_PROCESS_OWNER_USERNAME \

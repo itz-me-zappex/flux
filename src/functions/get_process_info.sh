@@ -9,14 +9,14 @@ cache_get_process_info(){
 # Required to get process info using PID
 get_process_info(){
   # Prefer using cache with process info if exists
-  if [[ -n "${cache_process_pid_map["$window_xid"]}" ]]; then
+  if [[ -n "${cache_pid_map["$window_xid"]}" ]]; then
     passed_window_xid="$window_xid" cache_get_process_info
   else
     # Attempt to find cache with info about the same process
     local local_temp_cached_window_xid
-    for local_temp_cached_window_xid in "${!cache_process_pid_map[@]}"; do
+    for local_temp_cached_window_xid in "${!cache_pid_map[@]}"; do
       # Compare parent PID with PID of process
-      if (( ${cache_process_pid_map["$local_temp_cached_window_xid"]} == process_pid )); then
+      if (( ${cache_pid_map["$local_temp_cached_window_xid"]} == pid )); then
         # Remember window XID of matching process
         local local_matching_window_xid="$local_temp_cached_window_xid"
         break
@@ -29,13 +29,13 @@ get_process_info(){
       passed_window_xid="$local_matching_window_xid" cache_get_process_info
     else
       # Get process name
-      if ! process_name="$(<"/proc/$process_pid/comm")"; then
+      if ! process_name="$(<"/proc/$pid/comm")"; then
         return 1
       fi
 
       # Get process command by reading file ignoring '\0' and those are replaced with spaces automatically because of arrays nature :D
       local local_process_command_array
-      if ! mapfile -d '' local_process_command_array < "/proc/$process_pid/cmdline"; then
+      if ! mapfile -d '' local_process_command_array < "/proc/$pid/cmdline"; then
         return 1
       else
         process_command="${local_process_command_array[*]}"
@@ -43,7 +43,7 @@ get_process_info(){
 
       # Bufferize to avoid failure from 'read' in case file will be removed during reading
       local local_status_content
-      if ! local_status_content="$(<"/proc/$process_pid/status")"; then
+      if ! local_status_content="$(<"/proc/$pid/status")"; then
         return 1
       fi
 
@@ -82,7 +82,7 @@ get_process_info(){
     fi
 
     # Store process info to cache to speed up its obtainance on next focus event and to use it implicitly using only window XID
-    cache_process_pid_map["$window_xid"]="$process_pid"
+    cache_pid_map["$window_xid"]="$pid"
     cache_process_name_map["$window_xid"]="$process_name"
     cache_process_owner_map["$window_xid"]="$process_owner"
     cache_process_command_map["$window_xid"]="$process_command"

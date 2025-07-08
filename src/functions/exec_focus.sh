@@ -1,8 +1,8 @@
 # Required to execute command from 'exec-focus' and 'lazy-exec-focus' config keys
 exec_focus(){
-  local local_end_of_msg="due to focus event of window with XID $window_xid of process '$process_name' with PID $process_pid"
+  local local_end_of_msg="due to focus event of window with XID $window_xid of process '$process_name' with PID $pid"
 
-  if (( process_pid != previous_process_pid )); then
+  if (( pid != previous_pid )); then
     export_focus_envvars
 
     if [[ -n "${config_key_exec_focus_map["$section"]}" ]]; then
