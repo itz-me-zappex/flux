@@ -33,6 +33,6 @@ exec_focus(){
       done <<< "${config_key_lazy_exec_focus_map["$section"]}"
     fi
     
-    unset_focus_envvars
+    unset_envvars
   fi
 }

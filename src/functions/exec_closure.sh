@@ -19,5 +19,5 @@ exec_closure(){
     done <<< "${config_key_exec_closure_map["$passed_section"]}"
   fi
   
-  unset_unfocus_envvars
+  unset_envvars
 }

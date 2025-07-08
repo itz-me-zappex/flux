@@ -32,5 +32,5 @@ exec_unfocus(){
     done <<< "${config_key_lazy_exec_unfocus_map["$passed_section"]}"
   fi
   
-  unset_unfocus_envvars
+  unset_envvars
 }

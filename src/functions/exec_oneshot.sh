@@ -18,5 +18,5 @@ exec_oneshot(){
     is_exec_oneshot_executed_map["$process_pid"]='1'
   fi
 
-  unset_focus_envvars
+  unset_envvars
 }

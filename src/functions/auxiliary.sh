@@ -230,64 +230,48 @@ get_key_line(){
 
 # Needed to use environment variables with previous and focused window info in commands from 'exec-focus', `lazy-exec-focus` and 'exec-oneshot'
 export_focus_envvars(){
-  export WINDOW_XID="$window_xid" \
-  PROCESS_PID="$process_pid" \
-  PROCESS_NAME="$process_name" \
-  PROCESS_OWNER="$process_owner" \
-  PROCESS_OWNER_USERNAME="$process_owner_username" \
-  PROCESS_COMMAND="$process_command" \
-  PREV_WINDOW_XID="$previous_window_xid" \
-  PREV_PROCESS_PID="$previous_process_pid" \
-  PREV_PROCESS_NAME="$previous_process_name" \
-  PREV_PROCESS_OWNER="$previous_process_owner" \
-  PREV_PROCESS_OWNER_USERNAME="$previous_process_owner_username" \
-  PREV_PROCESS_COMMAND="$previous_process_command"
-}
-
-# Needed to unset environment variables with previous and focused window info used in commands from 'exec-focus', `lazy-exec-focus` and 'exec-oneshot'
-unset_focus_envvars(){
-  unset WINDOW_XID \
-  PROCESS_PID \
-  PROCESS_NAME \
-  PROCESS_OWNER \
-  PROCESS_OWNER_USERNAME \
-  PROCESS_COMMAND \
-  PREV_WINDOW_XID \
-  PREV_PROCESS_PID \
-  PREV_PROCESS_NAME \
-  PREV_PROCESS_OWNER \
-  PREV_PROCESS_OWNER_USERNAME \
-  PREV_PROCESS_COMMAND
+  export FOCUSED_WINDOW_XID="$window_xid" \
+  FOCUSED_PROCESS_PID="$process_pid" \
+  FOCUSED_PROCESS_NAME="$process_name" \
+  FOCUSED_PROCESS_OWNER="$process_owner" \
+  FOCUSED_PROCESS_OWNER_USERNAME="$process_owner_username" \
+  FOCUSED_PROCESS_COMMAND="$process_command" \
+  UNFOCUSED_WINDOW_XID="$previous_window_xid" \
+  UNFOCUSED_PROCESS_PID="$previous_process_pid" \
+  UNFOCUSED_PROCESS_NAME="$previous_process_name" \
+  UNFOCUSED_PROCESS_OWNER="$previous_process_owner" \
+  UNFOCUSED_PROCESS_OWNER_USERNAME="$previous_process_owner_username" \
+  UNFOCUSED_PROCESS_COMMAND="$previous_process_command"
 }
 
 # Needed to use environment variables with previous and focused window info in commands from 'exec-unfocus', `lazy-exec-unfocus` and 'exec-closure'
 export_unfocus_envvars(){
-  export NEW_WINDOW_XID="$window_xid" \
-  NEW_PROCESS_PID="$process_pid" \
-  NEW_PROCESS_NAME="$process_name" \
-  NEW_PROCESS_OWNER="$process_owner" \
-  NEW_PROCESS_OWNER_USERNAME="$process_owner_username" \
-  NEW_PROCESS_COMMAND="$process_command" \
-  WINDOW_XID="$passed_window_xid" \
-  PROCESS_PID="$passed_process_pid" \
-  PROCESS_NAME="$passed_process_name" \
-  PROCESS_OWNER="$passed_process_owner" \
-  PROCESS_OWNER_USERNAME="$passed_process_owner_username" \
-  PROCESS_COMMAND="$passed_process_command"
+  export FOCUSED_WINDOW_XID="$window_xid" \
+  FOCUSED_PROCESS_PID="$process_pid" \
+  FOCUSED_PROCESS_NAME="$process_name" \
+  FOCUSED_PROCESS_OWNER="$process_owner" \
+  FOCUSED_PROCESS_OWNER_USERNAME="$process_owner_username" \
+  FOCUSED_PROCESS_COMMAND="$process_command" \
+  UNFOCUSED_WINDOW_XID="$passed_window_xid" \
+  UNFOCUSED_PROCESS_PID="$passed_process_pid" \
+  UNFOCUSED_PROCESS_NAME="$passed_process_name" \
+  UNFOCUSED_PROCESS_OWNER="$passed_process_owner" \
+  UNFOCUSED_PROCESS_OWNER_USERNAME="$passed_process_owner_username" \
+  UNFOCUSED_PROCESS_COMMAND="$passed_process_command"
 }
 
-# Needed to unset environment variables with previous and focused window info used in commands from 'exec-unfocus', `lazy-exec-unfocus` and 'exec-closure'
-unset_unfocus_envvars(){
-  unset NEW_WINDOW_XID \
-  NEW_PROCESS_PID \
-  NEW_PROCESS_NAME \
-  NEW_PROCESS_OWNER \
-  NEW_PROCESS_OWNER_USERNAME \
-  NEW_PROCESS_COMMAND \
-  WINDOW_XID \
-  PROCESS_PID \
-  PROCESS_NAME \
-  PROCESS_OWNER \
-  PROCESS_OWNER_USERNAME \
-  PROCESS_COMMAND
+# Needed to unset environment variables which were exported to commands in execution related config keys
+unset_envvars(){
+  unset FOCUSED_WINDOW_XID \
+  FOCUSED_PROCESS_PID \
+  FOCUSED_PROCESS_NAME \
+  FOCUSED_PROCESS_OWNER \
+  FOCUSED_PROCESS_OWNER_USERNAME \
+  FOCUSED_PROCESS_COMMAND \
+  UNFOCUSED_WINDOW_XID \
+  UNFOCUSED_PROCESS_PID \
+  UNFOCUSED_PROCESS_NAME \
+  UNFOCUSED_PROCESS_OWNER \
+  UNFOCUSED_PROCESS_OWNER_USERNAME \
+  UNFOCUSED_PROCESS_COMMAND
 }
