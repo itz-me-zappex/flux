@@ -136,7 +136,7 @@ git clone 'https://aur.archlinux.org/cpulimit.git' && cd 'cpulimit' && makepkg -
 
 #### Clone this repository and use PKGBUILD to install daemon
 ```bash
-git clone https://github.com/itz-me-zappex/flux.git && cd flux && makepkg -sric
+git clone https://github.com/itz-me-zappex/flux.git && cd flux/packaging/archlinux && makepkg -sric
 ```
 
 #### Add user to `flux` group to bypass limitations related to changing scheduling policies
