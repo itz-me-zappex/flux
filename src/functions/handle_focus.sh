@@ -1,6 +1,6 @@
 # Required to unset limit for focused process
 handle_focus(){
-  local local_end_of_msg="due to focus event of window with XID $window_xid"
+  local local_end_of_msg="because of focus event of window with XID $window_xid"
 
   # Define type of limit which should be unset
   if [[ -n "${background_freeze_pid_map["$pid"]}" ]]; then
@@ -18,7 +18,7 @@ handle_focus(){
   elif [[ -n "${config_key_mangohud_config_map["$section"]}" ]]; then
     # Unset FPS limit or update target config
     passed_section="$section" \
-    passed_end_of_msg="due to focus event of window with XID $window_xid of process '$process_name' with PID $pid" \
+    passed_end_of_msg="because of focus event of window with XID $window_xid of process '$process_name' with PID $pid" \
     unset_fps_limit
   fi
 
@@ -40,9 +40,9 @@ handle_focus(){
     # Send to background because there is 100ms delay before change child window size to match screen in case window/process did not do that automatically
     (
       if ! "$window_fullscreen_path" "$window_xid" > /dev/null 2>&1; then
-        message --warning "Unable to expand to fullscreen window with XID $window_xid of process '$process_name' with PID $pid due to focus event!"
+        message --warning "Unable to expand to fullscreen window with XID $window_xid of process '$process_name' with PID $pid because of focus event!"
       else
-        message --info "Window with XID $window_xid of process '$process_name' with PID $pid has been expanded into fullscreen due to focus event."
+        message --info "Window with XID $window_xid of process '$process_name' with PID $pid has been expanded into fullscreen because of focus event."
       fi
     ) &
   fi

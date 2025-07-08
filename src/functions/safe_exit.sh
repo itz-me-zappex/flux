@@ -1,6 +1,6 @@
 # Required to unset applied limits for windows on SIGTERM/SIGINT signal
 safe_exit(){
-  local local_end_of_msg='due to daemon termination'
+  local local_end_of_msg='because of daemon termination'
 
   # Get list of all cached windows
   local local_temp_window_xid

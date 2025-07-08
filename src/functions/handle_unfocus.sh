@@ -33,9 +33,9 @@ handle_unfocus(){
         # Minimize window, send to background to avoid slowdown because of external binary execution
         (
           if ! "$window_minimize_path" "$local_temp_window_xid" > /dev/null 2>&1; then
-            message --warning "Unable to minimize window with XID $local_temp_window_xid of process '$local_process_name' with PID $local_pid due to unfocus event!"
+            message --warning "Unable to minimize window with XID $local_temp_window_xid of process '$local_process_name' with PID $local_pid because of unfocus event!"
           else
-            message --info "Window with XID $local_temp_window_xid of process '$local_process_name' with PID $local_pid has been minimized due to unfocus event."
+            message --info "Window with XID $local_temp_window_xid of process '$local_process_name' with PID $local_pid has been minimized because of unfocus event."
           fi
         ) &
       fi
@@ -53,7 +53,7 @@ handle_unfocus(){
           request_fps_limit_map["$local_section"] \
           request_sched_idle_map["$local_pid"]
 
-          message --warning "Daemon has insufficient rights to apply limit for process '$local_process_name' with PID $local_pid due to unfocus event of window with XID $local_temp_window_xid!"
+          message --warning "Daemon has insufficient rights to apply limit for process '$local_process_name' with PID $local_pid because of unfocus event of window with XID $local_temp_window_xid!"
 
           return 1
         fi
@@ -142,11 +142,11 @@ handle_unfocus(){
           # Print warning if daemon unable to change scheduling policy, otherwise - change it to 'SCHED_IDLE' if not set already
           if [[ -z "$sched_realtime_is_supported" &&
                 "${sched_previous_policy_map["$local_pid"]}" =~ ^('SCHED_RR'|'SCHED_FIFO')$ ]]; then
-            message --warning "Daemon has insufficient rights to restore realtime scheduling policy for process '$local_process_name' with PID $local_pid, changing it to 'idle' due to unfocus event of window with XID $local_temp_window_xid has been cancelled!"
+            message --warning "Daemon has insufficient rights to restore realtime scheduling policy for process '$local_process_name' with PID $local_pid, changing it to 'idle' because of unfocus event of window with XID $local_temp_window_xid has been cancelled!"
             local local_idle_cancelled='1'
           elif (( UID != 0 )) &&
                [[ "${sched_previous_policy_map["$local_pid"]}" == 'SCHED_DEADLINE' ]]; then
-            message --warning "Daemon has insufficient rights to restore deadline scheduling policy for process '$local_process_name' with PID $local_pid, changing it to 'idle' due to unfocus event of window with XID $local_temp_window_xid has been cancelled!"
+            message --warning "Daemon has insufficient rights to restore deadline scheduling policy for process '$local_process_name' with PID $local_pid, changing it to 'idle' because of unfocus event of window with XID $local_temp_window_xid has been cancelled!"
             local local_idle_cancelled='1'
           elif [[ "${sched_previous_policy_map["$local_pid"]}" != 'SCHED_IDLE' ]]; then
             # Change scheduling policy to 'SCHED_IDLE' if not already set
@@ -157,7 +157,7 @@ handle_unfocus(){
             background_sched_idle &
             background_sched_idle_pid_map["$local_pid"]="$!"
           else
-            message --warning "Process '$local_process_name' with PID $local_pid already has scheduling policy set to 'idle', changing it due to unfocus event of window with XID $local_temp_window_xid has been cancelled!"
+            message --warning "Process '$local_process_name' with PID $local_pid already has scheduling policy set to 'idle', changing it because of unfocus event of window with XID $local_temp_window_xid has been cancelled!"
             local local_idle_cancelled='1'
           fi
 
@@ -170,11 +170,11 @@ handle_unfocus(){
             sched_previous_period_map["$local_pid"]
           fi
         else
-          message --warning "Unable to obtain scheduling policy info of process '$local_process_name' with PID $local_pid, changing it to 'idle' due to unfocus event of window with XID $local_temp_window_xid has been cancelled!"
+          message --warning "Unable to obtain scheduling policy info of process '$local_process_name' with PID $local_pid, changing it to 'idle' because of unfocus event of window with XID $local_temp_window_xid has been cancelled!"
         fi
       elif [[ -n "${request_sched_idle_map["$local_pid"]}" &&
               -z "$sched_change_is_supported" ]]; then
-        message --warning "Daemon has insufficient rights to restore scheduling policy for process '$local_process_name' with PID $local_pid, changing it to 'idle' due to unfocus event of window with XID $local_temp_window_xid has been cancelled!"
+        message --warning "Daemon has insufficient rights to restore scheduling policy for process '$local_process_name' with PID $local_pid, changing it to 'idle' because of unfocus event of window with XID $local_temp_window_xid has been cancelled!"
       fi
 
       unset request_sched_idle_map["$local_pid"]
@@ -199,7 +199,7 @@ handle_unfocus(){
         passed_window_xid="$local_temp_window_xid" \
         passed_pid="$local_pid" \
         passed_process_name="$local_process_name" \
-        passed_end_of_msg="due to unfocus event" \
+        passed_end_of_msg="because of unfocus event" \
         cursor_ungrab
       fi
     fi
