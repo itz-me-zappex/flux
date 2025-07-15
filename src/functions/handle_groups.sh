@@ -65,12 +65,14 @@ handle_groups(){
       if [[ -n "$local_group_key_value" ]]; then
         if (( local_group_key_line > local_key_line )); then
           if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
+            config_key_exec_exit_append_to_default_map["$local_temp_section_or_group"]='1'
             config_key_exec_exit_map["$local_temp_section_or_group"]+="$local_group_key_value"
           else
             config_key_exec_exit_map["$local_temp_section_or_group"]="$local_group_key_value"
           fi
         elif (( local_group_key_line < local_key_line )) &&
              [[ "$local_key_value" =~ ^$'\n' ]]; then
+          config_key_exec_exit_append_to_default_map["$local_temp_section_or_group"]='1'
           local local_group_key_value+="$local_key_value"
           config_key_exec_exit_map["$local_temp_section_or_group"]="$local_group_key_value"
         fi
@@ -116,12 +118,14 @@ handle_groups(){
       if [[ -n "$local_group_key_value" ]]; then
         if (( local_group_key_line > local_key_line )); then
           if [[ "$local_group_key_value" =~ ^$'\n' ]]; then
+            config_key_exec_closure_append_to_default_map["$local_temp_section_or_group"]='1'
             config_key_exec_closure_map["$local_temp_section_or_group"]+="$local_group_key_value"
           else
             config_key_exec_closure_map["$local_temp_section_or_group"]="$local_group_key_value"
           fi
         elif (( local_group_key_line < local_key_line )) &&
              [[ "$local_key_value" =~ ^$'\n' ]]; then
+          config_key_exec_closure_append_to_default_map["$local_temp_section_or_group"]='1'
           local local_group_key_value+="$local_key_value"
           config_key_exec_closure_map["$local_temp_section_or_group"]="$local_group_key_value"
         fi
