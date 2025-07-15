@@ -137,6 +137,11 @@ declare -A config_key_regexp_name_map \
 config_key_regexp_command_map \
 config_key_regexp_owner_map
 
+# Needed to define whether commands to 'exec-closure'/'exec-exit' should be appended to inherited from 'lazy-exec-unfocus' or not
+# Unneeded if first declaration has '=' instead of '+='
+declare -A config_key_exec_closure_append_to_default_map \
+config_key_exec_exit_append_to_default_map
+
 # Declare associative arrays to store info about backgrounded limits
 declare -A background_freeze_pid_map \
 background_cpu_limit_pid_map \
@@ -209,6 +214,8 @@ is_section_blank_map \
 config \
 get_key_line \
 config_keys_order_map \
+config_key_exec_closure_append_to_default_map \
+config_key_exec_exit_append_to_default_map \
 config_line_count \
 get_key_line_result
 

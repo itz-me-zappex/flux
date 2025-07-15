@@ -165,10 +165,20 @@ validate_config_keys(){
       if [[ -n "${config_key_lazy_exec_unfocus_map["$local_temp_section_or_group"]}" ]]; then
         if [[ -z "${config_key_exec_exit_map["$local_temp_section_or_group"]}" ]]; then
           config_key_exec_exit_map["$local_temp_section_or_group"]="${config_key_lazy_exec_unfocus_map["$local_temp_section_or_group"]}"
+        elif [[ -n "${config_key_exec_exit_append_to_default_map["$local_temp_section_or_group"]}" ]]; then
+          # Put commands to the end of inherited from 'lazy-exec-unfocus' ones
+          local local_content="${config_key_lazy_exec_unfocus_map["$local_temp_section_or_group"]}"
+          local local_content+=$'\n'"${config_key_exec_exit_map["$local_temp_section_or_group"]}"
+          config_key_exec_exit_map["$local_temp_section_or_group"]="$local_content"
         fi
 
         if [[ -z "${config_key_exec_closure_map["$local_temp_section_or_group"]}" ]]; then
           config_key_exec_closure_map["$local_temp_section_or_group"]="${config_key_lazy_exec_unfocus_map["$local_temp_section_or_group"]}"
+        elif [[ -n "${config_key_exec_closure_append_to_default_map["$local_temp_section_or_group"]}" ]]; then
+          # Put commands to the end of inherited from 'lazy-exec-unfocus' ones
+          local local_content="${config_key_lazy_exec_unfocus_map["$local_temp_section_or_group"]}"
+          local local_content+=$'\n'"${config_key_exec_closure_map["$local_temp_section_or_group"]}"
+          config_key_exec_closure_map["$local_temp_section_or_group"]="$local_content"
         fi
       fi
 

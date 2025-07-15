@@ -171,6 +171,11 @@ parse_config(){
             if [[ -z "$local_append" ]]; then
               config_key_exec_exit_map["$local_section"]="$local_config_value"
             else
+              # Needed to append commands in key to inherited from 'lazy-exec-unfocus' config key
+              if [[ -z "${config_key_exec_exit_map["$local_section"]}" ]]; then
+                config_key_exec_exit_append_to_default_map["$local_section"]='1'
+              fi
+
               config_key_exec_exit_map["$local_section"]+=$'\n'"$local_config_value"
             fi
 
@@ -204,6 +209,11 @@ parse_config(){
             if [[ -z "$local_append" ]]; then
               config_key_exec_closure_map["$local_section"]="$local_config_value"
             else
+              # Needed to append commands in key to inherited from 'lazy-exec-unfocus' config key
+              if [[ -z "${config_key_exec_closure_map["$local_section"]}" ]]; then
+                config_key_exec_closure_append_to_default_map["$local_section"]='1'
+              fi
+
               config_key_exec_closure_map["$local_section"]+=$'\n'"$local_config_value"
             fi
 
