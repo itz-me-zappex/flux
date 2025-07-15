@@ -357,8 +357,8 @@ As INI is not standartized, I should mention all supported features here.
 | Key | Description |
 |-----|-------------|
 | `exec-oneshot` | Command to execute on window appearance event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
-| `exec-closure` | Command to execute on window closure event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. Defaults to `lazy-exec-unfocus` value if not specified. |
-| `exec-exit` | Command to execute when daemon receives `SIGINT` or `SIGTERM` signal, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. Defaults to `lazy-exec-unfocus` value if not specified. |
+| `exec-closure` | Command to execute on window closure event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. Defaults to `lazy-exec-unfocus` value if not specified or declared with `+=` (appending). |
+| `exec-exit` | Command to execute when daemon receives `SIGINT` or `SIGTERM` signal, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. Defaults to `lazy-exec-unfocus` value if not specified or declared with `+=` (appending). |
 | `exec-exit-focus` | Same as `exec-exit`, but command appears executed only if matching window appears focused at the moment of daemon termination. |
 | `exec-exit-unfocus` | Same as `exec-exit`, but command appears executed only if matching window appears unfocused at the moment of daemon termination. |
 | `exec-focus` | Command to execute on focus event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
