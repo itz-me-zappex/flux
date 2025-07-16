@@ -596,9 +596,10 @@ exec-oneshot += find ~/.cache/mesa_shader_cache_db -type f -exec cat {} + > /dev
 - Main task is to reduce CPU/GPU usage of games that have been minimized. Almost every engine fails to recognize that game is unfocused and still consumes a lot of CPU and GPU resources, what can make system slow for other tasks like browsing stuff, chatting, transcoding video etc. or even unresponsive at all. With this daemon now I can simply play a game or tinker with virtual machine and then minimize window if needed without carrying about high CPU/GPU usage and suffering from low multitasking performance. Also, daemon does not care about type of software, so you can use it with everything. Inspiried by feature from NVIDIA driver for Windows where user can set FPS limit for minimized software, this tool is not exactly the same, but better than nothing.
 
 ### Why code is so complicated?
-- I trying to avoid using external tools in favor of bashisms to reduce CPU usage daemon and speed up code.
+- I try to avoid using external tools in favor of bashisms to reduce CPU usage by daemon and speed up code.
 
 ### What about Wayland support?
-- That is impossible, there is no any unified way to read window related events and obtain PIDs of windows on Wayland.
+- That is impossible, there is no any unified or even per-compositor way to read window related events and obtain PIDs of windows on Wayland. [Think twice before abandoning X11. Wayland breaks everything!](https://gist.github.com/probonopd/9feb7c20257af5dd915e3a9f2d1f2277)
+
 ### Why did you write it in Bash?
 - This is (scripting) language I know pretty good, despite a fact that Bash as all interpretators works slower than compilable languages, it still fits my needs almost perfectly.
