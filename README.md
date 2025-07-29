@@ -79,7 +79,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - Reduce process priority on unfocus and restore it on focus.
 - Minimize window on unfocus, useful for borderless windows.
 - Expand window to fullscreen on focus, useful for games which are handle a window mode in weird way, e.g. Forza Horizon 4 changes its mode to windowed after minimization.
-- Force window to grab cursor to prevent it from escaping to second monitor as example.
+- Grab cursor and redirect input into focused window, that prevents cursor from escaping to second monitor in case this is borderless window.
 - Execute commands and scripts on focus, unfocus and window closure events to extend daemon functionality. Daemon provides info about window and process through environment variables.
 - Logging support.
 - Notifications support.
