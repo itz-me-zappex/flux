@@ -49,6 +49,10 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [Preload shader cache on window appearance to avoid stuttering](#preload-shader-cache-on-window-appearance-to-avoid-stuttering)
     - [NVIDIA](#nvidia-1)
     - [Mesa (AMD/Intel/NVIDIA with Nouveau)](#mesa-amdintelnvidia-with-nouveau)
+  - [Disable night light on focus](#disable-night-light-on-focus)
+    - [Cinnamon](#cinnamon)
+    - [GNOME Shell](#gnome-shell)
+    - [KDE Plasma](#kde-plasma)
 - [Possible questions](#possible-questions)
   - [How does this daemon work?](#how-does-this-daemon-work)
   - [Does this daemon reduce performance?](#does-this-daemon-reduce-performance)
@@ -580,6 +584,41 @@ exec-oneshot += find ~/.cache/nvidia -type f -exec cat {} + > /dev/null
 ```ini
 ; Preload shader cache if window opens first time
 exec-oneshot += find ~/.cache/mesa_shader_cache_db -type f -exec cat {} + > /dev/null
+```
+
+### Disable night light on focus
+Add following lines to section responsible for target depending on your desktop environment:
+#### Cinnamon
+Using `dconf`:
+```ini
+lazy-exec-focus += dconf write '/org/cinnamon/settings-daemon/plugins/color/night-light-enabled' false
+lazy-exec-unfocus += dconf write '/org/cinnamon/settings-daemon/plugins/color/night-light-enabled' true
+```
+
+Using `gsettings`:
+```ini
+lazy-exec-focus += gsettings set org.cinnamon.settings-daemon.plugins.color night-light-enabled false
+lazy-exec-unfocus += gsettings set org.cinnamon.settings-daemon.plugins.color night-light-enabled true
+```
+
+#### GNOME Shell
+Using `dconf`:
+```ini
+lazy-exec-focus += dconf write '/org/gnome/settings-daemon/plugins/color/night-light-enabled' false
+lazy-exec-unfocus += dconf write '/org/gnome/settings-daemon/plugins/color/night-light-enabled' true
+```
+
+Using `gsettings`:
+```ini
+lazy-exec-focus += gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled false
+lazy-exec-unfocus += gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true
+```
+
+#### KDE Plasma
+Yeah, two similar commands, those work as toggle.
+```ini
+lazy-exec-focus += qdbus org.kde.kglobalaccel /component/kwin org.kde.kglobalaccel.Component.invokeShortcut "Toggle Night Color"
+lazy-exec-unfocus += qdbus org.kde.kglobalaccel /component/kwin org.kde.kglobalaccel.Component.invokeShortcut "Toggle Night Color"
 ```
 
 ## Possible questions
