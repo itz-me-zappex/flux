@@ -244,7 +244,8 @@ Examples:
     --version | -V )
       author_github_link='https://github.com/itz-me-zappex'
       echo "flux $daemon_version
-Advanced daemon for X11 desktops and window managers, designed to automatically limit FPS/CPU usage of unfocused windows and run commands on focus and unfocus events. Written in Bash and partially in C.
+Advanced daemon for X11 desktops and window managers, designed to automatically limit FPS/CPU usage of unfocused windows and run commands on focus and unfocus events.
+Written in Bash and partially in C.
 License: GPL-3.0-only
 Author: $author_github_link
 Repository: ${author_github_link}/flux
