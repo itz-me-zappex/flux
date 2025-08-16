@@ -31,15 +31,15 @@ mangohud_fps_set(){
           # Just append to other lines
           local local_new_config_content+="$local_temp_config_line"$'\n'
         fi
-
-        if [[ -n "$local_fps_limit_has_been_changed" ]]; then
-          # Overwrite with changes
-          echo "$local_new_config_content" > "$local_target_config"
-        else
-          # Just append "fps_limit" config key with value
-          echo "fps_limit=$local_fps_to_set" >> "$local_target_config"
-        fi
       done < "$local_source_config"
+
+      # Append "fps_limit" config key with value
+      if [[ -z "$local_fps_limit_has_been_changed" ]]; then
+        local local_new_config_content+="fps_limit=$local_fps_to_set"$'\n'
+      fi
+
+      # Overwrite with changes
+      echo "$local_new_config_content" > "$local_target_config"
     fi
   else
     message --warning "Target MangoHud config file '$(shorten_path "$local_target_config")' does not exist!"
