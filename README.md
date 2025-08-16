@@ -75,7 +75,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - Use regexp in `name` config key like `^('X-RAY Primary t'|'xrEngine.exe'|'AnomalyDX11AVX.'|'XR_3DA.exe')$`. You may want to start daemon in verbose mode to find message about mismatch containing process name catched at engine initialization step.
 
 ## Screenshot
-![](preview.png)
+![](images/preview.png)
 *Daemon running with handling already opened windows (`-H`) in verbose mode (`-v`) and enabled timestamps (`-t`)*
 
 ## Features
@@ -400,7 +400,7 @@ exec-unfocus += wpctl set-mute -p $UNFOCUSED_PID 1
 lazy-exec-focus += nvidia-settings -a '[gpu:0]/DigitalVibrance=150'
 lazy-exec-unfocus += nvidia-settings -a '[gpu:0]/DigitalVibrance=0'
 exec-oneshot += renice -n -4 $FOCUSED_PID
-exec-oneshot += find ~/.nv -type f -exec cat {} + > /dev/null
+exec-oneshot += find ~/.nv -type f -exec cat {} +
 
 [@games-overclock]
 group = @games
@@ -571,19 +571,29 @@ lazy-exec-unfocus += vibrant-cli DisplayPort-0 1
 ```
 
 ### Preload shader cache on window appearance to avoid stuttering
-That is how bufferization works, you just need to load file to memory by reading it *somehow* and kernel will not read it from disk again relying on RAM instead.
+Very important if you want to improve FPS stability and get rid of stutters in games at cost of higher RAM usage.
+
+First time (e.g. after reboot) preloading may take a lot of time, especially if shader cache folder that big as mine, but next executions will happen immediately.
+
+![](images/preload.png)
+
+*First preload command is very slow, but next execution is blazingly fast*
+
+*P.S.: My environment has `__GL_SHADER_DISK_CACHE_PATH="$HOME/.nv"`*
+
+That is how bufferization works, you just need to load file to memory by reading it somehow, and then kernel will not read it from disk again, relying on RAM instead.
 
 Add following line to section responsible for target (path may vary depending on system configuration):
 #### NVIDIA
 ```ini
 ; Preload shader cache if window opens first time
-exec-oneshot += find ~/.cache/nvidia -type f -exec cat {} + > /dev/null
+exec-oneshot += find ~/.cache/nvidia -type f -exec cat {} +
 ```
 
 #### Mesa (AMD/Intel/NVIDIA with Nouveau)
 ```ini
 ; Preload shader cache if window opens first time
-exec-oneshot += find ~/.cache/mesa_shader_cache_db -type f -exec cat {} + > /dev/null
+exec-oneshot += find ~/.cache/mesa_shader_cache_db -type f -exec cat {} +
 ```
 
 ### Disable night light on focus
