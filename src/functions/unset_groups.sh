@@ -21,7 +21,8 @@ unset_groups(){
     config_key_group_map["$local_temp_group"] \
     config_key_exec_exit_map["$local_temp_group"] \
     config_key_exec_exit_focus_map["$local_temp_group"] \
-    config_key_exec_exit_unfocus_map["$local_temp_group"]
+    config_key_exec_exit_unfocus_map["$local_temp_group"] \
+    config_key_mute_map["$local_temp_group"]
   done
 
   unset groups_array

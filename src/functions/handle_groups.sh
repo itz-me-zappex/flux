@@ -271,6 +271,13 @@ handle_groups(){
          (( local_group_key_line > local_key_line )); then
         config_key_focus_grab_cursor_map["$local_temp_section_or_group"]="$local_group_key_value"
       fi
+
+      get_key_line "$local_temp_section_or_group" 'mute' ; local local_key_line="$get_key_line_result"
+      local local_group_key_value="${config_key_mute_map["$local_group"]}"
+      if [[ -n "$local_group_key_value" ]] &&
+         (( local_group_key_line > local_key_line )); then
+        config_key_mute_map["$local_temp_section_or_group"]="$local_group_key_value"
+      fi
     fi
   done
 }
