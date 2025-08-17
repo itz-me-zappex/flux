@@ -32,19 +32,12 @@ handle_focus(){
   fi
 
   exec_oneshot
+
   exec_focus
 
-  # TODO: Move to separate function
   # Enforce fullscreen mode for window if specified in config
   if [[ -n "${config_key_focus_fullscreen_map["$section"]}" ]]; then
-    # Send to background because there is 100ms delay before change child window size to match screen in case window/process did not do that automatically
-    (
-      if ! "$window_fullscreen_path" "$window_xid" > /dev/null 2>&1; then
-        message --warning "Unable to expand to fullscreen window with XID $window_xid of process '$process_name' with PID $pid because of focus event!"
-      else
-        message --info "Window with XID $window_xid of process '$process_name' with PID $pid has been expanded into fullscreen because of focus event."
-      fi
-    ) &
+    window_fullscreen &
   fi
 
   # Run subprocess which pins cursor to window if specified in config and that is not implicitly opened window
