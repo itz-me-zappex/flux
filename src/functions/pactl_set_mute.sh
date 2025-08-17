@@ -11,7 +11,8 @@ pactl_set_mute(){
   local_application_process_binary_map \
   local_current_sink_input
 
-  local -a local_sink_inputs_array
+  local -a local_sink_inputs_array \
+  local_matching_sink_inputs_array
 
   # Get info about existing sink inputs
   local local_temp_line
@@ -50,31 +51,33 @@ pactl_set_mute(){
   for local_temp_sink_input in "${local_sink_inputs_array[@]}"; do
     # Pulseaudio (and pipewire-pulse) relies on clients, those may give weird information, or may not at all
     if [[ "$local_pid" == "${local_application_process_id_map["$local_temp_sink_input"]}" ]]; then
-      local local_matching_sink="$local_temp_sink_input"
-      break
+      local local_matching_sink_inputs_array+=("$local_temp_sink_input")
     elif [[ -n "${local_application_process_binary_map["$local_temp_sink_input"]}" &&
             "${local_process_name,,}" == *"${local_application_process_binary_map["$local_temp_sink_input"],,}"* ]]; then
-      local local_matching_sink="$local_temp_sink_input"
-      break
+      local local_matching_sink_inputs_array+=("$local_temp_sink_input")
     elif [[ -n "${local_application_name_map["$local_temp_sink_input"]}" &&
             "${local_process_name,,}" == *"${local_application_name_map["$local_temp_sink_input"],,}"* ]]; then
-      local local_matching_sink="$local_temp_sink_input"
-      break
+      local local_matching_sink_inputs_array+=("$local_temp_sink_input")
     elif [[ -n "${local_application_id_map["$local_temp_sink_input"]}" &&
             "${local_process_name,,}" == *"${local_application_id_map["$local_temp_sink_input"],,}"* ]]; then
-      local local_matching_sink="$local_temp_sink_input"
-      break
+      local local_matching_sink_inputs_array+=("$local_temp_sink_input")
     elif [[ -n "${local_application_icon_name_map["$local_temp_sink_input"]}" &&
             "${local_process_name,,}" == *"${local_application_icon_name_map["$local_temp_sink_input"],,}"* ]]; then
-      local local_matching_sink="$local_temp_sink_input"
-      break
+      local local_matching_sink_inputs_array+=("$local_temp_sink_input")
     fi
   done
 
   # Change mute status if there is a match
-  if [[ -n "$local_matching_sink" ]]; then
-    #message --info "good"
-    pactl set-sink-input-mute "$local_matching_sink" "$local_action"
+  if [[ -n "${local_matching_sink_inputs_array[*]}" ]]; then
+    # Mute all matching sink inputs
+    local local_temp_matching_sink_input
+    for local_temp_matching_sink_input in "${local_matching_sink_inputs_array[@]}"; do
+      if pactl set-sink-input-mute "$local_temp_matching_sink_input" "$local_action"; then
+        #message --info "good"
+      else
+        #message --warning "bad"
+      fi
+    done
   else
     #message --warning "bad"
   fi
