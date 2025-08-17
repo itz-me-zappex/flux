@@ -25,19 +25,10 @@ handle_unfocus(){
       local local_process_owner_username="${cache_process_owner_username_map["$local_temp_window_xid"]}"
       local local_process_command="${cache_process_command_map["$local_temp_window_xid"]}"
 
-      # TODO: Move to separate function?
       # Minimize window if requested
       if [[ -n "${request_minimize_map["$local_pid"]}" ]]; then
         unset request_minimize_map["$local_pid"]
-        
-        # Minimize window, send to background to avoid slowdown because of external binary execution
-        (
-          if ! "$window_minimize_path" "$local_temp_window_xid" > /dev/null 2>&1; then
-            message --warning "Unable to minimize window with XID $local_temp_window_xid of process '$local_process_name' with PID $local_pid because of unfocus event!"
-          else
-            message --info "Window with XID $local_temp_window_xid of process '$local_process_name' with PID $local_pid has been minimized because of unfocus event."
-          fi
-        ) &
+        window_minimize &
       fi
 
       # Return an error if daemon has insufficient rights to apply limit (except FPS limit, that does not require interaction with process)
