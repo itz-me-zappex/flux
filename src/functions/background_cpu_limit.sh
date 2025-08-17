@@ -54,6 +54,9 @@ background_cpu_limit(){
     exit 0' SIGUSR2
 
     wait "$local_cpulimit_pid"
+
+    # To receive "SIGUSR2" signal after process termination
+    sleep 0.15
   else
     message --warning "Process '$passed_process_name' with PID $passed_pid of window with XID $passed_window_xid has been terminated before applying CPU limit!"
   fi
