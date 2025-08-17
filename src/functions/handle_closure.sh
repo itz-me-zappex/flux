@@ -121,7 +121,8 @@ handle_closure(){
       passed_process_command="$local_terminated_process_command" \
       exec_closure
 
-      if [[ -n "${config_key_exec_closure_map["$local_terminated_section"]}" ]]; then
+      if [[ -n "$local_terminated_section" &&
+            -n "${config_key_exec_closure_map["$local_terminated_section"]}" ]]; then
         unset local_closure_notify
       fi
 
