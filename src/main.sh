@@ -250,14 +250,14 @@ colorless_timestamp_format
 unset -f configure_prefixes \
 colors_interpret
 
+daemon_prepare
+unset -f daemon_prepare
+
 if [[ -n "$should_validate_sched" ]]; then
   sched_validate
   unset should_validate_sched
 fi
 unset -f sched_validate
-
-daemon_prepare
-unset -f daemon_prepare
 
 # Read events from 'flux-listener' binary
 "$flux_listener_path" > "$flux_listener_fifo_path" &
