@@ -236,10 +236,28 @@ unset -f create_fifo_files
 validate_lock
 unset -f validate_lock
 
-daemon_prepare
-unset -f daemon_prepare \
-colors_interpret \
 configure_prefixes
+unset color_prefix_error \
+color_prefix_info \
+color_prefix_verbose \
+color_prefix_warning \
+color_timestamp_format \
+colorless_prefix_error \
+colorless_prefix_info \
+colorless_prefix_verbose \
+colorless_prefix_warning \
+colorless_timestamp_format
+unset -f configure_prefixes \
+colors_interpret
+
+if [[ -n "$should_validate_sched" ]]; then
+  sched_validate
+  unset should_validate_sched
+fi
+unset -f sched_validate
+
+daemon_prepare
+unset -f daemon_prepare
 
 # Read events from 'flux-listener' binary
 "$flux_listener_path" > "$flux_listener_fifo_path" &
