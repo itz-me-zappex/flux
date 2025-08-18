@@ -73,12 +73,12 @@ pactl_set_mute(){
     local local_temp_matching_sink_input
     for local_temp_matching_sink_input in "${local_matching_sink_inputs_array[@]}"; do
       if pactl set-sink-input-mute "$local_temp_matching_sink_input" "$local_action"; then
-        #message --info "good"
+        return 0
       else
-        #message --warning "bad"
+        return 1
       fi
     done
   else
-    #message --warning "bad"
+    return 2
   fi
 }
