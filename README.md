@@ -397,8 +397,7 @@ You can use `group` config key inside groups.
 To make things more clear, here is an example of how to create and use groups:
 ```ini
 [@games]
-exec-focus += wpctl set-mute -p $FOCUSED_PID 0
-exec-unfocus += wpctl set-mute -p $UNFOCUSED_PID 1
+mute = true
 lazy-exec-focus += nvidia-settings -a '[gpu:0]/DigitalVibrance=150'
 lazy-exec-unfocus += nvidia-settings -a '[gpu:0]/DigitalVibrance=0'
 exec-oneshot += renice -n -4 $FOCUSED_PID
@@ -471,9 +470,7 @@ mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
 mangohud-source-config = ~/.config/MangoHud/MangoHud.conf
 fps-unfocus = 5
 fps-focus = 60
-exec-focus = wpctl set-mute -p $FOCUSED_PID 0
-exec-unfocus = wpctl set-mute -p $UNFOCUSED_PID 1
-exec-exit = wpctl set-mute -p $FOCUSED_PID 0
+mute = true
 idle = true
 unfocus-minimize = true
 focus-fullscreen = true
