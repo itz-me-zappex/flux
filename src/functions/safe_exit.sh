@@ -52,6 +52,24 @@ safe_exit(){
       cursor_ungrab
     fi
 
+    # Unmute process, even if it is not muted, just in case
+    if [[ -n "$local_section" && 
+          -n "${config_key_mute_map["$local_section"]}" ]]; then
+      pactl_set_mute "$local_process_name" "$local_pid" '0'
+      local local_pactl_set_mute_exit_code="$?"
+
+      case "$local_pactl_set_mute_exit_code" in
+      '0' )
+        message --info "Process '$local_process_name' with PID $local_pid of window with XID $local_temp_window_xid has been unmuted because of daemon termination."
+      ;;
+      '1' )
+        message --warning "Unable to unmute process '$local_process_name' with PID $local_pid of window with XID $local_temp_window_xid because of daemon termination!"
+      ;;
+      '2' )
+        message --warning "Unable to find sink input(s) of process '$local_process_name' with PID $local_pid of window with XID $local_temp_window_xid to unmute it because of daemon termination!"
+      esac
+    fi
+
     # Execute commands from 'exec-exit', 'exec-exit-focus' and 'exec-exit-unfocus' if possible
     # Previous section here is matching section for focused window
     # It just moved to previous because of end of loop before next event in 'src/main.sh'
