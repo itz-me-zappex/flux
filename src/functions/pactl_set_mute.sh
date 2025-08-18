@@ -53,16 +53,16 @@ pactl_set_mute(){
     if [[ "$local_pid" == "${local_application_process_id_map["$local_temp_sink_input"]}" ]]; then
       local local_matching_sink_inputs_array+=("$local_temp_sink_input")
     elif [[ -n "${local_application_process_binary_map["$local_temp_sink_input"]}" &&
-            "${local_process_name,,}" == *"${local_application_process_binary_map["$local_temp_sink_input"],,}"* ]]; then
+            "${local_application_process_binary_map["$local_temp_sink_input"],,}" == *"${local_process_name,,}"* ]]; then
       local local_matching_sink_inputs_array+=("$local_temp_sink_input")
     elif [[ -n "${local_application_name_map["$local_temp_sink_input"]}" &&
-            "${local_process_name,,}" == *"${local_application_name_map["$local_temp_sink_input"],,}"* ]]; then
+            "${local_application_name_map["$local_temp_sink_input"],,}" == *"${local_process_name,,}"* ]]; then
       local local_matching_sink_inputs_array+=("$local_temp_sink_input")
     elif [[ -n "${local_application_id_map["$local_temp_sink_input"]}" &&
-            "${local_process_name,,}" == *"${local_application_id_map["$local_temp_sink_input"],,}"* ]]; then
+            "${local_application_id_map["$local_temp_sink_input"],,}" == *"${local_process_name,,}"* ]]; then
       local local_matching_sink_inputs_array+=("$local_temp_sink_input")
     elif [[ -n "${local_application_icon_name_map["$local_temp_sink_input"]}" &&
-            "${local_process_name,,}" == *"${local_application_icon_name_map["$local_temp_sink_input"],,}"* ]]; then
+            "${local_application_icon_name_map["$local_temp_sink_input"],,}" == *"${local_process_name,,}"* ]]; then
       local local_matching_sink_inputs_array+=("$local_temp_sink_input")
     fi
   done
