@@ -5,7 +5,7 @@ unfocus_request_limit(){
      [[ -n "$previous_section" &&
         "$disallow_request" != "$previous_window_xid=$previous_pid" ]]; then
     # Request limits to be applied on 'check_requests' internal event (from 'event_source()')
-    if [[ "${config_key_cpu_limit_map["$previous_section"]}" == '0' ]]; then
+    if (( "${config_key_cpu_limit_map["$previous_section"]}" == 0 )); then
       # Request freezing of process if it is not limited
       if [[ -z "${background_freeze_pid_map["$previous_pid"]}" ]]; then
         request_freeze_map["$previous_pid"]='1'
@@ -41,10 +41,12 @@ unfocus_request_limit(){
     # Request unfocus command execution if specified in config
     if [[ -n "${config_key_exec_unfocus_map["$previous_section"]}" ||
           -n "${config_key_lazy_exec_unfocus_map["$previous_section"]}" ]]; then
-      # Do not do anything if focused window process PID is exacly the same as previous one
-      if (( pid != previous_pid )); then
-        request_exec_unfocus_general_map["$previous_pid"]='1'
-      fi
+      request_exec_unfocus_general_map["$previous_pid"]='1'
+    fi
+
+    # Request muting if specified in config
+    if [[ -n "${config_key_mute_map["$previous_section"]}" ]]; then
+      request_mute_map["$previous_pid"]='1'
     fi
   fi
 }
