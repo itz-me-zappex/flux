@@ -168,7 +168,16 @@ handle_closure(){
 
       # Unset window minimization request
       if [[ -n "${request_minimize_map["$local_terminated_pid"]}" ]]; then
+        unset request_minimize_map["$local_terminated_pid"]
         message --verbose "Window with XID $local_temp_terminated_window_xid minimization of process '$local_terminated_process_name' with PID $local_terminated_pid has been cancelled because of window closure."
+
+        unset local_closure_notify
+      fi
+
+      # Unset mute request
+      if [[ -n "${request_mute_map["$local_terminated_pid"]}" ]]; then
+        unset request_mute_map["$local_terminated_pid"]
+        message --verbose "Muting process '$local_terminated_process_name' with PID $local_terminated_pid of window with XID $local_temp_terminated_window_xid has been cancelled because of window closure."
 
         unset local_closure_notify
       fi
