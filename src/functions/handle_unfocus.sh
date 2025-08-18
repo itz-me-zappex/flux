@@ -193,6 +193,25 @@ handle_unfocus(){
         passed_end_of_msg="because of unfocus event" \
         cursor_ungrab
       fi
+
+      # Mute process
+      if [[ -n "${request_mute_map["$local_pid"]}" ]]; then
+        unset request_mute_map["$local_pid"]
+
+        pactl_set_mute "$local_process_name" "$local_pid" '1'
+        local local_pactl_set_mute_exit_code="$?"
+
+        case "$local_pactl_set_mute_exit_code" in
+        '0' )
+          message --info "Process '$local_process_name' with PID $local_pid of window with XID $local_temp_window_xid has been muted because of unfocus event."
+        ;;
+        '1' )
+          message --warning "Unable to mute process '$local_process_name' with PID $local_pid of window with XID $local_temp_window_xid because of unfocus event!"
+        ;;
+        '2' )
+          message --warning "Unable to find sink input(s) of process '$local_process_name' with PID $local_pid of window with XID $local_temp_window_xid to mute it because of unfocus event!"
+        esac
+      fi
     fi
   done
 }
