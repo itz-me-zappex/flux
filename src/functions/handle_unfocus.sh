@@ -169,20 +169,6 @@ handle_unfocus(){
       fi
 
       unset request_sched_idle_map["$local_pid"]
-      
-      # Execute unfocus event command
-      if [[ -n "${request_exec_unfocus_general_map["$local_pid"]}" ]]; then
-        unset request_exec_unfocus_general_map["$local_pid"]
-
-        passed_window_xid="$local_temp_window_xid" \
-        passed_pid="$local_pid" \
-        passed_section="$local_section" \
-        passed_process_name="$local_process_name" \
-        passed_process_owner="$local_process_owner" \
-        passed_process_owner_username="$local_process_owner_username" \
-        passed_process_command="$local_process_command" \
-        exec_unfocus
-      fi
 
       # Cancel cursor grabbing for previously focused window
       if [[ -n "${background_focus_grab_cursor_map["$local_temp_window_xid"]}" &&
@@ -211,6 +197,20 @@ handle_unfocus(){
         '2' )
           message --warning "Unable to find sink input(s) of process '$local_process_name' with PID $local_pid of window with XID $local_temp_window_xid to mute it because of unfocus event!"
         esac
+      fi
+
+      # Execute unfocus event command
+      if [[ -n "${request_exec_unfocus_general_map["$local_pid"]}" ]]; then
+        unset request_exec_unfocus_general_map["$local_pid"]
+
+        passed_window_xid="$local_temp_window_xid" \
+        passed_pid="$local_pid" \
+        passed_section="$local_section" \
+        passed_process_name="$local_process_name" \
+        passed_process_owner="$local_process_owner" \
+        passed_process_owner_username="$local_process_owner_username" \
+        passed_process_command="$local_process_command" \
+        exec_unfocus
       fi
     fi
   done

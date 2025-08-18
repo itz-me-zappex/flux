@@ -31,10 +31,6 @@ handle_focus(){
     unset_sched_idle
   fi
 
-  exec_oneshot
-
-  exec_focus
-
   # Enforce fullscreen mode for window if specified in config
   if [[ -n "${config_key_focus_fullscreen_map["$section"]}" ]]; then
     window_fullscreen &
@@ -66,4 +62,8 @@ handle_focus(){
       message --warning "Unable to find sink input(s) of process '$process_name' with PID $pid of window with XID $window_xid to unmute it because of focus event!"
     esac
   fi
+
+  exec_oneshot
+
+  exec_focus
 }

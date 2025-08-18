@@ -111,6 +111,19 @@ handle_closure(){
         unset local_closure_notify
       fi
 
+      # Cancel cursor grabbing for previously focused window
+      if [[ -n "${background_focus_grab_cursor_map["$local_temp_terminated_window_xid"]}" ]]; then
+        local local_cursor_has_been_ungrabbed='1'
+
+        passed_window_xid="$local_temp_terminated_window_xid" \
+        passed_pid="$local_terminated_pid" \
+        passed_process_name="$local_terminated_process_name" \
+        passed_end_of_msg="because of window closure" \
+        cursor_ungrab
+
+        unset local_closure_notify
+      fi
+
       # Execute closure event command
       passed_window_xid="$local_temp_terminated_window_xid" \
       passed_pid="$local_terminated_pid" \
@@ -123,19 +136,6 @@ handle_closure(){
 
       if [[ -n "$local_terminated_section" &&
             -n "${config_key_exec_closure_map["$local_terminated_section"]}" ]]; then
-        unset local_closure_notify
-      fi
-
-      # Cancel cursor grabbing for previously focused window
-      if [[ -n "${background_focus_grab_cursor_map["$local_temp_terminated_window_xid"]}" ]]; then
-        local local_cursor_has_been_ungrabbed='1'
-
-        passed_window_xid="$local_temp_terminated_window_xid" \
-        passed_pid="$local_terminated_pid" \
-        passed_process_name="$local_terminated_process_name" \
-        passed_end_of_msg="because of window closure" \
-        cursor_ungrab
-
         unset local_closure_notify
       fi
 
