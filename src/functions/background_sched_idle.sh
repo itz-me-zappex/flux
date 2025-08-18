@@ -8,7 +8,7 @@ background_sched_idle(){
   fi
   
   if check_pid_existence "$passed_pid"; then
-    if ! chrt --idle --pid 0 "$passed_pid"; then
+    if ! chrt --idle --pid 0 "$passed_pid" > /dev/null 2>&1; then
       message --warning "Scheduling policy of process '$passed_process_name' with PID $passed_pid cannot be changed to 'idle' because of unfocus event of window with XID $passed_window_xid!"
     else
       if [[ "$local_delay" == '0' ]]; then
