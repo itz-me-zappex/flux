@@ -156,7 +156,8 @@ request_cpu_limit_map \
 request_fps_limit_map \
 request_sched_idle_map \
 request_minimize_map \
-request_exec_unfocus_general_map
+request_exec_unfocus_general_map \
+request_mute_map
 
 # Declare associative arrays to store info about windows to avoid obtaining it every time to speed up code and reduce CPU-usage
 declare -A cache_pid_map \
