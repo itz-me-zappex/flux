@@ -39,7 +39,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [Environment variables passed to commands](#environment-variables-passed-to-commands)
 - [Tips and tricks](#tips-and-tricks)
   - [Apply changes in config file](#apply-changes-in-config-file)
-  - [Mute process audio on unfocus (Pipewire & Wireplumber)](#mute-process-audio-on-unfocus-pipewire--wireplumber)
+  - [Alternative way to mute process audio on unfocus for Pipewire with Wireplumber](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber)
   - [Reduce niceness of process on window appearance (increase priority)](#reduce-niceness-of-process-on-window-appearance-increase-priority)
   - [Overclock NVIDIA GPU on window focus and revert it on unfocus](#overclock-nvidia-gpu-on-window-focus-and-revert-it-on-unfocus)
   - [Change keyboard layout to English on focus and revert it to Russian on unfocus](#change-keyboard-layout-to-english-on-focus-and-revert-it-to-russian-on-unfocus)
@@ -66,7 +66,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - Freezing online/multiplayer games by setting `cpu-limit` to `0%` causes disconnects.
   - Use less aggressive CPU limit to allow game to send/receive packets.
 - Stuttery audio in unfocused game if CPU limit is pretty aggressive. That should be expected, because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage.
-  - If you use Pipewire with Wireplumber, you may want to mute process as described [here](#mute-process-audio-on-unfocus-pipewire--wireplumber).
+  - Use `mute` config key, or in case you use Pipewire with Wireplumber, you may want to use `wpctl` as described [here](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber).
 - In some games, with `focus-grab-cursor` set to `true`, cursor still able to escape, but does not work outside of window. As example - "Ori and the Will of the Wisps" game on Unity engine in windowed mode.
   - Whether do not use `focus-grab-cursor` config key in such cases or ignore an issue, I can not do anything with this.
 - Daemon says that it waits for cursor ungrab "without any reason". That may happen in case game grabs cursor manually.
@@ -90,42 +90,43 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - Flexible identifiers support to avoid false positives, including regular expressions.
 - Works with processes running in sandbox with PID namespaces, through Firejail for example.
 - Survives DE/WM restart and continues work without issues.
-- Supports most of X11 DEs/WMs [(EWMH-compatible ones)](<https://specifications.freedesktop.org/wm-spec/latest/>) and does not rely on neither GPU nor its driver.
+- Supports most of X11 DEs/WMs ([EWMH-compatible ones](<https://specifications.freedesktop.org/wm-spec/latest/>)) and does not rely on neither GPU nor its driver.
 - Detects and handles both explicitly and implicitly opened windows (appeared with and without focus event respectively).
+- Mute processes on unfocus and unmute on focus. Supports Pulseaudio and Pipewire (including Pipewire Media Session and Wireplumber).
 
 ## Dependencies
 ### Arch Linux and dereatives
 **Required:** `bash` `util-linux` `cpulimit` `coreutils` `libxres` `libx11` `libxext` `xorgproto` `less`
 
-**Optional:** `mangohud` `lib32-mangohud` `libnotify`
+**Optional:** `mangohud` `lib32-mangohud` `libnotify` `libpulse`
 
 **Build:** `libxres` `libx11` `libxext` `xorgproto` `make` `gcc`
 
 ### Debian and dereatives
 **Required:** `bash` `cpulimit` `coreutils` `libxres1` `libx11-6` `libxext6` `less`
 
-**Optional:** `mangohud` `mangohud:i386` `libnotify-bin`
+**Optional:** `mangohud` `mangohud:i386` `libnotify-bin` `pulseaudio-utils`
 
 **Build:** `libxres-dev` `libx11-dev` `libxext-dev` `x11proto-dev` `make` `gcc`
 
 ### Void Linux and dereatives
 **Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext` `xorgproto` `less`
 
-**Optional:** `MangoHud` `MangoHud-32bit` `libnotify`
+**Optional:** `MangoHud` `MangoHud-32bit` `libnotify` `pulseaudio-utils`
 
 **Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto` `make` `gcc`
 
 ### Fedora and dereatives
 **Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext` `less`
 
-**Optional:** `mangohud` `mangohud.i686` `libnotify`
+**Optional:** `mangohud` `mangohud.i686` `libnotify` `pulseaudio-utils`
 
 **Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorg-x11-proto-devel` `make` `gcc`
 
 ### OpenSUSE Tumbleweed and dereatives
 **Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXRes1` `libX11-6` `libXext6` `less`
 
-**Optional:** `mangohud` `mangohud-32bit` `libnotify4`
+**Optional:** `mangohud` `mangohud-32bit` `libnotify4` `pulseaudio-utils`
 
 **Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto-devel` `make` `gcc`
 
@@ -376,6 +377,7 @@ As INI is not standartized, I should mention all supported features here.
 | `unfocus-minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`. Defaults to `false`. |
 | `focus-fullscreen` | Boolean, sends X event to window manager on focus to expand window to fullscreen, useful if game (e.g. Forza Horizon 4) handles window mode in weird a way. Defaults to `false`. |
 | `focus-grab-cursor` | Boolean, daemon grabs cursor if possible, binds it to window and because of X11 nature which prevents input to anything but client which owns cursor (`flux-grab-cursor` module in background in this case) - redirects all input into focused window. This ugly layer prevents cursor from escaping to second monitor in some games at cost of *possible* input lag. Cursor is ungrabbed on unfocus event. Defaults to `false`. |
+| `mute` | Boolean, daemon mutes process on unfocus and unmutes on focus events. Uses `pactl` tool with a bunch of logic to parse list of sink inputs and find match using only process name and PID. Defaults to `false`. You may want to use [alternative](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber) way to mute process in case you use Pipewire with Wireplumber. |
 
 ### Groups
 To avoid repeating yourself, reduce config file size and simplify editing, you may want to create and use groups.
@@ -507,7 +509,11 @@ You can use these variables in you commands and scripts that running from execut
 ### Apply changes in config file
 As daemon does not parse config on a go, you need to restart daemon with `--hot` option after config file editing to make it handle already opened windows immediately after start.
 
-### Mute process audio on unfocus (Pipewire & Wireplumber)
+### Alternative way to mute process audio on unfocus for Pipewire with Wireplumber
+This way should be faster and simplier, than using `pactl` tool with a bunch of logic as daemon does in case with `mute` config key.
+
+But, `wpctl` tool does not mute processes which run in sandbox with PID namespaces (e.g. Firejail), and will not work without Wireplumber, so it is not applicable on Pulseaudio setups too.
+
 Add following lines to section responsible for target:
 
 ```ini
