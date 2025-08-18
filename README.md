@@ -65,8 +65,8 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 ## Known issues
 - Freezing online/multiplayer games by setting `cpu-limit` to `0%` causes disconnects.
   - Use less aggressive CPU limit to allow game to send/receive packets.
-- Stuttery audio in unfocused game if CPU limit is pretty aggressive. That should be expected, because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage.
-  - Use `mute` config key, or in case you use Pipewire with Wireplumber, you may want to use `wpctl` as described [here](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber).
+- Stuttery audio in unfocused game if CPU limit is pretty aggressive.
+  - That should be expected, because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. Use `mute` config key, or in case you use Pipewire with Wireplumber, you may want to use `wpctl` as described [here](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber).
 - In some games, with `focus-grab-cursor` set to `true`, cursor still able to escape, but does not work outside of window. As example - "Ori and the Will of the Wisps" game on Unity engine in windowed mode.
   - Whether do not use `focus-grab-cursor` config key in such cases or ignore an issue, I can not do anything with this.
 - Daemon says that it waits for cursor ungrab "without any reason". That may happen in case game grabs cursor manually.
