@@ -399,6 +399,9 @@ parse_config(){
             if ! config_key_mute_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key$local_section_msg is not boolean!"
               (( parse_config_error_count++ ))
+            elif ! command -v pactl > /dev/null 2>&1; then
+              message --warning "$local_line_count_msg Config key '$local_config_key'$local_section_msg requires 'pactl' command which is missing!"
+              (( parse_config_error_count++ ))
             fi
 
             is_section_useful_map["$local_section"]='1'
