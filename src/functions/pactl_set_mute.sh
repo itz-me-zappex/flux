@@ -1,4 +1,4 @@
-# Required to mute and unmute processes, runs in background via '&'
+# Required to mute and unmute processes
 pactl_set_mute(){
   local local_process_name="$1"
   local local_pid="$2"
