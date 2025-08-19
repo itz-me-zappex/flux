@@ -349,6 +349,7 @@ As INI is not standartized, I should mention all supported features here.
 | `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`, cannot be equal to `0` as that means no limit. |
 | `fps-focus` | FPS to set on focus or list of comma-separated integers (e.g. `30,60,120`, used in MangoHud as FPS limits you can switch between using built-in keybinding), requires `fps-unfocus`. Defaults to `0` (i.e. no limit). |
 | `idle` | Boolean, set `SCHED_IDLE` scheduling policy for process on unfocus event to greatly reduce its priority. Daemon should run as `@flux` to be able restore `SCHED_RR`/`SCHED_FIFO`/`SCHED_OTHER`/`SCHED_BATCH` scheduling policy and only as root to restore `SCHED_DEADLINE` scheduling policy (if daemon does not have sufficient rights to restore these scheduling policies, it will print warning and will not change anything). Defaults to `false`. |
+| `mute` | Boolean, daemon mutes process on unfocus and unmutes on focus events. Uses `pactl` tool with a bunch of logic to parse list of sink inputs and find match using only process name and PID. Defaults to `false`. You may want to use [alternative](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber) way to mute process in case you use Pipewire with Wireplumber. |
 
 #### Limits configuration
 | Key | Description |
@@ -377,7 +378,6 @@ As INI is not standartized, I should mention all supported features here.
 | `unfocus-minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`. Defaults to `false`. |
 | `focus-fullscreen` | Boolean, sends X event to window manager on focus to expand window to fullscreen, useful if game (e.g. Forza Horizon 4) handles window mode in weird a way. Defaults to `false`. |
 | `focus-grab-cursor` | Boolean, daemon grabs cursor if possible, binds it to window and because of X11 nature which prevents input to anything but client which owns cursor (`flux-grab-cursor` module in background in this case) - redirects all input into focused window. This ugly layer prevents cursor from escaping to second monitor in some games at cost of *possible* input lag. Cursor is ungrabbed on unfocus event. Defaults to `false`. |
-| `mute` | Boolean, daemon mutes process on unfocus and unmutes on focus events. Uses `pactl` tool with a bunch of logic to parse list of sink inputs and find match using only process name and PID. Defaults to `false`. You may want to use [alternative](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber) way to mute process in case you use Pipewire with Wireplumber. |
 
 ### Groups
 To avoid repeating yourself, reduce config file size and simplify editing, you may want to create and use groups.
