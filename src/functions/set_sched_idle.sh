@@ -2,7 +2,8 @@
 # If possible, then it runs 'background_sched_idle()'
 set_sched_idle(){
   # Remember scheduling policy and priority before change it
-  if ! local local_sched_info="$(chrt --pid "$local_pid" 2>/dev/null)"; then
+  local local_sched_info
+  if ! local_sched_info="$(chrt --pid "$local_pid" 2>/dev/null)"; then
     local local_chrt_error='1'
   fi
 
