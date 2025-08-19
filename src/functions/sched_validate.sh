@@ -26,8 +26,5 @@ sched_validate(){
     else
       sched_realtime_is_supported='1'
     fi
-
-    # Warn user about inablity to restore 'SCHED_DEADLINE' in case daemon runs without root rights
-    message --info "Daemon has insufficient rights to restore 'deadline' scheduling policy. If you need this feature, then run daemon as root."
   fi
 }
