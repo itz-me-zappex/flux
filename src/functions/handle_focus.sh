@@ -48,19 +48,13 @@ handle_focus(){
 
   # Unmute process, even if it is not muted, just in case
   if [[ -n "${config_key_mute_map["$section"]}" ]]; then
-    pactl_set_mute "$process_name" "$pid" '0'
-    local local_pactl_set_mute_exit_code="$?"
-
-    case "$local_pactl_set_mute_exit_code" in
-    '0' )
-      message --info "Process '$process_name' with PID $pid of window with XID $window_xid has been unmuted because of focus event."
-    ;;
-    '1' )
-      message --warning "Unable to unmute process '$process_name' with PID $pid of window with XID $window_xid because of focus event!"
-    ;;
-    '2' )
-      message --warning "Unable to find sink input(s) of process '$process_name' with PID $pid of window with XID $window_xid to unmute it because of focus event!"
-    esac
+    passed_window_xid="$window_xid" \
+    passed_process_name="$process_name" \
+    passed_pid="$pid" \
+    passed_action='0' \
+    passed_action_name='unmute' \
+    passed_end_of_msg="$local_end_of_msg" \
+    pactl_set_mute &
   fi
 
   exec_oneshot

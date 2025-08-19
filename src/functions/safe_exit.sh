@@ -55,19 +55,13 @@ safe_exit(){
     # Unmute process, even if it is not muted, just in case
     if [[ -n "$local_section" && 
           -n "${config_key_mute_map["$local_section"]}" ]]; then
-      pactl_set_mute "$local_process_name" "$local_pid" '0'
-      local local_pactl_set_mute_exit_code="$?"
-
-      case "$local_pactl_set_mute_exit_code" in
-      '0' )
-        message --info "Process '$local_process_name' with PID $local_pid of window with XID $local_temp_window_xid has been unmuted because of daemon termination."
-      ;;
-      '1' )
-        message --warning "Unable to unmute process '$local_process_name' with PID $local_pid of window with XID $local_temp_window_xid because of daemon termination!"
-      ;;
-      '2' )
-        message --warning "Unable to find sink input(s) of process '$local_process_name' with PID $local_pid of window with XID $local_temp_window_xid to unmute it because of daemon termination!"
-      esac
+      passed_window_xid="$local_temp_window_xid" \
+      passed_process_name="$local_process_name" \
+      passed_pid="$local_pid" \
+      passed_action='0' \
+      passed_action_name='unmute' \
+      passed_end_of_msg="$local_end_of_msg" \
+      pactl_set_mute &
     fi
 
     # Execute commands from 'exec-exit', 'exec-exit-focus' and 'exec-exit-unfocus' if possible

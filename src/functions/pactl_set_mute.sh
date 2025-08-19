@@ -1,9 +1,5 @@
-# Required to mute and unmute processes
+# Required to mute and unmute processes, runs in background via '&'
 pactl_set_mute(){
-  local local_process_name="$1"
-  local local_pid="$2"
-  local local_action="$3" # 1/0/toggle
-
   local -A local_application_name_map \
   local_application_id_map \
   local_application_icon_name_map \
@@ -50,19 +46,19 @@ pactl_set_mute(){
   local local_temp_sink_input
   for local_temp_sink_input in "${local_sink_inputs_array[@]}"; do
     # Pulseaudio (and pipewire-pulse) relies on clients, those may give weird information, or may not at all
-    if [[ "$local_pid" == "${local_application_process_id_map["$local_temp_sink_input"]}" ]]; then
+    if [[ "$passed_pid" == "${local_application_process_id_map["$local_temp_sink_input"]}" ]]; then
       local local_matching_sink_inputs_array+=("$local_temp_sink_input")
     elif [[ -n "${local_application_process_binary_map["$local_temp_sink_input"]}" &&
-            "${local_application_process_binary_map["$local_temp_sink_input"],,}" == *"${local_process_name,,}"* ]]; then
+            "${local_application_process_binary_map["$local_temp_sink_input"],,}" == *"${passed_process_name,,}"* ]]; then
       local local_matching_sink_inputs_array+=("$local_temp_sink_input")
     elif [[ -n "${local_application_name_map["$local_temp_sink_input"]}" &&
-            "${local_application_name_map["$local_temp_sink_input"],,}" == *"${local_process_name,,}"* ]]; then
+            "${local_application_name_map["$local_temp_sink_input"],,}" == *"${passed_process_name,,}"* ]]; then
       local local_matching_sink_inputs_array+=("$local_temp_sink_input")
     elif [[ -n "${local_application_id_map["$local_temp_sink_input"]}" &&
-            "${local_application_id_map["$local_temp_sink_input"],,}" == *"${local_process_name,,}"* ]]; then
+            "${local_application_id_map["$local_temp_sink_input"],,}" == *"${passed_process_name,,}"* ]]; then
       local local_matching_sink_inputs_array+=("$local_temp_sink_input")
     elif [[ -n "${local_application_icon_name_map["$local_temp_sink_input"]}" &&
-            "${local_application_icon_name_map["$local_temp_sink_input"],,}" == *"${local_process_name,,}"* ]]; then
+            "${local_application_icon_name_map["$local_temp_sink_input"],,}" == *"${passed_process_name,,}"* ]]; then
       local local_matching_sink_inputs_array+=("$local_temp_sink_input")
     fi
   done
@@ -72,11 +68,13 @@ pactl_set_mute(){
     # Mute all matching sink inputs
     local local_temp_matching_sink_input
     for local_temp_matching_sink_input in "${local_matching_sink_inputs_array[@]}"; do
-      if ! pactl set-sink-input-mute "$local_temp_matching_sink_input" "$local_action"; then
-        return 1
+      if ! pactl set-sink-input-mute "$local_temp_matching_sink_input" "$passed_action"; then
+        message --warning "Unable to $passed_action_name process '$passed_process_name' with PID $passed_pid $passed_end_of_msg!"
+      else
+        message --info "Process '$passed_process_name' with PID $passed_pid has been ${passed_action_name}d $passed_end_of_msg."
       fi
     done
   else
-    return 2
+    message --warning "Unable to find sink input(s) of process '$passed_process_name' with PID $passed_pid to $passed_action_name it $passed_end_of_msg!"
   fi
 }
