@@ -10,6 +10,12 @@ pactl_set_mute(){
   local -a local_sink_inputs_array \
   local_matching_sink_inputs_array
 
+  local local_pactl_output
+  if ! local_pactl_output="$(pactl list sink-inputs 2>/dev/null)"; then
+    message --warning "Unable to get list of sink inputs to $passed_action_name process '$passed_process_name' with PID $passed_pid $passed_end_of_msg!"
+    return 0
+  fi
+
   # Get info about existing sink inputs
   local local_temp_line
   while read -r local_temp_line ||
@@ -40,7 +46,7 @@ pactl_set_mute(){
       local_application_process_binary_map["$local_current_sink_input"]="${local_temp_line#'application.process.binary = '}"
       local_application_process_binary_map["$local_current_sink_input"]="${local_application_process_binary_map["$local_current_sink_input"]//\"/}"
     esac
-  done < <(pactl list sink-inputs)
+  done <<< "$local_pactl_output"
 
   # Go through sink inputs and try find matching one
   local local_temp_sink_input
