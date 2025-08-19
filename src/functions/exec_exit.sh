@@ -27,7 +27,7 @@ exec_exit(){
       passed_command_type='default' \
       passed_section="$passed_section" \
       passed_event_command="$local_temp_command" \
-      passed_end_of_msg="$passed_end_of_msg as window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_pid is focused at this moment" \
+      passed_end_of_msg="$passed_end_of_msg" \
       passed_event_type='exit focus' \
       exec_on_event
     done <<< "${config_key_exec_exit_focus_map["$passed_section"]}"
@@ -41,7 +41,7 @@ exec_exit(){
       passed_command_type='default' \
       passed_section="$passed_section" \
       passed_event_command="$local_temp_command" \
-      passed_end_of_msg="$passed_end_of_msg as window with XID $passed_window_xid of process '$passed_process_name' with PID $passed_pid is unfocused at this moment" \
+      passed_end_of_msg="$passed_end_of_msg" \
       passed_event_type='exit unfocus' \
       exec_on_event
     done <<< "${config_key_exec_exit_unfocus_map["$passed_section"]}"
