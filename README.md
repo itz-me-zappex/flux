@@ -40,13 +40,13 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - [Tips and tricks](#tips-and-tricks)
   - [Apply changes in config file](#apply-changes-in-config-file)
   - [Alternative way to mute process audio on unfocus for Pipewire with Wireplumber](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber)
-  - [Reduce niceness of process on window appearance (increase priority)](#reduce-niceness-of-process-on-window-appearance-increase-priority)
-  - [Overclock NVIDIA GPU on window focus and revert it on unfocus](#overclock-nvidia-gpu-on-window-focus-and-revert-it-on-unfocus)
-  - [Change keyboard layout to English on focus and revert it to Russian on unfocus](#change-keyboard-layout-to-english-on-focus-and-revert-it-to-russian-on-unfocus)
-  - [Increase digital vibrance on focus and revert it on unfocus](#increase-digital-vibrance-on-focus-and-revert-it-on-unfocus)
+  - [Increase process priority on window appearance](#increase-process-priority-on-window-appearance)
+  - [Overclock NVIDIA GPU on focus](#overclock-nvidia-gpu-on-focus)
+  - [Change keyboard layout to English on focus](#change-keyboard-layout-to-english-on-focus)
+  - [Increase digital vibrance on focus](#increase-digital-vibrance-on-focus)
     - [NVIDIA](#nvidia)
     - [Mesa (AMD/Intel)](#mesa-amdintel)
-  - [Preload shader cache on window appearance to avoid stuttering](#preload-shader-cache-on-window-appearance-to-avoid-stuttering)
+  - [Preload shader cache on window appearance](#preload-shader-cache-on-window-appearance)
     - [NVIDIA](#nvidia-1)
     - [Mesa (AMD/Intel/NVIDIA with Nouveau)](#mesa-amdintelnvidia-with-nouveau)
   - [Disable night light on focus](#disable-night-light-on-focus)
@@ -514,66 +514,58 @@ But, `wpctl` tool does not mute processes which run in sandbox with PID namespac
 Add following lines to section responsible for target:
 
 ```ini
-; Unmute on focus
 exec-focus += wpctl set-mute -p $FOCUSED_PID 0
-
-; Mute on unfocus
 exec-unfocus += wpctl set-mute -p $UNFOCUSED_PID 1
 ```
 
-### Reduce niceness of process on window appearance (increase priority)
+### Increase process priority on window appearance
 Niceness `-4` is fine for multimedia tasks, including games.
 
 Add following line to section responsible for target:
 
 ```ini
-; Increase process priority if window opens first time
 exec-oneshot += renice -n -4 $FOCUSED_PID
 ```
 
-### Overclock NVIDIA GPU on window focus and revert it on unfocus
+### Overclock NVIDIA GPU on focus
 Command from `lazy-exec-unfocus` is also executed on daemon termination if window appears focused at that moment.
 
 Add following lines to section responsible for target (use your own values):
 
 ```ini
-; Overclock GPU on focus and revert on unfocus
 lazy-exec-focus += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=200'
 lazy-exec-focus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=2000'
 lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=0'
 lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=0'
 ```
 
-### Change keyboard layout to English on focus and revert it to Russian on unfocus
+### Change keyboard layout to English on focus
 Useful for some games/apps that do not understand cyrillic letters and rely on layout instead of scancodes.
 
 Add following lines to section responsible for target (use your own values):
 
 ```ini
-; Change layout to US on focus and to RU on unfocus
 lazy-exec-focus += setxkbmap us,ru,ua
 lazy-exec-unfocus += setxkbmap ru,ua,us
 ```
 
-### Increase digital vibrance on focus and revert it on unfocus
+### Increase digital vibrance on focus
 Use `vibrant-cli` from [`libvibrant`](<https://github.com/libvibrant/libvibrant>) project if you use AMD or Intel GPU.
 
 Add following lines to section responsible for target (use your own values):
 #### NVIDIA
 ```ini
-; Increase digital vibrance on focus and revert on unfocus
 lazy-exec-focus += nvidia-settings -a '[gpu:0]/DigitalVibrance=150'
 lazy-exec-unfocus += nvidia-settings -a '[gpu:0]/DigitalVibrance=0'
 ```
 
 #### Mesa (AMD/Intel)
 ```ini
-; Increase digital vibrance on focus and revert on unfocus
 lazy-exec-focus += vibrant-cli DisplayPort-0 2.3
 lazy-exec-unfocus += vibrant-cli DisplayPort-0 1
 ```
 
-### Preload shader cache on window appearance to avoid stuttering
+### Preload shader cache on window appearance
 Very important if you want to improve FPS stability and get rid of stutters in games at cost of higher RAM usage.
 
 First time (e.g. after reboot) preloading may take a lot of time, especially if shader cache folder that big as mine, but next executions will happen immediately.
@@ -589,13 +581,11 @@ That is how bufferization works, you just need to load file to memory by reading
 Add following line to section responsible for target (path may vary depending on system configuration):
 #### NVIDIA
 ```ini
-; Preload shader cache if window opens first time
 exec-oneshot += find ~/.cache/nvidia -type f -exec cat {} +
 ```
 
 #### Mesa (AMD/Intel/NVIDIA with Nouveau)
 ```ini
-; Preload shader cache if window opens first time
 exec-oneshot += find ~/.cache/mesa_shader_cache_db -type f -exec cat {} +
 ```
 
