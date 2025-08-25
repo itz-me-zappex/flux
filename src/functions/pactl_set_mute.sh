@@ -75,9 +75,9 @@ pactl_set_mute(){
     local local_temp_matching_sink_input
     for local_temp_matching_sink_input in "${local_matching_sink_inputs_array[@]}"; do
       if ! pactl set-sink-input-mute "$local_temp_matching_sink_input" "$passed_action" > /dev/null 2>&1; then
-        message --warning "Unable to $passed_action_name process '$passed_process_name' with PID $passed_pid $passed_end_of_msg!"
+        message --warning "Unable to $passed_action_name sink input #$local_temp_matching_sink_input of process '$passed_process_name' with PID $passed_pid $passed_end_of_msg!"
       else
-        message --info "Process '$passed_process_name' with PID $passed_pid has been ${passed_action_name}d $passed_end_of_msg."
+        message --info "Sink input #$local_temp_matching_sink_input of process '$passed_process_name' with PID $passed_pid has been ${passed_action_name}d $passed_end_of_msg."
       fi
     done
   else
