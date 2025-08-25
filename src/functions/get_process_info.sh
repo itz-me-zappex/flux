@@ -57,7 +57,6 @@ get_process_info(){
         if [[ "$local_temp_status_line" == 'Uid:'* ]]; then
           # Find 3rd column
           for local_temp_status_column in $local_temp_status_line; do
-            # Increase column count
             (( local_column_count++ ))
 
             # Remember effective UID and break loop
