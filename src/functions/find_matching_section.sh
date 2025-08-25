@@ -88,7 +88,7 @@ find_matching_section(){
   fi
 
   if [[ -n "$hot" ]]; then
-    local local_window_type_text='opened window'
+    local local_window_type_text='implicitly opened window'
   else
     local local_window_type_text='focused window'
   fi
