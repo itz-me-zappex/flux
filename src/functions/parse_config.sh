@@ -413,7 +413,7 @@ parse_config(){
             (( parse_config_error_count++ ))
           esac
         else
-          message --warning "$local_line_count_msg Config key '$local_config_key' is specified without value$local_section_msg!"
+          message --warning "$local_line_count_msg Config key '$local_config_key' is specified without any value$local_section_msg!"
           (( parse_config_error_count++ ))
         fi
       else
