@@ -426,7 +426,7 @@ while read -r raw_event ||
         previous_process_command \
         previous_section
 
-        message --warning "Unable to obtain info about process with PID $pid of window with XID $window_xid! Probably process has been terminated during check."
+        message --warning "Unable to obtain info about process with PID $pid of window $window_xid! Probably process has been terminated during check."
       fi
 
       unset get_process_info_exit_code

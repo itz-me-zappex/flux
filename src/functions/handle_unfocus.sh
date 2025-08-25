@@ -44,7 +44,7 @@ handle_unfocus(){
           request_fps_limit_map["$local_section"] \
           request_sched_idle_map["$local_pid"]
 
-          message --warning "Daemon has insufficient rights to apply limit for process '$local_process_name' with PID $local_pid because of unfocus event of window with XID $local_temp_window_xid!"
+          message --warning "Daemon has insufficient rights to apply limit for process '$local_process_name' with PID $local_pid on window $local_temp_window_xid unfocus event!"
 
           return 1
         fi
@@ -90,7 +90,7 @@ handle_unfocus(){
         set_sched_idle
       elif [[ -n "${request_sched_idle_map["$local_pid"]}" &&
               -z "$sched_change_is_supported" ]]; then
-        message --warning "Daemon has insufficient rights to restore scheduling policy for process '$local_process_name' with PID $local_pid, changing it to 'idle' because of unfocus event of window with XID $local_temp_window_xid has been cancelled!"
+        message --warning "Daemon has insufficient rights to restore scheduling policy for process '$local_process_name' with PID $local_pid, changing it to 'idle' on window $local_temp_window_xid unfocus event has been cancelled!"
       fi
 
       unset request_sched_idle_map["$local_pid"]
@@ -101,7 +101,7 @@ handle_unfocus(){
         passed_window_xid="$local_temp_window_xid" \
         passed_pid="$local_pid" \
         passed_process_name="$local_process_name" \
-        passed_end_of_msg="because of unfocus event" \
+        passed_end_of_msg="on unfocus event" \
         cursor_ungrab
       fi
 
@@ -114,7 +114,7 @@ handle_unfocus(){
         passed_pid="$local_pid" \
         passed_action='1' \
         passed_action_name='mute' \
-        passed_end_of_msg="because of unfocus event of window with XID $local_temp_window_xid" \
+        passed_end_of_msg="on window $local_temp_window_xid unfocus event" \
         pactl_set_mute &
       fi
 
