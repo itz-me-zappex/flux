@@ -306,8 +306,8 @@ parse_config(){
             is_section_useful_map["$local_section"]='1'
 
             # Exit with an error if value is neither integer nor list of comma-separated integers
-            if [[ ! "$local_config_value" =~ ^[0-9]+$ ||
-                  ! "$local_config_value" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
+            if [[ ! "$local_config_value" =~ ^[0-9]+$ &&
+                  ! "$local_config_value" =~ ^[0-9]+((\ )+?,(\ )+?[0-9]+)+$ ]]; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key$local_section_msg is not an integer!"
               (( parse_config_error_count++ ))
             fi
