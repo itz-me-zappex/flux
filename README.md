@@ -6,18 +6,18 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - [Screenshot](#screenshot)
 - [Features](#features)
 - [Dependencies](#dependencies)
-  - [Arch Linux and dereatives](#arch-linux-and-dereatives)
-  - [Debian and dereatives](#debian-and-dereatives)
-  - [Void Linux and dereatives](#void-linux-and-dereatives)
-  - [Fedora and dereatives](#fedora-and-dereatives)
-  - [OpenSUSE Tumbleweed and dereatives](#opensuse-tumbleweed-and-dereatives)
+  - [Arch Linux and derivatives](#arch-linux-and-derivatives)
+  - [Debian and derivatives](#debian-and-derivatives)
+  - [Void Linux and derivatives](#void-linux-and-derivatives)
+  - [Fedora and derivatives](#fedora-and-derivatives)
+  - [OpenSUSE Tumbleweed and derivatives](#opensuse-tumbleweed-and-derivatives)
 - [Building and installation](#building-and-installation)
-  - [Arch Linux and dereatives](#arch-linux-and-dereatives-1)
+  - [Arch Linux and derivatives](#arch-linux-and-derivatives-1)
   - [Manual installation using release tarball](#manual-installation-using-release-tarball)
     - [Make options](#make-options)
     - [Make environment variables](#make-environment-variables)
 - [Uninstallation](#uninstallation)
-  - [Arch Linux and dereatives](#arch-linux-and-dereatives-2)
+  - [Arch Linux and derivatives](#arch-linux-and-derivatives-2)
   - [Uninstallation using `make`](#uninstallation-using-make)
   - [Cleaning up](#cleaning-up)
 - [Usage](#usage)
@@ -71,8 +71,10 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - Whether do not use `focus-grab-cursor` config key in such cases or ignore an issue, I can not do anything with this.
 - Daemon says that it waits for cursor ungrab "without any reason". That may happen in case game grabs cursor manually.
   - Do not use `focus-grab-cursor` config key in such cases, as it becomes useless.
-- Process name mismatch when using info from `--get` option. That may happen because process may change its name at runtime. For example, in "S.T.A.L.K.E.R." trilogy and its derivatives (e.g. "S.T.A.L.K.E.R.: Anomaly"), process initially starts as `xrEngine.exe`, but after engine initialization, it changes its name to `X-Ray Primary t`. Daemon reads process name and other info once and puts it into associative arrays to reduce CPU usage and improve performance. As a result, if daemon detects process during initialization step, it will continue to associate it with this name. However, if daemon becomes restarted with `--hot` option after name has been changed, it will now detect updated name, which will match with what is returned by `--get`.
-  - Use regexp in `name` config key like `^('X-RAY Primary t'|'xrEngine.exe'|'AnomalyDX11AVX.'|'XR_3DA.exe')$`. You may want to start daemon in verbose mode to find message about mismatch containing process name catched at engine initialization step.
+- Process name mismatch when using info from `--get` option. That may happen because process may change its name at runtime. For example, in "S.T.A.L.K.E.R." trilogy and its derivatives (e.g. "S.T.A.L.K.E.R.: Anomaly"), process initially starts as `xrEngine.exe`, but after engine initialization step, it changes its name to `X-Ray Primary t`. Daemon reads process name and other info once and puts it into associative arrays to reduce CPU usage and improve performance. As a result, if daemon detects process during initialization step, it will continue to associate it with this old name. However, if daemon becomes restarted with `--hot` option after name has been changed, it will now detect updated name, which will match with what is returned by `--get`.
+  - Use regular expressions in `name` (`~=`) config key, e.g. `^('X-RAY Primary t'|'xrEngine.exe'|'AnomalyDX11AVX.'|'XR_3DA.exe')$`. You may want to start daemon in verbose mode to find message about mismatch containing process name catched at engine initialization step.
+- Daemon mutes wrong process if there is >=2 processes with the same name.
+  - That happens in case processes do not report their PIDs, so daemon should guess. If you use Pipewire with Wireplumber, you may want to use [this](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber) method. Keep in mind, this method does not mute processes in sandboxes with PID namespaces, unlike default one.
 
 ## Screenshot
 ![](images/preview.png)
@@ -90,40 +92,40 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - Flexible identifiers support to avoid false positives, including regular expressions.
 - Works with processes running in sandbox with PID namespaces, through Firejail for example.
 - Survives DE/WM restart and continues work without issues.
-- Supports most of X11 DEs/WMs ([EWMH-compatible ones](<https://specifications.freedesktop.org/wm-spec/latest/>)) and does not rely on neither GPU nor its driver.
+- Supports most of X11 DEs/WMs ([EWMH-compatible ones](https://specifications.freedesktop.org/wm-spec/latest/)) and does not rely on neither GPU nor its driver.
 - Detects and handles both explicitly and implicitly opened windows (appeared with and without focus event respectively).
 - Mute processes on unfocus and unmute on focus. Supports Pulseaudio and Pipewire (including Pipewire Media Session and Wireplumber).
 
 ## Dependencies
-### Arch Linux and dereatives
+### Arch Linux and derivatives
 **Required:** `bash` `util-linux` `cpulimit` `coreutils` `libxres` `libx11` `libxext` `xorgproto` `less`
 
 **Optional:** `mangohud` `lib32-mangohud` `libnotify` `libpulse`
 
 **Build:** `libxres` `libx11` `libxext` `xorgproto` `make` `gcc`
 
-### Debian and dereatives
+### Debian and derivatives
 **Required:** `bash` `cpulimit` `coreutils` `libxres1` `libx11-6` `libxext6` `less`
 
 **Optional:** `mangohud` `mangohud:i386` `libnotify-bin` `pulseaudio-utils`
 
 **Build:** `libxres-dev` `libx11-dev` `libxext-dev` `x11proto-dev` `make` `gcc`
 
-### Void Linux and dereatives
+### Void Linux and derivatives
 **Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext` `xorgproto` `less`
 
 **Optional:** `MangoHud` `MangoHud-32bit` `libnotify` `pulseaudio-utils`
 
 **Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto` `make` `gcc`
 
-### Fedora and dereatives
+### Fedora and derivatives
 **Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext` `less`
 
 **Optional:** `mangohud` `mangohud.i686` `libnotify` `pulseaudio-utils`
 
 **Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorg-x11-proto-devel` `make` `gcc`
 
-### OpenSUSE Tumbleweed and dereatives
+### OpenSUSE Tumbleweed and derivatives
 **Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXRes1` `libX11-6` `libXext6` `less`
 
 **Optional:** `mangohud` `mangohud-32bit` `libnotify4` `pulseaudio-utils`
@@ -131,7 +133,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 **Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto-devel` `make` `gcc`
 
 ## Building and installation
-### Arch Linux and dereatives
+### Arch Linux and derivatives
 Make sure you have installed `base-devel` package before continue.
 
 #### Install `cpulimit` dependency from AUR
@@ -207,7 +209,7 @@ sudo usermod -aG flux "$USER"
 ```
 
 ## Uninstallation
-### Arch Linux and dereatives
+### Arch Linux and derivatives
 #### Execute following
 ```bash
 sudo pacman -Rnsc flux
@@ -430,7 +432,7 @@ group = @games-overclock
 ```
 
 ### Regular expressions
-To simplify config file editing and reduce its config size, you may want to use regexp e.g. to avoid extremely long strings (like in Minecraft's command which has `java` as process name) or to make section matchable with multiple process names.
+To simplify config file editing and reduce its size, you may want to use regular expressions e.g. to avoid extremely long strings (like in Minecraft's command which has `java` as process name) or to make section matchable with multiple process names.
 
 ```ini
 ; Section matches both 'vkcube' and 'glxgears' processes
@@ -485,7 +487,7 @@ idle = true
 ```
 
 ### Environment variables passed to commands
-You can use these variables in you commands and scripts that running from execution config keys to avoid obtaining window XID and process info twice.
+You can use these variables in your commands and scripts that running from `exec-*` config keys to avoid obtaining window XID and process info twice.
 
 | Variable | Description |
 |----------|-------------|
@@ -550,7 +552,7 @@ lazy-exec-unfocus += setxkbmap ru,ua,us
 ```
 
 ### Increase digital vibrance on focus
-Use `vibrant-cli` from [`libvibrant`](<https://github.com/libvibrant/libvibrant>) project if you use AMD or Intel GPU.
+Use `vibrant-cli` from [`libvibrant`](https://github.com/libvibrant/libvibrant) project if you use AMD or Intel GPU.
 
 Add following lines to section responsible for target (use your own values):
 #### NVIDIA
