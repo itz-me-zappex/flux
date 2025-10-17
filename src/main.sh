@@ -15,7 +15,7 @@ done < <(declare -x)
 unset temp_envvar_line \
 envvar_name
 
-daemon_version='1.31'
+daemon_version='1.31.0.1'
 
 if [[ -z "$DISPLAY" ]]; then
   export DISPLAY=':0'
