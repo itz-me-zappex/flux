@@ -73,7 +73,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - Do not use `focus-grab-cursor` config key in such cases, as it becomes useless.
 - Process name mismatch when using info from `--get` option. That may happen because process may change its name at runtime. For example, in "S.T.A.L.K.E.R." trilogy and its derivatives (e.g. "S.T.A.L.K.E.R.: Anomaly"), process initially starts as `xrEngine.exe`, but after engine initialization step, it changes its name to `X-Ray Primary t`. Daemon reads process name and other info once and puts it into associative arrays to reduce CPU usage and improve performance. As a result, if daemon detects process during initialization step, it will continue to associate it with this old name. However, if daemon becomes restarted with `--hot` option after name has been changed, it will now detect updated name, which will match with what is returned by `--get`.
   - Use regular expressions in `name` (`~=`) config key, e.g. `^('X-RAY Primary t'|'xrEngine.exe'|'AnomalyDX11AVX.'|'XR_3DA.exe')$`. You may want to start daemon in verbose mode to find message about mismatch containing process name catched at engine initialization step.
-- Daemon mutes wrong process if there is >=2 processes with the same name.
+- Daemon mutes multiple processes if there is >=2 processes with the same name.
   - That happens in case processes do not report their PIDs, so daemon should guess. If you use Pipewire with Wireplumber, you may want to use [this](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber) method. Keep in mind, this method does not mute processes in sandboxes with PID namespaces, unlike default one.
 
 ## Screenshot
@@ -81,17 +81,17 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 *Daemon running with handling already opened windows (`-H`) in verbose mode (`-v`) and enabled timestamps (`-t`)*
 
 ## Features
-- Apply CPU or FPS limit to process on unfocus and unlimit on focus, FPS limiting requires game running using MangoHud with already existing config file.
+- Apply CPU or FPS limit to process on unfocus and unlimit on focus. FPS limiting requires game running using MangoHud with already existing config file.
 - Reduce process priority on unfocus and restore it on focus.
 - Minimize window on unfocus, useful for borderless windows.
-- Expand window to fullscreen on focus, useful for games which are handle a window mode in weird way, e.g. Forza Horizon 4 changes its mode to windowed after minimization.
-- Grab cursor and redirect input into focused window, that prevents cursor from escaping to second monitor in case this is borderless window.
+- Expand window to fullscreen on focus, useful for games which handle a window mode in weird way, e.g. Forza Horizon 4 changes its mode to windowed after minimization.
+- Grab cursor and redirect input into focused window, that prevents cursor from escaping to second monitor in case with borderless windows.
 - Execute commands and scripts on focus, unfocus and window closure events to extend daemon functionality. Daemon provides info about window and process through environment variables.
 - Logging support.
 - Notifications support.
 - Flexible identifiers support to avoid false positives, including regular expressions.
-- Works with processes running in sandbox with PID namespaces, through Firejail for example.
-- Survives DE/WM restart and continues work without issues.
+- Works with processes running through sandbox with PID namespaces, e.g. Firejail.
+- Handles DE/WM restart or switching it on the fly.
 - Supports most of X11 DEs/WMs ([EWMH-compatible ones](https://specifications.freedesktop.org/wm-spec/latest/)) and does not rely on neither GPU nor its driver.
 - Detects and handles both explicitly and implicitly opened windows (appeared with and without focus event respectively).
 - Mute processes on unfocus and unmute on focus. Supports Pulseaudio and Pipewire (including Pipewire Media Session and Wireplumber).
