@@ -134,13 +134,13 @@ parse_options(){
           process_name="'$process_name'"
         fi
 
-        echo "├── Window
-│   └── XID: "$window_xid" (decimal), "$(printf "0x%x\n" "$window_xid")" (hexadecimal)
-└── Process
-    ├── PID: "$pid"
-    ├── Name: "$process_name"
-    ├── Owner: "$process_owner" (UID), "$process_owner_username" (username)
-    └── Command: "$process_command"
+        echo "Window
+└── XID: "$window_xid" (decimal), "$(printf "0x%x\n" "$window_xid")" (hexadecimal)
+Process
+├── PID: "$pid"
+├── Name: "$process_name"
+├── Owner: "$process_owner" (UID), "$process_owner_username" (username)
+└── Command: "$process_command"
 " | less -FSX
       fi
 
