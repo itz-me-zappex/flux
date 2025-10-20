@@ -13,11 +13,14 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
   - [OpenSUSE Tumbleweed and derivatives](#opensuse-tumbleweed-and-derivatives)
 - [Building and installation](#building-and-installation)
   - [Arch Linux and derivatives](#arch-linux-and-derivatives-1)
+  - [Debian and derivatives](#debian-and-derivatives-1)
   - [Manual installation using release tarball](#manual-installation-using-release-tarball)
     - [Make options](#make-options)
     - [Make environment variables](#make-environment-variables)
+- [Post install](#post-install)
 - [Uninstallation](#uninstallation)
   - [Arch Linux and derivatives](#arch-linux-and-derivatives-2)
+  - [Debian and derivatives](#debian-and-derivatives-2)
   - [Uninstallation using `make`](#uninstallation-using-make)
   - [Cleaning up](#cleaning-up)
 - [Usage](#usage)
@@ -138,7 +141,7 @@ Make sure you have installed `base-devel` package before continue.
 
 #### Install `cpulimit` dependency from AUR
 ```bash
-git clone 'https://aur.archlinux.org/cpulimit.git' && cd 'cpulimit' && makepkg -sric && cd ..
+git clone https://aur.archlinux.org/cpulimit.git && cd cpulimit && makepkg -sric && cd ..
 ```
 
 #### Clone this repository and use PKGBUILD to install daemon
@@ -146,9 +149,20 @@ git clone 'https://aur.archlinux.org/cpulimit.git' && cd 'cpulimit' && makepkg -
 git clone https://github.com/itz-me-zappex/flux.git && cd flux/packaging/archlinux && makepkg -sric
 ```
 
-#### Add user to `flux` group to bypass limitations related to changing scheduling policies
+#### Remove useless packages installed during building
 ```bash
-sudo usermod -aG flux "$USER"
+sudo pacman -Rns $(pacman -Qttdq)
+```
+
+### Debian and derivatives
+#### Clone this repository and use script to build package
+```bash
+git clone https://github.com/itz-me-zappex/flux.git && cd flux/packaging/debian && bash build-deb.sh
+```
+
+#### Remove useless packages installed during building
+```bash
+sudo apt autoremove
 ```
 
 ### Manual installation using release tarball
@@ -208,11 +222,23 @@ sudo groupadd -r flux
 sudo usermod -aG flux "$USER"
 ```
 
+## Post install
+### Add user to `flux` group to bypass limitations related to changing scheduling policies
+```bash
+sudo usermod -aG flux "$USER"
+```
+
 ## Uninstallation
 ### Arch Linux and derivatives
 #### Execute following
 ```bash
 sudo pacman -Rnsc flux
+```
+
+### Debian and derivatives
+#### Execute following
+```bash
+sudo apt autoremove flux
 ```
 
 ### Uninstallation using `make`
