@@ -159,6 +159,10 @@ sudo pacman -Rns $(pacman -Qttdq)
 ```bash
 git clone https://github.com/itz-me-zappex/flux.git && cd flux/packaging/debian && bash build-deb.sh
 ```
+After that, use command provided by script after successful building, e.g.:
+```bash
+sudo dpkg -i flux_1.31.0.1-1_amd64.deb ; sudo apt install -f
+```
 
 #### Remove useless packages installed during building
 ```bash
