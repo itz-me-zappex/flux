@@ -14,6 +14,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - [Building and installation](#building-and-installation)
   - [Arch Linux and derivatives](#arch-linux-and-derivatives-1)
   - [Debian and derivatives](#debian-and-derivatives-1)
+  - [Fedora and derivatives](#fedora-and-derivatives-1)
   - [Manual installation using release tarball](#manual-installation-using-release-tarball)
     - [Make options](#make-options)
     - [Make environment variables](#make-environment-variables)
@@ -21,6 +22,7 @@ Advanced daemon for X11 desktops and window managers, designed to automatically 
 - [Uninstallation](#uninstallation)
   - [Arch Linux and derivatives](#arch-linux-and-derivatives-2)
   - [Debian and derivatives](#debian-and-derivatives-2)
+  - [Fedora and derivatives](#fedora-and-derivatives-2)
   - [Uninstallation using `make`](#uninstallation-using-make)
   - [Cleaning up](#cleaning-up)
 - [Usage](#usage)
@@ -159,7 +161,9 @@ sudo pacman -Rns $(pacman -Qttdq)
 ```bash
 git clone https://github.com/itz-me-zappex/flux.git && cd flux/packaging/debian && bash build-deb.sh
 ```
-After that, use command provided by script after successful building, e.g.:
+
+#### Install built package
+**WARNING**: You need to figure out with file name, it differs depending on version and architecture, e.g.:
 ```bash
 sudo dpkg -i flux_1.31.0.1-1_amd64.deb ; sudo apt install -f
 ```
@@ -167,6 +171,58 @@ sudo dpkg -i flux_1.31.0.1-1_amd64.deb ; sudo apt install -f
 #### Remove useless packages installed during building
 ```bash
 sudo apt autoremove
+```
+
+### Fedora and derivatives
+#### Install toolset required to create RPM package
+```bash
+sudo dnf install rpmdevtools
+```
+
+#### Clone this repository
+```bash
+git clone https://github.com/itz-me-zappex/flux.git
+```
+
+#### Create RPM tree for package
+```bash
+rpmdev-setuptree
+```
+
+#### Copy RPM spec file into tree
+```bash
+cp flux/packaging/fedora/flux.spec rpmbuild/SPECS/
+```
+
+#### Download source code
+```bash
+spectool -g rpmbuild/SPECS/flux.spec --sourcedir
+```
+
+#### Install build dependencies
+```bash
+sudo dnf builddep rpmbuild/SPECS/flux.spec
+```
+
+#### Build binary package
+```bash
+rpmbuild -bb rpmbuild/SPECS/flux.spec
+```
+
+#### Install built package
+**WARNING**: You need to figure out with file name, it differs depending on version and architecture, e.g.:
+```bash
+sudo dnf install rpmbuild/RPMS/x86_64/flux-1.31.0.1-1.fc42.x86_64.rpm
+```
+
+#### Remove useless packages installed during building
+##### Get transaction number of `builddep` command
+```bash
+dnf history list
+```
+##### Remove build dependencies using this number
+```bash
+sudo dnf history undo <number>
 ```
 
 ### Manual installation using release tarball
@@ -243,6 +299,12 @@ sudo pacman -Rnsc flux
 #### Execute following
 ```bash
 sudo apt autoremove flux
+```
+
+### Fedora and derivatives
+#### Execute following
+```bash
+sudo dnf remove flux
 ```
 
 ### Uninstallation using `make`
