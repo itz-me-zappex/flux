@@ -35,6 +35,14 @@ install -Dm644 10-flux.conf %{buildroot}/etc/security/limits.d/
 /usr/lib/flux/*
 /etc/security/limits.d/10-flux.conf
 
+%post
+groupadd -r flux
+echo "Group 'flux' has been created, you may want to add your user to there by 'sudo usermod -aG flux \$USER' to bypass scheduling policy changing restrictions."
+
+%postun
+groupdel flux
+echo "Group 'flux' has been removed."
+
 %changelog
 * Tue Oct 21 2025 ZaPPeX - %{version}-%{release}
 - Initial RPM packaging of flux
