@@ -1,5 +1,5 @@
-## flux
-Advanced daemon for X11 desktops and window managers, designed to automatically limit FPS/CPU usage of unfocused windows and run commands on focus and unfocus events. Written in Bash and partially in C.
+## flux (FLawless User eXperience)
+An advanced automation daemon for X11 desktops and window managers. Designed to limit FPS/CPU usage and run commands on window focus and unfocus events. Provides gaming-oriented features. Written mostly in Bash and partially in C.
 
 ## Navigation
 - [Known issues](#known-issues)
