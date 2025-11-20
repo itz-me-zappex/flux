@@ -135,11 +135,14 @@ parse_options(){
         fi
 
         echo "Window
-└── XID: "$window_xid" (decimal), "$(printf "0x%x\n" "$window_xid")" (hexadecimal)
+├── XID (decimal): "$window_xid"
+└── XID (hexadecimal): "$(printf "0x%x\n" "$window_xid")" 
+
 Process
 ├── PID: "$pid"
 ├── Name: "$process_name"
-├── Owner: "$process_owner" (UID), "$process_owner_username" (username)
+├── Owner (UID): "$process_owner"
+├── Owner (username): "$process_owner_username"
 └── Command: "$process_command"
 " | less -FSX
       fi
