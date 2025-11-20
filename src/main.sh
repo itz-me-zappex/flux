@@ -275,39 +275,61 @@ while read -r raw_event ||
   fi
   events_count='0'
 
-  # Add opened windows as focus events once if '--hot' is specified, otherwise find implicitly opened windows and add those as focus events
   if [[ -n "$hot" ]]; then
-    # Add opened windows info except focused one to array as events to apply actions to already opened windows
-    for temp_window in $opened_windows; do
-      if [[ "$temp_window" != "$focused_window" ]]; then
-        events_array+=("$temp_window")
+    # Handle implicitly opened windows at start if '--hot' is specified
+    for temp_opened_window in $opened_windows; do
+      if [[ "$temp_opened_window" != "$focused_window" ]]; then
+        handle_window_event "$temp_opened_window"
       fi
     done
-    unset temp_window
+    unset temp_opened_window
 
-    # Add event to unset '--hot'
-    events_array+=('unset_hot')
+    unset hot
   else
     if [[ -n "$previous_opened_windows" ]]; then
       # Attempt to find implicitly opened windows
-      for temp_window in $opened_windows; do
-        # Add window as event if opened implicitly
-        if [[ " $previous_opened_windows " != *" $temp_window "* &&
-              "$temp_window" != "$focused_window" ]]; then
-          # Add event to set '--hot' temporary, to avoid execution of lazy commands
-          if [[ "${events_array[*]}" != 'disallow_lazy_commands'* ]]; then
-            events_array+=('disallow_lazy_commands')
+      for temp_opened_window in $opened_windows; do
+        # Handle if opened implicitly
+        if [[ " $previous_opened_windows " != *" $temp_opened_window "* &&
+              "$temp_opened_window" != "$focused_window" ]]; then
+          if [[ -n "$allow_lazy_commands" ]]; then
+            # Set '--hot' internally, to avoid execution of lazy commands
+            hot='1'
+            unset allow_lazy_commands
+
+            # Remember focused window info to set it as previous after handling implicitly opened windows
+            # Needed to make daemon able to handle requests after first unfocus event (after handling implicitly opened windows)
+            explicit_window_xid="$window_xid"
+            explicit_pid="$pid"
+            explicit_process_name="$process_name"
+            explicit_process_owner="$process_owner"
+            explicit_process_command="$process_command"
+            explicit_section="$section"
           fi
 
-          # Add window as focus event
-          events_array+=("$temp_window")
+          handle_window_event "$temp_opened_window"
         fi
       done
-      unset temp_window
+      unset temp_opened_window
 
-      # Add event to unset '--hot'
-      if [[ "${events_array[*]}" == 'disallow_lazy_commands'* ]]; then
-        events_array+=('allow_lazy_commands')
+      if [[ -z "$allow_lazy_commands" ]]; then
+        # Unset '--hot' to allow lazy commands execution after handling implicitly opened windows
+        unset hot
+
+        # Restore info about focused window after handling implicitly opened windows
+        previous_window_xid="$explicit_window_xid"
+        previous_pid="$explicit_pid"
+        previous_process_name="$explicit_process_name"
+        previous_process_owner="$explicit_process_owner"
+        previous_process_command="$explicit_process_command"
+        previous_section="$explicit_section"
+
+        unset explicit_window_xid \
+        explicit_pid \
+        explicit_process_name \
+        explicit_process_owner \
+        explicit_process_command \
+        explicit_section
       fi
 
       # Prevent focused window from being handled as unfocused
@@ -315,123 +337,19 @@ while read -r raw_event ||
     fi
   fi
 
-  # Add info about focused window to array as event if it does not repeat
   if [[ "$previous_focused_window" != "$focused_window" ]]; then
-    events_array+=("$focused_window")
-    # Remember focused window XID to skip adding it to array as event if repeats
+    # Handle focused window if it does not repeat
+    handle_window_event "$focused_window"
+
+    # Remember focused window to skip handling it again if repeats
     previous_focused_window="$focused_window"
   fi
 
-  # Needed find terminated windows and check requests
-  events_array+=("windows_list: $opened_windows")
+  handle_closure "$opened_windows"
+  handle_unfocus "$opened_windows"
 
   # Needed to find implicitly opened windows next time
   previous_opened_windows="$opened_windows"
-
-  # Handle events
-  for event in "${events_array[@]}"; do
-    # Apply actions depending by event type
-    case "$event" in
-    'set_hot' )
-      # Set '--hot' temporary to process implicitly opened windows
-      hot='1'
-
-      # Prevent lazy commands in matching sections of implicitly opened windows from working
-      unset allow_lazy_commands
-    ;;
-    'unset_hot' )
-      # Unset '--hot' as it becomes useless from this moment
-      unset hot
-    ;;
-    'disallow_lazy_commands' )
-      # Disallow lazy commands before handle implicitly opened windows
-      hot='1'
-      unset allow_lazy_commands
-
-      # Remember focused window info to set it as previous after handling implicitly opened windows
-      # Needed to make daemon able to handle requests after first unfocus event (after handling implicitly opened windows)
-      explicit_window_xid="$window_xid"
-      explicit_pid="$pid"
-      explicit_process_name="$process_name"
-      explicit_process_owner="$process_owner"
-      explicit_process_command="$process_command"
-      explicit_section="$section"
-    ;;
-    'allow_lazy_commands' )
-      # Unset '--hot' to allow lazy commands after handling all internal events
-      unset hot
-
-      # Restore info about focused window after handling implicitly opened windows
-      previous_window_xid="$explicit_window_xid"
-      previous_pid="$explicit_pid"
-      previous_process_name="$explicit_process_name"
-      previous_process_owner="$explicit_process_owner"
-      previous_process_command="$explicit_process_command"
-      previous_section="$explicit_section"
-
-      unset explicit_window_xid \
-      explicit_pid \
-      explicit_process_name \
-      explicit_process_owner \
-      explicit_process_command \
-      explicit_section
-    ;;
-    'windows_list'* )
-      handle_closure
-      handle_unfocus
-    ;;
-    * )
-      # Unset info about process to avoid using it by an accident
-      unset window_xid \
-      pid \
-      process_name \
-      process_owner \
-      process_command \
-      section
-
-      window_xid="${event/'='*/}"
-      pid="${event/*'='/}"
-
-      # Hide error messages, even standart ones which are appearing directly from Bash (https://unix.stackexchange.com/a/184807)
-      exec 3>&2
-      exec 2>/dev/null
-
-      get_process_info
-      get_process_info_exit_code="$?"
-
-      # Restore stderr
-      exec 2>&3
-
-      # Request CPU/FPS limit for unfocused process if it matches with section
-      unfocus_request_limit
-
-      if (( get_process_info_exit_code == 0 )); then
-        if find_matching_section; then
-          handle_focus
-        fi
-
-        # Remember info about process until next event to run commands on unfocus and apply CPU/FPS limit, and, to pass variables to command in 'exec-unfocus' key
-        previous_window_xid="$window_xid"
-        previous_pid="$pid"
-        previous_process_name="$process_name"
-        previous_process_owner="$process_owner"
-        previous_process_command="$process_command"
-        previous_section="$section"
-      else
-        # Forget info about previous window/process because it is not changed
-        unset previous_window_xid \
-        previous_pid \
-        previous_process_name \
-        previous_process_owner \
-        previous_process_command \
-        previous_section
-
-        message --warning "Unable to obtain info about process with PID $pid of window $window_xid! Probably process has been terminated during check."
-      fi
-
-      unset get_process_info_exit_code
-    esac
-  done
 
   if [[ -z "$hot" ]]; then
     allow_lazy_commands='1'
@@ -440,8 +358,6 @@ while read -r raw_event ||
   if [[ -n "$disallow_request" ]]; then
     unset disallow_request
   fi
-
-  unset events_array
 done < "$flux_listener_fifo_path"
 
 # Only for case if event reader becomes terminated

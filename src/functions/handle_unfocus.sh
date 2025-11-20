@@ -1,7 +1,7 @@
 # Required to set CPU/FPS limits for requested windows
 handle_unfocus(){
   # Get list of existing windows
-  local local_windows="${event/'windows_list: '/}"
+  local local_windows="$1"
 
   # Get focused window XID to avoid false positive in case unfocus actions should not happen before handling of focused window
   local local_focused_window_xid="${focused_window/'='*/}"

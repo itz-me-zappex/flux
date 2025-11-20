@@ -1,7 +1,7 @@
 # Required to unset limits for terminated windows and remove info about them from cache
 handle_closure(){
   # Remove everything including event type name, to obtain list of existing windows
-  local local_existing_windows="${event/'windows_list: '/}"
+  local local_existing_windows="$1"
 
   # Remove PIDs from list of existing windows
   local local_temp_existing_window
