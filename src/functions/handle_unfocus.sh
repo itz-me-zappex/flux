@@ -1,14 +1,11 @@
 # Required to set CPU/FPS limits for requested windows
 handle_unfocus(){
-  # Get list of existing windows
-  local local_windows="$1"
-
   # Get focused window XID to avoid false positive in case unfocus actions should not happen before handling of focused window
   local local_focused_window_xid="${focused_window/'='*/}"
 
   # Remove PIDs from list of existing windows
   local local_temp_window
-  for local_temp_window in $local_windows; do
+  for local_temp_window in $opened_windows; do
     local local_window_xids_array+=("${local_temp_window/'='*/}")
   done
 

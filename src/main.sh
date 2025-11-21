@@ -345,8 +345,8 @@ while read -r raw_event ||
     previous_focused_window="$focused_window"
   fi
 
-  handle_closure "$opened_windows"
-  handle_unfocus "$opened_windows"
+  handle_closure
+  handle_unfocus
 
   # Needed to find implicitly opened windows next time
   previous_opened_windows="$opened_windows"
