@@ -62,7 +62,7 @@ install:
 	install -Dm 755 $(BUILD_DIR)/validate-x11-session $(PREFIX)/lib/flux/
 
 	@if [[ $(PREFIX) != '/usr' ]]; then \
-		echo -e "\nwarning: Unable to install '10-flux.conf' to '/etc/security/limits.d' because that is not '/usr' prefix!\n" >&2; \
+		echo -e "\nwarning: Unable to install '/etc/security/limits.d/10-flux.conf' because not installing to '/usr' prefix!\n" >&2; \
 	fi
 
 	if [[ $(PREFIX) == '/usr' ]]; then \
