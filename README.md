@@ -324,7 +324,7 @@ sudo PREFIX='/usr' make uninstall
 ```
 
 #### Remove unneeded dependencies
-Depends by distro and package manager you use, I highly suggest to remove dependencies selectively and check which packages are use it to avoid system breakage.
+Depends on distro and package manager you use, I highly suggest to remove dependencies selectively and check which packages are use it to avoid system breakage.
 
 ### Cleaning up
 #### Temporary directory (after crash)
@@ -622,7 +622,7 @@ exec-oneshot += renice -n -4 $FOCUSED_PID
 ```
 
 ### Overclock NVIDIA GPU on focus
-Command from `lazy-exec-unfocus` is also executed on daemon termination if window appears focused at that moment.
+Command from `lazy-exec-unfocus` is also executed on daemon termination if window appears focused at this moment.
 
 Add following lines to section responsible for target (use your own values):
 
