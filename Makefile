@@ -17,7 +17,7 @@ all:
 
 	echo '#!/usr/bin/bash' > $(FLUX_BUILD)
 
-	for module in $(PWD)/src/functions/*.sh; do \
+	for module in $(PWD)/src/functions/*.sh $(PWD)/src/macro/*.sh; do \
 		echo >> $(FLUX_BUILD); \
 		cat $$module >> $(FLUX_BUILD); \
 	done
