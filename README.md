@@ -28,6 +28,7 @@ An advanced automation daemon for X11 desktops and window managers. Designed to 
 - [Usage](#usage)
   - [List of available options](#list-of-available-options)
   - [Colorful output](#colorful-output)
+  - [Startup](#startup)
   - [Autostart](#autostart)
 - [Configuration](#configuration)
   - [Config path](#config-path)
@@ -89,7 +90,7 @@ An advanced automation daemon for X11 desktops and window managers. Designed to 
 - Apply CPU or FPS limit to process on unfocus and unlimit on focus. FPS limiting requires game running using MangoHud with already existing config file.
 - Reduce process priority on unfocus and restore it on focus.
 - Minimize window on unfocus, useful for borderless windows.
-- Expand window to fullscreen on focus, useful for games which handle a window mode in weird way, e.g. Forza Horizon 4 changes its mode to windowed after minimization.
+- Expand window to fullscreen on focus. Useful for games which handle a window mode in weird way, e.g. Forza Horizon 4 changes its mode to windowed after minimization.
 - Grab cursor and redirect input into focused window, that prevents cursor from escaping to second monitor in case with borderless windows.
 - Execute commands and scripts on focus, unfocus and window closure events to extend daemon functionality. Daemon provides info about window and process through environment variables.
 - Logging support.
@@ -143,12 +144,27 @@ Make sure you have installed `base-devel` package before continue.
 
 #### Install `cpulimit` dependency from AUR
 ```bash
-git clone https://aur.archlinux.org/cpulimit.git && cd cpulimit && makepkg -sric && cd ..
+git clone https://aur.archlinux.org/cpulimit.git
+```
+```bash
+cd cpulimit
+```
+```bash
+makepkg -sric
+```
+```bash
+cd ..
 ```
 
 #### Clone this repository and use PKGBUILD to install daemon
 ```bash
-git clone https://github.com/itz-me-zappex/flux.git && cd flux/packaging/archlinux && makepkg -sric
+git clone https://github.com/itz-me-zappex/flux.git
+```
+```bash
+cd flux/packaging/archlinux
+```
+```bash
+makepkg -sric
 ```
 
 #### Remove useless packages installed during building
@@ -159,13 +175,22 @@ sudo pacman -Rns $(pacman -Qttdq)
 ### Debian and derivatives
 #### Clone this repository and use script to build package
 ```bash
-git clone https://github.com/itz-me-zappex/flux.git && cd flux/packaging/debian && bash build-deb.sh
+git clone https://github.com/itz-me-zappex/flux.git
+```
+```bash
+cd flux/packaging/debian
+```
+```bash
+bash build-deb.sh
 ```
 
 #### Install built package
 **WARNING**: You need to figure out with file name, it differs depending on version and architecture, e.g.:
 ```bash
-sudo dpkg -i flux_1.31.0.1-1_amd64.deb ; sudo apt install -f
+sudo dpkg -i flux_1.31.0.1-1_amd64.deb
+```
+```bash
+sudo apt install -f
 ```
 
 #### Remove useless packages installed during building
@@ -249,7 +274,10 @@ wget -qO- 'https://api.github.com/repos/itz-me-zappex/flux/releases/latest' | gr
 
 #### Extract archive and change directory
 ```bash
-tar -xvf flux.tar.gz --one-top-level=flux --strip-components=1 && cd 'flux'
+tar -xvf flux.tar.gz --one-top-level=flux --strip-components=1
+```
+```bash
+cd 'flux'
 ```
 
 #### Build daemon
@@ -267,7 +295,8 @@ sudo make install
 PREFIX="~/.local" make install
 ```
 
-#### Or you may want to keep daemon and modules in single directory, that will work, just
+#### Or you may want to keep daemon and modules in single directory
+Daemon fully functional without installation, if you installed proper dependencies into system.
 ```bash
 ./build/flux -h
 ```
@@ -310,7 +339,13 @@ sudo dnf remove flux
 ### Uninstallation using `make`
 #### Download release archive with currently installed version and extract it, e.g
 ```bash
-wget 'https://github.com/itz-me-zappex/flux/archive/refs/tags/v1.23.4.tar.gz' && tar -xvf 'v1.23.4.tar.gz' && cd 'flux-1.23.4'
+wget 'https://github.com/itz-me-zappex/flux/archive/refs/tags/v1.23.4.tar.gz'
+```
+```bash
+tar -xvf 'v1.23.4.tar.gz'
+```
+```bash
+cd 'flux-1.23.4'
 ```
 
 #### Uninstall daemon from `/usr/local`
@@ -399,8 +434,21 @@ flux -tT '(\e[1;4;36m%d.%m.%Y\e[0m \e[1;4;31m%H:%M:%S\e[0m)'
 
 Now you have timestamp with bold and underlined text with cyan date and red time. Order or count of ANSI escape sequences does not matter, so you can turn timestamps into freaking rainbow without causing explosion of the Sun. Same is applicable to prefixes. If you do not like `\e` for whatever reason, you can use either `\033`, `\u001b` or `\x1b` instead, those are handled registry independently. More about colors and ANSI escape sequences you can find on `https://www.shellhacks.com/bash-colors` or on another website.
 
+### Startup
+#### Foreground
+```bash
+flux -Hvt
+```
+
+#### Background
+```bash
+flux -HtLl ~/.flux.log & exit
+```
+
+Running daemon as root also possible, but that feature almost useless and **UNSAFE**.
+
 ### Autostart
-Just add command to autostart using your DE/WM settings. Running daemon as root also possible, but that feature almost useless.
+Just add command to autostart using your DE/WM settings or config file.
 
 ## Configuration
 A simple INI is used for configuration.
@@ -420,8 +468,8 @@ As INI is not standartized, I should mention all supported features here.
 - Сase insensitivity of key names.
 - Comments (using `;` and/or `#` symbols).
 - Insensetivity to spaces before and after `=` symbol.
-- Appending values to config keys using `+=`. Works only in `exec-oneshot`, `exec-focus`, `exec-unfocus`, `lazy-exec-focus` and `lazy-exec-unfocus` config keys.
-- Regular expressions using `~=`. Works only in `name`, `command` and `owner` config keys.
+- Appending values to config keys using `+=`. Works only in [scripting](#Scripting) config keys.
+- Regular expressions using `~=`. Works only in [identifier](#Identifiers) config keys.
 
 **Unsupported:**
 - Line continuation.
