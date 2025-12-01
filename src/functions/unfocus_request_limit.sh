@@ -5,12 +5,12 @@ unfocus_request_limit(){
      [[ -n "$previous_section" &&
         "$disallow_request" != "$previous_window_xid=$previous_pid" ]]; then
     # Request limits to be applied on 'check_requests' internal event
-    if (( "${config_key_cpu_limit_map["$previous_section"]}" == 0 )); then
+    if (( "${config_key_unfocus_cpu_limit_map["$previous_section"]}" == 0 )); then
       # Request freezing of process if it is not limited
       if [[ -z "${background_freeze_pid_map["$previous_pid"]}" ]]; then
         request_freeze_map["$previous_pid"]='1'
       fi
-    elif (( "${config_key_cpu_limit_map["$previous_section"]}" < 100 )); then
+    elif (( "${config_key_unfocus_cpu_limit_map["$previous_section"]}" < 100 )); then
       # Request CPU limit for process if it is not limited
       if [[ -z "${background_cpu_limit_pid_map["$previous_pid"]}" ]]; then
         request_cpu_limit_map["$previous_pid"]='1'
@@ -23,9 +23,9 @@ unfocus_request_limit(){
     fi
     
     # Request 'SCHED_IDLE' scheduling policy for process if specified in config
-    if [[ -n "${config_key_idle_map["$previous_section"]}" ]]; then
+    if [[ -n "${config_key_unfocus_sched_idle_map["$previous_section"]}" ]]; then
       # Do not request 'idle' scheduling policy if CPU limit specified to zero because that is useless as process will not consume neither GPU nor CPU time
-      if (( "${config_key_cpu_limit_map["$previous_section"]}" > 0 )); then
+      if (( "${config_key_unfocus_cpu_limit_map["$previous_section"]}" > 0 )); then
         # Request 'idle' scheduling policy if it is not set already
         if [[ -z "${background_sched_idle_pid_map["$previous_pid"]}" ]]; then
           request_sched_idle_map["$previous_pid"]='1'
@@ -45,7 +45,7 @@ unfocus_request_limit(){
     fi
 
     # Request muting if specified in config
-    if [[ -n "${config_key_mute_map["$previous_section"]}" ]]; then
+    if [[ -n "${config_key_unfocus_mute_map["$previous_section"]}" ]]; then
       request_mute_map["$previous_pid"]='1'
     fi
   fi

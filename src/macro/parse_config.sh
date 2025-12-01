@@ -141,8 +141,8 @@ parse_config(){
             config_keys_order_map["$local_section"]+=" $config_line_count.owner"
             config_key_regexp_owner_map["$local_section"]="$local_regexp"
           ;;
-          cpu-limit )
-            config_key_cpu_limit_map["$local_section"]="${local_config_value/%\%/}"
+          unfocus-cpu-limit | cpu-limit )
+            config_key_unfocus_cpu_limit_map["$local_section"]="${local_config_value/%\%/}"
             is_section_useful_map["$local_section"]='1'
 
             # Exit with an error if CPU limit is specified incorrectly or greater than maximum allowed, regexp - any number with optional '%' symbol
@@ -153,10 +153,10 @@ parse_config(){
             fi
 
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $config_line_count.cpu-limit"
+            config_keys_order_map["$local_section"]+=" $config_line_count.unfocus-cpu-limit"
           ;;
-          delay )
-            config_key_delay_map["$local_section"]="$local_config_value"
+          limits-delay | delay )
+            config_key_limits_delay_map["$local_section"]="$local_config_value"
 
             # Exit with an error if value is neither an integer nor a float (that is what regexp means)
             if [[ ! "$local_config_value" =~ ^[0-9]+((\.|\,)[0-9]+)?$ ]]; then
@@ -165,7 +165,7 @@ parse_config(){
             fi
 
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $config_line_count.delay"
+            config_keys_order_map["$local_section"]+=" $config_line_count.limits-delay"
           ;;
           exec-exit )
             if [[ -z "$local_append" ]]; then
@@ -337,16 +337,16 @@ parse_config(){
             unset is_section_blank_map["$local_section"]
             config_keys_order_map["$local_section"]+=" $config_line_count.lazy-exec-unfocus"
           ;;
-          idle )
+          unfocus-sched-idle | idle )
             # Exit with an error if value is not boolean
-            if ! config_key_idle_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
+            if ! config_key_unfocus_sched_idle_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key$local_section_msg is not boolean!"
               (( parse_config_error_count++ ))
             fi
 
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $config_line_count.idle"
+            config_keys_order_map["$local_section"]+=" $config_line_count.unfocus-sched-idle"
           ;;
           unfocus-minimize )
             # Exit with an error if value is not boolean
@@ -394,9 +394,9 @@ parse_config(){
             unset is_section_blank_map["$local_section"]
             config_keys_order_map["$local_section"]+=" $config_line_count.group"
           ;;
-          mute )
+          unfocus-mute | mute )
             # Exit with an error if value is not boolean
-            if ! config_key_mute_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
+            if ! config_key_unfocus_mute_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key$local_section_msg is not boolean!"
               (( parse_config_error_count++ ))
             elif ! command -v pactl > /dev/null 2>&1; then
@@ -406,7 +406,7 @@ parse_config(){
 
             is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $config_line_count.mute"
+            config_keys_order_map["$local_section"]+=" $config_line_count.unfocus-mute"
           ;;
           * )
             message --warning "$local_line_count_msg Unknown '$local_config_key' config key$local_section_msg!"

@@ -104,8 +104,8 @@ fi
 # Needed to store values from config
 declare -A config_key_name_map \
 config_key_owner_map \
-config_key_cpu_limit_map \
-config_key_delay_map \
+config_key_unfocus_cpu_limit_map \
+config_key_limits_delay_map \
 config_key_exec_closure_map \
 config_key_exec_oneshot_map \
 config_key_exec_focus_map \
@@ -117,7 +117,7 @@ config_key_mangohud_source_config_map \
 config_key_mangohud_config_map \
 config_key_fps_unfocus_map \
 config_key_fps_focus_map \
-config_key_idle_map \
+config_key_unfocus_sched_idle_map \
 config_key_unfocus_minimize_map \
 config_key_focus_fullscreen_map \
 config_key_focus_grab_cursor_map \
@@ -125,7 +125,7 @@ config_key_group_map \
 config_key_exec_exit_map \
 config_key_exec_exit_focus_map \
 config_key_exec_exit_unfocus_map \
-config_key_mute_map
+config_key_unfocus_mute_map
 
 # Needed to remember line and order of keys in section, used to handle 'group' config key and print line in warnings after parsing (validation)
 declare -A config_keys_order_map

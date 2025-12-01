@@ -54,7 +54,7 @@ safe_exit(){
 
     # Unmute process, even if it is not muted, just in case
     if [[ -n "$local_section" && 
-          -n "${config_key_mute_map["$local_section"]}" ]]; then
+          -n "${config_key_unfocus_mute_map["$local_section"]}" ]]; then
       passed_window_xid="$local_temp_window_xid" \
       passed_process_name="$local_process_name" \
       passed_pid="$local_pid" \

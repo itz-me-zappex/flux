@@ -57,8 +57,8 @@ validate_config_keys(){
     # Exit with an error if MangoHud FPS limit is specified along with CPU limit
     if [[ -n "$local_fps_unfocus_line" ]]; then
       if [[ -n "${config_key_fps_unfocus_map["$local_temp_section_or_group"]}" &&
-            -n "${config_key_cpu_limit_map["$local_temp_section_or_group"]}" &&
-            "${config_key_cpu_limit_map["$local_temp_section_or_group"]}" != '100' ]]; then
+            -n "${config_key_unfocus_cpu_limit_map["$local_temp_section_or_group"]}" &&
+            "${config_key_unfocus_cpu_limit_map["$local_temp_section_or_group"]}" != '100' ]]; then
         message --warning "L$local_fps_unfocus_line: Do not use FPS limit along with CPU limit$local_section_msg!"
         (( parse_config_error_count++ ))
       fi
@@ -146,13 +146,13 @@ validate_config_keys(){
       fi
 
       # Set CPU limit to '100' (none) if it is not specified
-      if [[ -z "${config_key_cpu_limit_map["$local_temp_section_or_group"]}" ]]; then
-        config_key_cpu_limit_map["$local_temp_section_or_group"]='100'
+      if [[ -z "${config_key_unfocus_cpu_limit_map["$local_temp_section_or_group"]}" ]]; then
+        config_key_unfocus_cpu_limit_map["$local_temp_section_or_group"]='100'
       fi
 
       # Set 'delay' to '0' if it is not specified
-      if [[ -z "${config_key_delay_map["$local_temp_section_or_group"]}" ]]; then
-        config_key_delay_map["$local_temp_section_or_group"]='0'
+      if [[ -z "${config_key_limits_delay_map["$local_temp_section_or_group"]}" ]]; then
+        config_key_limits_delay_map["$local_temp_section_or_group"]='0'
       fi
 
       # Set 'mangohud-config' as 'mangohud-source-config' if it is not specified
@@ -184,7 +184,7 @@ validate_config_keys(){
 
       # Request check for ability to change and restore scheduling policies if specified in config
       if [[ -z "$should_validate_sched" &&
-            -n "${config_key_idle_map["$local_temp_section_or_group"]}" ]]; then
+            -n "${config_key_unfocus_sched_idle_map["$local_temp_section_or_group"]}" ]]; then
         should_validate_sched='1'
       fi
 

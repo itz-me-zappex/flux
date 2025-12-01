@@ -1,15 +1,15 @@
 # Required to terminate background process with delayed setting of 'SCHED_IDLE' or restore scheduling policy for process if window becomes focused or terminated
 unset_sched_idle(){
   local local_background_sched_idle_pid="${background_sched_idle_pid_map["$passed_pid"]}"
-  local local_config_delay="${config_key_delay_map["$passed_section"]}"
+  local local_limits_delay="${config_key_limits_delay_map["$passed_section"]}"
 
   # Check for existence of background process with delayed setting of 'SCHED_IDLE'
-  if [[ "$local_config_delay" != '0' ]] &&
+  if [[ "$local_limits_delay" != '0' ]] &&
      check_pid_existence "$local_background_sched_idle_pid"; then
     if ! kill "$local_background_sched_idle_pid" > /dev/null 2>&1; then
-      message --warning "Unable to cancel delayed for $local_config_delay second(s) delayed setting of 'idle' scheduling policy for process '$passed_process_name' with PID $passed_pid $passed_end_of_msg!"
+      message --warning "Unable to cancel delayed for $local_limits_delay second(s) delayed setting of 'idle' scheduling policy for process '$passed_process_name' with PID $passed_pid $passed_end_of_msg!"
     else
-      message --info "Delayed for $local_config_delay second(s) setting of 'idle' scheduling policy for process $passed_process_name' with PID $passed_pid has been cancelled $passed_end_of_msg."
+      message --info "Delayed for $local_limits_delay second(s) setting of 'idle' scheduling policy for process $passed_process_name' with PID $passed_pid has been cancelled $passed_end_of_msg."
     fi
   else
     # Define option and scheduling policy name depending by scheduling policy

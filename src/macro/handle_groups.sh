@@ -45,18 +45,18 @@ handle_groups(){
       get_key_line "$local_temp_section_or_group" 'group' ; local local_group_key_line="$get_key_line_result"
 
       # Store values from group to section
-      get_key_line "$local_temp_section_or_group" 'cpu-limit' ; local local_key_line="$get_key_line_result"
-      local local_group_key_value="${config_key_cpu_limit_map["$local_group"]}"
+      get_key_line "$local_temp_section_or_group" 'unfocus-cpu-limit' ; local local_key_line="$get_key_line_result"
+      local local_group_key_value="${config_key_unfocus_cpu_limit_map["$local_group"]}"
       if [[ -n "$local_group_key_value" ]] &&
          (( local_group_key_line > local_key_line )); then
-        config_key_cpu_limit_map["$local_temp_section_or_group"]="$local_group_key_value"
+        config_key_unfocus_cpu_limit_map["$local_temp_section_or_group"]="$local_group_key_value"
       fi
 
-      get_key_line "$local_temp_section_or_group" 'delay' ; local local_key_line="$get_key_line_result"
-      local local_group_key_value="${config_key_delay_map["$local_group"]}"
+      get_key_line "$local_temp_section_or_group" 'limits-delay' ; local local_key_line="$get_key_line_result"
+      local local_group_key_value="${config_key_limits_delay_map["$local_group"]}"
       if [[ -n "$local_group_key_value" ]] &&
          (( local_group_key_line > local_key_line )); then
-        config_key_delay_map["$local_temp_section_or_group"]="$local_group_key_value"
+        config_key_limits_delay_map["$local_temp_section_or_group"]="$local_group_key_value"
       fi
 
       get_key_line "$local_temp_section_or_group" 'exec-exit' ; local local_key_line="$get_key_line_result"
@@ -244,11 +244,11 @@ handle_groups(){
         config_key_fps_focus_map["$local_temp_section_or_group"]="$local_group_key_value"
       fi
 
-      get_key_line "$local_temp_section_or_group" 'idle' ; local local_key_line="$get_key_line_result"
-      local local_group_key_value="${config_key_idle_map["$local_group"]}"
+      get_key_line "$local_temp_section_or_group" 'unfocus-sched-idle' ; local local_key_line="$get_key_line_result"
+      local local_group_key_value="${config_key_unfocus_sched_idle_map["$local_group"]}"
       if [[ -n "$local_group_key_value" ]] &&
          (( local_group_key_line > local_key_line )); then
-        config_key_idle_map["$local_temp_section_or_group"]="$local_group_key_value"
+        config_key_unfocus_sched_idle_map["$local_temp_section_or_group"]="$local_group_key_value"
       fi
 
       get_key_line "$local_temp_section_or_group" 'unfocus-minimize' ; local local_key_line="$get_key_line_result"
@@ -272,11 +272,11 @@ handle_groups(){
         config_key_focus_grab_cursor_map["$local_temp_section_or_group"]="$local_group_key_value"
       fi
 
-      get_key_line "$local_temp_section_or_group" 'mute' ; local local_key_line="$get_key_line_result"
-      local local_group_key_value="${config_key_mute_map["$local_group"]}"
+      get_key_line "$local_temp_section_or_group" 'unfocus-mute' ; local local_key_line="$get_key_line_result"
+      local local_group_key_value="${config_key_unfocus_mute_map["$local_group"]}"
       if [[ -n "$local_group_key_value" ]] &&
          (( local_group_key_line > local_key_line )); then
-        config_key_mute_map["$local_temp_section_or_group"]="$local_group_key_value"
+        config_key_unfocus_mute_map["$local_temp_section_or_group"]="$local_group_key_value"
       fi
     fi
   done

@@ -69,10 +69,10 @@ An advanced automation daemon for X11 desktops and window managers. Designed to 
   - [Why did you write it in Bash?](#why-did-you-write-it-in-bash)
 
 ## Known issues
-- Freezing online/multiplayer games by setting `cpu-limit` to `0%` causes disconnects.
+- Freezing online/multiplayer games by setting `unfocus-cpu-limit` to `0%` causes disconnects.
   - Use less aggressive CPU limit to allow game to send/receive packets.
 - Stuttery audio in unfocused game if CPU limit is pretty aggressive.
-  - That should be expected, because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. Use `mute` config key, or in case you use Pipewire with Wireplumber, you may want to use `wpctl` as described [here](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber).
+  - That should be expected, because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. Use `unfocus-mute` config key, or in case you use Pipewire with Wireplumber, you may want to use `wpctl` as described [here](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber).
 - In some games, with `focus-grab-cursor` set to `true`, cursor still able to escape, but does not work outside of window. As example - "Ori and the Will of the Wisps" game on Unity engine in windowed mode.
   - Whether do not use `focus-grab-cursor` config key in such cases or ignore an issue, I can not do anything with this.
 - Daemon says that it waits for cursor ungrab "without any reason".
@@ -487,16 +487,16 @@ As INI is not standartized, I should mention all supported features here.
 #### Limits
 | Key | Description |
 |-----|-------------|
-| `cpu-limit` | CPU limit to set on unfocus event, accepts values between `0%` and `100%` (no limit), `%` symbol is optional. Defaults to `100%`. |
+| `unfocus-cpu-limit` | CPU limit to set on unfocus event, accepts values between `0%` and `100%` (no limit), `%` symbol is optional. Defaults to `100%`. |
 | `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`, cannot be equal to `0` as that means no limit. |
 | `fps-focus` | FPS to set on focus or list of comma-separated integers (e.g. `30,60,120`, used in MangoHud as FPS limits you can switch between using built-in keybinding), requires `fps-unfocus`. Defaults to `0` (i.e. no limit). |
-| `idle` | Boolean, set `SCHED_IDLE` scheduling policy for process on unfocus event to greatly reduce its priority. Daemon should run as `@flux` to be able restore `SCHED_RR`/`SCHED_FIFO`/`SCHED_OTHER`/`SCHED_BATCH` scheduling policy and only as root to restore `SCHED_DEADLINE` scheduling policy (if daemon does not have sufficient rights to restore these scheduling policies, it will print warning and will not change anything). Defaults to `false`. |
-| `mute` | Boolean, daemon mutes process on unfocus and unmutes on focus events. Uses `pactl` tool with a bunch of logic to parse list of sink inputs and find match using only process name and PID. Defaults to `false`. You may want to use [alternative](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber) way to mute process in case you use Pipewire with Wireplumber. |
+| `unfocus-sched-idle` | Boolean, set `SCHED_IDLE` scheduling policy for process on unfocus event to greatly reduce its priority. Daemon should run as `@flux` to be able restore `SCHED_RR`/`SCHED_FIFO`/`SCHED_OTHER`/`SCHED_BATCH` scheduling policy and only as root to restore `SCHED_DEADLINE` scheduling policy (if daemon does not have sufficient rights to restore these scheduling policies, it will print warning and will not change anything). Defaults to `false`. |
+| `unfocus-mute` | Boolean, daemon mutes process on unfocus and unmutes on focus events. Uses `pactl` tool with a bunch of logic to parse list of sink inputs and find match using only process name and PID. Defaults to `false`. You may want to use [alternative](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber) way to mute process in case you use Pipewire with Wireplumber. |
 
 #### Limits configuration
 | Key | Description |
 |-----|-------------|
-| `delay` | Delay in seconds before applying CPU/FPS limit and setting `SCHED_IDLE`. Defaults to `0`, supports values with floating point. |
+| `limits-delay` | Delay in seconds before applying CPU/FPS limit and setting `SCHED_IDLE`. Defaults to `0`, supports values with floating point. |
 | `mangohud-source-config` | Path to MangoHud config which should be used as a base before apply FPS limit in `mangohud-config`, if not specified, then target behaves as source. Useful if you not looking for duplicate MangoHud config for multiple games. |
 | `mangohud-config` | Path to MangoHud config which should be changed (target), required if you want change FPS limits and requires `fps-unfocus`. Make sure you created specified config, at least just keep it blank, otherwise MangoHud will not be able to load new config on fly and daemon will throw warnings related to config absence. Do not use the same config for multiple sections! |
 | `group` | Specify group from which section suppossed to inherit rules. Group declaration should begin with `@` symbol in both its section name and in value of `group` key. |
@@ -539,7 +539,7 @@ You can use `group` config key inside groups.
 To make things more clear, here is an example of how to create and use groups:
 ```ini
 [@games]
-mute = true
+unfocus-mute = true
 lazy-exec-focus += nvidia-settings -a '[gpu:0]/DigitalVibrance=150'
 lazy-exec-unfocus += nvidia-settings -a '[gpu:0]/DigitalVibrance=0'
 exec-oneshot += renice -n -4 $FOCUSED_PID
@@ -554,20 +554,20 @@ lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffs
 
 [Geometry Dash]
 name = GeometryDash.exe
-cpu-limit = 2%
-idle = true
+unfocus-cpu-limit = 2%
+unfocus-sched-idle = true
 group = @games-overclock
 
 [Ember Knights]
 name = EmberKnights_64.exe
-cpu-limit = 5%
-idle = true
+unfocus-cpu-limit = 5%
+unfocus-sched-idle = true
 unfocus-minimize = true
 group = @games
 
 [Alan Wake]
 name = AlanWake.exe
-cpu-limit = 0%
+unfocus-cpu-limit = 0%
 group = @games-overclock
 ```
 
@@ -578,14 +578,14 @@ To simplify config file editing and reduce its size, you may want to use regular
 ; Section matches both 'vkcube' and 'glxgears' processes
 [vkcube and glxgears]
 name ~= ^(vkcube|glxgears)$
-cpu-limit = 0%
+unfocus-cpu-limit = 0%
 
 ; Minecraft has extremely long command and process name is just 'java', so
 [Minecraft]
 name = java
 ;command = /usr/lib/jvm/java-17-openjdk/bin/java -Xms512m -Xmx8192m -Duser.language=en -Djava.library.path...minecraft-1.20.4-client.jar org.prismlauncher.EntryPoint
 command ~= minecraft
-cpu-limit = 5%
+unfocus-cpu-limit = 5%
 ```
 
 ### Configuration example
@@ -599,7 +599,7 @@ cpu-limit = 5%
 name = witcher3.exe
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\The Witcher 3\bin\x64\witcher3.exe 
 owner = zappex
-cpu-limit = 0%
+unfocus-cpu-limit = 0%
 lazy-exec-focus = killall picom
 lazy-exec-unfocus = picom
 
@@ -612,8 +612,8 @@ mangohud-config = ~/.config/MangoHud/wine-ForzaHorizon4.conf
 mangohud-source-config = ~/.config/MangoHud/MangoHud.conf
 fps-unfocus = 5
 fps-focus = 60
-mute = true
-idle = true
+unfocus-mute = true
+unfocus-sched-idle = true
 unfocus-minimize = true
 focus-fullscreen = true
 
@@ -622,8 +622,8 @@ focus-fullscreen = true
 name = GeometryDash.exe
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\Geometry Dash\GeometryDash.exe 
 owner = zappex
-cpu-limit = 2%
-idle = true
+unfocus-cpu-limit = 2%
+unfocus-sched-idle = true
 ```
 
 ### Environment variables passed to commands
@@ -649,7 +649,7 @@ You can use these variables in your commands and scripts that running from `exec
 As daemon does not parse config on a go, you need to restart daemon with `--hot` option after config file editing to make it handle already opened windows immediately after start.
 
 ### Alternative way to mute process audio on unfocus for Pipewire with Wireplumber
-This way should be faster and simplier, than using `pactl` tool with a bunch of logic as daemon does in case with `mute` config key.
+This way should be faster and simplier, than using `pactl` tool with a bunch of logic as daemon does in case with `unfocus-mute` config key.
 
 But, `wpctl` tool does not mute processes which run in sandbox with PID namespaces (e.g. Firejail), and will not work without Wireplumber, so it is not applicable on Pulseaudio setups too.
 

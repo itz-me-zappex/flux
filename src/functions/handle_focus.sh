@@ -47,7 +47,7 @@ handle_focus(){
   fi
 
   # Unmute process, even if it is not muted, just in case
-  if [[ -n "${config_key_mute_map["$section"]}" ]]; then
+  if [[ -n "${config_key_unfocus_mute_map["$section"]}" ]]; then
     passed_window_xid="$window_xid" \
     passed_process_name="$process_name" \
     passed_pid="$pid" \
