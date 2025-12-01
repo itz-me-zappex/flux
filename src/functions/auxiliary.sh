@@ -78,11 +78,14 @@ exec_on_event(){
   passed_end_of_msg='' \
   nohup setsid bash -c "$passed_event_command" > /dev/null 2>&1 &
 
+  local local_expand_variables_result
+  expand_variables "$passed_event_command"
+
   # Notify user about execution
   if [[ "$passed_command_type" == 'default' ]]; then
-    message --info "${passed_event_type^} command '$(bash -c "echo \"$passed_event_command\"")' from section '$passed_section' has been executed $passed_end_of_msg."
+    message --info "${passed_event_type^} command '$local_expand_variables_result' from section '$passed_section' has been executed $passed_end_of_msg."
   elif [[ "$passed_command_type" == 'lazy' ]]; then
-    message --info "Lazy $passed_event_type command '$(bash -c "echo \"$passed_event_command\"")' from section '$passed_section' has been executed $passed_end_of_msg."
+    message --info "Lazy $passed_event_type command '$local_expand_variables_result' from section '$passed_section' has been executed $passed_end_of_msg."
   fi
 }
 
@@ -274,4 +277,38 @@ unset_envvars(){
   UNFOCUSED_PROCESS_OWNER \
   UNFOCUSED_PROCESS_OWNER_USERNAME \
   UNFOCUSED_PROCESS_COMMAND
+}
+
+# Needed to replace variables in commands from config file with actual values
+# Result used to print messages about execution
+expand_variables(){
+  local local_command="$1"
+  local -a local_random_map
+
+  # Regexp means variable with optional '\' (escaping)
+  while [[ "$local_command" =~ ('\')?'$'[a-zA-Z0-9_]+ ]]; do
+    local local_rematch="${BASH_REMATCH[0]}"
+
+    if [[ "$local_rematch" == '\$'* ]]; then
+      # Since we want to ignore escaped variables, we should replace those temporary with something
+      local local_random="$SRANDOM"
+      local local_random_map["$local_random"]="$local_rematch"
+      local local_command="${local_command/"$local_rematch"/"$local_random"}"
+    else
+      # Replace variable with its value
+      local local_variable_name="${local_rematch#'$'}"
+      local local_command="${local_command/"$local_rematch"/"${!local_variable_name}"}"
+    fi
+  done
+
+  # Now we need to restore escaped variables back
+  local local_temp_random
+  for local_temp_random in "${!local_random_map[@]}"; do
+    local local_variable_without_escaping="${local_random_map["$local_temp_random"]}"
+    local local_variable_without_escaping="${local_variable_without_escaping#'\'}"
+    local local_command="${local_command/"$local_temp_random"/"$local_variable_without_escaping"}"
+  done
+
+  # Should be declared as local outside
+  local_expand_variables_result="$local_command"
 }
