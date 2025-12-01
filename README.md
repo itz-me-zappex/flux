@@ -306,11 +306,6 @@ Daemon fully functional without installation, if you installed proper dependenci
 sudo groupadd -r flux
 ```
 
-#### Add current user to `flux` group
-```bash
-sudo usermod -aG flux "$USER"
-```
-
 ## Post install
 ### Add user to `flux` group to bypass limitations related to changing scheduling policies
 ```bash
