@@ -17,7 +17,7 @@ background_grab_cursor(){
   # Enforce 'SCHED_FIFO' to reduce mouse input lag
   if check_pid_existence "$local_flux_grab_cursor_pid" &&
      ! chrt --fifo --pid 99 "$local_flux_grab_cursor_pid" > /dev/null 2>&1; then
-    message --warning "Unable to change scheduling policy to 'fifo' for 'flux-grab-cursor' hooked to process '$passed_process_name' with PID $passed_pid of window $passed_window_xid!"
+    message --warning "Unable to change scheduling policy to 'fifo' for 'flux-grab-cursor' ($local_flux_grab_cursor_pid) hooked to process '$passed_process_name' with PID $passed_pid of window $passed_window_xid!"
   fi
 
   local local_flux_grab_cursor_line
