@@ -35,10 +35,10 @@ background_cpu_limit(){
     cpulimit --lazy --limit="$local_real_cpu_limit" --pid="$passed_pid" > /dev/null 2>&1 &
     local local_cpulimit_pid="$!"
 
-    # Enforce 'SCHED_BATCH' to improve interval stability between interrupts
+    # Enforce 'SCHED_FIFO' to improve interval stability between interrupts
     if check_pid_existence "$local_cpulimit_pid" &&
-       ! chrt --batch --pid 0 "$local_cpulimit_pid" > /dev/null 2>&1; then
-      message --warning "Daemon has insufficient rights to change scheduling policy to 'batch' for 'cpulimit' which is hooked to process '$passed_process_name' with PID $passed_pid of window $passed_window_xid!"
+       ! chrt --fifo --pid 99 "$local_cpulimit_pid" > /dev/null 2>&1; then
+      message --warning "Unable to change scheduling policy to 'fifo' for 'cpulimit' hooked to process '$passed_process_name' with PID $passed_pid of window $passed_window_xid!"
     fi
 
     trap 'message --info "Process '"'$passed_process_name'"' with PID $passed_pid of window $passed_window_xid has been CPU unlimited because of daemon termination." ; \
