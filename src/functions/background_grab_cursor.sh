@@ -8,16 +8,16 @@ background_grab_cursor(){
   elif [[ ! -e "$flux_grab_cursor_fifo_path" ]]; then
     message --warning "Unable to grab cursor for window $passed_window_xid of process '$passed_process_name' with PID $passed_pid on focus event, '$(shorten_path "$flux_grab_cursor_fifo_path")' FIFO file does not exist!"
     return 1
-  else
-    "$flux_grab_cursor_path" "$passed_window_xid" > "$flux_grab_cursor_fifo_path" &
-    local local_flux_grab_cursor_pid="$!"
-    trap 'kill "$local_flux_grab_cursor_pid"' SIGINT SIGTERM
+  fi
 
-    # Enforce 'SCHED_FIFO' to reduce mouse input lag
-    if check_pid_existence "$local_flux_grab_cursor_pid" &&
-       ! chrt --fifo --pid 99 "$local_flux_grab_cursor_pid" > /dev/null 2>&1; then
-      message --warning "Unable to change scheduling policy to 'fifo' for 'flux-grab-cursor' hooked to process '$passed_process_name' with PID $passed_pid of window $passed_window_xid!"
-    fi
+  "$flux_grab_cursor_path" "$passed_window_xid" > "$flux_grab_cursor_fifo_path" &
+  local local_flux_grab_cursor_pid="$!"
+  trap 'kill "$local_flux_grab_cursor_pid"' SIGINT SIGTERM
+
+  # Enforce 'SCHED_FIFO' to reduce mouse input lag
+  if check_pid_existence "$local_flux_grab_cursor_pid" &&
+     ! chrt --fifo --pid 99 "$local_flux_grab_cursor_pid" > /dev/null 2>&1; then
+    message --warning "Unable to change scheduling policy to 'fifo' for 'flux-grab-cursor' hooked to process '$passed_process_name' with PID $passed_pid of window $passed_window_xid!"
   fi
 
   local local_flux_grab_cursor_line
