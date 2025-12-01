@@ -146,8 +146,10 @@ parse_config(){
             is_section_useful_map["$local_section"]='1'
 
             # Exit with an error if CPU limit is specified incorrectly or greater than maximum allowed, regexp - any number with optional '%' symbol
-            if [[ ! "$local_config_value" =~ ^[0-9]+(\%)?$ ]] ||
-               ! (( "${local_config_value/%\%/}" * cpu_threads <= max_cpu_limit )); then
+            if [[ ! "$local_config_value" =~ ^[0-9]+(\%)?$ ]]; then
+              message --warning "$local_line_count_msg Value '$local_config_value' in '$local_config_key' config key$local_section_msg is invalid! Expected value is number between 0 and 100 with '%' symbol (optional)."
+              (( parse_config_error_count++ ))
+            elif ! (( "${local_config_value/%\%/}" * cpu_threads <= max_cpu_limit )); then
               message --warning "$local_line_count_msg Value '$local_config_value' in '$local_config_key' config key$local_section_msg is invalid! Allowed values are between 0 and 100."
               (( parse_config_error_count++ ))
             fi
