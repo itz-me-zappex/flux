@@ -2,10 +2,10 @@
 message(){
   # Get timestamp if that behavior is allowed using '--timestamps' option
   if [[ -n "$allow_timestamps" ]]; then
-    local local_timestamp="$(printf "%($timestamp_format)T") "
+    local local_timestamp="%($timestamp_format)T "
 
     if [[ -n "$log_timestamp_format" ]]; then
-      local local_log_timestamp="$(printf "%($log_timestamp_format)T") "
+      local local_log_timestamp="%($log_timestamp_format)T "
     fi
   fi
 
@@ -13,20 +13,20 @@ message(){
   case "$1" in
   --error )
     shift 1
-    echo "$local_timestamp$prefix_error $*" >&2
+    printf "$local_timestamp$prefix_error $*\n" >&2
     local local_log_prefix="$log_prefix_error"
     local local_notification_icon='emblem-error'
   ;;
   --error-opt )
     # Setting '$local_log_prefix' is unneeded because this message will not be logged ever
     shift 1
-    echo "$local_timestamp$prefix_error $*" >&2
+    printf "$local_timestamp$prefix_error $*\n" >&2
     echo "$prefix_info Try 'flux --help' for more information."
   ;;
   --info )
     shift 1
     if [[ -z "$quiet" ]]; then
-      echo "$local_timestamp$prefix_info $*"
+      printf "$local_timestamp$prefix_info $*\n"
       local local_log_prefix="$log_prefix_info"
       local local_notification_icon='emblem-information'
     else
@@ -36,7 +36,7 @@ message(){
   --verbose )
     shift 1
     if [[ -n "$verbose" ]]; then
-      echo "$local_timestamp$prefix_verbose $*"
+      printf "$local_timestamp$prefix_verbose $*\n"
       local local_log_prefix="$log_prefix_verbose"
       local local_notification_icon='emblem-added'
     else
@@ -45,7 +45,7 @@ message(){
   ;;
   --warning )
     shift 1
-    echo "$local_timestamp$prefix_warning $*" >&2
+    printf "$local_timestamp$prefix_warning $*\n" >&2
     local local_log_prefix="$log_prefix_warning"
     local local_notification_icon='emblem-warning'
   esac
@@ -54,7 +54,7 @@ message(){
   if [[ -n "$allow_logging" ]]; then
     # Check log file for read-write access before store message to log
     if check_rw "$log"; then
-      echo "$local_log_timestamp$local_log_prefix $*" >> "$log"
+      printf "$local_log_timestamp$local_log_prefix $*\n" >> "$log"
     else
       allow_logging='' message --warning "Unable to write message to log file '$(shorten_path "$log")', recreate it or check read-write access!"
     fi
