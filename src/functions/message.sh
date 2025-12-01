@@ -56,7 +56,7 @@ message(){
     if check_rw "$log"; then
       printf "$local_log_timestamp$local_log_prefix $*\n" >> "$log"
     else
-      allow_logging='' message --warning "Unable to write message to log file '$(shorten_path "$log")', recreate it or check read-write access!"
+      printf "$local_timestamp$prefix_warning Unable to write message to log file '$(shorten_path "$log")', recreate it or check read-write access!\n" >&2
     fi
   fi
 
