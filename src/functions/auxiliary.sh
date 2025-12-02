@@ -216,18 +216,19 @@ get_key_line(){
 
   # Get section line if key name is not specified
   if [[ -z "$local_key_name" ]]; then
-    get_key_line_result="${config_keys_order_map["$local_section"]/' '*/}"
+    local_get_key_line_result="${config_keys_order_map["$local_section"]/' '*/}"
   else
     # Get key line
     local local_temp_key
     for local_temp_key in ${config_keys_order_map["$local_section"]}; do
       if [[ "$local_temp_key" == *".$local_key_name" ]]; then
-        get_key_line_result="${local_temp_key/'.'*/}"
+        local_get_key_line_result="${local_temp_key/'.'*/}"
         return 0
       fi
     done
 
-    get_key_line_result='0'
+    # Should be declared as local outside
+    local_get_key_line_result='0'
   fi
 }
 

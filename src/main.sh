@@ -218,8 +218,7 @@ get_key_line \
 config_keys_order_map \
 config_key_exec_closure_append_to_default_map \
 config_key_exec_exit_append_to_default_map \
-config_line_count \
-get_key_line_result
+config_line_count
 
 unset_groups
 unset -f unset_groups \
