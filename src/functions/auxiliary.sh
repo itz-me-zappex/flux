@@ -304,9 +304,7 @@ expand_variables(){
   # Now we need to restore escaped variables back
   local local_temp_random
   for local_temp_random in "${!local_random_map[@]}"; do
-    local local_variable_without_escaping="${local_random_map["$local_temp_random"]}"
-    local local_variable_without_escaping="${local_variable_without_escaping#'\'}"
-    local local_command="${local_command/"$local_temp_random"/"$local_variable_without_escaping"}"
+    local local_command="${local_command/"$local_temp_random"/"${local_random_map["$local_temp_random"]}"}"
   done
 
   # Should be declared as local outside
