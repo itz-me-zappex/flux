@@ -193,8 +193,8 @@ shorten_path(){
     local local_path="${local_path/"$HOME"/'~'}"
   fi
 
-  # Value will be printed in message from command substitution
-  echo "$local_path"
+  # Should be declared as local outside
+  local_shorten_path_result="$local_path"
 }
 
 # Required to detect whether section is a group or not
@@ -222,6 +222,7 @@ get_key_line(){
     local local_temp_key
     for local_temp_key in ${config_keys_order_map["$local_section"]}; do
       if [[ "$local_temp_key" == *".$local_key_name" ]]; then
+        # Should be declared as local outside
         local_get_key_line_result="${local_temp_key/'.'*/}"
         return 0
       fi

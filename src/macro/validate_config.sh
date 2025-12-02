@@ -25,19 +25,27 @@ validate_config(){
   elif [[ -e "$config" &&
           ! -f "$config" ]]; then
     # Exit with an error if path exists but that is not a file
-    message --error "Path '$(shorten_path "$config")' specified in '--config' is not a file!"
+    local local_shorten_path_result
+    shorten_path "$config"
+    message --error "Path '$local_shorten_path_result' specified in '--config' is not a file!"
     exit 1
   elif [[ ! -f "$config" ]]; then
     # Exit with an error if config file does not exist
-    message --error "Config file '$(shorten_path "$config")' does not exist!"
+    local local_shorten_path_result
+    shorten_path "$config"
+    message --error "Config file '$local_shorten_path_result' does not exist!"
     exit 1
   elif ! check_ro "$config"; then
     # Exit with an error if config file is not readable
-    message --error "Config file '$(shorten_path "$config")' is not accessible for reading!"
+    local local_shorten_path_result
+    shorten_path "$config"
+    message --error "Config file '$local_shorten_path_result' is not accessible for reading!"
     exit 1
   elif [[ -z "$(<"$config")" ]]; then
     # Exit with an error if config file is blank
-    message --error "Config file '$(shorten_path "$config")' is blank!"
+    local local_shorten_path_result
+    shorten_path "$config"
+    message --error "Config file '$local_shorten_path_result' is blank!"
     exit 1
   fi
 }

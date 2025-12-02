@@ -219,7 +219,9 @@ validate_config_keys(){
       local local_error_msg="all $parse_config_error_count errors"
     fi
 
-    message --error "Unable to continue, fix $local_error_msg displayed above in '$(shorten_path "$config")' config file before start!"
+    local local_shorten_path_result
+    shorten_path "$config"
+    message --error "Unable to continue, fix $local_error_msg displayed above in '$local_shorten_path_result' config file before start!"
     exit 1
   fi
 }

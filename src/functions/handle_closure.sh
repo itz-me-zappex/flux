@@ -150,7 +150,10 @@ handle_closure(){
       elif [[ -n "$local_terminated_section" &&
               -n "${request_fps_limit_map["$local_terminated_section"]}" ]]; then
         unset request_fps_limit_map["$local_terminated_section"]
-        message --verbose "MangoHud config file '$(shorten_path "${config_key_mangohud_config_map["$local_terminated_section"]}")' FPS limiting from section '$local_terminated_section' has been cancelled on window $local_temp_terminated_window_xid closure event of process '$local_terminated_process_name' with PID $local_terminated_pid."
+
+        local local_shorten_path_result
+        shorten_path "${config_key_mangohud_config_map["$local_terminated_section"]}"
+        message --verbose "MangoHud config file '$local_shorten_path_result' FPS limiting from section '$local_terminated_section' has been cancelled on window $local_temp_terminated_window_xid closure event of process '$local_terminated_process_name' with PID $local_terminated_pid."
 
         unset local_closure_notify
       fi

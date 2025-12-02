@@ -280,7 +280,9 @@ parse_config(){
             # Check for config file existence
             if [[ ! -f "$local_config_value" ]]; then
               # Exit with an error if specified MangoHud config file does not exist
-              message --warning "$local_line_count_msg MangoHud config file '$(shorten_path "$local_config_value")' specified in '$local_config_key' config key$local_section_msg does not exist!"
+              local local_shorten_path_result
+              shorten_path "$local_config_value"
+              message --warning "$local_line_count_msg MangoHud config file '$local_shorten_path_result' specified in '$local_config_key' config key$local_section_msg does not exist!"
               (( parse_config_error_count++ ))
             fi
 

@@ -61,7 +61,9 @@ message(){
     if check_rw "$log"; then
       printf "$local_timestamp" "$local_current_time" "$local_log_prefix $*" >> "$log"
     else
-      printf "$local_timestamp" "$local_current_time" "$prefix_warning Unable to write message to log file '$(shorten_path "$log")', recreate it or check read-write access!" >&2
+      local local_shorten_path_result
+      shorten_path "$log"
+      printf "$local_timestamp" "$local_current_time" "$prefix_warning Unable to write message to log file '$local_shorten_path_result', recreate it or check read-write access!" >&2
     fi
   fi
 

@@ -3,10 +3,14 @@ background_grab_cursor(){
   # Do not grab cursor if something is wrong with named pipe
   if [[ -e "$flux_grab_cursor_fifo_path" &&
         ! -p "$flux_grab_cursor_fifo_path" ]]; then
-    message --warning "Unable to grab cursor for window $passed_window_xid of process '$passed_process_name' with PID $passed_pid on focus event, '$(shorten_path "$flux_grab_cursor_fifo_path")' is not a FIFO file!"
+    local local_shorten_path_result
+    shorten_path "$flux_grab_cursor_fifo_path"
+    message --warning "Unable to grab cursor for window $passed_window_xid of process '$passed_process_name' with PID $passed_pid on focus event, '$local_shorten_path_result' is not a FIFO file!"
     return 1
   elif [[ ! -e "$flux_grab_cursor_fifo_path" ]]; then
-    message --warning "Unable to grab cursor for window $passed_window_xid of process '$passed_process_name' with PID $passed_pid on focus event, '$(shorten_path "$flux_grab_cursor_fifo_path")' FIFO file does not exist!"
+    local local_shorten_path_result
+    shorten_path "$flux_grab_cursor_fifo_path"
+    message --warning "Unable to grab cursor for window $passed_window_xid of process '$passed_process_name' with PID $passed_pid on focus event, '$local_shorten_path_result' FIFO file does not exist!"
     return 1
   fi
 

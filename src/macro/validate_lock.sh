@@ -4,7 +4,9 @@ validate_lock(){
   if [[ -f "$flux_lock_file_path" ]]; then
     # Exit with an error if lock file is not readable
     if ! check_ro "$flux_lock_file_path"; then
-      message --error "Unable to read '$(shorten_path "$flux_lock_file_path")' lock file!"
+      local local_shorten_path_result
+      shorten_path "$flux_lock_file_path"
+      message --error "Unable to read '$local_shorten_path_result' lock file!"
       exit 1
     fi
 
@@ -20,12 +22,16 @@ validate_lock(){
 
     # Exit with an error if lock file exists but not accessible for writing
     if ! check_rw "$flux_lock_file_path"; then
-      message --error "Unable to overwrite '$(shorten_path "$flux_lock_file_path")' lock file!"
+      local local_shorten_path_result
+      shorten_path "$flux_lock_file_path"
+      message --error "Unable to overwrite '$local_shorten_path_result' lock file!"
       exit 1
     fi
   elif [[ -e "$flux_lock_file_path" &&
           ! -f "$flux_lock_file_path" ]]; then
-    message --error "Unable to handle '$(shorten_path "$flux_lock_file_path")', file is expected!"
+    local local_shorten_path_result
+    shorten_path "$flux_lock_file_path"
+    message --error "Unable to handle '$local_shorten_path_result', file is expected!"
     exit 1
   fi
 
@@ -34,7 +40,14 @@ validate_lock(){
     # Store daemon PID to lock file to check its existence on next launch (if lock file still exists, e.g. after crash or SIGKILL)
     echo "$$" > "$flux_lock_file_path"
   else
-    message --error "Unable to create '$(shorten_path "$flux_lock_file_path")' lock file, '$(shorten_path "$flux_temp_dir_path")' directory is not accessible for read-write operations!"
+    local local_shorten_path_result
+    shorten_path "$flux_lock_file_path"
+    local local_shorten_path_result_1="$local_shorten_path_result"
+
+    local local_shorten_path_result
+    shorten_path "$flux_temp_dir_path"
+    local local_shorten_path_result_2="$local_shorten_path_result"
+    message --error "Unable to create '$local_shorten_path_result_1' lock file, '$local_shorten_path_result_2' directory is not accessible for read-write operations!"
     exit 1
   fi
 }
