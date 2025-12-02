@@ -41,7 +41,10 @@ background_grab_cursor(){
       message --info "Attempt to grab cursor and redirect input to window $passed_window_xid of process '$passed_process_name' with PID $passed_pid on focus event..."
     ;;
     'success' )
-      message --info "Cursor for window $passed_window_xid of process '$passed_process_name' with PID $passed_pid has been grabbed fully on focus event."
+      message --info "Cursor for window $passed_window_xid of process '$passed_process_name' with PID $passed_pid has been grabbed successfully on focus event."
+      break
     esac
   done < "$flux_grab_cursor_fifo_path"
+
+  wait "$local_flux_grab_cursor_pid"
 }
