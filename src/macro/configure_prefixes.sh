@@ -32,7 +32,9 @@ configure_prefixes(){
 
     # Check for existence of value in variable indirectly
     if [[ -n "${!local_variable_name}" ]]; then
-      eval "prefix_$local_temp_prefix_type"=\'"$(colors_interpret "$local_variable_name")"\'
+      local local_colors_interpret_result
+      colors_interpret "$local_variable_name"
+      eval "prefix_$local_temp_prefix_type"=\'"$local_colors_interpret_result"\'
       local local_is_prefixes_changed='1'
       unset "new_prefix_$local_temp_prefix_type"
     fi
@@ -40,7 +42,9 @@ configure_prefixes(){
 
   # Set specified timestamp format if any and handle ANSI escapes
   if [[ -n "$new_timestamp_format" ]]; then
-    timestamp_format="$(colors_interpret "new_timestamp_format")"
+    local local_colors_interpret_result
+    colors_interpret "new_timestamp_format"
+    timestamp_format="$local_colors_interpret_result"
     local local_is_timestamp_format_changed='1'
     unset new_timestamp_format
   fi

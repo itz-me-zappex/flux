@@ -171,8 +171,8 @@ colors_interpret(){
     local local_variable_value="${local_variable_value//"${BASH_REMATCH[0]}"/"$local_ansi_interpretation"}"
   done
 
-  # Value will be stored to variable from command substitution
-  echo "$local_variable_value"
+  # Should be declared as local outside
+  local_colors_interpret_result="$local_variable_value"
 }
 
 # Required to shorten paths in messages if possible
