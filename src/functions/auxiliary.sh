@@ -136,11 +136,8 @@ get_realpath(){
     esac
   done
 
-  # Summarize absolute path
-  local local_absolute_path="${local_stack_map[*]}"
-
-  # Output will be stored to variable from command substitution
-  echo "$local_absolute_path"
+  # Should be declared as local outside
+  local_get_realpath_result="${local_stack_map[*]}"
 }
 
 # Required to check whether value is boolean or not and simplify it

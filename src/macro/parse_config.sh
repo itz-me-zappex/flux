@@ -264,7 +264,9 @@ parse_config(){
           ;;
           mangohud-source-config | mangohud-config )
             # Get absolute path to MangoHud config in case it is specified as relative
-            local local_config_value="$(get_realpath "$local_config_value")"
+            local local_get_realpath_result
+            get_realpath "$local_config_value"
+            local local_config_value="$local_get_realpath_result"
 
             # Set path to MangoHud config depending by specified key
             case "$local_config_key" in

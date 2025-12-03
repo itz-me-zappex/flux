@@ -22,7 +22,9 @@ parse_options(){
       shift "$shift"
 
       if [[ -n "$config" ]]; then
-        config="$(get_realpath "$config")"
+        local local_get_realpath_result
+        get_realpath "$config"
+        config="$local_get_realpath_result"
       fi
     ;;
     --get | -g | --get=* )
@@ -207,7 +209,9 @@ Examples:
       shift "$shift"
 
       if [[ -n "$log" ]]; then
-        log="$(get_realpath "$log")"
+        local local_get_realpath_result
+        get_realpath "$log"
+        log="$local_get_realpath_result"
       fi
     ;;
     --log-overwrite | -L )

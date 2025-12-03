@@ -29,7 +29,10 @@ flux_listener_fifo_path="${flux_temp_fifo_dir_path}/flux-listener"
 flux_grab_cursor_fifo_path="${flux_temp_fifo_dir_path}/flux-grab-cursor"
 
 # Define prefix where daemon has been installed using path to 'flux'
-flux_path="$(get_realpath "$0")"
+local_get_realpath_result=''
+get_realpath "$0"
+flux_path="$local_get_realpath_result"
+unset local_get_realpath_result
 case "$flux_path" in
 *'/bin/flux'* )
   # Keep only prefix path
