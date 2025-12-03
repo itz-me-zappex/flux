@@ -146,10 +146,10 @@ simplify_bool(){
 
   # Return an error if value is not boolean
   if [[ "${local_value,,}" =~ ^('true'|'t'|'yes'|'y'|'1'|'false'|'f'|'no'|'n'|'0')$ ]]; then
-    # Value will be stored to variable from command substitution
     # No need to set value in case it is false
     if [[ "${local_value,,}" =~ ^('true'|'t'|'yes'|'y'|'1')$ ]]; then
-      echo 1
+      # Should be declared as local outside
+      local_simplify_bool_result='1'
     fi
   else
     return 1

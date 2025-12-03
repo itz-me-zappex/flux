@@ -345,9 +345,12 @@ parse_config(){
           ;;
           unfocus-sched-idle | idle )
             # Exit with an error if value is not boolean
-            if ! config_key_unfocus_sched_idle_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
+            local local_simplify_bool_result
+            if ! simplify_bool "$local_config_value"; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key$local_section_msg is not boolean!"
               (( parse_config_error_count++ ))
+            else
+              config_key_unfocus_sched_idle_map["$local_section"]="$local_simplify_bool_result"
             fi
 
             is_section_useful_map["$local_section"]='1'
@@ -356,9 +359,12 @@ parse_config(){
           ;;
           unfocus-minimize )
             # Exit with an error if value is not boolean
-            if ! config_key_unfocus_minimize_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
+            local local_simplify_bool_result
+            if ! simplify_bool "$local_config_value"; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key$local_section_msg is not boolean!"
               (( parse_config_error_count++ ))
+            else
+              config_key_unfocus_minimize_map["$local_section"]="$local_simplify_bool_result"
             fi
 
             is_section_useful_map["$local_section"]='1'
@@ -367,9 +373,12 @@ parse_config(){
           ;;
           focus-fullscreen )
             # Exit with an error if value is not boolean
-            if ! config_key_focus_fullscreen_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
+            local local_simplify_bool_result
+            if ! simplify_bool "$local_config_value"; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key$local_section_msg is not boolean!"
               (( parse_config_error_count++ ))
+            else
+              config_key_focus_fullscreen_map["$local_section"]="$local_simplify_bool_result"
             fi
 
             is_section_useful_map["$local_section"]='1'
@@ -378,9 +387,12 @@ parse_config(){
           ;;
           focus-grab-cursor )
             # Exit with an error if value is not boolean
-            if ! config_key_focus_grab_cursor_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
+            local local_simplify_bool_result
+            if ! simplify_bool "$local_config_value"; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key$local_section_msg is not boolean!"
               (( parse_config_error_count++ ))
+            else
+              config_key_focus_grab_cursor_map["$local_section"]="$local_simplify_bool_result"
             fi
 
             is_section_useful_map["$local_section"]='1'
@@ -402,12 +414,15 @@ parse_config(){
           ;;
           unfocus-mute | mute )
             # Exit with an error if value is not boolean
-            if ! config_key_unfocus_mute_map["$local_section"]="$(simplify_bool "$local_config_value")"; then
+            local local_simplify_bool_result
+            if ! simplify_bool "$local_config_value"; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key$local_section_msg is not boolean!"
               (( parse_config_error_count++ ))
             elif ! command -v pactl > /dev/null 2>&1; then
               message --warning "$local_line_count_msg Config key '$local_config_key'$local_section_msg requires 'pactl' command which is missing!"
               (( parse_config_error_count++ ))
+            else
+              config_key_unfocus_mute_map["$local_section"]="$local_simplify_bool_result"
             fi
 
             is_section_useful_map["$local_section"]='1'
