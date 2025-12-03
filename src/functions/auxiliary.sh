@@ -290,7 +290,16 @@ expand_variables(){
 
     if [[ "$local_rematch" == '\$'* ]]; then
       # Since we want to ignore escaped variables, we should replace those temporary with something
-      local local_random="$SRANDOM"
+      # Just in case random value will match one in command string
+      while true; do
+        local local_random="$SRANDOM"
+        if [[ "$local_command" == *"$local_random"* ]]; then
+          continue
+        else
+          break
+        fi
+      done
+
       local local_random_map["$local_random"]="$local_rematch"
       local local_command="${local_command/"$local_rematch"/"$local_random"}"
     else
