@@ -285,10 +285,17 @@ expand_variables(){
   local -a local_random_map
 
   # Regexp means variable with optional '\' (escaping)
-  while [[ "$local_command" =~ ('\')?'$'[a-zA-Z0-9_]+ ]]; do
+  while [[ "$local_command" =~ ('\')+?'$'[a-zA-Z0-9_]+ ]]; do
     local local_rematch="${BASH_REMATCH[0]}"
 
-    if [[ "$local_rematch" == '\$'* ]]; then
+    local local_first_backslashes="${local_rematch/[^'\']*/}"
+    local local_first_backslash_count="${#local_first_backslashes}"
+
+    # '0' if even, '1' if odd
+    local local_backslash_count_is_odd="$(( local_first_backslash_count - local_first_backslash_count / 2 * 2 ))"
+    echo "$local_backslash_count_is_odd"
+
+    if [[ "$local_backslash_count_is_odd" == '1' ]]; then
       # Since we want to ignore escaped variables, we should replace those temporary with something
       # Just in case random value will match one in command string
       while true; do
@@ -304,8 +311,8 @@ expand_variables(){
       local local_command="${local_command/"$local_rematch"/"$local_random"}"
     else
       # Replace variable with its value
-      local local_variable_name="${local_rematch#'$'}"
-      local local_command="${local_command/"$local_rematch"/"${!local_variable_name}"}"
+      local local_variable_name="${local_rematch#"$local_first_backslashes\$"}"
+      local local_command="${local_command/"$local_rematch"/"$local_first_backslashes${!local_variable_name}"}"
     fi
   done
 
