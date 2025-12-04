@@ -16,11 +16,11 @@ unset_sched_idle(){
     case "${sched_previous_policy_map["$passed_pid"]}" in
     'SCHED_FIFO' )
       local local_policy_option='--fifo'
-      local local_policy_name="'FIFO' (first in first out)"
+      local local_policy_name="'FIFO'"
     ;;
     'SCHED_RR' )
       local local_policy_option='--rr'
-      local local_policy_name="'RR' (round robin)"
+      local local_policy_name="'RR'"
     ;;
     'SCHED_OTHER' )
       local local_policy_option='--other'
