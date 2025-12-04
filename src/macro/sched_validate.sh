@@ -11,7 +11,7 @@ sched_validate(){
     local local_sleep_pid="$!"
     chrt --idle --pid 0 "$local_sleep_pid" > /dev/null 2>&1
     if ! chrt --other --pid 0 "$local_sleep_pid" > /dev/null 2>&1; then
-      message --warning "Daemon has insufficient rights to change scheduling policies! To make 'idle' config key work and apply optimizations to 'cpulimit' and 'flux-grab-cursor', add your user to 'flux' group and reboot."
+      message --warning "Daemon has insufficient rights to change scheduling policies! To make 'unfocus-sched-idle' config key work and apply optimizations to 'cpulimit' and 'flux-grab-cursor', add your user to 'flux' group and reboot."
     else
       sched_change_is_supported='1'
     fi
@@ -22,7 +22,7 @@ sched_validate(){
        ! chrt --fifo 1 echo > /dev/null 2>&1; then
       # Adding user to 'flux' group already allows using these scheduling policies
       # This message will appear in case user configured '/etc/security/limits.conf' manually and did not allow realtime policies
-      message --warning "Daemon has insufficient rights to support 'RR' and 'FIFO' scheduling policies! Optimizations for 'cpulimit' and 'flux-grab-cursor' will not be applied."
+      message --warning "Daemon has insufficient rights to support 'RR' and 'FIFO' scheduling policies! Optimizations to 'cpulimit' and 'flux-grab-cursor' will not be applied."
     else
       sched_realtime_is_supported='1'
     fi
