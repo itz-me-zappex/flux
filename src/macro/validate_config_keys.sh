@@ -198,12 +198,6 @@ validate_config_keys(){
         fi
       fi
 
-      # Request check for ability to change and restore scheduling policies if specified in config
-      if [[ -z "$should_validate_sched" &&
-            -n "${config_key_unfocus_sched_idle_map["$local_temp_section_or_group"]}" ]]; then
-        should_validate_sched='1'
-      fi
-
       # Request creation of FIFO file for 'flux-grab-cursor' if specified in config
       if [[ -z "$should_create_fifo_for_flux_grab_cursor" &&
             -n "${config_key_focus_grab_cursor_map["$local_temp_section_or_group"]}" ]]; then

@@ -256,10 +256,7 @@ colors_interpret
 daemon_prepare
 unset -f daemon_prepare
 
-if [[ -n "$should_validate_sched" ]]; then
-  sched_validate
-  unset should_validate_sched
-fi
+sched_validate
 unset -f sched_validate
 
 # Read events from 'flux-listener' binary
