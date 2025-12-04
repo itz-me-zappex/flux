@@ -36,9 +36,12 @@ background_cpu_limit(){
     local local_cpulimit_pid="$!"
 
     # Enforce 'SCHED_FIFO' to improve interval stability between interrupts
-    if check_pid_existence "$local_cpulimit_pid" &&
-       ! chrt --fifo --pid 99 "$local_cpulimit_pid" > /dev/null 2>&1; then
-      message --warning "Unable to change scheduling policy to 'fifo' for 'cpulimit' ($local_cpulimit_pid) hooked to process '$passed_process_name' with PID $passed_pid of window $passed_window_xid!"
+    if [[ -n "$sched_realtime_is_supported" ]]; then
+      if ! chrt --fifo --pid 99 "$local_cpulimit_pid" > /dev/null 2>&1; then
+        message --warning "Unable to change scheduling policy to 'FIFO' for 'cpulimit' ($local_cpulimit_pid) hooked to process '$passed_process_name' with PID $passed_pid of window $passed_window_xid!"
+      else
+        message --info "Scheduling policy of 'cpulimit' ($local_cpulimit_pid) hooked to process '$passed_process_name' with PID $passed_pid of window $passed_window_xid has been changed to 'FIFO'."
+      fi
     fi
 
     trap 'message --info "Process '"'$passed_process_name'"' with PID $passed_pid of window $passed_window_xid has been CPU unlimited because of daemon termination." ; \

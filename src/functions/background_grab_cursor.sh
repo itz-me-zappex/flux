@@ -19,9 +19,12 @@ background_grab_cursor(){
   trap 'kill "$local_flux_grab_cursor_pid"' SIGINT SIGTERM
 
   # Enforce 'SCHED_FIFO' to reduce mouse input lag
-  if check_pid_existence "$local_flux_grab_cursor_pid" &&
-     ! chrt --fifo --pid 99 "$local_flux_grab_cursor_pid" > /dev/null 2>&1; then
-    message --warning "Unable to change scheduling policy to 'fifo' for 'flux-grab-cursor' ($local_flux_grab_cursor_pid) hooked to process '$passed_process_name' with PID $passed_pid of window $passed_window_xid!"
+  if [[ -n "$sched_realtime_is_supported" ]]; then
+    if ! chrt --fifo --pid 99 "$local_flux_grab_cursor_pid" > /dev/null 2>&1; then
+      message --warning "Unable to change scheduling policy to 'FIFO' for 'flux-grab-cursor' ($local_flux_grab_cursor_pid) hooked to process '$passed_process_name' with PID $passed_pid of window $passed_window_xid!"
+    else
+      message --info "Scheduling policy of 'flux-grab-cursor' ($local_flux_grab_cursor_pid) hooked to process '$passed_process_name' with PID $passed_pid of window $passed_window_xid has been changed to 'FIFO'."
+    fi
   fi
 
   local local_flux_grab_cursor_line
@@ -39,7 +42,7 @@ background_grab_cursor(){
       message --info "Window $passed_window_xid of process '$passed_process_name' with PID $passed_pid seems to be related to Wine/Proton, trying to grab cursor and redirect input to there workarounding hangs because of that..."
     ;;
     'wine_hang' )
-      message --verbose "Detected hang of Wine/Proton process '$passed_process_name' with PID $passed_pid of window $passed_window_xid caused by cursor grabbing, still workarounding..."
+      message --verbose "Detected hang of Wine/Proton process '$passed_process_name' with PID $passed_pid of window $passed_window_xid caused because of cursor grabbing, still workarounding..."
     ;;
     'window' )
       message --info "Attempt to grab cursor and redirect input to window $passed_window_xid of process '$passed_process_name' with PID $passed_pid on focus event..."
