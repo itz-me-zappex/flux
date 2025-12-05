@@ -1,6 +1,6 @@
 # Required to check whether daemon able to change and restore scheduling policy or not
 # Executed once before event reading if there is section with 'idle' set to 'true'
-sched_validate(){
+validate_sched(){
   # Skip checks if running as root
   if (( UID == 0 )); then
     sched_change_is_supported='1'

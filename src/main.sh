@@ -256,8 +256,8 @@ colors_interpret
 daemon_prepare
 unset -f daemon_prepare
 
-sched_validate
-unset -f sched_validate
+validate_sched
+unset -f validate_sched
 
 # Read events from 'flux-listener' binary
 "$flux_listener_path" > "$flux_listener_fifo_path" &
