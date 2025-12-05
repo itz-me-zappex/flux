@@ -59,7 +59,7 @@ message(){
   if [[ -n "$allow_logging" ]]; then
     # Check log file for read-write access before store message to log
     if check_rw "$log"; then
-      printf "$local_timestamp" "$local_current_time" "$local_log_prefix $*" >> "$log"
+      printf "$local_log_timestamp" "$local_current_time" "$local_log_prefix $*" >> "$log"
     else
       local local_shorten_path_result
       shorten_path "$log"
