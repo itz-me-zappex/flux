@@ -210,7 +210,7 @@ validate_config_keys(){
     if (( parse_config_error_count == 1 )); then
       local local_error_msg='1 error'
     else
-      local local_error_msg="all $parse_config_error_count errors"
+      local local_error_msg="$parse_config_error_count errors"
     fi
 
     local local_shorten_path_result
