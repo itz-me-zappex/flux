@@ -12,10 +12,10 @@ Requires:       bash, util-linux, cpulimit, coreutils, libXres, libX11, libXext,
 Recommends:     mangohud, mangohud.i686, libnotify, pulseaudio-utils
 
 %description
-Advanced daemon for X11 desktops and window managers,
-designed to automatically limit FPS/CPU usage of
-unfocused windows and run commands on focus and unfocus events.
-Written in Bash and partially in C.
+An advanced automation daemon for X11 desktops and window managers.
+Designed to limit FPS/CPU usage and run commands on window focus and unfocus events.
+Provides gaming-oriented features.
+Written mostly in Bash and partially in C.
 
 %prep
 %autosetup -n flux-%{version}

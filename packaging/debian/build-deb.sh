@@ -151,11 +151,11 @@ Recommends: $optional_deps_str
 Section: utils
 Priority: standard
 Homepage: https://github.com/itz-me-zappex/flux
-Description: advanced daemon for X11 desktops and window managers
- Advanced daemon for X11 desktops and window managers, designed to
- automatically limit FPS/CPU usage of unfocused windows and run
- commands on focus and unfocus events.
- Written in Bash and partially in C.
+Description: an advanced automation daemon for X11 desktops and window managers
+ An advanced automation daemon for X11 desktops and window managers.
+ Designed to limit FPS/CPU usage and run commands on window focus and unfocus events.
+ Provides gaming-oriented features.
+ Written mostly in Bash and partially in C.
 EOF
 
 msg_info "Creating post install script for package..."
