@@ -84,7 +84,7 @@ An advanced automation daemon for X11 desktops and window managers. Designed to 
 
 ## Screenshot
 ![](images/preview.png)
-*Daemon running with handling already opened windows (`-H`) in verbose mode (`-v`) and enabled timestamps (`-t`)*
+Daemon running handling already opened windows (`-H`) in verbose mode (`-v`) and enabled timestamps (`-t`)
 
 ## Features
 - Apply CPU or FPS limit to process on unfocus and unlimit on focus. FPS limiting requires game running using MangoHud with already existing config file.
