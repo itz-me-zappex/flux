@@ -60,10 +60,10 @@ validate_config_keys(){
     fi
 
     # Exit with an error if MangoHud FPS limit is not specified along with config path
-    if [[ -n "$local_fps_focus_line" ]]; then
+    if [[ -n "$local_fps_unfocus_line" ]]; then
       if [[ -n "${config_key_fps_unfocus_map["$local_temp_section_or_group"]}" &&
             -z "${config_key_mangohud_config_map["$local_temp_section_or_group"]}" ]]; then
-        message --warning "L$local_fps_focus_line: Value ${config_key_fps_unfocus_map["$local_temp_section_or_group"]} in 'fps-unfocus' key$local_section_msg is specified without 'mangohud-config' key!"
+        message --warning "L$local_fps_unfocus_line: Value ${config_key_fps_unfocus_map["$local_temp_section_or_group"]} in 'fps-unfocus' key$local_section_msg is specified without 'mangohud-config' key!"
         (( parse_config_error_count++ ))
       fi
     fi
