@@ -324,3 +324,13 @@ expand_variables(){
   # Should be declared as local outside
   local_expand_variables_result="$local_command"
 }
+
+# Hide/restore error messages, even standart ones which appear directly from Bash
+# Source: https://unix.stackexchange.com/a/184807
+hide_stderr(){
+  exec 3>&2
+  exec 2>/dev/null
+}
+restore_stderr(){
+  exec 2>&3
+}
