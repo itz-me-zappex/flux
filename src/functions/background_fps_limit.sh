@@ -8,7 +8,7 @@ background_fps_limit(){
   if [[ "$local_limits_delay" != '0' ]]; then
     local local_shorten_path_result
     shorten_path "$local_mangohud_config"
-    message --verbose "MangoHud config file '$local_shorten_path_result' from section '$passed_section' will be FPS limited after $local_limits_delay second(s) on window ($passed_window_xid) unfocus event of process '$passed_process_name' ($passed_pid)."
+    message --verbose "MangoHud config file '$local_shorten_path_result' ($passed_section) will be FPS limited after $local_limits_delay second(s) on window ($passed_window_xid) unfocus event of process '$passed_process_name' ($passed_pid)."
     sleep "$local_limits_delay"
   fi
   
@@ -17,11 +17,11 @@ background_fps_limit(){
       if [[ "$local_limits_delay" == '0' ]]; then
         local local_shorten_path_result
         shorten_path "$local_mangohud_config"
-        message --info "MangoHud config file '$local_shorten_path_result' from section '$passed_section' has been limited to $local_fps_unfocus FPS on window ($passed_window_xid) unfocus event of process '$passed_process_name' ($passed_pid)."
+        message --info "MangoHud config file '$local_shorten_path_result' ($passed_section) has been limited to $local_fps_unfocus FPS on window ($passed_window_xid) unfocus event of process '$passed_process_name' ($passed_pid)."
       else
         local local_shorten_path_result
         shorten_path "$local_mangohud_config"
-        message --info "MangoHud config file '$local_shorten_path_result' from section '$passed_section' has been limited to $local_fps_unfocus FPS after $local_limits_delay second(s) on window ($passed_window_xid) unfocus event of process '$passed_process_name' ($passed_pid)."
+        message --info "MangoHud config file '$local_shorten_path_result' ($passed_section) has been limited to $local_fps_unfocus FPS after $local_limits_delay second(s) on window ($passed_window_xid) unfocus event of process '$passed_process_name' ($passed_pid)."
       fi
     fi
   else
