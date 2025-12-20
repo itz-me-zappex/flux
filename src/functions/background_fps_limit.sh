@@ -25,6 +25,6 @@ background_fps_limit(){
       fi
     fi
   else
-    message --warning "Process '$passed_process_name' ($passed_pid) of window ($passed_window_xid) matching with section '$passed_section' terminated before FPS limiting!"
+    message --warning "Process '$passed_process_name' ($passed_pid) of window ($passed_window_xid) terminated before FPS limiting ($passed_section)!"
   fi
 }
