@@ -177,7 +177,7 @@ handle_closure(){
       # Unset mute request
       if [[ -n "${request_mute_map["$local_terminated_pid"]}" ]]; then
         unset request_mute_map["$local_terminated_pid"]
-        message --verbose "Muting of process '$local_terminated_process_name' ($local_terminated_pid) of window ($local_temp_terminated_window_xid) cancelled on window closure event."
+        message --verbose "Muting process '$local_terminated_process_name' ($local_terminated_pid) of window ($local_temp_terminated_window_xid) cancelled on window closure event."
 
         unset local_closure_notify
       fi
