@@ -152,7 +152,7 @@ Process
       exit 0
     ;;
     --help | -h | --usage | -u )
-      echo "Usage: flux [-C <mode>] [-c <file>] [-g <method>] [-l <file>] [-T <format>] [-Pe/-Pi/-Pv/-Pw <text>] [options]
+      echo "Usage: flux [-C <mode>] [-c <file>] [-g <method>] [-l <file>] [-T <format>] [--pe/--pi/--pv/--pw <text>] [options]
 
 Options and values:
   -C, --color <mode>                  Color mode, either 'always', 'auto' or 'never'
@@ -176,13 +176,13 @@ Options and values:
   -V, --version                       Display release information and exit
 
 Prefixes configuration:
-  -Pe, --prefix-error <text>          Change prefix for error messages
+  --pe, --prefix-error <text>         Change prefix for error messages
                                       default: [x]
-  -Pi, --prefix-info <text>           Change prefix for info messages
+  --pi, --prefix-info <text>          Change prefix for info messages
                                       default: [i]
-  -Pv, --prefix-verbose <text>        Change prefix for verbose messages
+  --pv, --prefix-verbose <text>       Change prefix for verbose messages
                                       default: [~]
-  -Pw, --prefix-warning <text>        Change prefix for warning messages
+  --pw, --prefix-warning <text>       Change prefix for warning messages
                                       default: [!]
 
 Examples:
@@ -264,38 +264,38 @@ There is NO WARRANTY, to the extent permitted by law.
 "
       exit 0
     ;;
-    --prefix-error | -Pe | --prefix-error=* )
+    --prefix-error | --pe | --prefix-error=* )
       passed_check='prefix_error_is_passed' \
       passed_set='new_prefix_error' \
       passed_option='--prefix-error' \
-      passed_short_option='-Pe' \
+      passed_short_option='--pe' \
       cmdline_get "$@"
 
       shift "$shift"
     ;;
-    --prefix-info | -Pi | --prefix-info=* )
+    --prefix-info | --pi | --prefix-info=* )
       passed_check='prefix_info_is_passed' \
       passed_set='new_prefix_info' \
       passed_option='--prefix-info' \
-      passed_short_option='-Pi' \
+      passed_short_option='--pi' \
       cmdline_get "$@"
 
       shift "$shift"
     ;;
-    --prefix-verbose | -Pv | --prefix-verbose=* )
+    --prefix-verbose | --pv | --prefix-verbose=* )
       passed_check='prefix_verbose_is_passed' \
       passed_set='new_prefix_verbose' \
       passed_option='--prefix-verbose' \
-      passed_short_option='-Pv' \
+      passed_short_option='--pv' \
       cmdline_get "$@"
 
       shift "$shift"
     ;;
-    --prefix-warning | -Pw | --prefix-warning=* )
+    --prefix-warning | --pw | --prefix-warning=* )
       passed_check='prefix_warning_is_passed' \
       passed_set='new_prefix_warning' \
       passed_option='--prefix-warning' \
-      passed_short_option='-Pw' \
+      passed_short_option='--pw' \
       cmdline_get "$@"
 
       shift "$shift"
