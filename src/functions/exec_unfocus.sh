@@ -1,6 +1,6 @@
 # Required to execute command from 'exec-unfocus' and 'lazy-exec-unfocus' config keys
 exec_unfocus(){
-  local local_end_of_msg="on window $passed_window_xid unfocus event of process '$passed_process_name' with PID $passed_pid"
+  local local_end_of_msg="on window $passed_window_xid unfocus event of process '$passed_process_name' ($passed_pid)"
 
   export_unfocus_envvars
 

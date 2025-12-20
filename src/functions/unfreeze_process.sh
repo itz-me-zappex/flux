@@ -6,15 +6,15 @@ unfreeze_process(){
   if [[ "$local_limits_delay" != '0' ]] &&
      check_pid_existence "$local_background_freeze_pid"; then
     if ! kill "$local_background_freeze_pid" > /dev/null 2>&1; then
-      message --warning "Unable to cancel delayed for $local_limits_delay second(s) freezing of process '$passed_process_name' with PID $passed_pid $passed_end_of_msg!"
+      message --warning "Unable to cancel delayed for $local_limits_delay second(s) freezing of process '$passed_process_name' ($passed_pid) $passed_end_of_msg!"
     else
-      message --info "Delayed for $local_limits_delay second(s) freezing of process $passed_process_name' with PID $passed_pid has been cancelled $passed_end_of_msg."
+      message --info "Delayed for $local_limits_delay second(s) freezing of process $passed_process_name' ($passed_pid) has been cancelled $passed_end_of_msg."
     fi
   else
     if ! kill -CONT "$passed_pid" > /dev/null 2>&1; then
-      message --warning "Unable to unfreeze process '$passed_process_name' with PID $passed_pid $passed_end_of_msg!"
+      message --warning "Unable to unfreeze process '$passed_process_name' ($passed_pid) $passed_end_of_msg!"
     else
-      message --info "Process '$passed_process_name' with PID $passed_pid has been unfrozen $passed_end_of_msg."
+      message --info "Process '$passed_process_name' ($passed_pid) has been unfrozen $passed_end_of_msg."
     fi
   fi
 
