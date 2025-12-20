@@ -29,23 +29,32 @@ get_process_info(){
       passed_window_xid="$local_matching_window_xid" cache_get_process_info
     else
       # Get process name
+      hide_stderr
       if ! process_name="$(<"/proc/$pid/comm")"; then
+        restore_stderr
         return 1
       fi
+      restore_stderr
 
       # Get process command by reading file ignoring '\0' and those are replaced with spaces automatically because of arrays nature :D
       local local_process_command_array
+      hide_stderr
       if ! mapfile -d '' local_process_command_array < "/proc/$pid/cmdline"; then
+        restore_stderr
         return 1
       else
         process_command="${local_process_command_array[*]}"
       fi
+      restore_stderr
 
       # Bufferize to avoid failure from 'read' in case file will be removed during reading
       local local_status_content
+      hide_stderr
       if ! local_status_content="$(<"/proc/$pid/status")"; then
+        restore_stderr
         return 1
       fi
+      restore_stderr
 
       # Get effective UID of process
       local local_temp_status_line
