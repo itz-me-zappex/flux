@@ -13,15 +13,8 @@ handle_window_event(){
   window_xid="${local_window_event/'='*/}"
   pid="${local_window_event/*'='/}"
 
-  # Hide error messages, even standart ones which are appearing directly from Bash (https://unix.stackexchange.com/a/184807)
-  exec 3>&2
-  exec 2>/dev/null
-
   get_process_info
   local local_get_process_info_exit_code="$?"
-
-  # Restore stderr
-  exec 2>&3
 
   # Request CPU/FPS limit for unfocused process if it matches with section
   unfocus_request_limit
