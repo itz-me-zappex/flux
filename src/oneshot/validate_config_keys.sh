@@ -167,8 +167,8 @@ validate_config_keys(){
       fi
 
       # Set 'delay' to '0' if it is not specified
-      if [[ -z "${config_key_limits_delay_map["$local_temp_section_or_group"]}" ]]; then
-        config_key_limits_delay_map["$local_temp_section_or_group"]='0'
+      if [[ -z "${config_key_unfocus_limits_delay_map["$local_temp_section_or_group"]}" ]]; then
+        config_key_unfocus_limits_delay_map["$local_temp_section_or_group"]='0'
       fi
 
       # Set 'mangohud-config' as 'mangohud-source-config' if it is not specified

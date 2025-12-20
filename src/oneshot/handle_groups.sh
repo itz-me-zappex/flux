@@ -59,11 +59,11 @@ handle_groups(){
       fi
 
       local local_get_key_line_result
-      get_key_line "$local_temp_section_or_group" 'limits-delay'
-      local local_group_key_value="${config_key_limits_delay_map["$local_group"]}"
+      get_key_line "$local_temp_section_or_group" 'unfocus-limits-delay'
+      local local_group_key_value="${config_key_unfocus_limits_delay_map["$local_group"]}"
       if [[ -n "$local_group_key_value" ]] &&
          (( local_group_key_line > local_get_key_line_result )); then
-        config_key_limits_delay_map["$local_temp_section_or_group"]="$local_group_key_value"
+        config_key_unfocus_limits_delay_map["$local_temp_section_or_group"]="$local_group_key_value"
       fi
 
       local local_get_key_line_result

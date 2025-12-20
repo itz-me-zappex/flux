@@ -3,7 +3,7 @@ unset_groups(){
   local local_temp_group
   for local_temp_group in "${groups_array[@]}"; do
     unset config_key_unfocus_cpu_limit_map["$local_temp_group"] \
-    config_key_limits_delay_map["$local_temp_group"] \
+    config_key_unfocus_limits_delay_map["$local_temp_group"] \
     config_key_exec_closure_map["$local_temp_group"] \
     config_key_exec_oneshot_map["$local_temp_group"] \
     config_key_exec_focus_map["$local_temp_group"] \

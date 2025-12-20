@@ -157,8 +157,8 @@ parse_config(){
             unset is_section_blank_map["$local_section"]
             config_keys_order_map["$local_section"]+=" $config_line_count.unfocus-cpu-limit"
           ;;
-          limits-delay | delay )
-            config_key_limits_delay_map["$local_section"]="$local_config_value"
+          unfocus-limits-delay | limits-delay | delay )
+            config_key_unfocus_limits_delay_map["$local_section"]="$local_config_value"
 
             # Exit with an error if value is neither an integer nor a float (that is what regexp means)
             if [[ ! "$local_config_value" =~ ^[0-9]+((\.|\,)[0-9]+)?$ ]]; then
@@ -167,7 +167,7 @@ parse_config(){
             fi
 
             unset is_section_blank_map["$local_section"]
-            config_keys_order_map["$local_section"]+=" $config_line_count.limits-delay"
+            config_keys_order_map["$local_section"]+=" $config_line_count.unfocus-limits-delay"
           ;;
           exec-exit )
             if [[ -z "$local_append" ]]; then

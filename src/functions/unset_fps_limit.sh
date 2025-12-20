@@ -1,15 +1,15 @@
 # Required to terminate FPS limit background process or unset FPS limit if window becomes focused or terminated
 unset_fps_limit(){
   local local_background_fps_limit_pid="${background_fps_limit_pid_map["$passed_section"]}"
-  local local_limits_delay="${config_key_limits_delay_map["$passed_section"]}"
+  local local_unfocus_limits_delay="${config_key_unfocus_limits_delay_map["$passed_section"]}"
 
   # Check for existence of FPS limit background process
-  if [[ "$local_limits_delay" != '0' ]] &&
+  if [[ "$local_unfocus_limits_delay" != '0' ]] &&
      check_pid_existence "$local_background_fps_limit_pid"; then
     if ! kill "$local_background_fps_limit_pid" > /dev/null 2>&1; then
-      message --warning "Unable to cancel delayed for $local_limits_delay second(s) FPS unlimiting ($passed_section) $passed_end_of_msg!"
+      message --warning "Unable to cancel delayed for $local_unfocus_limits_delay second(s) FPS unlimiting ($passed_section) $passed_end_of_msg!"
     else
-      message --info "Delayed for $local_limits_delay second(s) FPS unlimiting ($passed_section) cancelled $passed_end_of_msg."
+      message --info "Delayed for $local_unfocus_limits_delay second(s) FPS unlimiting ($passed_section) cancelled $passed_end_of_msg."
     fi
   fi
 

@@ -108,7 +108,7 @@ fi
 declare -A config_key_name_map \
 config_key_owner_map \
 config_key_unfocus_cpu_limit_map \
-config_key_limits_delay_map \
+config_key_unfocus_limits_delay_map \
 config_key_exec_closure_map \
 config_key_exec_oneshot_map \
 config_key_exec_focus_map \
