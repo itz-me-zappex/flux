@@ -48,11 +48,11 @@ set_sched_idle(){
     # Print warning if daemon unable to change scheduling policy, otherwise - change it to 'SCHED_IDLE' if not set already
     if [[ -z "$sched_realtime_is_supported" &&
           "${sched_previous_policy_map["$local_pid"]}" =~ ^('SCHED_RR'|'SCHED_FIFO')$ ]]; then
-      message --warning "Daemon has insufficient rights to restore realtime scheduling policy for process '$local_process_name' ($local_pid), changing it to 'idle' on window $local_temp_window_xid unfocus event has been cancelled!"
+      message --warning "Daemon has insufficient rights to restore realtime scheduling policy for process '$local_process_name' ($local_pid), changing it to 'idle' on window ($local_temp_window_xid) unfocus event has been cancelled!"
       local local_idle_cancelled='1'
     elif (( UID != 0 )) &&
          [[ "${sched_previous_policy_map["$local_pid"]}" == 'SCHED_DEADLINE' ]]; then
-      message --warning "Daemon has insufficient rights to restore deadline scheduling policy for process '$local_process_name' ($local_pid), changing it to 'idle' on window $local_temp_window_xid unfocus event has been cancelled!"
+      message --warning "Daemon has insufficient rights to restore deadline scheduling policy for process '$local_process_name' ($local_pid), changing it to 'idle' on window ($local_temp_window_xid) unfocus event has been cancelled!"
       local local_idle_cancelled='1'
     elif [[ "${sched_previous_policy_map["$local_pid"]}" != 'SCHED_IDLE' ]]; then
       # Change scheduling policy to 'SCHED_IDLE' if not already set
@@ -63,7 +63,7 @@ set_sched_idle(){
       background_sched_idle &
       background_sched_idle_pid_map["$local_pid"]="$!"
     else
-      message --warning "Process '$local_process_name' ($local_pid) already has scheduling policy set to 'idle', changing it on window $local_temp_window_xid unfocus event has been cancelled!"
+      message --warning "Process '$local_process_name' ($local_pid) already has scheduling policy set to 'idle', changing it on window ($local_temp_window_xid) unfocus event has been cancelled!"
       local local_idle_cancelled='1'
     fi
 
@@ -76,6 +76,6 @@ set_sched_idle(){
       sched_previous_period_map["$local_pid"]
     fi
   else
-    message --warning "Unable to obtain scheduling policy info of process '$local_process_name' ($local_pid), changing it to 'idle' on window $local_temp_window_xid unfocus event has been cancelled!"
+    message --warning "Unable to obtain scheduling policy info of process '$local_process_name' ($local_pid), changing it to 'idle' on window ($local_temp_window_xid) unfocus event has been cancelled!"
   fi
 }

@@ -1,6 +1,6 @@
 # Required to unset limit for focused process
 handle_focus(){
-  local local_end_of_msg="on window $window_xid focus event"
+  local local_end_of_msg="on window ($window_xid) focus event"
 
   # Define type of limit which should be unset
   if [[ -n "${background_freeze_pid_map["$pid"]}" ]]; then
@@ -18,7 +18,7 @@ handle_focus(){
   elif [[ -n "${config_key_mangohud_config_map["$section"]}" ]]; then
     # Unset FPS limit or update target config
     passed_section="$section" \
-    passed_end_of_msg="on window $window_xid focus event of process '$process_name' ($pid)" \
+    passed_end_of_msg="on window ($window_xid) focus event of process '$process_name' ($pid)" \
     unset_fps_limit
   fi
 
