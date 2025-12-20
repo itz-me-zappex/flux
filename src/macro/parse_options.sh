@@ -94,7 +94,7 @@ parse_options(){
             message --error "Unable to obtain PID and XID of focused window, window is not stacking one!"
           ;;
           4 )
-            message --error "Unable to obtain PID and XID of focused window, probably window has been closed too early!"
+            message --error "Unable to obtain PID and XID of focused window, probably window closed too early!"
           ;;
           * )
             message --error "Unexpected error occured trying to obtain PID and XID of focused window!"
@@ -109,7 +109,7 @@ parse_options(){
             message --error "Unable to obtain PID and XID of picked window, window is not stacking one!"
           ;;
           4 )
-            message --error "Unable to obtain PID and XID of picked window, probably window has been closed too early!"
+            message --error "Unable to obtain PID and XID of picked window, probably window closed too early!"
           ;;
           * )
             message --error "Unexpected error occured trying to create window picker!"
@@ -124,7 +124,7 @@ parse_options(){
         get_process_info
 
         if (( get_process_info_exit_code == 1 )); then
-          message --error "Unable to obtain info about process ($pid) of window ($window_xid)! Probably process has been terminated during check."
+          message --error "Unable to obtain info about process ($pid) of window ($window_xid)! Probably process terminated during check."
           exit 1
         elif (( get_process_info_exit_code == 2 )); then
           message --error "Unable to obtain owner username of process $process_name ($pid) of window ($window_xid)!"

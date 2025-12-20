@@ -87,7 +87,7 @@ handle_unfocus(){
         set_sched_idle
       elif [[ -n "${request_sched_idle_map["$local_pid"]}" &&
               -z "$sched_change_is_supported" ]]; then
-        message --warning "Daemon has insufficient rights to restore scheduling policy for process '$local_process_name' ($local_pid), changing it to 'idle' on window ($local_temp_window_xid) unfocus event has been cancelled!"
+        message --warning "Daemon has insufficient rights to restore scheduling policy for process '$local_process_name' ($local_pid), changing it to 'idle' on window ($local_temp_window_xid) unfocus event cancelled!"
       fi
 
       unset request_sched_idle_map["$local_pid"]

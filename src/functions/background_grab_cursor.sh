@@ -23,7 +23,7 @@ background_grab_cursor(){
     if ! chrt --fifo --pid 99 "$local_flux_grab_cursor_pid" > /dev/null 2>&1; then
       message --warning "Unable to change scheduling policy to 'FIFO' for 'flux-grab-cursor' ($local_flux_grab_cursor_pid) hooked to process '$passed_process_name' ($passed_pid) of window ($passed_window_xid)!"
     else
-      message --info "Scheduling policy of 'flux-grab-cursor' ($local_flux_grab_cursor_pid) hooked to process '$passed_process_name' ($passed_pid) of window ($passed_window_xid) has been changed to 'FIFO'."
+      message --info "Scheduling policy of 'flux-grab-cursor' ($local_flux_grab_cursor_pid) hooked to process '$passed_process_name' ($passed_pid) of window ($passed_window_xid) changed to 'FIFO'."
     fi
   fi
 
@@ -48,7 +48,7 @@ background_grab_cursor(){
       message --info "Attempt to grab cursor and redirect input to window ($passed_window_xid) of process '$passed_process_name' ($passed_pid) on focus event..."
     ;;
     'success' )
-      message --info "Cursor for window ($passed_window_xid) of process '$passed_process_name' ($passed_pid) has been grabbed successfully on focus event."
+      message --info "Cursor for window ($passed_window_xid) of process '$passed_process_name' ($passed_pid) grabbed successfully on focus event."
       break
     esac
   done < "$flux_grab_cursor_fifo_path"

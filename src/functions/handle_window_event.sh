@@ -47,6 +47,6 @@ handle_window_event(){
     previous_process_command \
     previous_section
 
-    message --warning "Unable to obtain info about process ($pid) of window ($window_xid)! Probably process has been terminated during check."
+    message --warning "Unable to obtain info about process ($pid) of window ($window_xid)! Probably process terminated during check."
   fi
 }
