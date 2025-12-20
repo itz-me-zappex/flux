@@ -63,7 +63,9 @@ int main(int argc, char *argv[]) {
     if (child_count > 0) {
       Window child = childs[0];
 
-      XFree(childs);
+      if (childs) {
+        XFree(childs);
+      }      
 
       int x, y;
       unsigned int child_width, child_height, child_border_width, child_depth;
