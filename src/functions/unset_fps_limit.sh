@@ -7,9 +7,9 @@ unset_fps_limit(){
   if [[ "$local_limits_delay" != '0' ]] &&
      check_pid_existence "$local_background_fps_limit_pid"; then
     if ! kill "$local_background_fps_limit_pid" > /dev/null 2>&1; then
-      message --warning "Unable to cancel delayed for $local_limits_delay second(s) FPS unlimiting of section '$passed_section' $passed_end_of_msg!"
+      message --warning "Unable to cancel delayed for $local_limits_delay second(s) FPS unlimiting ($passed_section) $passed_end_of_msg!"
     else
-      message --info "Delayed for $local_limits_delay second(s) FPS unlimiting of section '$passed_section' has been cancelled $passed_end_of_msg."
+      message --info "Delayed for $local_limits_delay second(s) FPS unlimiting ($passed_section) has been cancelled $passed_end_of_msg."
     fi
   fi
 
