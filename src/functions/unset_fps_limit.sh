@@ -14,7 +14,7 @@ unset_fps_limit(){
   fi
 
   # Set FPS from 'fps-focus' key
-  if mangohud_fps_set "${config_key_mangohud_config_map["$passed_section"]}" "${config_key_mangohud_source_config_map["$passed_section"]}" "${config_key_fps_focus_map["$passed_section"]}"; then
+  if passed_section="$passed_section" mangohud_fps_set "${config_key_mangohud_config_map["$passed_section"]}" "${config_key_mangohud_source_config_map["$passed_section"]}" "${config_key_fps_focus_map["$passed_section"]}"; then
     # Print message depending by FPS limit
     if [[ "${config_key_fps_focus_map["$passed_section"]}" == '0' ]]; then
       local local_shorten_path_result

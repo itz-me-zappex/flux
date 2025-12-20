@@ -13,7 +13,7 @@ background_fps_limit(){
   fi
   
   if check_pid_existence "$passed_pid"; then
-    if mangohud_fps_set "$local_mangohud_config" "$local_mangohud_source_config" "$local_fps_unfocus"; then
+    if passed_section="$passed_section" mangohud_fps_set "$local_mangohud_config" "$local_mangohud_source_config" "$local_fps_unfocus"; then
       if [[ "$local_limits_delay" == '0' ]]; then
         local local_shorten_path_result
         shorten_path "$local_mangohud_config"

@@ -11,7 +11,7 @@ mangohud_fps_set(){
       if ! check_ro "$local_source_config"; then
         local local_shorten_path_result
         shorten_path "$local_source_config"
-        message --warning "Source MangoHud config file ($local_shorten_path_result) is not readable!"
+        message --warning "Source MangoHud config file ($local_shorten_path_result) ($passed_section) is not readable!"
         return 1
       fi
     fi
@@ -20,7 +20,7 @@ mangohud_fps_set(){
     if ! check_rw "$local_target_config"; then
       local local_shorten_path_result
       shorten_path "$local_target_config"
-      message --warning "Target MangoHud config file ($local_shorten_path_result) is not rewritable!"
+      message --warning "Target MangoHud config file ($local_shorten_path_result) ($passed_section) is not rewritable!"
       return 1
     else
       # Replace "fps_limit" string if exists in config content (in memory, not in file as this is source)
@@ -48,7 +48,7 @@ mangohud_fps_set(){
   else
     local local_shorten_path_result
     shorten_path "$local_target_config"
-    message --warning "Target MangoHud config file ($local_shorten_path_result) does not exist!"
+    message --warning "Target MangoHud config file ($local_shorten_path_result) ($passed_section) does not exist!"
     return 1
   fi
 }
