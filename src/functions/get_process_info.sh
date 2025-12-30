@@ -32,6 +32,7 @@ get_process_info(){
       hide_stderr
       if ! process_name="$(<"/proc/$pid/comm")"; then
         restore_stderr
+        message "$get_process_info_msg_type" "Unable to obtain name of process ($pid) of window ($window_xid)!"
         return 1
       fi
       restore_stderr
@@ -41,6 +42,7 @@ get_process_info(){
       hide_stderr
       if ! mapfile -d '' local_process_command_array < "/proc/$pid/cmdline"; then
         restore_stderr
+        message "$get_process_info_msg_type" "Unable to obtain command of process ($pid) of window ($window_xid)!"
         return 1
       else
         process_command="${local_process_command_array[*]}"
@@ -52,6 +54,7 @@ get_process_info(){
       hide_stderr
       if ! local_status_content="$(<"/proc/$pid/status")"; then
         restore_stderr
+        message "$get_process_info_msg_type" "Unable to obtain process ($pid) owner UID of window ($window_xid)!"
         return 1
       fi
       restore_stderr
@@ -78,6 +81,13 @@ get_process_info(){
       done <<< "$local_status_content"
 
       # Obtain process owner username from '/etc/passwd' file using UID of process
+      if ! check_ro '/etc/passwd'; then
+        local local_shorten_path_result
+        shorten_path '/etc/passwd'
+        message "$get_process_info_msg_type" "Unable to obtain process ($pid) owner username of window ($window_xid), file '$local_shorten_path_result' is either missing or broken!"
+        return 1
+      fi
+
       local local_temp_passwd_line
       while read -r local_temp_passwd_line ||
             [[ -n "$local_temp_passwd_line" ]]; do

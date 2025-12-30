@@ -104,6 +104,10 @@ else
   log_timestamp_format="$colorless_timestamp_format"
 fi
 
+# 'get_process_info()' should print errors in '--get' and warnings at runtime
+# changed in 'parse_options()'
+get_process_info_msg_type='--warning'
+
 # Needed to store values from config
 declare -A config_key_name_map \
 config_key_owner_map \

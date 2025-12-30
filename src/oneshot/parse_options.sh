@@ -121,13 +121,8 @@ parse_options(){
         window_xid="${window_info/'='*/}"
         pid="${window_info/*'='/}"
 
-        get_process_info
-
-        if (( get_process_info_exit_code == 1 )); then
-          message --error "Unable to obtain info about process ($pid) of window ($window_xid)! Probably process terminated during check."
-          exit 1
-        elif (( get_process_info_exit_code == 2 )); then
-          message --error "Unable to obtain owner username of process $process_name ($pid) of window ($window_xid)!"
+        get_process_info_msg_type='--error'
+        if ! get_process_info; then
           exit 1
         fi
 
