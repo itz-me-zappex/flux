@@ -295,12 +295,12 @@ parse_config(){
             is_section_useful_map["$local_section"]='1'
 
             # Exit with an error if value equal to zero
-            if [[ "$local_config_value" == '0' ]]; then
-              message --warning "$local_line_count_msg Value $local_config_value in '$local_config_key' config key$local_section_msg should be greater than zero!"
-              (( parse_config_error_count++ ))
-            elif [[ ! "$local_config_value" =~ ^[0-9]+$ ]]; then
+            if [[ ! "$local_config_value" =~ ^[0-9]+$ ]]; then
               # Exit with an error if value is not integer, that is what regexp means
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key$local_section_msg is not an integer!"
+              (( parse_config_error_count++ ))
+            elif (( local_config_value == 0 )); then
+              message --warning "$local_line_count_msg Value $local_config_value in '$local_config_key' config key$local_section_msg should be greater than zero!"
               (( parse_config_error_count++ ))
             fi
 
