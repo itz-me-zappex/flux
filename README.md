@@ -375,7 +375,7 @@ sudo groupdel flux
 ## Usage
 ### List of available options
 ```
-Usage: flux [-C <mode>] [-c <file>] [-g <method>] [-l <file>] [-T <format>] [-Pe/-Pi/-Pv/-Pw <text>] [options]
+Usage: flux [-C <mode>] [-c <file>] [-g <method>] [-l <file>] [-T <format>] [--pe/--pi/--pv/--pw <text>] [options]
 
 Options and values:
   -C, --color <mode>                  Color mode, either 'always', 'auto' or 'never'
@@ -399,13 +399,13 @@ Options and values:
   -V, --version                       Display release information and exit
 
 Prefixes configuration:
-  -Pe, --prefix-error <text>          Change prefix for error messages
+  --pe, --prefix-error <text>         Change prefix for error messages
                                       default: [x]
-  -Pi, --prefix-info <text>           Change prefix for info messages
+  --pi, --prefix-info <text>          Change prefix for info messages
                                       default: [i]
-  -Pv, --prefix-verbose <text>        Change prefix for verbose messages
+  --pv, --prefix-verbose <text>       Change prefix for verbose messages
                                       default: [~]
-  -Pw, --prefix-warning <text>        Change prefix for warning messages
+  --pw, --prefix-warning <text>       Change prefix for warning messages
                                       default: [!]
 
 Examples:
