@@ -294,7 +294,7 @@ expand_variables(){
     # '0' if even, '1' if odd
     local local_backslash_count_is_odd="$(( local_first_backslash_count - local_first_backslash_count / 2 * 2 ))"
 
-    if [[ "$local_backslash_count_is_odd" == '1' ]]; then
+    if (( local_backslash_count_is_odd == 1 )); then
       # Since we want to ignore escaped variables, we should replace those temporary with something
       # Just in case random value will match one in command string
       while true; do
