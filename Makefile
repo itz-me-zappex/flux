@@ -61,19 +61,6 @@ install:
 	install -Dm 755 $(BUILD_DIR)/flux-grab-cursor $(PREFIX)/lib/flux/
 	install -Dm 755 $(BUILD_DIR)/validate-x11-session $(PREFIX)/lib/flux/
 
-	@if [[ $(PREFIX) != '/usr' ]]; then \
-		echo -e "\nwarning: Unable to install '/etc/security/limits.d/10-flux.conf' because not installing to '/usr' prefix!\n" >&2; \
-	fi
-
-	if [[ $(PREFIX) == '/usr' ]]; then \
-		mkdir -p /etc/security/limits.d/; \
-		install -Dm 644 $(PWD)/10-flux.conf /etc/security/limits.d/; \
-	fi
-
 uninstall:
 	rm $(PREFIX)/bin/flux
 	rm -rf $(PREFIX)/lib/flux/
-
-	if [[ $(PREFIX) == '/usr' ]]; then \
-		rm /etc/security/limits.d/10-flux.conf; \
-	fi
