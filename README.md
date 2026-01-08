@@ -313,7 +313,8 @@ sudo groupadd -r flux
 ```
 
 ## Post install
-### Add user to `flux` group to bypass limitations related to changing scheduling policies
+### Add user to `flux` group
+Needed to bypass limitations related to changing scheduling policies.
 ```bash
 sudo usermod -aG flux "$USER"
 ```
