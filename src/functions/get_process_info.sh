@@ -28,15 +28,6 @@ get_process_info(){
       # Get process info using cache
       passed_window_xid="$local_matching_window_xid" cache_get_process_info
     else
-      # Get process name
-      hide_stderr
-      if ! process_name="$(<"/proc/$pid/comm")"; then
-        restore_stderr
-        message "$get_process_info_msg_type" "Unable to obtain name of process ($pid) of window ($window_xid)!"
-        return 1
-      fi
-      restore_stderr
-
       # Get process command by reading file ignoring '\0' and those are replaced with spaces automatically because of arrays nature :D
       local local_process_command_array
       hide_stderr
@@ -48,6 +39,28 @@ get_process_info(){
         process_command="${local_process_command_array[*]}"
       fi
       restore_stderr
+
+      # If this is Wine/Proton application, it is possible to get its full name
+      # Helps avoid section match issues if process changes its name during runtime
+      # E.g. S.T.A.L.K.E.R. trilogy and games based on it, e.g. Anomaly, GAMMA etc.
+      # Also allows more accurate match with section because it is not stripped to 15 symbols
+      if [[ "$process_command" =~ ^[A-Za-z]':\'.*'.exe' ]]; then
+        process_name="${process_command/*'\'/}"
+
+        # Not really a check, I just need to remove everything after '.exe'
+        if [[ "$process_name" =~ .*'.exe' ]]; then
+          process_name="${BASH_REMATCH[0]}"
+        fi
+      else
+        # Get process name
+        hide_stderr
+        if ! process_name="$(<"/proc/$pid/comm")"; then
+          restore_stderr
+          message "$get_process_info_msg_type" "Unable to obtain name of process ($pid) of window ($window_xid)!"
+          return 1
+        fi
+        restore_stderr
+      fi
 
       # Bufferize to avoid failure from 'read' in case file will be removed during reading
       local local_status_content
