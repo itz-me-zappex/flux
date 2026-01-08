@@ -290,6 +290,12 @@ make
 sudo make install
 ```
 
+#### Install `10-flux.conf` to `/etc/limits.d`
+Needed for `flux` group users to bypass scheduling policy change limitations.
+```bash
+sudo install -Dm644 '10-flux.conf' '/etc/security/limits.d/'
+```
+
 #### Or you may want to change prefix e.g. in case you want install it locally
 ```bash
 PREFIX="~/.local" make install
@@ -351,6 +357,11 @@ sudo make uninstall
 #### Or, if it was installed somewhere else, e.g. in `/usr`, then
 ```bash
 sudo PREFIX='/usr' make uninstall
+```
+
+#### Remove `10-flux.conf` from `/etc/security/limits.d`
+```bash
+sudo rm '/etc/security/limits.d/10-flux.conf'
 ```
 
 #### Remove unneeded dependencies
