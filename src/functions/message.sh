@@ -57,14 +57,13 @@ message(){
 
   # Print message with timestamp to log file if responding option is specified and logging has been allowed before event reading
   if [[ -n "$allow_logging" ]]; then
-    # Check log file for read-write access before store message to log
-    if check_rw "$log"; then
-      printf "$local_log_timestamp" "$local_current_time" "$local_log_prefix $*" >> "$log"
-    else
-      local local_shorten_path_result
-      shorten_path "$log"
-      printf "$local_timestamp" "$local_current_time" "$prefix_warning Unable to write message to log file '$local_shorten_path_result', recreate it or check read-write access!" >&2
-    fi
+    # All I need is just write log to file
+    # Previously check with warning was added
+    # But warnings are useless if daemon runs in background
+    # And it is better to try recreate log file in case it becomes removed at runtime
+    hide_stderr
+    printf "$local_log_timestamp" "$local_current_time" "$local_log_prefix $*" >> "$log"
+    restore_stderr
   fi
 
   # Print message as notification if '--notifications' option is specified and those have been allowed (before start event reading)
