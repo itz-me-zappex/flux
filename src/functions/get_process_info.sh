@@ -52,14 +52,22 @@ get_process_info(){
           process_name="${BASH_REMATCH[0]}"
         fi
       else
-        # Get process name
+        # Get process name from 'cmdline'
+        # 'comm' is unreliable because it is stripped to 16 symbols
+        # In 'cmdline' process path and arguments are splitten with '^@'
+        # Even if process name has spaces, those are still not '^@'
+        # So all I need is just skip everything after '^@'
+        # test: 'cat -A /proc/<PID>/cmdline'
         hide_stderr
-        if ! process_name="$(<"/proc/$pid/comm")"; then
+        if ! read -r -d '' process_name < "/proc/$pid/cmdline"; then
           restore_stderr
           message "$get_process_info_msg_type" "Unable to obtain name of process ($pid) of window ($window_xid)!"
           return 1
+        else
+          restore_stderr
+          # Remove path and keep only process name
+          process_name="${process_name/*'/'/}"
         fi
-        restore_stderr
       fi
 
       # Bufferize to avoid failure from 'read' in case file will be removed during reading
