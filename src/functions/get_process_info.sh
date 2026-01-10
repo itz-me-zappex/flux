@@ -40,34 +40,26 @@ get_process_info(){
       fi
       restore_stderr
 
-      # If this is Wine/Proton application, it is possible to get its full name
-      # Helps avoid section match issues if process changes its name during runtime
-      # E.g. S.T.A.L.K.E.R. trilogy and games based on it, e.g. Anomaly, GAMMA etc.
-      # Also allows more accurate match with section because it is not stripped to 15 symbols
-      if [[ "$process_command" =~ ^[A-Za-z]':\'.*'.exe' ]]; then
-        process_name="${process_command/*'\'/}"
-
-        # Not really a check, I just need to remove everything after '.exe'
-        if [[ "$process_name" =~ .*'.exe' ]]; then
-          process_name="${BASH_REMATCH[0]}"
-        fi
+      # Get process name from 'cmdline'
+      # 'comm' is unreliable because it is stripped to 16 symbols
+      # In 'cmdline' process path and arguments are splitten with '^@'
+      # Even if process name has spaces, those are still not '^@'
+      # So all I need is just skip everything after '^@'
+      # test: 'cat -A /proc/<PID>/cmdline'
+      hide_stderr
+      if ! read -r -d '' process_name < "/proc/$pid/cmdline"; then
+        restore_stderr
+        message "$get_process_info_msg_type" "Unable to obtain name of process ($pid) of window ($window_xid)!"
+        return 1
       else
-        # Get process name from 'cmdline'
-        # 'comm' is unreliable because it is stripped to 16 symbols
-        # In 'cmdline' process path and arguments are splitten with '^@'
-        # Even if process name has spaces, those are still not '^@'
-        # So all I need is just skip everything after '^@'
-        # test: 'cat -A /proc/<PID>/cmdline'
-        hide_stderr
-        if ! read -r -d '' process_name < "/proc/$pid/cmdline"; then
-          restore_stderr
-          message "$get_process_info_msg_type" "Unable to obtain name of process ($pid) of window ($window_xid)!"
-          return 1
-        else
-          restore_stderr
-          # Remove path and keep only process name
-          process_name="${process_name/*'/'/}"
-        fi
+        restore_stderr
+        # Remove path and keep only process name
+        # Neither removing '\' nor '/' at the same time hurt each other
+        # Checking for regexp, e.g. `^[A-Za-z]':\'.*` is slow
+        # Wine/Proton apps
+        process_name="${process_name/*'\'/}"
+        # Regular apps
+        process_name="${process_name/*'/'/}"
       fi
 
       # Bufferize to avoid failure from 'read' in case file will be removed during reading
