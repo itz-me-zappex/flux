@@ -1,5 +1,5 @@
 Name:           flux
-Version:        1.33
+Version:        1.34
 Release:        1%{?dist}
 Summary:        Advanced daemon for X11 desktops and window managers
 

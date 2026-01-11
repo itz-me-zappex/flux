@@ -5,7 +5,7 @@
 ###############################
 # --- Available to modify --- #
 ###############################
-version='1.33'
+version='1.34'
 rev='1'
 arch="$(dpkg --print-architecture)"
 package="flux_${version}-${rev}_${arch}"

@@ -1,5 +1,5 @@
 pkgname='flux'
-pkgver='1.33'
+pkgver='1.34'
 pkgrel='1'
 pkgdesc='An advanced automation daemon for X11 desktops and window managers. Designed to limit FPS/CPU usage and run commands on window focus and unfocus events. Provides gaming-oriented features. Written mostly in Bash and partially in C.'
 arch=('any')
