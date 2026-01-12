@@ -73,32 +73,32 @@ An advanced automation daemon for X11 desktops and window managers. Designed to 
   - Use less aggressive CPU limit to allow game to send/receive packets.
 - Stuttery audio in unfocused game if CPU limit is pretty aggressive.
   - That should be expected, because `cpulimit` interrupts process with `SIGSTOP` and `SIGCONT` signals very frequently to limit CPU usage. Use `unfocus-mute` config key, or in case you use Pipewire with Wireplumber, you may want to use `wpctl` as described [here](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber).
-- In some games, with `focus-grab-cursor` set to `true`, cursor still able to escape, but does not work outside of window. As example - "Ori and the Will of the Wisps" game on Unity engine in windowed mode.
-  - Whether do not use `focus-grab-cursor` config key in such cases or ignore an issue, I can not do anything with this.
+- In some games, with `focus-grab-cursor` set to `true`, cursor still able to escape, but does not work outside of window.
+  - As example, in "Ori and the Will of the Wisps" game (Unity engine) in windowed mode. Whether do not use `focus-grab-cursor` config key in such cases or ignore an issue, I can not do anything with this, sorry.
 - Daemon says that it waits for cursor ungrab "without any reason".
-  - That may happen in case game grabs cursor manually. Do not use `focus-grab-cursor` config key in such cases, as it becomes useless.
+  - That happens in case game grabs cursor manually (e.g. in fullscreen mode, not borderless one). Do not use `focus-grab-cursor` config key in such cases, as it becomes useless.
 - Daemon mutes multiple processes if there is >=2 processes with the same name.
-  - That happens in case processes do not report their PIDs, so daemon should guess. If you use Pipewire with Wireplumber, you may want to use [this](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber) method. Keep in mind, this method does not mute processes in sandboxes with PID namespaces, unlike default one.
+  - Edge case, that happens in case processes do not report their PIDs, so daemon should guess. If you use Pipewire with Wireplumber, you may want to use [this](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber) method. Keep in mind, this method does not mute processes in sandboxes with PID namespaces, unlike default one.
 
 ## Screenshot
+Daemon running handling already opened windows (`-H`) in verbose mode (`-v`) and enabled timestamps (`-t`).
 ![](images/preview.png)
-Daemon running handling already opened windows (`-H`) in verbose mode (`-v`) and enabled timestamps (`-t`)
 
 ## Features
-- Apply CPU or FPS limit to process on unfocus and unlimit on focus. FPS limiting requires game running using MangoHud with already existing config file.
-- Reduce process priority on unfocus and restore it on focus.
-- Minimize window on unfocus, useful for borderless windows.
-- Expand window to fullscreen on focus. Useful for games which handle a window mode in weird way, e.g. Forza Horizon 4 changes its mode to windowed after minimization.
-- Grab cursor and redirect input into focused window, that prevents cursor from escaping to second monitor in case with borderless windows.
-- Execute commands and scripts on focus, unfocus and window closure events to extend daemon functionality. Daemon provides info about window and process through environment variables.
+- Applying CPU or FPS limit to process on unfocus and unlimit on focus. FPS limiting requires game running using MangoHud with already existing config file.
+- Reducing process priority on unfocus and restore it on focus.
+- Minimizing window on unfocus, useful for borderless windows.
+- Expanding window to fullscreen on focus. Useful for games which handle a window mode in a weird way.
+- Grabbing cursor and redirect input into focused window to prevent cursor from escaping to second monitor in case with borderless windows.
+- Executing commands and scripts on focus, unfocus and window closure events to extend daemon functionality. Daemon provides info about window and process through environment variables.
 - Logging support.
 - Notifications support.
 - Flexible identifiers support to avoid false positives, including regular expressions.
-- Works with processes running through sandbox with PID namespaces, e.g. Firejail.
-- Handles DE/WM restart or switching it on the fly.
-- Supports most of X11 DEs/WMs ([EWMH-compatible ones](https://specifications.freedesktop.org/wm-spec/latest/)) and does not rely on neither GPU nor its driver.
-- Detects and handles both explicitly and implicitly opened windows (appeared with and without focus event respectively).
-- Mute processes on unfocus and unmute on focus. Supports Pulseaudio and Pipewire (including Pipewire Media Session and Wireplumber).
+- Working with processes running through sandbox with PID namespaces, e.g. Firejail.
+- Handling DE/WM restart or switching it on the fly.
+- Support for most of X11 DEs/WMs ([EWMH-compatible ones](https://specifications.freedesktop.org/wm-spec/latest/)) and does not rely on either GPU or its driver.
+- Detection and handling both explicitly and implicitly opened windows.
+- Muting processes on unfocus and unmute on focus. Supports Pulseaudio and Pipewire, including Pipewire Media Session and Wireplumber.
 
 ## Dependencies
 ### Arch Linux and derivatives
@@ -305,7 +305,8 @@ Daemon fully functional without installation, if you installed proper dependenci
 ./build/flux -h
 ```
 
-#### Create `flux` group, needed to bypass scheduling policies change limitations
+#### Create `flux` group
+Needed to bypass scheduling policies change limitations.
 ```bash
 sudo groupadd -r flux
 ```
@@ -321,13 +322,13 @@ sudo usermod -aG flux "$USER"
 ### Arch Linux and derivatives
 #### Execute following
 ```bash
-sudo pacman -Rnsc flux
+sudo pacman -Rns flux
 ```
 
 ### Debian and derivatives
 #### Execute following
 ```bash
-sudo apt autoremove flux
+sudo apt autopurge flux
 ```
 
 ### Fedora and derivatives
@@ -364,7 +365,7 @@ sudo rm '/etc/security/limits.d/10-flux.conf'
 ```
 
 #### Remove unneeded dependencies
-Depends on distro and package manager you use, I highly suggest to remove dependencies selectively and check which packages are use it to avoid system breakage.
+Depends on distro and package manager you use, I highly suggest to remove dependencies selectively and check which packages are use them to avoid system breakage.
 
 ### Cleaning up
 #### Temporary directory (after crash)
@@ -372,9 +373,16 @@ Depends on distro and package manager you use, I highly suggest to remove depend
 rm -rf '/tmp/flux'
 ```
 
-#### Config file (if not needed anymore), e.g.
+#### Config file (if not needed anymore)
+Path to config file depends on your own choice.
 ```bash
-rm ~/.config/flux.ini
+rm "$HOME/.config/flux.ini"
+```
+```bash
+rm "$XDG_CONFIG_HOME/flux.ini"
+```
+```bash
+sudo rm '/etc/flux.ini'
 ```
 
 #### Remove group from system
@@ -456,7 +464,7 @@ Running daemon as root also possible, but that feature almost useless and **UNSA
 Just add command to autostart using your DE/WM settings or config file.
 
 ## Configuration
-A simple INI is used for configuration.
+An INI-like syntax is used for configuration.
 
 ### Config path
 Daemon searches for following configuration files by priority:
@@ -471,7 +479,7 @@ As INI is not standartized, I should mention all supported features here.
 - Spaces and other symbols in section names.
 - Single and double quoted strings.
 - Сase insensitivity of key names.
-- Comments (using `;` and/or `#` symbols).
+- Comments using `;` and/or `#` symbols.
 - Insensetivity to spaces before and after `=` symbol.
 - Appending values to config keys using `+=`. Works only in [scripting](#Scripting) config keys.
 - Regular expressions using `~=`. Works only in [identifier](#Identifiers) config keys.
@@ -486,45 +494,47 @@ As INI is not standartized, I should mention all supported features here.
 | Key | Description |
 |-----|-------------|
 | `command` | Command which is used to execute process, required if `name` is not specified. |
-| `name` | Name of process, required if `command` is not specified. Daemon uses process executable name as process name, because `/proc/<PID>/comm` is stripped to 15 visible symbols. Side effect of this, is that in case `/proc/<PID>/cmdline` contains arguments separated with spaces instead of zero bytes, then arguments become a part of process name (noticed that only with Ungoogled Chromium subprocesses daemon can't even see). You can safely use executable name of both native and Wine/Proton applications. |
+| `name` | Name of process, required if `command` is not specified. Daemon uses process executable name as process name, because `/proc/<PID>/comm` is stripped to 15 visible symbols. Side effect of this, is that in case `/proc/<PID>/cmdline` contains arguments separated with spaces instead of zero bytes, then arguments become a part of process name (noticed that only with Ungoogled Chromium subprocesses daemon can't even see). You can safely use executable name of both native and Wine/Proton applications here. |
 | `owner` | Effective UID of process or username (login), optional. |
 
 #### Limits
 | Key | Description |
 |-----|-------------|
-| `unfocus-cpu-limit` | CPU limit to set on unfocus event, accepts values between `0%` and `100%` (no limit), `%` symbol is optional. Defaults to `100%`. |
+| `unfocus-cpu-limit` | CPU limit to set on unfocus event, accepts values between `0%` (freeze) and `100%` (no limit), `%` symbol is optional. Defaults to `100%`. |
 | `fps-unfocus` | FPS to set on unfocus, required by and requires `mangohud-config`, cannot be equal to `0` as that means no limit. |
 | `fps-focus` | FPS to set on focus or list of comma-separated integers (e.g. `30,60,120`, used in MangoHud as FPS limits you can switch between using built-in keybinding), requires `fps-unfocus`. Defaults to `0` (i.e. no limit). |
-| `unfocus-sched-idle` | Boolean, set `SCHED_IDLE` scheduling policy for process on unfocus event to greatly reduce its priority. Daemon should run as `@flux` to be able restore `SCHED_RR`/`SCHED_FIFO`/`SCHED_OTHER`/`SCHED_BATCH` scheduling policy and only as root to restore `SCHED_DEADLINE` scheduling policy (if daemon does not have sufficient rights to restore these scheduling policies, it will print warning and will not change anything). Defaults to `false`. |
-| `unfocus-mute` | Boolean, daemon mutes process on unfocus and unmutes on focus events. Uses `pactl` tool with a bunch of logic to parse list of sink inputs and find match using only process name and PID. Defaults to `false`. You may want to use [alternative](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber) way to mute process in case you use Pipewire with Wireplumber. |
+| `unfocus-sched-idle` | Boolean, set `SCHED_IDLE` scheduling policy for process on unfocus event to greatly reduce its priority. Daemon should run as `@flux` to be able restore `SCHED_RR`/`SCHED_FIFO`/`SCHED_OTHER`/`SCHED_BATCH` scheduling policy and only as root to restore `SCHED_DEADLINE` scheduling policy. If daemon does not have sufficient rights to restore these scheduling policies, it will print warning and will not change anything. Defaults to `false`. |
+| `unfocus-mute` | Boolean, daemon mutes process on unfocus and unmutes on focus. Uses `pactl` tool with a bunch of logic to parse list of sink inputs and find match using process name and PID. Defaults to `false`. You may want to use [an alternative way](#alternative-way-to-mute-process-audio-on-unfocus-for-pipewire-with-wireplumber) to mute process in case you use Pipewire with Wireplumber. |
 
 #### Limits configuration
 | Key | Description |
 |-----|-------------|
-| `unfocus-limits-delay` | Delay in seconds before applying CPU/FPS limit and setting `SCHED_IDLE`. Defaults to `0`, supports values with floating point. |
-| `mangohud-source-config` | Path to MangoHud config which should be used as a base before apply FPS limit in `mangohud-config`, if not specified, then target behaves as source. Useful if you not looking for duplicate MangoHud config for multiple games. |
-| `mangohud-config` | Path to MangoHud config which should be changed (target), required if you want change FPS limits and requires `fps-unfocus`. Make sure you created specified config, at least just keep it blank, otherwise MangoHud will not be able to load new config on fly and daemon will throw warnings related to config absence. Do not use the same config for multiple sections! |
-| `group` | Specify group from which section suppossed to inherit rules. Group declaration should begin with `@` symbol in both its section name and in value of `group` key. |
+| `unfocus-limits-delay` | Delay in seconds before apply CPU/FPS limit and/or setting `SCHED_IDLE`. Supports values with floating point. Defaults to `0`. |
+| `mangohud-source-config` | Path to MangoHud config file which should be used as a base before apply FPS limit in `mangohud-config`. If not specified, then target behaves as source. Useful if you are not looking to duplicate MangoHud config for multiple games. |
+| `mangohud-config` | Path to MangoHud config which should be changed (target), required if you want change FPS limits and requires `fps-unfocus`. Make sure you created specified config file before start game/application with it (at least keep it blank), otherwise MangoHud will not be able to load new config on the fly and daemon will throw warnings related to config absence. Do not use the same config for multiple sections to avoid unexpected issues with limits! |
+| `group` | Specify group from which section supposed to inherit rules. Group declaration should begin with `@` symbol in both its section name and in value of `group` key. |
 
 #### Scripting
+All commands run via Bash with `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess, so consider to redirect output to expected place if you need output of specific command.
+
 | Key | Description |
 |-----|-------------|
-| `exec-oneshot` | Command to execute on window appearance event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
-| `exec-closure` | Command to execute on window closure event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. Defaults to `lazy-exec-unfocus` value if not specified or declared with `+=` (appending). |
-| `exec-exit` | Command to execute when daemon receives `SIGINT` or `SIGTERM` signal, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. Defaults to `lazy-exec-unfocus` value if not specified or declared with `+=` (appending). |
+| `exec-oneshot` | Command to execute on window appearance event. |
+| `exec-closure` | Command to execute on window closure event. Defaults to `lazy-exec-unfocus` value if not specified or declared with `+=` (appending). |
+| `exec-exit` | Command to execute when daemon receives `SIGINT` or `SIGTERM` signal. Defaults to `lazy-exec-unfocus` value if not specified or declared with `+=` (appending). |
 | `exec-exit-focus` | Same as `exec-exit`, but command appears executed only if matching window appears focused at the moment of daemon termination. |
 | `exec-exit-unfocus` | Same as `exec-exit`, but command appears executed only if matching window appears unfocused at the moment of daemon termination. |
-| `exec-focus` | Command to execute on focus event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
-| `exec-unfocus` | Command to execute on unfocus event, command runs via bash using `nohup setsid` and will not be killed on daemon exit, output is hidden to avoid mess. |
-| `lazy-exec-focus` | Same as `exec-focus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event). |
-| `lazy-exec-unfocus` | Same as `exec-unfocus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly (w/o focus event). Used as `exec-exit` and/or `exec-closure` automatically if one/two of those is/are not specified. |
+| `exec-focus` | Command to execute on focus event. |
+| `exec-unfocus` | Command to execute on unfocus event. |
+| `lazy-exec-focus` | Same as `exec-focus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly. |
+| `lazy-exec-unfocus` | Same as `exec-unfocus`, but command will not run when processing opened windows if `--hot` is specified or in case window appeared implicitly. Used as `exec-exit` and/or `exec-closure` automatically if one/two of those is/are not specified. |
 
 #### Miscellaneous
 | Key | Description |
 |-----|-------------|
-| `unfocus-minimize` | Boolean, minimize window to panel on unfocus, useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`. Defaults to `false`. |
-| `focus-fullscreen` | Boolean, sends X event to window manager on focus to expand window to fullscreen, useful if game (e.g. Forza Horizon 4) handles window mode in weird a way. Defaults to `false`. |
-| `focus-grab-cursor` | Boolean, daemon grabs cursor if possible, binds it to window and because of X11 nature which prevents input to anything but client which owns cursor (`flux-grab-cursor` module in background in this case) - redirects all input into focused window. This ugly layer prevents cursor from escaping to second monitor in some games at cost of *possible* input lag. Cursor is ungrabbed on unfocus event. Defaults to `false`. |
+| `unfocus-minimize` | Boolean, minimize window to panel on unfocus. Useful for borderless windowed apps/games as those are not minimized automatically on `Alt+Tab`. Defaults to `false`. |
+| `focus-fullscreen` | Boolean, sends X event to window manager on focus to expand window to fullscreen. Useful if game handles window mode in a weird way, e.g. Forza Horizon 4. Defaults to `false`. |
+| `focus-grab-cursor` | Boolean, daemon grabs cursor if possible, binds it to window rectangles and because of X11 nature which prevents input to anything but client which owns cursor (`flux-grab-cursor` module in background in this case) - redirects all input into focused window. This ugly layer prevents cursor from escaping to second monitor in some games at cost of *possible* input lag. Cursor is ungrabbed on unfocus event. Defaults to `false`. |
 
 ### Groups
 To avoid repeating yourself, reduce config file size and simplify editing, you may want to create and use groups.
@@ -577,7 +587,7 @@ group = @games-overclock
 ```
 
 ### Regular expressions
-To simplify config file editing and reduce its size, you may want to use regular expressions e.g. to avoid extremely long strings (like in Minecraft's command which has `java` as process name) or to make section matchable with multiple process names.
+To simplify config file editing and reduce its size, you may want to use regular expressions. As example, to avoid extremely long strings, like in case with Minecraft as its process name is just `java` and command is extremely long or to make section matchable with multiple process names.
 
 ```ini
 ; Section matches both 'vkcube' and 'glxgears' processes
@@ -585,20 +595,17 @@ To simplify config file editing and reduce its size, you may want to use regular
 name ~= ^(vkcube|glxgears)$
 unfocus-cpu-limit = 0%
 
-; Minecraft has extremely long command and process name is just 'java', so
+; Minecraft has extremely long command and process name is just 'java'
 [Minecraft]
 name = java
-;command = /usr/lib/jvm/java-17-openjdk/bin/java -Xms512m -Xmx8192m -Duser.language=en -Djava.library.path...minecraft-1.20.4-client.jar org.prismlauncher.EntryPoint
 command ~= minecraft
 unfocus-cpu-limit = 5%
 ```
 
 ### Configuration example
-```ini
-; ----------------------------------------------------------------------------------------------- ;
-; --- Config keys 'command' and 'owner' are optional in this case, so you can use just 'name' --- ;
-; ----------------------------------------------------------------------------------------------- ;
+Config keys `command` and `owner` are optional in this case, so you can use just `name`.
 
+```ini
 ; Freeze on unfocus and disable/enable compositor on focus and unfocus respectively
 [The Witcher 3: Wild Hunt]
 name = witcher3.exe
@@ -608,7 +615,8 @@ unfocus-cpu-limit = 0%
 lazy-exec-focus = killall picom
 lazy-exec-unfocus = picom
 
-; Set FPS limit to 5, minimize (as this is borderless window) and mute on unfocus, restore FPS to 60, unmute and expand to fullscreen on focus
+; Set FPS to 5, minimize, reduce process priority and mute on unfocus
+; Set FPS to 60, restore process priority, unmute and expand to fullscreen on focus
 [Forza Horizon 4]
 name = ForzaHorizon4.exe
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\ForzaHorizon4\ForzaHorizon4.exe 
@@ -622,7 +630,7 @@ unfocus-sched-idle = true
 unfocus-minimize = true
 focus-fullscreen = true
 
-; Reduce CPU usage and reduce priority when unfocused, needed to keep game able download music and assets
+; Reduce CPU usage and reduce priority when unfocused to keep game able download music and assets
 [Geometry Dash]
 name = GeometryDash.exe
 command = Z:\run\media\zappex\WD-BLUE\Games\Steam\steamapps\common\Geometry Dash\GeometryDash.exe 
@@ -651,7 +659,7 @@ You can use these variables in your commands and scripts that running from `exec
 
 ## Tips and tricks
 ### Apply changes in config file
-As daemon does not parse config on a go, you need to restart daemon with `--hot` option after config file editing to make it handle already opened windows immediately after start.
+As daemon does not parse config on the fly, you need to restart daemon with `--hot` option after config file editing to make it handle already opened windows immediately after start.
 
 ### Alternative way to mute process audio on unfocus for Pipewire with Wireplumber
 This way should be faster and simplier, than using `pactl` tool with a bunch of logic as daemon does in case with `unfocus-mute` config key.
@@ -719,11 +727,11 @@ First time (e.g. after reboot) preloading may take a lot of time, especially if 
 
 ![](images/preload.png)
 
-*First preload command is very slow, but next execution is blazingly fast*
-
-*P.S.: My environment has `__GL_SHADER_DISK_CACHE_PATH="$HOME/.nv"`*
+As you can see, first preload command is very slow, but next one is blazingly fast.
 
 That is how bufferization works, you just need to load file to memory by reading it somehow, and then kernel will not read it from disk again, relying on RAM instead.
+
+P.S.: I have set `__GL_SHADER_DISK_CACHE_PATH="$HOME/.nv"` to environment variables.
 
 Add following line to section responsible for target (path may vary depending on system configuration):
 #### NVIDIA
@@ -773,13 +781,13 @@ lazy-exec-unfocus += qdbus org.kde.kglobalaccel /component/kwin org.kde.kglobala
 
 ## Possible questions
 ### How does this daemon work?
-- Daemon listens changes in `_NET_ACTIVE_WINDOW` and `_NET_CLIENT_LIST_STACKING` atoms, obtains window IDs and using those obtains PIDs by "asking" Xorg server via `XRes` extension, then reads info about processes from files in `/proc/<PID>` to compare it with identifiers in config file and if matching section appears, then it does specified in config file actions.
+- Daemon listens changes in `_NET_ACTIVE_WINDOW` and `_NET_CLIENT_LIST_STACKING` atoms, obtains window XIDs and using those obtains PIDs by "asking" Xorg server through XRes extension for those, reads info about processes from files in `/proc/<PID>` to compare it with identifiers in config file, and, if matching section appears, then it does specified in config file actions, otherwise - nothing.
 
 ### Does this daemon reduce performance?
 - Daemon uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time and just chills out when you doing stuff in single window. Performance loss should not be noticeable even on weak systems.
 
 ### May I get banned in game because of this daemon?
-- Nowadays, anti-cheats are pure garbage, developed by freaks without balls, and you may get banned even for a wrong click or sudden mouse movement, I am not even talking about bans because of broken libs provided with games by developers themselves. But daemon by its nature should not trigger anti-cheat, anyway, I am not responsible for your actions, so use it carefully and do not write me if you got a ban.
+- Nowadays, anti-cheats are pure garbage, developed by freaks without balls, and you may get banned even for a wrong click or sudden mouse movement, I am not even talking about bans because of broken libs provided with games by developers themselves. But, daemon by its nature should not trigger any anti-cheat ~~garbage~~ software. Anyway, I am not responsible for your actions, so use daemon carefully in case you worry and do not write me if you got banned somewhere.
 
 ### Why was this daemon developed?
 - Main task is to reduce CPU/GPU usage of games that have been minimized. Almost every engine fails to recognize that game is unfocused and still consumes a lot of CPU and GPU resources, what can make system slow for other tasks like browsing stuff, chatting, transcoding video etc. or even unresponsive at all. With this daemon now I can simply play a game or tinker with virtual machine and then minimize window if needed without carrying about high CPU/GPU usage and suffering from low multitasking performance. Also, daemon does not care about type of software, so you can use it with everything. Inspiried by feature from NVIDIA driver for Windows where user can set FPS limit for minimized software, this tool is not exactly the same, but better than nothing.
@@ -788,7 +796,7 @@ lazy-exec-unfocus += qdbus org.kde.kglobalaccel /component/kwin org.kde.kglobala
 - I try to avoid using external tools in favor of bashisms to reduce CPU usage by daemon and speed up code.
 
 ### What about Wayland support?
-- That is impossible, there is no any unified or even per-compositor way to read window related events and obtain PIDs of windows on Wayland. [Think twice before abandoning X11. Wayland breaks everything!](https://gist.github.com/probonopd/9feb7c20257af5dd915e3a9f2d1f2277)
+- That is impossible, there is no any unified or even per-compositor way to read window related events and obtain PIDs of windows on Wayland. Even if that become possible, it is still will not be possible to e.g. bind cursor to window rectangles, minimize/fullscreenize windows and so on. [Think twice before abandoning X11. Wayland breaks everything!](https://gist.github.com/probonopd/9feb7c20257af5dd915e3a9f2d1f2277)
 
 ### Why did you write it in Bash?
 - This is (scripting) language I know pretty good, despite a fact that Bash as all interpretators works slower than compilable languages, it still fits my needs almost perfectly.
