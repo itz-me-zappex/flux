@@ -486,7 +486,7 @@ As INI is not standartized, I should mention all supported features here.
 | Key | Description |
 |-----|-------------|
 | `command` | Command which is used to execute process, required if `name` is not specified. |
-| `name` | Name of process, required if `command` is not specified. Daemon uses soft match for processes with names which have length 15 symbols (not including 16th `\n`), i.e. probably stripped. |
+| `name` | Name of process, required if `command` is not specified. Daemon uses process executable name as process name, because `/proc/<PID>/comm` is stripped to 15 visible symbols. Side effect of this, is that in case `/proc/<PID>/cmdline` contains arguments separated with spaces instead of zero bytes, then arguments become a part of process name (noticed that only with Ungoogled Chromium subprocesses daemon can't even see). You can safely use executable name of both native and Wine/Proton applications. |
 | `owner` | Effective UID of process or username (login), optional. |
 
 #### Limits
