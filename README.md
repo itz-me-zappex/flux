@@ -98,7 +98,7 @@ Daemon running handling already opened windows (`-H`) in verbose mode (`-v`) and
 - Handling DE/WM restart or switching it on the fly.
 - Support for most of X11 DEs/WMs ([EWMH-compatible ones](https://specifications.freedesktop.org/wm-spec/latest/)) and does not rely on either GPU or its driver.
 - Detection and handling both explicitly and implicitly opened windows.
-- Muting processes on unfocus and unmute on focus. Supports Pulseaudio and Pipewire, including Pipewire Media Session and Wireplumber.
+- Muting processes on unfocus and unmuting on focus with Pulseaudio and Pipewire support, including Pipewire Media Session and Wireplumber.
 
 ## Dependencies
 ### Arch Linux and derivatives
