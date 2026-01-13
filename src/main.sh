@@ -52,8 +52,8 @@ case "$flux_path" in
   # Add modules to '$PATH'
   PATH="${daemon_prefix}:$PATH"
 esac
-unset flux_path \
-daemon_prefix
+unset flux_path
+# unset daemon_prefix
 
 # Define default prefixes
 color_prefix_error="$(echo -e "[\e[31mx\e[0m]")" # Red
@@ -98,6 +98,19 @@ else
   log_prefix_verbose="$colorless_prefix_verbose"
   log_prefix_warning="$colorless_prefix_warning"
   log_timestamp_format="$colorless_timestamp_format"
+fi
+
+# Exit with an error if even one of binary modules is missing
+for temp_module in flux-grab-cursor flux-listener select-window validate-x11-session window-fullscreen window-minimize; do
+  if ! command -v "$temp_module" > /dev/null 2>&1; then
+    missing_modules='1'
+    message --warning "Module '$temp_module' in '$daemon_prefix' daemon prefix is missing!"
+  fi
+done
+unset daemon_prefix
+if (( missing_modules != 0 )); then
+  message --error "Unable to continue because of missing module(s)!"
+  exit 1
 fi
 
 # 'get_process_info()' should print errors in '--get' and warnings at runtime
