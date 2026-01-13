@@ -31,7 +31,7 @@ cmdline_get(){
   esac
 }
 
-# Requred to check process existence
+# Required to check process existence
 check_pid_existence(){
   local local_pid="$1"
 
