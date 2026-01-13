@@ -14,7 +14,7 @@ background_grab_cursor(){
     return 1
   fi
 
-  "$flux_grab_cursor_path" "$passed_window_xid" > "$flux_grab_cursor_fifo_path" &
+  flux-grab-cursor "$passed_window_xid" > "$flux_grab_cursor_fifo_path" &
   local local_flux_grab_cursor_pid="$!"
   trap 'kill "$local_flux_grab_cursor_pid"' SIGINT SIGTERM
 

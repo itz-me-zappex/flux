@@ -1,3 +1,6 @@
+# Shown in '--version' output
+daemon_version='1.34'
+
 # Unset environment variables which are lowercase and may cause conflicts
 while read -r temp_envvar_line ||
       [[ -n "$temp_envvar_line" ]]; do
@@ -15,11 +18,12 @@ done < <(declare -x)
 unset temp_envvar_line \
 envvar_name
 
-daemon_version='1.34'
-
 if [[ -z "$DISPLAY" ]]; then
   export DISPLAY=':0'
 fi
+
+# Daemon designed to work with blank '$IFS'
+unset IFS
 
 # Set path to temporary directory and files
 flux_temp_dir_path='/tmp/flux'
@@ -38,23 +42,15 @@ case "$flux_path" in
   # Keep only prefix path
   daemon_prefix="${flux_path/%'/bin/flux'/}"
 
-  flux_listener_path="${daemon_prefix}/lib/flux/flux-listener"
-  window_minimize_path="${daemon_prefix}/lib/flux/window-minimize"
-  window_fullscreen_path="${daemon_prefix}/lib/flux/window-fullscreen"
-  select_window_path="${daemon_prefix}/lib/flux/select-window"
-  flux_grab_cursor_path="${daemon_prefix}/lib/flux/flux-grab-cursor"
-  validate_x11_session_path="${daemon_prefix}/lib/flux/validate-x11-session"
+  # Add modules to '$PATH'
+  PATH="${daemon_prefix}/lib/flux:$PATH"
 ;;
 * )
   # Keep only executable directory
   daemon_prefix="${flux_path/%'/flux'/}"
 
-  flux_listener_path="${daemon_prefix}/flux-listener"
-  window_minimize_path="${daemon_prefix}/window-minimize"
-  window_fullscreen_path="${daemon_prefix}/window-fullscreen"
-  select_window_path="${daemon_prefix}/select-window"
-  flux_grab_cursor_path="${daemon_prefix}/flux-grab-cursor"
-  validate_x11_session_path="${daemon_prefix}/validate-x11-session"
+  # Add modules to '$PATH'
+  PATH="${daemon_prefix}:$PATH"
 esac
 unset flux_path \
 daemon_prefix
@@ -264,7 +260,7 @@ validate_sched
 unset -f validate_sched
 
 # Read events from 'flux-listener' binary
-"$flux_listener_path" > "$flux_listener_fifo_path" &
+flux-listener > "$flux_listener_fifo_path" &
 flux_listener_pid="$!"
 quiet='' message --info "Flux started."
 while read -r raw_event ||

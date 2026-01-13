@@ -28,7 +28,7 @@ validate_x11_session(){
 
   # EWMH-compatibility and X11 session existence check (binary module)
   if (( local_error_code == 0 )); then
-    "$validate_x11_session_path" > /dev/null 2>&1
+    validate-x11-session > /dev/null 2>&1
     local local_validate_x11_session_exit_code="$?"
     if (( local_validate_x11_session_exit_code > 0 )); then
       case "$local_validate_x11_session_exit_code" in

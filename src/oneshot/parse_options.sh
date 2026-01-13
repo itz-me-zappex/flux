@@ -82,7 +82,7 @@ parse_options(){
       fi
 
       # Execute module responsible for getting window info and remember output
-      window_info="$("$select_window_path" "$get" 2>/dev/null)"
+      window_info="$(select-window "$get" 2>/dev/null)"
       select_window_exit_code="$?"
 
       # Define message depending by exit code
