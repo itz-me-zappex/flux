@@ -107,7 +107,8 @@ for temp_module in flux-grab-cursor flux-listener select-window validate-x11-ses
     message --warning "Module '$temp_module' in '$daemon_prefix' daemon prefix is missing!"
   fi
 done
-unset daemon_prefix
+unset temp_module \
+daemon_prefix
 if (( missing_modules != 0 )); then
   message --error "Unable to continue because of missing module(s)!"
   exit 1
