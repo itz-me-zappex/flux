@@ -19,7 +19,7 @@ unset temp_envvar_line \
 envvar_name
 
 if [[ -z "$DISPLAY" ]]; then
-  export DISPLAY=':0'
+  DISPLAY=':0'
 fi
 
 # Daemon designed to work with blank '$IFS'
