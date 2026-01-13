@@ -101,7 +101,12 @@ else
 fi
 
 # Exit with an error if even one of binary modules is missing
-for temp_module in flux-grab-cursor flux-listener select-window validate-x11-session window-fullscreen window-minimize; do
+for temp_module in flux-grab-cursor \
+flux-listener \
+select-window \
+validate-x11-session \
+window-fullscreen \
+window-minimize; do
   if ! command -v "$temp_module" > /dev/null 2>&1; then
     missing_modules='1'
     message --warning "Module '$temp_module' in '$daemon_prefix' daemon prefix is missing!"
