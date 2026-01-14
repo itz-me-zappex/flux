@@ -1,5 +1,5 @@
 # Shown in '--version' output
-daemon_version='1.34'
+daemon_version='1.34.1'
 
 # Unset environment variables which are lowercase and may cause conflicts
 while read -r temp_envvar_line ||
