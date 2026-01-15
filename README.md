@@ -82,6 +82,7 @@ An advanced automation daemon for X11 desktops and window managers. Designed to 
 
 ## Screenshot
 Daemon running handling already opened windows (`-H`) in verbose mode (`-v`) and enabled timestamps (`-t`).
+
 ![](images/preview.png)
 
 ## Features
