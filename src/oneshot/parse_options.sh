@@ -1,6 +1,6 @@
-# Required for options parsing
+# To parse command line options
 parse_options(){
-  # Continue until count of passed command line options is greater than zero
+  # Continue until count of passed command line options become zero
   while (( $# > 0 )); do
     case "$1" in
     --color | -C | --color=* )
@@ -46,11 +46,10 @@ parse_options(){
         exit 1
       fi
 
-      # Validate X11 session
       validate_x11_session
       validate_x11_session_exit_code="$?"
 
-      # Define message depending by exit code
+      # Define message depending on exit code
       if (( validate_x11_session_exit_code > 0 )); then
         case "$get" in
         focus )
@@ -85,7 +84,7 @@ parse_options(){
       window_info="$(select-window "$get" 2>/dev/null)"
       select_window_exit_code="$?"
 
-      # Define message depending by exit code
+      # Define message depending on exit code
       if (( select_window_exit_code > 0 )) ; then
         case "$get" in
         focus )
@@ -126,7 +125,8 @@ parse_options(){
           exit 1
         fi
 
-        # Single quote process name if it has space as last symbol due to 15 symbols limitation in '/proc/<PID>/comm' (excluding 16th $'\n')
+        # Single quote process name if it has space as last symbol
+        # because of 15 visible symbols limitation in '/proc/<PID>/comm'
         if [[ "$process_name" == *' ' ]]; then
           process_name="'$process_name'"
         fi
@@ -300,7 +300,8 @@ There is NO WARRANTY, to the extent permitted by law.
       # Second regexp avoids long options
       if [[ "$1" =~ ^-.{2,}$ &&
             ! "$1" =~ ^--.* ]]; then
-        # Split combined option and add result to array, also skip first symbol as that is hypen
+        # Split combined option and add result to array,
+        # also skip first symbol as that is hypen
         for (( i = 1; i < ${#1} ; i++ )); do
           options_array+=("-${1:i:1}")
         done

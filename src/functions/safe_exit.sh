@@ -1,4 +1,4 @@
-# Required to unset applied limits for windows on SIGTERM/SIGINT signal
+# To unset applied limits for windows on SIGTERM/SIGINT signal
 safe_exit(){
   local local_end_of_msg='because of daemon termination'
 
@@ -14,27 +14,24 @@ safe_exit(){
 
     # Define type of limit which should be unset
     if [[ -n "${background_freeze_pid_map["$local_pid"]}" ]]; then
-      # Unfreeze process if has been frozen
       passed_pid="$local_pid" \
       passed_section="$local_section" \
       passed_process_name="$local_process_name" \
       passed_end_of_msg="$local_end_of_msg" \
       unfreeze_process
     elif [[ -n "${background_cpu_limit_pid_map["$local_pid"]}" ]]; then
-      # Unset CPU limit if has been applied
       passed_pid="$local_pid" \
       passed_process_name="$local_process_name" \
       passed_signal='-SIGTERM' \
       unset_cpu_limit
     elif [[ -n "$local_section" &&
             -n "${config_key_mangohud_config_map["$local_section"]}" ]]; then
-      # Unset FPS limit
       passed_section="$local_section" \
       passed_end_of_msg="$local_end_of_msg" \
       unset_fps_limit
     fi
 
-    # Restore scheduling policy for process if it has been changed to idle
+    # Restore scheduling policy for process
     if [[ -n "${background_sched_idle_pid_map["$local_pid"]}" ]]; then
       passed_pid="$local_pid" \
       passed_section="$local_section" \
@@ -52,7 +49,7 @@ safe_exit(){
       cursor_ungrab
     fi
 
-    # Unmute process, even if it is not muted, just in case
+    # Unmute process, even if not muted, just in case
     if [[ -n "$local_section" && 
           -n "${config_key_unfocus_mute_map["$local_section"]}" ]]; then
       passed_window_xid="$local_temp_window_xid" \
@@ -64,9 +61,9 @@ safe_exit(){
       pactl_set_mute &
     fi
 
-    # Execute commands from 'exec-exit', 'exec-exit-focus' and 'exec-exit-unfocus' if possible
-    # Previous section here is matching section for focused window
-    # It just moved to previous because of end of loop before next event in 'src/main.sh'
+    # Execute 'exec-exit', 'exec-exit-focus' and 'exec-exit-unfocus' commands
+    # Previous section here is currently focused window matching section
+    # It is moved to previous because daemon does that after handling event
     passed_window_xid="$local_temp_window_xid" \
     passed_pid="$local_pid" \
     passed_section="$local_section" \
@@ -99,6 +96,7 @@ safe_exit(){
     message --warning "Unable to remove '$local_shorten_path_result', directory is expected!"
   fi
   
-  # Wait a bit to avoid printing message about daemon termination earlier than messages from background functions appear
+  # Wait a bit to avoid printing message about daemon termination
+  # earlier than ones from backgrounded functions appear
   sleep 0.1
 }

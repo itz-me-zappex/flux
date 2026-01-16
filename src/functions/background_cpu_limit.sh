@@ -1,4 +1,4 @@
-# Required to set CPU limit using 'cpulimit' tool on unfocus event, runs in background via '&'
+# To set CPU limit using 'cpulimit' tool on unfocus event
 background_cpu_limit(){
   local local_unfocus_limits_delay="${config_key_unfocus_limits_delay_map["$passed_section"]}"
   local local_cpu_limit="${config_key_unfocus_cpu_limit_map["$passed_section"]}"
@@ -35,7 +35,7 @@ background_cpu_limit(){
     cpulimit --lazy --limit="$local_real_cpu_limit" --pid="$passed_pid" > /dev/null 2>&1 &
     local local_cpulimit_pid="$!"
 
-    # Enforce 'SCHED_FIFO' to improve interval stability between interrupts
+    # Set 'SCHED_FIFO' to improve interval stability between interrupts
     if [[ -n "$sched_realtime_is_supported" ]]; then
       if ! chrt --fifo --pid 99 "$local_cpulimit_pid" > /dev/null 2>&1; then
         message --warning "Unable to change scheduling policy to 'FIFO' for 'cpulimit' ($local_cpulimit_pid) hooked to process '$passed_process_name' ($passed_pid) of window ($passed_window_xid)!"

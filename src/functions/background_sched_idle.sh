@@ -1,4 +1,4 @@
-# Required to change scheduling policy of process to 'SCHED_IDLE' on unfocus event, runs in background via '&'
+# To change scheduling policy of process to 'SCHED_IDLE' on unfocus event
 background_sched_idle(){
   local local_unfocus_limits_delay="${config_key_unfocus_limits_delay_map["$passed_section"]}"
 

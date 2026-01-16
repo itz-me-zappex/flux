@@ -1,4 +1,4 @@
-# Required to change FPS limit in specified MangoHud config
+# To change FPS limit in specified MangoHud config
 mangohud_fps_set(){
   local local_target_config="$1"
   local local_source_config="$2"
@@ -6,7 +6,7 @@ mangohud_fps_set(){
 
   # Check whether config file exists or not before continue
   if [[ -f "$local_target_config" ]]; then
-    # Check for source config readability only if it differs from target config
+    # Check for source config readability
     if [[ "$local_target_config" != "$local_source_config" ]]; then
       if ! check_ro "$local_source_config"; then
         local local_shorten_path_result
@@ -23,7 +23,8 @@ mangohud_fps_set(){
       message --warning "Target MangoHud config file ($local_shorten_path_result) ($passed_section) is not rewritable!"
       return 1
     else
-      # Replace "fps_limit" string if exists in config content (in memory, not in file as this is source)
+      # Replace "fps_limit" string if exists in config content
+      # in memory, not in file as this is source
       local local_temp_config_line
       while read -r local_temp_config_line ||
             [[ -n "$local_temp_config_line" ]]; do
@@ -42,7 +43,7 @@ mangohud_fps_set(){
         local local_new_config_content+="fps_limit=$local_fps_to_set"$'\n'
       fi
 
-      # Overwrite with changes
+      # Overwrite config file with changes
       echo "$local_new_config_content" > "$local_target_config"
     fi
   else

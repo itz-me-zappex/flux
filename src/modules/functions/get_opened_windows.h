@@ -4,7 +4,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 
-// Get list of opened window XIDs using '_NET_CLIENT_LIST_STACKING' atom
+/* Get list of opened window XIDs using '_NET_CLIENT_LIST_STACKING' atom */
 Window* get_opened_windows(Display* display, Window root, unsigned long *opened_windows_count) {
   unsigned char *data = NULL;
 

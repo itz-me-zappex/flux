@@ -7,8 +7,10 @@
 #include <stdbool.h>
 
 /* Inefficient and consumes a lot of CPU time
- * Needed to make window accept mouse input only for when waiting for Wine/Proton process to hang after cursor grab (workaround to pass init step)
- * Because process may not hang at all if already initialized and it will ignore mouse input without this crutch
+ * Needed to make window accept mouse input only for when waiting
+ * for Wine/Proton process to hang after cursor grab
+ * Needed because process may not hang at all if already initialized
+ * and without this crutch game will ignore mouse input
  */
 
 typedef struct {

@@ -4,7 +4,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 
-// Get window XID using '_NET_ACTIVE_WINDOW' atom
+/* Get window XID using '_NET_ACTIVE_WINDOW' atom */
 Window get_active_window(Display* display, Window root) {
   Window active_window;
   unsigned char *data = NULL;

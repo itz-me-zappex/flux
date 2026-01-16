@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <X11/Xlib.h>
 
-// Wait for cursor ungrab to grab it successfully
+/* Wait for cursor ungrab to grab it successfully */
 void wait_for_cursor_ungrab(Display* display, Window window) {
   while (true) {
     usleep(250000);

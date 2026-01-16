@@ -1,4 +1,5 @@
-# Required to execute command from 'exec-exit', 'exec-exit-focus' and 'exec-exit-unfocus' config keys
+# To execute commands from 'exec-exit', 'exec-exit-focus' and
+# 'exec-exit-unfocus' config keys
 exec_exit(){
   if [[ -z "$passed_section" ]]; then
     return 0

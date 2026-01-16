@@ -8,7 +8,11 @@
 #include "functions/get_opened_windows.h"
 #include "functions/check_window_existence.h"
 
-// Send X11 event to make window fullscreen and resize its child window to screen size (for games which are kinda buggy in terms of window modes e.g. Forza Horizon 4)
+/* Send X11 event to make window fullscreen and resize its child
+ * window to screen size
+ * Needed for games which are kinda buggy in terms of window mode
+ * handling, e.g. Forza Horizon 4
+ */
 int main(int argc, char *argv[]) {
   if (argc != 2) {
     return 1;
@@ -37,7 +41,9 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  // Original: https://stackoverflow.com/questions/12706631/x11-change-resolution-and-make-window-fullscreen
+  /* Source:
+   * https://stackoverflow.com/questions/12706631/x11-change-resolution-and-make-window-fullscreen
+   */
   XEvent event = {
     .xclient = {
       .type = ClientMessage,
@@ -45,9 +51,9 @@ int main(int argc, char *argv[]) {
       .message_type = net_wm_state,
       .format = 32,
       .data = {
-        .l[0] = 1, // Enforce fullscreen mode
+        .l[0] = 1, /* Enforce fullscreen mode */
         .l[1] = net_wm_state_fullscreen,
-        .l[2] = 0, // No property to toggle
+        .l[2] = 0, /* No property to toggle */
         .l[3] = 1,
         .l[4] = 0,
       }
@@ -86,7 +92,7 @@ int main(int argc, char *argv[]) {
 
         if (screen_width != child_width ||
             screen_height != child_height) {
-          // 100ms delay needed because some games will not be resized without it
+          /* 100ms delay needed because some games refuse to be resized without that */
           usleep(100000);
 
           XResizeWindow(display, child, screen_width, screen_height);

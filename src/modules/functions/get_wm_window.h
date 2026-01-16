@@ -4,7 +4,10 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 
-// Get window manager XID using '_NET_SUPPORTING_WM_CHECK' atom, needed to include it to list of opened windows and skip event if 'XGetInputFocus()' returns smth else instead of WM XID
+/* Get window manager XID using '_NET_SUPPORTING_WM_CHECK' atom
+ * Needed to include it to list of opened windows and skip event
+ * if 'XGetInputFocus()' returns something else instead of XID
+ */
 Window get_wm_window(Display* display, Window root) {
   Window wm_window;
   unsigned char *data = NULL;

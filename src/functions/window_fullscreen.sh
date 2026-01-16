@@ -1,4 +1,4 @@
-# Required to fullscreenize window, runs in background via '&'
+# Required to fullscreenize window
 window_fullscreen(){
   if ! window-fullscreen "$window_xid" > /dev/null 2>&1; then
     message --warning "Unable to expand to fullscreen window ($window_xid) of process '$process_name' ($pid) on focus event!"

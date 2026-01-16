@@ -1,4 +1,4 @@
-# Required to unset groups to avoid false positives due to missing identifiers
+# To unset groups to avoid false positives due to missing identifiers
 unset_groups(){
   local local_temp_group
   for local_temp_group in "${groups_array[@]}"; do

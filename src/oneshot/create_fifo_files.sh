@@ -1,4 +1,5 @@
-# Needed to create FIFO files used to read output of 'flux-listener' and 'flux-grab-cursor'
+# To create FIFO files used to read output of 'flux-listener' and
+# 'flux-grab-cursor'
 create_fifo_files(){
   # Needed to read output of and to kill 'flux-listener' process
   if [[ -e "$flux_listener_fifo_path" &&

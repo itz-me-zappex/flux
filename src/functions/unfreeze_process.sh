@@ -1,4 +1,5 @@
-# Required to terminate freeze background process or unfreeze process if window becomes focused or terminated
+# To terminate freeze background process or unfreeze process
+# on focus or closure
 unfreeze_process(){
   local local_background_freeze_pid="${background_freeze_pid_map["$passed_pid"]}"
   local local_unfocus_limits_delay="${config_key_unfocus_limits_delay_map["$passed_section"]}"

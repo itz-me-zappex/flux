@@ -1,9 +1,11 @@
-# Required to terminate background process with delayed setting of 'SCHED_IDLE' or restore scheduling policy for process if window becomes focused or terminated
+# To terminate background process with delayed setting of 'SCHED_IDLE'
+# or restore scheduling policy for process on focus or closure
 unset_sched_idle(){
   local local_background_sched_idle_pid="${background_sched_idle_pid_map["$passed_pid"]}"
   local local_unfocus_limits_delay="${config_key_unfocus_limits_delay_map["$passed_section"]}"
 
-  # Check for existence of background process with delayed setting of 'SCHED_IDLE'
+  # Check for existence of background process with delayed
+  # setting of 'SCHED_IDLE'
   if [[ "$local_unfocus_limits_delay" != '0' ]] &&
      check_pid_existence "$local_background_sched_idle_pid"; then
     if ! kill "$local_background_sched_idle_pid" > /dev/null 2>&1; then
@@ -12,7 +14,8 @@ unset_sched_idle(){
       message --info "Delayed for $local_unfocus_limits_delay second(s) setting of 'idle' scheduling policy for process $passed_process_name' ($passed_pid) cancelled $passed_end_of_msg."
     fi
   else
-    # Define option and scheduling policy name depending by scheduling policy
+    # Define option and scheduling policy name depending on
+    # scheduling policy
     case "${sched_previous_policy_map["$passed_pid"]}" in
     'SCHED_FIFO' )
       local local_policy_option='--fifo'
@@ -30,11 +33,14 @@ unset_sched_idle(){
       local local_policy_option='--batch'
       local local_policy_name="'batch'"
     ;;
-    'SCHED_DEADLINE' ) # Setting option unneeded because command for deadline differs greatly
+    'SCHED_DEADLINE' )
+      # Setting '$local_policy_option' useless because command
+      # for deadline differs greatly
       local local_policy_name="'deadline'"
     esac
 
-    # Define how to restore scheduling policy depending by whether that is deadline or not
+    # Define how to restore scheduling policy depending on
+    # whether that is deadline or not
     if [[ "${sched_previous_policy_map["$passed_pid"]}" == 'SCHED_DEADLINE' ]]; then
       # Restore deadline scheduling policy and its parameters for process
       chrt --deadline \
@@ -46,7 +52,7 @@ unset_sched_idle(){
       chrt "$local_policy_option" --pid "${sched_previous_priority_map["$passed_pid"]}" "$passed_pid" > /dev/null 2>&1
     fi
 
-    # Print message depending by 'chrt' exit code
+    # Print message depending on 'chrt' exit code
     if (( $? > 0 )); then
       message --warning "Unable to restore $local_policy_name scheduling policy for process '$passed_process_name' ($passed_pid) $passed_end_of_msg!"
     else

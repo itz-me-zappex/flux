@@ -7,7 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 
-// Get utime and stime
+/* Used to workaround hangs because of cursor grab in Wine/Proton games */
 bool get_cpu_time(char *path, unsigned long *utime, unsigned long *stime) {
   FILE *file = fopen(path, "r");
   if (!file) {
@@ -41,7 +41,7 @@ bool get_cpu_time(char *path, unsigned long *utime, unsigned long *stime) {
   }
 }
 
-// Check whether process sleeps or not using '/proc/PID/status'
+/* Check whether process sleeps or not using '/proc/PID/status' */
 bool is_process_cpu_idle(pid_t pid) {
   char path[64];
   snprintf(path, sizeof(path), "/proc/%d/stat", pid);
@@ -60,7 +60,9 @@ bool is_process_cpu_idle(pid_t pid) {
 
   unsigned long delta = (utime2 + stime2) - (utime1 + stime1);
   
-  // If nothing changed between two checks or difference is very small, then process is hanged
+  /* If nothing changed between two checks or difference is very small
+   * then process is hanged, so cursor should be ungrabbed
+   */
   if (delta <= 2) {
     return true;
   }

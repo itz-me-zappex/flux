@@ -1,4 +1,4 @@
-# Required to execute command from 'exec-focus' and 'lazy-exec-focus' config keys
+# To execute commands from 'exec-focus' and 'lazy-exec-focus' config keys
 exec_focus(){
   local local_end_of_msg="on window ($window_xid) focus event of process '$process_name' ($pid)"
 

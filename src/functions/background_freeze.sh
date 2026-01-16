@@ -1,4 +1,4 @@
-# Required to freeze process on unfocus event, runs in background via '&'
+# To freeze process on unfocus event
 background_freeze(){
   local local_unfocus_limits_delay="${config_key_unfocus_limits_delay_map["$passed_section"]}"
 

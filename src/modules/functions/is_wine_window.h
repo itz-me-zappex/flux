@@ -5,7 +5,9 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 
-// Check whether that is Wine/Proton window or not by checking '_WINE_HWND_STYLE' atom existence
+/* Check whether that is Wine/Proton window or not
+ * by checking '_WINE_HWND_STYLE' atom existence
+ */
 bool is_wine_window(Display* display, Window window) {
   unsigned char *data = NULL;
 

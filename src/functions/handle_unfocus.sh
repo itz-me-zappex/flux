@@ -1,6 +1,7 @@
-# Required to set CPU/FPS limits for requested windows
+# To set CPU/FPS limits for requested windows
 handle_unfocus(){
-  # Get focused window XID to avoid false positive in case unfocus actions should not happen before handling of focused window
+  # Get focused window XID to avoid false positive in case unfocus
+  # actions should not happen before handling of focused window
   local local_focused_window_xid="${focused_window/'='*/}"
 
   # Remove PIDs from list of existing windows
@@ -28,7 +29,8 @@ handle_unfocus(){
         window_minimize &
       fi
 
-      # Return an error if daemon has insufficient rights to apply limit (except FPS limit, that does not require interaction with process)
+      # Return an error if daemon has insufficient rights to apply limit,
+      # except FPS limit, that does not require interaction with process
       if (( UID != 0 &&
             local_process_owner != UID )); then
         # Check for limit requests which are requiring sufficient rights
@@ -51,7 +53,6 @@ handle_unfocus(){
       if [[ -n "${request_freeze_map["$local_pid"]}" ]]; then
         unset request_freeze_map["$local_pid"]
 
-        # Freeze process
         passed_section="$local_section" \
         passed_process_name="$local_process_name" \
         passed_pid="$local_pid" \
@@ -61,7 +62,6 @@ handle_unfocus(){
       elif [[ -n "${request_cpu_limit_map["$local_pid"]}" ]]; then
         unset request_cpu_limit_map["$local_pid"]
 
-        # Apply CPU limit
         passed_section="$local_section" \
         passed_process_name="$local_process_name" \
         passed_pid="$local_pid" \
@@ -72,7 +72,6 @@ handle_unfocus(){
               -n "${request_fps_limit_map["$local_section"]}" ]]; then
         unset request_fps_limit_map["$local_section"]
 
-        # Set FPS limit
         passed_section="$local_section" \
         passed_process_name="$local_process_name" \
         passed_pid="$local_pid" \

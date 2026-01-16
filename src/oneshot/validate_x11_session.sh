@@ -1,4 +1,4 @@
-# Needed to check whether X11 session is valid or not
+# To check whether X11 session is valid or not
 validate_x11_session(){
   # Wayland check
   if [[ -n "$WAYLAND_DISPLAY" ]]; then
@@ -43,7 +43,7 @@ validate_x11_session(){
     fi
   fi
 
-  # Define error message depending by error code
+  # Define error message depending on error code
   if (( local_error_code > 0 )); then
     case "$local_error_code" in
     1 )

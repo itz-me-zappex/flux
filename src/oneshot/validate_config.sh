@@ -1,8 +1,8 @@
-# Required to validate config file
+# To validate config file
 validate_config(){
-  # Automatically set a path to config file if it is not specified
+  # Automatically set a path to config file if not specified
   if [[ -z "$config" ]]; then
-    # Set XDG_CONFIG_HOME automatically if it is not specified
+    # Set '$XDG_CONFIG_HOME' automatically if not specified
     if [[ -z "$XDG_CONFIG_HOME" ]]; then
       XDG_CONFIG_HOME="$HOME/.config"
     fi

@@ -3,7 +3,7 @@
 
 #include <X11/Xlib.h>
 
-// Fallback, get window XID from X server if '_NET_ACTIVE_WINDOW' is zero
+/* Fallback, get window XID from X server if '_NET_ACTIVE_WINDOW' is zero */
 Window get_input_focus(Display* display) {
   Window active_window;
 

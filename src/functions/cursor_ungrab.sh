@@ -1,4 +1,5 @@
-# Required to cancel cursor grabbing for window on daemon termination and/or unfocus event
+# To cancel cursor grabbing for window on
+# daemon termination and/or unfocus event
 cursor_ungrab(){
   local local_background_focus_grab_cursor_pid="${background_focus_grab_cursor_map["$passed_window_xid"]}"
 

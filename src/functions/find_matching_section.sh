@@ -1,4 +1,4 @@
-# Required to find matching section for process
+# To find matching section for process
 find_matching_section(){
   # Find matching section if was not found previously and store it to cache
   if [[ -z "${cache_section_map["$pid"]}" ]]; then
@@ -13,12 +13,10 @@ find_matching_section(){
           (( local_match++ ))
         else
           if [[ -z "${config_key_regexp_name_map["$local_temp_section"]}" ]]; then
-            # Compare process name with specified in config
             if [[ "${config_key_name_map["$local_temp_section"]}" == "$process_name" ]]; then
               (( local_match++ ))
             fi
           else
-            # Use regexp to define whether process name matches with one from section or not
             if [[ "$process_name" =~ ${config_key_name_map["$local_temp_section"]} ||
                   "'$process_name'" =~ ${config_key_name_map["$local_temp_section"]} ||
                   "\"$process_name\"" =~ ${config_key_name_map["$local_temp_section"]} ]]; then
@@ -65,7 +63,7 @@ find_matching_section(){
           fi
         fi
 
-        # Mark section as matching if matching section is found
+        # Mark section as matching if all identifiers match
         if (( local_match == 3 )); then
           section="$local_temp_section"
           cache_section_map["$pid"]="$local_temp_section"
@@ -75,7 +73,6 @@ find_matching_section(){
         unset local_match
       done
 
-      # Mark process as mismatched if matching section was not found
       if [[ -z "$section" ]]; then
         cache_mismatch_map["$pid"]='1'
       fi

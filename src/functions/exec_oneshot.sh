@@ -1,4 +1,4 @@
-# Required to execute command from 'exec-oneshot' config key
+# To execute commands from 'exec-oneshot' config key
 exec_oneshot(){
   export_focus_envvars
 

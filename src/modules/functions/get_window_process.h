@@ -4,7 +4,9 @@
 #include <X11/Xlib.h>
 #include <X11/extensions/XRes.h>
 
-// Get process of window using XRes extension ('_NET_WM_PID' is unreliable)
+/* Get process ID of window using XRes extension
+ * In this way because '_NET_WM_PID' is unreliable
+ */
 pid_t get_window_process(Display* display, Window window_id) {
   pid_t window_process;
   XResClientIdValue *client_ids = NULL;

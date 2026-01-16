@@ -1,4 +1,4 @@
-# Required to get info about current scheduling policy and figure out with either it is possible to restore scheduling policy or not
+# To get info about current scheduling policy and figure out with either it is possible to restore scheduling policy or not
 # If possible, then it runs 'background_sched_idle()'
 set_sched_idle(){
   # Remember scheduling policy and priority before change it
@@ -9,11 +9,14 @@ set_sched_idle(){
 
   # Skip handling 'chrt' output if it returned an error
   if [[ -z "$local_chrt_error" ]]; then
-    # Read output of 'chrt' tool line-by-line and remember scheduling policy with priority of process to restore it on daemon exit or window focus event
+    # Read output of 'chrt' tool line-by-line and remember
+    # scheduling policy with priority of process to restore
+    # it on daemon exit or window focus event
     local local_temp_sched_info_line
     while read -r local_temp_sched_info_line ||
           [[ -n "$local_temp_sched_info_line" ]]; do
-      # Define associative array which should store value depending by what line contains
+      # Define associative array which should store value depending
+      # on what line contains
       case "$local_temp_sched_info_line" in
       *'scheduling policy'* )
         # Extract scheduling policy name from string and remember it
@@ -45,7 +48,8 @@ set_sched_idle(){
       esac
     done <<< "$local_sched_info"
 
-    # Print warning if daemon unable to change scheduling policy, otherwise - change it to 'SCHED_IDLE' if not set already
+    # Print warning if daemon unable to change scheduling policy,
+    # otherwise - change it to 'SCHED_IDLE' if not set already
     if [[ -z "$sched_realtime_is_supported" &&
           "${sched_previous_policy_map["$local_pid"]}" =~ ^('SCHED_RR'|'SCHED_FIFO')$ ]]; then
       message --warning "Daemon has insufficient rights to restore realtime scheduling policy for process '$local_process_name' ($local_pid), changing it to 'idle' on window ($local_temp_window_xid) unfocus event cancelled!"

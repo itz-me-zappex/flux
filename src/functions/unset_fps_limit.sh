@@ -1,4 +1,5 @@
-# Required to terminate FPS limit background process or unset FPS limit if window becomes focused or terminated
+# To terminate FPS limit background process or unset FPS limit
+# on focus or closure
 unset_fps_limit(){
   local local_background_fps_limit_pid="${background_fps_limit_pid_map["$passed_section"]}"
   local local_unfocus_limits_delay="${config_key_unfocus_limits_delay_map["$passed_section"]}"
@@ -15,7 +16,7 @@ unset_fps_limit(){
 
   # Set FPS from 'fps-focus' key
   if passed_section="$passed_section" mangohud_fps_set "${config_key_mangohud_config_map["$passed_section"]}" "${config_key_mangohud_source_config_map["$passed_section"]}" "${config_key_fps_focus_map["$passed_section"]}"; then
-    # Print message depending by FPS limit
+    # Print message depending on FPS limit
     if [[ "${config_key_fps_focus_map["$passed_section"]}" == '0' ]]; then
       local local_shorten_path_result
       shorten_path "${config_key_mangohud_config_map["$passed_section"]}"

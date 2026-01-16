@@ -1,6 +1,5 @@
-# Required to parse INI config file
+# To parse INI config file
 parse_config(){
-  # Parse INI config
   local local_temp_config_line
   while read -r local_temp_config_line ||
         [[ -n "$local_temp_config_line" ]]; do
@@ -9,10 +8,13 @@ parse_config(){
 
     local local_line_count_msg="L${config_line_count}:"
 
-    # Skip cycle if line is commented or blank, regexp means comments which beginning from ';' or '#' symbols
+    # Skip if line is commented or blank
+    # Regexp means comments which begin with ';' or '#' symbols
     if [[ ! "$local_temp_config_line" =~ ^(\;|\#) &&
           -n "$local_temp_config_line" ]]; then
-      # Exit with an error if first line is not a section, otherwise remember section name, regexp means any symbols in square brackes
+      # Exit with an error if first line is not a section,
+      # otherwise remember section name
+      # Regexp means anything in square brackets
       if [[ ! "$local_temp_config_line" =~ ^\[.*\]$ &&
             -z "$local_section" &&
             -z "$local_no_init_section" ]]; then
@@ -20,7 +22,6 @@ parse_config(){
         local local_no_init_section='1'
         (( parse_config_error_count++ ))
       elif [[ "$local_temp_config_line" =~ ^\[.*\]$ ]]; then
-        # Regexp above means any symbols in square brackes
         # Exit with an error if section is repeated
         if [[ -n "${sections_array[*]}" ]]; then
           local local_temp_section
@@ -44,11 +45,13 @@ parse_config(){
         fi
 
         # Remove square brackets from section name and add it to array
-        # Array required to check for repeating sections and find matching rule(s) for process in config
+        # Array required to check for repeating sections and find matching
+        # rule(s) for process in config
         local local_section="${local_temp_config_line/\[/}"
         local local_section="${local_section/%\]/}"
 
-        # Splitting groups and section is needed to make groups inside groups work, also I need to define type of section to show in message
+        # Splitting groups and section is needed to make groups inside groups work,
+        # also I need to define type of section to show in message
         if section_is_group "$local_section"; then
           groups_array+=("$local_section")
           local local_section_msg=" in '$local_section' group"
@@ -57,7 +60,8 @@ parse_config(){
           local local_section_msg=" in '$local_section' section"
         fi
 
-        # Needed to detect blank sections, if at least one key specified, this map is unset
+        # Needed to detect blank sections
+        # Should be unset if at least one config key specified
         is_section_blank_map["$local_section"]='1'
 
         # Remember section line
@@ -78,54 +82,62 @@ parse_config(){
           local local_config_key="${local_temp_config_line/%=*/}"
         fi
 
-        # Remove all spaces before and after string, internal shell parameter expansion required to get spaces supposed to be removed
-        local local_config_key="${local_config_key#"${local_config_key%%[![:space:]]*}"}" # Remove spaces in beginning for string
-        local local_config_key="${local_config_key%"${local_config_key##*[![:space:]]}"}" # Remove spaces in end of string
+        # Remove spaces in beginning for string
+        local local_config_key="${local_config_key#"${local_config_key%%[![:space:]]*}"}"
+        # Remove spaces in end of string
+        local local_config_key="${local_config_key%"${local_config_key##*[![:space:]]}"}"
 
-        # Use lowercase for key name
+        # Use lower case symbols for key name
         local local_config_key="${local_config_key,,}"
 
         # Remove key name and equal symbol
         local local_config_value="${local_temp_config_line#*=}"
 
-        # Remove all spaces before and after string, internal shell parameter expansion required to get spaces supposed to be removed
-        local local_config_value="${local_config_value#"${local_config_value%%[![:space:]]*}"}" # Remove spaces in beginning for string
-        local local_config_value="${local_config_value%"${local_config_value##*[![:space:]]}"}" # Remove spaces in end of string
+        # Remove spaces in beginning for string
+        local local_config_value="${local_config_value#"${local_config_value%%[![:space:]]*}"}"
+        # Remove spaces in the end of string
+        local local_config_value="${local_config_value%"${local_config_value##*[![:space:]]}"}"
 
-        # Remove single or double quotes from strings, that is what regexp means
+        # Remove single or double quotes from strings
         if [[ "$local_config_value" =~ ^(\".*\"|\'.*\')$ ]]; then
           # Regexp means double quoted string
           if [[ "$local_config_value" =~ ^\".*\"$ ]]; then
-            local local_config_value="${local_config_value/\"/}" # Remove first double quote
-            local local_config_value="${local_config_value/%\"/}" # And last one
+            # Remove first double quote
+            local local_config_value="${local_config_value/\"/}"
+            # And last one
+            local local_config_value="${local_config_value/%\"/}"
           else
-            local local_config_value="${local_config_value/\'/}" # Remove first single quote
-            local local_config_value="${local_config_value/%\'/}" # And last one
+            # Remove first single quote
+            local local_config_value="${local_config_value/\'/}"
+            # And last one
+            local local_config_value="${local_config_value/%\'/}"
           fi
         fi
 
-        # Print warning and mark as an error if appending to unsupported key
+        # Print warning and mark as an error if appending to
+        # an unsupported key
         if [[ -n "$local_append" &&
               ! "$local_config_key" =~ ^('exec-exit'|'exec-exit-focus'|'exec-exit-unfocus'|'exec-closure'|'exec-oneshot'|'exec-focus'|'exec-unfocus'|'lazy-exec-focus'|'lazy-exec-unfocus')$ ]]; then
           message --warning "$local_line_count_msg Appending values$local_section_msg to '$local_config_key' config key is not supported!"
           (( parse_config_error_count++ ))
         fi
 
-        # Print warning and mark as an error if regexp used in unsupported key
+        # Print warning and mark as an error if regexp used with
+        # an unsupported key
         if [[ -n "$local_regexp" &&
               ! "$local_config_key" =~ ^('name'|'command'|'owner')$ ]]; then
           message --warning "$local_line_count_msg Regexp$local_section_msg in '$local_config_key' config key is not supported!"
           (( parse_config_error_count++ ))
         fi
 
-        # Print warning and mark as an error if identifiers appear used in group
+        # Print warning and mark as an error if identifiers used in group
         if section_is_group "$local_section" &&
            [[ "$local_config_key" =~ ^('name'|'owner'|'command')$ ]]; then
           message --warning "$local_line_count_msg Identifiers, including '$local_config_key' config key are not supported in groups!"
           (( parse_config_error_count++ ))
         fi
 
-        # Associate value with section if it is not blank
+        # Associate value with section if not blank
         if [[ -n "$local_config_value" ]]; then
           # Define type of key to associate value properly
           case "$local_config_key" in
@@ -145,7 +157,9 @@ parse_config(){
             config_key_unfocus_cpu_limit_map["$local_section"]="${local_config_value/%\%/}"
             is_section_useful_map["$local_section"]='1'
 
-            # Exit with an error if CPU limit is specified incorrectly or greater than maximum allowed, regexp - any number with optional '%' symbol
+            # Exit with an error if CPU limit is specified incorrectly or
+            # greater than maximum allowed
+            # Regexp means any number with optional '%' symbol
             if [[ ! "$local_config_value" =~ ^[0-9]+(\%)?$ ]]; then
               message --warning "$local_line_count_msg Value '$local_config_value' in '$local_config_key' config key$local_section_msg is invalid! Expected value is number between 0 and 100 with '%' symbol (optional)."
               (( parse_config_error_count++ ))
@@ -160,7 +174,7 @@ parse_config(){
           unfocus-limits-delay | limits-delay | delay )
             config_key_unfocus_limits_delay_map["$local_section"]="$local_config_value"
 
-            # Exit with an error if value is neither an integer nor a float (that is what regexp means)
+            # Exit with an error if value is neither an integer nor a float
             if [[ ! "$local_config_value" =~ ^[0-9]+((\.|\,)[0-9]+)?$ ]]; then
               message --warning "$local_line_count_msg Value '$local_config_value' in '$local_config_key' config key$local_section_msg is neither integer nor float!"
               (( parse_config_error_count++ ))
@@ -173,7 +187,8 @@ parse_config(){
             if [[ -z "$local_append" ]]; then
               config_key_exec_exit_map["$local_section"]="$local_config_value"
             else
-              # Needed to append commands in key to inherited from 'lazy-exec-unfocus' config key
+              # Needed to append commands in config key to inherited ones
+              # from 'lazy-exec-unfocus'
               if [[ -z "${config_key_exec_exit_map["$local_section"]}" ]]; then
                 config_key_exec_exit_append_to_default_map["$local_section"]='1'
               fi
@@ -211,7 +226,8 @@ parse_config(){
             if [[ -z "$local_append" ]]; then
               config_key_exec_closure_map["$local_section"]="$local_config_value"
             else
-              # Needed to append commands in key to inherited from 'lazy-exec-unfocus' config key
+              # Needed to append commands in key to inherited from
+              # 'lazy-exec-unfocus' config key
               if [[ -z "${config_key_exec_closure_map["$local_section"]}" ]]; then
                 config_key_exec_closure_append_to_default_map["$local_section"]='1'
               fi
@@ -263,12 +279,13 @@ parse_config(){
             config_key_regexp_command_map["$local_section"]="$local_regexp"
           ;;
           mangohud-source-config | mangohud-config )
-            # Get absolute path to MangoHud config in case it is specified as relative
+            # Get absolute path to MangoHud config in case it is specified
+            # as relative
             local local_get_realpath_result
             get_realpath "$local_config_value"
             local local_config_value="$local_get_realpath_result"
 
-            # Set path to MangoHud config depending by specified key
+            # Set path to MangoHud config depending on specified key
             case "$local_config_key" in
             mangohud-source-config )
               config_key_mangohud_source_config_map["$local_section"]="$local_config_value"
@@ -311,7 +328,8 @@ parse_config(){
             config_key_fps_focus_map["$local_section"]="$local_config_value"
             is_section_useful_map["$local_section"]='1'
 
-            # Exit with an error if value is neither integer nor list of comma-separated integers
+            # Exit with an error if value is neither integer nor list of
+            # comma-separated integers
             if [[ ! "$local_config_value" =~ ^[0-9]+$ &&
                   ! "$local_config_value" =~ ^[0-9]+((\ )+?,(\ )+?[0-9]+)+$ ]]; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key$local_section_msg is not an integer!"
@@ -403,7 +421,8 @@ parse_config(){
             config_key_group_map["$local_section"]="$local_config_value"
             is_section_useful_map["$local_section"]='1'
 
-            # Exit with an error if group specified without '@' at the beginning of name
+            # Exit with an error if group specified without '@'
+            # at the beginning of name
             if ! section_is_group "$local_config_value"; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key$local_section_msg is not a group!"
               (( parse_config_error_count++ ))

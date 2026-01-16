@@ -1,4 +1,4 @@
-# Required to check option repeating and exit with an error if that happens
+# To check option repeating and exit with an error if that happens
 option_repeat_check(){
   if [[ -n "${!1}" ]]; then
     message --error-opt "Option '$2' is repeated!"
@@ -6,16 +6,19 @@ option_repeat_check(){
   fi
 }
 
-# Required to obtain values from command line options
+# To obtain values from command line options
 cmdline_get(){
-  # Remember that option is passed to check whether it is passed again or not 
+  # Remember that option is passed to check whether it is passed
+  # again or not 
   option_repeat_check "$passed_check" "$passed_option"
   eval "$passed_check"='1'
 
-  # Define option type (short, long or long=value) and remember specified value
+  # Define option type and remember specified value
+  # 'short', 'long' or 'long=value'
   case "$1" in
   "$passed_option" | "$passed_short_option" )
-    # Remember value only if that is not an another option, regexp means long or short option
+    # Remember value only if that is not an another option
+    # Regexp means long or short option
     if [[ -n "$2" &&
           ! "$2" =~ ^(--.*|-.*)$ ]]; then
       eval "$passed_set"=\'"$2"\'
@@ -31,7 +34,7 @@ cmdline_get(){
   esac
 }
 
-# Required to check process existence
+# To check process existence
 check_pid_existence(){
   local local_pid="$1"
 
@@ -42,7 +45,7 @@ check_pid_existence(){
   fi
 }
 
-# Required to check read-write access on file
+# To check read-write access on file
 check_rw(){
   local local_file="$1"
 
@@ -54,7 +57,7 @@ check_rw(){
   fi
 }
 
-# Required to check read-only access on file
+# To check read-only access on file
 check_ro(){
   local local_file="$1"
 
@@ -65,9 +68,11 @@ check_ro(){
   fi
 }
 
-# Used in 'exec_focus()' and 'exec_unfocus()' as wrapper to run commands
+# Used in 'exec_focus()' and 'exec_unfocus()' as wrapper
+# to run commands
 exec_on_event(){
-  # Workaround for case when new line character is passed as command (because of appending support using '+=')
+  # Workaround for case when new line character is passed as command
+  # Caused by appending support (using '+=' key declaration)
   if [[ -z "$passed_event_command" ]]; then
     return 0
   fi
@@ -89,7 +94,7 @@ exec_on_event(){
   fi
 }
 
-# Required to convert relative paths to absolute ones
+# To convert relative paths to absolute ones
 get_realpath(){
   local local_path="$1"
   local IFS='/'
@@ -98,8 +103,9 @@ get_realpath(){
   local -a local_parts_map \
   local_stack_map
 
-  # Append passed path to '$PWD' if it contains relative beginning and not begins with home path ('~')
-  # Or if path begins with '~', then replace symbol with home path
+  # Append passed path to '$PWD' if it contains relative beginning
+  # and does not begin with '~'
+  # Or if path begins with '~', then replace symbol with "$HOME" value
   if [[ "$local_path" != '/'* &&
         "$local_path" != '~/'* ]]; then
     local local_path="${PWD}/${local_path}"
@@ -107,7 +113,7 @@ get_realpath(){
     local local_path="${local_path/'~'/"$HOME"}"
   fi
 
-  # Replace double slashes with single one
+  # Replace double slashes with single ones
   while [[ "$local_path" == *'//'* ]]; do
     local local_path="${local_path//'//'/'/'}"
   done
@@ -140,7 +146,7 @@ get_realpath(){
   local_get_realpath_result="${local_stack_map[*]}"
 }
 
-# Required to check whether value is boolean or not and simplify it
+# To check whether value is boolean or not and simplify it
 simplify_bool(){
   local local_value="$1"
 
@@ -156,8 +162,10 @@ simplify_bool(){
   fi
 }
 
-# Required to interpret colors/formatting in specified variable using ANSI escapes
-# That is needed because handling all escape characters with just 'echo -e' may break output
+# To interpret colors/formatting in specified variable using
+# ANSI escape sequences
+# Needed because handling all escape characters with just 'echo -e'
+# may break output
 colors_interpret(){
   # Accepts variable names and gets value
   local local_variable_value="${!1}"
@@ -165,7 +173,7 @@ colors_interpret(){
   # Disable formatting in the end of value
   local local_variable_value="${local_variable_value}\e[0m"
 
-  # Replace ANSI escapes with their interpreted form
+  # Replace ANSI escape sequences with their interpreted form
   while [[ "$local_variable_value" =~ '\'([eE]|[uU]001[bB]|[xX]1[bB]|033)\[[0-9\;]+'m' ]]; do
     local local_ansi_interpretation="$(echo -e "${BASH_REMATCH[0]}")"
     local local_variable_value="${local_variable_value//"${BASH_REMATCH[0]}"/"$local_ansi_interpretation"}"
@@ -175,7 +183,7 @@ colors_interpret(){
   local_colors_interpret_result="$local_variable_value"
 }
 
-# Required to shorten paths in messages if possible
+# To shorten paths in messages if possible
 shorten_path(){
   # Accepts path as a single argument
   local local_path="$1"
@@ -183,10 +191,12 @@ shorten_path(){
   # Define how to shorten path
   if [[ "$local_path" == "$PWD/"* &&
         "$PWD" != "$HOME" ]]; then
-    # E.g. '/home/zappex/.config/flux.ini' -> 'flux.ini' (if current directory is '/home/zappex/.config')
+    # E.g. if current directory is '/home/zappex/.config':
+    # '/home/zappex/.config/flux.ini' -> 'flux.ini'
     local local_path="${local_path/"$PWD/"/}"
   elif [[ "$local_path" == "$HOME"* ]]; then
-    # E.g. '/home/zappex/.config/flux.ini' -> '~/.config/flux.ini' (if current directory is '/home/zappex')
+    # E.g. if current directory is '/home/zappex':
+    # '/home/zappex/.config/flux.ini' -> '~/.config/flux.ini'
     local local_path="${local_path/"$HOME"/'~'}"
   fi
 
@@ -194,7 +204,7 @@ shorten_path(){
   local_shorten_path_result="$local_path"
 }
 
-# Required to detect whether section is a group or not
+# To detect whether section is a group or not
 section_is_group(){
   local local_section="$1"
   if [[ "$local_section" =~ ^'@'.* ]]; then
@@ -204,7 +214,7 @@ section_is_group(){
   fi
 }
 
-# Required to get number of line from section using key name
+# To get number of line from section using key name
 # get_key_line <section> - section line
 # get_key_line <section> <key> - key line
 get_key_line(){
@@ -230,7 +240,8 @@ get_key_line(){
   fi
 }
 
-# Needed to use environment variables with previous and focused window info in commands from 'exec-focus', `lazy-exec-focus` and 'exec-oneshot'
+# To use environment variables with previous and focused window info
+# in commands from execution related config keys (focus)
 export_focus_envvars(){
   export FOCUSED_WINDOW_XID="$window_xid" \
   FOCUSED_PID="$pid" \
@@ -246,7 +257,8 @@ export_focus_envvars(){
   UNFOCUSED_PROCESS_COMMAND="$previous_process_command"
 }
 
-# Needed to use environment variables with previous and focused window info in commands from 'exec-unfocus', `lazy-exec-unfocus` and 'exec-closure'
+# To use environment variables with previous and focused window info
+# in commands from execution related config keys (unfocus)
 export_unfocus_envvars(){
   export FOCUSED_WINDOW_XID="$window_xid" \
   FOCUSED_PID="$pid" \
@@ -262,7 +274,8 @@ export_unfocus_envvars(){
   UNFOCUSED_PROCESS_COMMAND="$passed_process_command"
 }
 
-# Needed to unset environment variables which were exported to commands in execution related config keys
+# To unset environment variables that were exported to commands
+# in execution related config keys
 unset_envvars(){
   unset FOCUSED_WINDOW_XID \
   FOCUSED_PID \
@@ -278,7 +291,7 @@ unset_envvars(){
   UNFOCUSED_PROCESS_COMMAND
 }
 
-# Needed to replace variables in commands from config file with actual values
+# To replace variables in commands from config file with actual values
 # Result used to print messages about execution
 expand_variables(){
   local local_command="$1"
@@ -295,7 +308,8 @@ expand_variables(){
     local local_backslash_count_is_odd="$(( local_first_backslash_count - local_first_backslash_count / 2 * 2 ))"
 
     if (( local_backslash_count_is_odd == 1 )); then
-      # Since we want to ignore escaped variables, we should replace those temporary with something
+      # Since we want to ignore escaped variables,
+      # we should replace those temporary with something
       # Just in case random value will match one in command string
       while true; do
         local local_random="$SRANDOM"

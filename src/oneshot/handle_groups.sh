@@ -1,21 +1,21 @@
-# Required to check groups and store values to config keys from them
+# To check groups and store values to config keys from them
 handle_groups(){
   # Get section name
   local local_temp_section_or_group
   for local_temp_section_or_group in "${groups_array[@]}" "${sections_array[@]}"; do
-    # Do not handle if section repeats (warning already shown from 'parse_config()')
+    # Do not handle if section repeats
     if [[ "${sections_array[*]}" =~ "$local_temp_section_or_group".*"$local_temp_section_or_group" ]]; then
       continue
     fi
 
-    # Do not handle if group repeats (warning already shown from 'parse_config()')
+    # Do not handle if group repeats
     if [[ "${groups_array[*]}" =~ "$local_temp_section_or_group".*"$local_temp_section_or_group" ]]; then
       continue
     fi
 
     local local_group="${config_key_group_map["$local_temp_section_or_group"]}"
 
-    # Skip if 'group' is not specified or does not begin with '@' (warning already shown from 'parse_config()')
+    # Skip if 'group' is not specified or does not begin with '@'
     if [[ -z "$local_group" ]] ||
        ! section_is_group "$local_group"; then
       continue

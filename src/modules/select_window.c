@@ -19,11 +19,14 @@
 #include "functions/third-party/xprop/clientwin.h"
 #include "functions/third-party/xprop/dsimple.h"
 
-// To avoid compilation breakage, used in 'xprop' source code
+/* To avoid compilation breakage, used in 'xprop' source code */
 void usage(const char *errmsg) {}
 
-// Use picker to select window or get focused one depending by cmdline argument and print its XID with PID
-// Exit codes here are wrapped in 'flux' to print proper error messages when executing this binary
+/* Use picker to select window or get focused one depending by
+ * cmdline argument and print its XID with PID
+ * Exit codes here are wrapped in 'flux' to print proper error
+ * messages when executing this binary
+ */
 int main(int argc, char *argv[]) {
   if (argc != 2) {
     return 1;
@@ -55,7 +58,9 @@ int main(int argc, char *argv[]) {
   Window window;
 
   if (should_pick) {
-    // Attempt to grab mouse to avoid error from third-party 'Select_Window()'
+    /* Attempt to grab mouse here to avoid error message
+     * from third-party 'Select_Window()'
+     */
     int grab_status = XGrabPointer(display, root, True,
         ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
         GrabModeAsync, GrabModeAsync,

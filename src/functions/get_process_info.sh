@@ -1,4 +1,4 @@
-# Required to get process info from cache using window XID
+# To get process info from cache using window XID
 cache_get_process_info(){
   process_name="${cache_process_name_map["$passed_window_xid"]}"
   process_owner="${cache_process_owner_map["$passed_window_xid"]}"
@@ -6,13 +6,13 @@ cache_get_process_info(){
   process_owner_username="${cache_process_owner_username_map["$passed_window_xid"]}"
 }
 
-# Required to get process info using PID
+# To get process info using PID
 get_process_info(){
-  # Prefer using cache with process info if exists
+  # Get process info from cache if exists
   if [[ -n "${cache_pid_map["$window_xid"]}" ]]; then
     passed_window_xid="$window_xid" cache_get_process_info
   else
-    # Attempt to find cache with info about the same process
+    # Attempt to find cached info about the same process
     local local_temp_cached_window_xid
     for local_temp_cached_window_xid in "${!cache_pid_map[@]}"; do
       # Compare parent PID with PID of process
@@ -23,12 +23,12 @@ get_process_info(){
       fi
     done
 
-    # Check for match of cached process info to define a way how to obtain it
     if [[ -n "$local_matching_window_xid" ]]; then
-      # Get process info using cache
+      # Get process info from cache
       passed_window_xid="$local_matching_window_xid" cache_get_process_info
     else
-      # Get process command by reading file ignoring '\0' and those are replaced with spaces automatically because of arrays nature :D
+      # Get process command by reading file ignoring '^@' (zero bytes)
+      # Those are replaced with spaces automatically because of arrays nature :D
       local local_process_command_array
       hide_stderr
       if ! mapfile -d '' local_process_command_array < "/proc/$pid/cmdline"; then
@@ -62,7 +62,8 @@ get_process_info(){
         process_name="${process_name/*'/'/}"
       fi
 
-      # Bufferize to avoid failure from 'read' in case file will be removed during reading
+      # Bufferize to avoid failure from 'read' in case file become
+      # removed during reading
       local local_status_content
       hide_stderr
       if ! local_status_content="$(<"/proc/$pid/status")"; then
@@ -93,7 +94,8 @@ get_process_info(){
         fi
       done <<< "$local_status_content"
 
-      # Obtain process owner username from '/etc/passwd' file using UID of process
+      # Obtain process owner username from '/etc/passwd'
+      # file using UID of process
       if ! check_ro '/etc/passwd'; then
         local local_shorten_path_result
         shorten_path '/etc/passwd'
@@ -112,7 +114,7 @@ get_process_info(){
       done < '/etc/passwd'
     fi
 
-    # Store process info to cache to speed up its obtainance on next focus event and to use it implicitly using only window XID
+    # Store process info to cache to speed up its obtainance on next focus event
     cache_pid_map["$window_xid"]="$pid"
     cache_process_name_map["$window_xid"]="$process_name"
     cache_process_owner_map["$window_xid"]="$process_owner"

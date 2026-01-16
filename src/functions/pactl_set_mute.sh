@@ -1,4 +1,4 @@
-# Required to mute and unmute processes, runs in background via '&'
+# To mute and unmute processes
 pactl_set_mute(){
   local -A local_application_name_map \
   local_application_id_map \
@@ -51,7 +51,8 @@ pactl_set_mute(){
   # Go through sink inputs and try find matching one
   local local_temp_sink_input
   for local_temp_sink_input in "${local_sink_inputs_array[@]}"; do
-    # Pulseaudio (and pipewire-pulse) relies on clients, those may give weird information, or may not at all
+    # Pulseaudio relies on unreliable info from clients, here we are
+    # We should find match somehow, even in a weird way
     if [[ "$passed_pid" == "${local_application_process_id_map["$local_temp_sink_input"]}" ]]; then
       local local_matching_sink_inputs_array+=("$local_temp_sink_input")
     elif [[ -n "${local_application_process_binary_map["$local_temp_sink_input"]}" &&
@@ -69,9 +70,8 @@ pactl_set_mute(){
     fi
   done
 
-  # Change mute status if there is a match
+  # Mute all matching sink inputs
   if [[ -n "${local_matching_sink_inputs_array[*]}" ]]; then
-    # Mute all matching sink inputs
     local local_temp_matching_sink_input
     for local_temp_matching_sink_input in "${local_matching_sink_inputs_array[@]}"; do
       if ! pactl set-sink-input-mute "$local_temp_matching_sink_input" "$passed_action" > /dev/null 2>&1; then

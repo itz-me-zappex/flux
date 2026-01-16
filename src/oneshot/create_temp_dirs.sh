@@ -1,4 +1,4 @@
-# Needed to create temporary directory to store lock and FIFO files
+# To create temporary directory to store lock and FIFO files
 create_temp_dirs(){
   # Exit with an error if something is wrong with temporary directory
   if [[ -e "$flux_temp_dir_path" &&

@@ -1,6 +1,6 @@
-# Required to get maximum allowed CPU limit by multiplying threads count to 100
+# To get maximum allowed CPU limit
+# Instead of 'nproc' tool
 get_max_cpu_limit(){
-  # Instead of 'nproc' tool
   local local_temp_cpuinfo_line
   cpu_threads='0'
   while read -r local_temp_cpuinfo_line ||

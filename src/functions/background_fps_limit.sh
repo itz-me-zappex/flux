@@ -1,4 +1,4 @@
-# Required to set specified FPS on unfocus event, runs in background via '&'
+# To set specified FPS on unfocus event
 background_fps_limit(){
   local local_unfocus_limits_delay="${config_key_unfocus_limits_delay_map["$passed_section"]}"
   local local_mangohud_config="${config_key_mangohud_config_map["$passed_section"]}"

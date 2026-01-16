@@ -5,7 +5,7 @@
 
 #include "functions/get_wm_window.h"
 
-// Just tries to open display and checks EWMH compatibility
+/* Tries to open display and checks compatibility for EWMH */
 int main() {
   Display *display = XOpenDisplay(NULL);
 

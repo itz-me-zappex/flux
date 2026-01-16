@@ -1,4 +1,4 @@
-# Required to prevent multiple instances from running
+# To prevent multiple instances from running
 validate_lock(){
   # Skip checks if file does not exist
   if [[ -f "$flux_lock_file_path" ]]; then
@@ -58,7 +58,7 @@ validate_lock(){
 
   # Exit with an error if lock file directory is not writable
   if check_rw "$flux_temp_dir_path"; then
-    # Store daemon PID to lock file to check its existence on next launch (if lock file still exists, e.g. after crash or SIGKILL)
+    # Store daemon PID to lock file to prevent multiple instances
     echo "$$" > "$flux_lock_file_path"
   else
     local local_shorten_path_result

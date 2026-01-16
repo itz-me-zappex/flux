@@ -1,4 +1,4 @@
-# Required to validate log
+# To validate log file
 validate_log(){
   # Run multiple checks related to logging if '--log' option is specified
   if [[ -n "$log_is_passed" ]]; then
@@ -13,7 +13,8 @@ validate_log(){
     # Check for critical errors
     if [[ -f "$log" ]] &&
        ! check_rw "$log"; then
-      # Exit with an error if specified log file exists but not accessible for read-write operations
+      # Exit with an error if specified log file exists but not accessible
+      # for read-write operations
       local local_shorten_path_result
       shorten_path "$log"
       message --error "Log file '$local_shorten_path_result' is not accessible for read-write operations!"
@@ -27,7 +28,8 @@ validate_log(){
       exit 1
     elif [[ -d "${log%/*}" ]] &&
          ! check_rw "${log%/*}"; then
-      # Exit with an error if log file directory is not accessible for read-write operations
+      # Exit with an error if log file directory is not accessible for
+      # read-write operations
       local local_shorten_path_result
       shorten_path "$log"
       message --error "Directory of log file '$local_shorten_path_result' is not accessible for read-write operations!"

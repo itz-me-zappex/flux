@@ -1,4 +1,4 @@
-# Required to validate config keys
+# To validate values in config keys
 validate_config_keys(){
   # Exit with an error if there is no any section specified
   if [[ -z "${sections_array[*]}" ]]; then
@@ -6,7 +6,9 @@ validate_config_keys(){
     (( parse_config_error_count++ ))
   fi
 
-  # Check values in sections and exit with an error if something is wrong or set default values in some keys if those are not specified
+  # Check values in sections and exit with an error if something
+  # is wrong or set default values in some keys if those are
+  # not specified
   local local_temp_section_or_group
   for local_temp_section_or_group in "${groups_array[@]}" "${sections_array[@]}"; do
     # Get key lines of ones which will be checked for an errors
@@ -44,7 +46,8 @@ validate_config_keys(){
       message --warning "L$local_section_or_group_line: $local_section_msg_head '$local_temp_section_or_group' is blank!"
       (( parse_config_error_count++ ))
     else
-      # Exit with an error if neither identifier 'name' nor 'command' is specified
+      # Exit with an error if neither identifier 'name' nor 'command'
+      # is specified
       if ! section_is_group "$local_temp_section_or_group" &&
          [[ -z "${config_key_name_map["$local_temp_section_or_group"]}" &&
             -z "${config_key_command_map["$local_temp_section_or_group"]}" ]]; then
@@ -59,7 +62,8 @@ validate_config_keys(){
       fi
     fi
 
-    # Exit with an error if MangoHud FPS limit is not specified along with config path
+    # Exit with an error if MangoHud FPS limit is not specified
+    # along with config path
     if [[ -n "$local_fps_unfocus_line" ]]; then
       if [[ -n "${config_key_fps_unfocus_map["$local_temp_section_or_group"]}" &&
             -z "${config_key_mangohud_config_map["$local_temp_section_or_group"]}" ]]; then
@@ -68,7 +72,8 @@ validate_config_keys(){
       fi
     fi
 
-    # Exit with an error if MangoHud FPS limit is specified along with CPU limit
+    # Exit with an error if MangoHud FPS limit is specified along
+    # with CPU limit
     if [[ -n "$local_fps_unfocus_line" ]]; then
       if [[ -n "${config_key_fps_unfocus_map["$local_temp_section_or_group"]}" &&
             -n "${config_key_unfocus_cpu_limit_map["$local_temp_section_or_group"]}" &&
@@ -155,23 +160,23 @@ validate_config_keys(){
 
     # Autoset values if not a group
     if ! section_is_group "$local_temp_section_or_group"; then
-      # Set 'fps-focus' to '0' (full FPS unlock) if it is not specified
+      # Set 'fps-focus' to '0' (full FPS unlock) if not specified
       if [[ -n "${config_key_fps_unfocus_map["$local_temp_section_or_group"]}" &&
             -z "${config_key_fps_focus_map["$local_temp_section_or_group"]}" ]]; then
         config_key_fps_focus_map["$local_temp_section_or_group"]='0'
       fi
 
-      # Set CPU limit to '100' (none) if it is not specified
+      # Set CPU limit to '100' (none) if not specified
       if [[ -z "${config_key_unfocus_cpu_limit_map["$local_temp_section_or_group"]}" ]]; then
         config_key_unfocus_cpu_limit_map["$local_temp_section_or_group"]='100'
       fi
 
-      # Set 'delay' to '0' if it is not specified
+      # Set 'delay' to '0' if not specified
       if [[ -z "${config_key_unfocus_limits_delay_map["$local_temp_section_or_group"]}" ]]; then
         config_key_unfocus_limits_delay_map["$local_temp_section_or_group"]='0'
       fi
 
-      # Set 'mangohud-config' as 'mangohud-source-config' if it is not specified
+      # Set 'mangohud-config' as 'mangohud-source-config' if not specified
       if [[ -z "${config_key_mangohud_source_config_map["$local_temp_section_or_group"]}" &&
             -n "${config_key_mangohud_config_map["$local_temp_section_or_group"]}" ]]; then
         config_key_mangohud_source_config_map["$local_temp_section_or_group"]="${config_key_mangohud_config_map["$local_temp_section_or_group"]}"

@@ -5,7 +5,9 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 
-// Check difference between previous and current 'WM_S0' atom to detect WM restart
+/* Check difference between previous and current 'WM_S0' atom
+ * to detect WM restart
+ */
 bool check_wm_restart(Display* display, Window root) {
   static Window previous_owner = None;
 

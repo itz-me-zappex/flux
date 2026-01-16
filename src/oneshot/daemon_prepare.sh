@@ -5,7 +5,8 @@ daemon_prepare(){
     # Allow logging before start event reading (checked by 'message()')
     allow_logging='1'
 
-    # Remove content from log file if '--log-overwrite' option is specified or create a file if it does not exist
+    # Remove content from log file if '--log-overwrite' option
+    # is specified or create a file if it does not exist
     if [[ -n "$log_overwrite" ||
           ! -f "$log" ]]; then
       echo -n > "$log"
@@ -13,7 +14,8 @@ daemon_prepare(){
     fi
   fi
 
-  # Allow notifications if '--notifications' option is specified, checked by 'message()'
+  # Allow notifications if '--notifications' option is specified,
+  # checked by 'message()'
   if [[ -n "$notifications" ]]; then
     allow_notifications='1'
     unset notifications
@@ -25,9 +27,11 @@ daemon_prepare(){
     unset timestamps
   fi
   
-  # Unset CPU and FPS limits on SIGTERM or SIGINT signals and print message about daemon termination
+  # Unset CPU and FPS limits on SIGTERM or SIGINT signals and
+  # print message about daemon termination
   trap 'safe_exit ; quiet="" message --info "Flux terminated successfully." ; exit 0' SIGTERM SIGINT
 
-  # Ignore user related signals to avoid bash's output when 'background_cpu_limit()' receives those
+  # Ignore user related signals to avoid Bash's output when
+  # 'background_cpu_limit()' receives those, weird
   trap '' SIGUSR1 SIGUSR2
 }

@@ -1,4 +1,4 @@
-# Required to handle windows obtained from 'flux-listener'
+# To handle windows obtained from 'flux-listener'
 handle_window_event(){
   local local_window_event="$1"
 
@@ -16,7 +16,6 @@ handle_window_event(){
   get_process_info
   local local_get_process_info_exit_code="$?"
 
-  # Request CPU/FPS limit for unfocused process if it matches with section
   unfocus_request_limit
 
   if (( local_get_process_info_exit_code == 0 )); then
@@ -24,7 +23,9 @@ handle_window_event(){
       handle_focus
     fi
 
-    # Remember info about process until next event to run commands on unfocus and apply CPU/FPS limit, and, to pass variables to command in 'exec-unfocus' key
+    # Remember info about process until next event to run commands
+    # on unfocus and apply CPU/FPS limit, and, to pass environment
+    # variables to command in 'exec-unfocus' key
     previous_window_xid="$window_xid"
     previous_pid="$pid"
     previous_process_name="$process_name"
@@ -33,6 +34,7 @@ handle_window_event(){
     previous_section="$section"
   else
     # Forget info about previous window/process because it is not changed
+    # and causes issues
     unset previous_window_xid \
     previous_pid \
     previous_process_name \

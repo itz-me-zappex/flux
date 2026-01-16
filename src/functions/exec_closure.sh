@@ -1,4 +1,4 @@
-# Required to execute command from 'exec-closure' config key
+# To execute commands from 'exec-closure' config key
 exec_closure(){
   if [[ -z "$passed_section" ]]; then
     return 0

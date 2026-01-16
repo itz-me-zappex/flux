@@ -7,7 +7,7 @@ while read -r temp_envvar_line ||
   # Remove 'declare -x' from line
   temp_envvar_line="${temp_envvar_line/'declare -x '/}"
 
-  # Get name
+  # Remove everything after '=' symbol to get name
   envvar_name="${temp_envvar_line/=*/}"
 
   # Unset variable if its name written in lowercase
@@ -18,11 +18,12 @@ done < <(declare -x)
 unset temp_envvar_line \
 envvar_name
 
+# To prevent segfault trying to open display in C modules
 if [[ -z "$DISPLAY" ]]; then
   DISPLAY=':0'
 fi
 
-# Daemon designed to work with blank '$IFS'
+# Should be unset to prevent issues
 unset IFS
 
 # Set path to temporary directory and files
@@ -41,15 +42,11 @@ case "$flux_path" in
 *'/bin/flux'* )
   # Keep only prefix path
   daemon_prefix="${flux_path/%'/bin/flux'/}"
-
-  # Add modules to '$PATH'
   PATH="${daemon_prefix}/lib/flux:$PATH"
 ;;
 * )
   # Keep only executable directory
   daemon_prefix="${flux_path/%'/flux'/}"
-
-  # Add modules to '$PATH'
   PATH="${daemon_prefix}:$PATH"
 esac
 unset flux_path
@@ -83,7 +80,8 @@ if [[ -t 1 &&
   log_prefix_warning="$colorless_prefix_warning"
   log_timestamp_format="$colorless_timestamp_format"
 else
-  # In case color mode will not be specified using '--color' config key, needed to handle both custom prefixes and timestamp
+  # In case color mode will not be specified using '--color' config key
+  # Needed to handle both custom prefixes and timestamp
   color='never'
 
   # Assuming stdout/stderr is redirected
@@ -100,7 +98,7 @@ else
   log_timestamp_format="$colorless_timestamp_format"
 fi
 
-# Exit with an error if even one of binary modules is missing
+# Exit with an error if even one binary module is missing
 for temp_module in flux-grab-cursor \
 flux-listener \
 select-window \
@@ -120,7 +118,7 @@ if (( missing_modules != 0 )); then
 fi
 
 # 'get_process_info()' should print errors in '--get' and warnings at runtime
-# changed in 'parse_options()'
+# Changed to '--error' in 'parse_options()' ('--get')
 get_process_info_msg_type='--warning'
 
 # Needed to store values from config
@@ -149,30 +147,34 @@ config_key_exec_exit_focus_map \
 config_key_exec_exit_unfocus_map \
 config_key_unfocus_mute_map
 
-# Needed to remember line and order of keys in section, used to handle 'group' config key and print line in warnings after parsing (validation)
+# To remember line and order of keys in section
+# Used to handle 'group' config key and print line in warnings at
+# config validation step
 declare -A config_keys_order_map
 
-# Needed to detect blank sections in config during parsing
+# To detect blank sections in config during parsing
 declare -A is_section_blank_map
 
-# Needed to remember whether regexp should be used to find matching identifiers or not
+# To remember whether regexp should be used to find
+# matching identifiers or not
 declare -A config_key_regexp_name_map \
 config_key_regexp_command_map \
 config_key_regexp_owner_map
 
-# Needed to define whether commands to 'exec-closure'/'exec-exit' should be appended to inherited from 'lazy-exec-unfocus' or not
+# To remember whether commands to 'exec-closure'/'exec-exit'
+# should be appended to inherited from 'lazy-exec-unfocus' ones or not
 # Unneeded if first declaration has '=' instead of '+='
 declare -A config_key_exec_closure_append_to_default_map \
 config_key_exec_exit_append_to_default_map
 
-# Declare associative arrays to store info about backgrounded limits
+# To store info about backgrounded limits
 declare -A background_freeze_pid_map \
 background_cpu_limit_pid_map \
 background_fps_limit_pid_map \
 background_sched_idle_pid_map \
 background_focus_grab_cursor_map
 
-# Declare associative arrays to store info about requested limits
+# To store info about requested limits
 declare -A request_freeze_map \
 request_cpu_limit_map \
 request_fps_limit_map \
@@ -181,7 +183,8 @@ request_minimize_map \
 request_exec_unfocus_general_map \
 request_mute_map
 
-# Declare associative arrays to store info about windows to avoid obtaining it every time to speed up code and reduce CPU-usage
+# To store info about windows to avoid obtaining it every time
+# to speed up code and reduce CPU usage
 declare -A cache_pid_map \
 cache_process_name_map \
 cache_process_owner_map \
@@ -190,17 +193,18 @@ cache_section_map \
 cache_mismatch_map \
 cache_process_owner_username_map
 
-# Declare associative arrays to remember previous process scheduling policy, priority and parameters of 'SCHED_DEADLINE' scheduling policy
+# To remember previous process scheduling policy, priority
+# and parameters of 'SCHED_DEADLINE' scheduling policy
 declare -A sched_previous_policy_map \
 sched_previous_priority_map \
 sched_previous_runtime_map \
 sched_previous_deadline_map \
 sched_previous_period_map
 
-# Needed to define section with just identifiers specified, i.e. with no any action
+# To figure out whether section contains just identifiers or not
 declare -A is_section_useful_map
 
-# Needed to remember that 'exec-oneshot' command has been executed
+# To remember that 'exec-oneshot' command has been executed
 declare -A is_exec_oneshot_executed_map
 
 parse_options "$@"
@@ -315,8 +319,8 @@ while read -r raw_event ||
             hot='1'
             unset allow_lazy_commands
 
-            # Remember focused window info to set it as previous after handling implicitly opened windows
-            # Needed to make daemon able to handle requests after first unfocus event (after handling implicitly opened windows)
+            # To restore window/process info after handling implicitly
+            # opened windows
             explicit_window_xid="$window_xid"
             explicit_pid="$pid"
             explicit_process_name="$process_name"
@@ -331,10 +335,12 @@ while read -r raw_event ||
       unset temp_opened_window
 
       if [[ -z "$allow_lazy_commands" ]]; then
-        # Unset '--hot' to allow lazy commands execution after handling implicitly opened windows
+        # Unset '--hot' to allow lazy commands execution after handling
+        # implicitly opened windows
         unset hot
 
-        # Restore info about focused window after handling implicitly opened windows
+        # Restore info about focused window after handling implicitly
+        # opened windows
         previous_window_xid="$explicit_window_xid"
         previous_pid="$explicit_pid"
         previous_process_name="$explicit_process_name"
@@ -355,18 +361,18 @@ while read -r raw_event ||
     fi
   fi
 
+  # Handle focused window if it does not repeat
   if [[ "$previous_focused_window" != "$focused_window" ]]; then
-    # Handle focused window if it does not repeat
     handle_window_event "$focused_window"
 
-    # Remember focused window to skip handling it again if repeats
+    # To skip handling it again if repeats
     previous_focused_window="$focused_window"
   fi
 
   handle_closure
   handle_unfocus
 
-  # Needed to find implicitly opened windows next time
+  # To find implicitly opened windows next time
   previous_opened_windows="$opened_windows"
 
   if [[ -z "$hot" ]]; then
@@ -378,7 +384,7 @@ while read -r raw_event ||
   fi
 done < "$flux_listener_fifo_path"
 
-# Only for case if event reader becomes terminated
+# For cases when event reader becomes terminated implicitly
 message --warning "Event reader terminated!"
 safe_exit
 message --error "Flux terminated unexpectedly!"
