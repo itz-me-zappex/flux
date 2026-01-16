@@ -125,12 +125,6 @@ parse_options(){
           exit 1
         fi
 
-        # Single quote process name if it has space as last symbol
-        # because of 15 visible symbols limitation in '/proc/<PID>/comm'
-        if [[ "$process_name" == *' ' ]]; then
-          process_name="'$process_name'"
-        fi
-
         echo "Window
 ├── XID (decimal): "$window_xid"
 └── XID (hexadecimal): "$(printf "0x%x\n" "$window_xid")" 
