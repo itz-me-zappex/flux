@@ -161,7 +161,7 @@ Options and values:
   -H, --hot                           Apply actions to already unfocused windows before handling events
   -l, --log <file>                    Enable logging and set path to log file
   -L, --log-overwrite                 Recreate log file before start, depends on '--log' option
-  -n, --notifications                 Display messages as notifications
+  -n, --notifications                 Display notifications
   -q, --quiet                         Display errors and warnings only
   -T, --timestamp-format <format>     Set timestamp format, depends on '--timestamps' option
                                       default: [%Y-%m-%dT%H:%M:%S%z]
