@@ -20,7 +20,6 @@ message(){
     shift 1
     printf "$local_timestamp" "$local_current_time" "$prefix_error $*" >&2
     local local_log_prefix="$log_prefix_error"
-    local local_notification_icon='emblem-error'
   ;;
   --error-opt )
     # Setting '$local_log_prefix' not needed, never logged
@@ -33,7 +32,6 @@ message(){
     if [[ -z "$quiet" ]]; then
       printf "$local_timestamp" "$local_current_time" "$prefix_info $*"
       local local_log_prefix="$log_prefix_info"
-      local local_notification_icon='emblem-information'
     else
       return 0
     fi
@@ -43,7 +41,6 @@ message(){
     if [[ -n "$verbose" ]]; then
       printf "$local_timestamp" "$local_current_time" "$prefix_verbose $*"
       local local_log_prefix="$log_prefix_verbose"
-      local local_notification_icon='emblem-added'
     else
       return 0
     fi
@@ -52,16 +49,20 @@ message(){
     shift 1
     printf "$local_timestamp" "$local_current_time" "$prefix_warning $*" >&2
     local local_log_prefix="$log_prefix_warning"
-    local local_notification_icon='emblem-warning'
+  ;;
+  --notification )
+    if [[ -n "$allow_notifications" ]]; then
+      shift 1
+      notify-send "$*"
+    fi
+
+    # Should not be logged
+    return 0
   esac
 
   if [[ -n "$allow_logging" ]]; then
     hide_stderr
     printf "$local_log_timestamp" "$local_current_time" "$local_log_prefix $*" >> "$log"
     restore_stderr
-  fi
-
-  if [[ -n "$allow_notifications" ]]; then
-    notify-send --icon="$local_notification_icon" "$*"
   fi
 }
