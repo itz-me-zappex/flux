@@ -32,7 +32,7 @@ background_grab_cursor(){
         [[ -n "$local_flux_grab_cursor_line" ]]; do
     case "$local_flux_grab_cursor_line" in
     'cursor_already_grabbed' )
-      message --verbose "Waiting for when cursor become ungrabbed to assign it to window ($passed_window_xid) of process '$passed_process_name' ($passed_pid) on focus event..."
+      message --verbose "Waiting for when cursor become ungrabbed to bind it to window ($passed_window_xid) of process '$passed_process_name' ($passed_pid) on focus event..."
     ;;
     'error' )
       message --warning "Unable to grab cursor for window ($passed_window_xid) of process '$passed_process_name' ($passed_pid) on focus event!"
