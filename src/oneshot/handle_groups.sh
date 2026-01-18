@@ -21,7 +21,7 @@ handle_groups(){
       continue
     fi
 
-    # Check whether group exits or not
+    # Check whether group exists or not
     local local_temp_group
     for local_temp_group in "${groups_array[@]}"; do
       if [[ "$local_temp_group" == "$local_group" ]]; then
