@@ -1,6 +1,3 @@
-# Shown in '--version' output
-daemon_version='1.34.1'
-
 # Unset environment variables which are lowercase and may cause conflicts
 while read -r temp_envvar_line ||
       [[ -n "$temp_envvar_line" ]]; do
@@ -17,6 +14,9 @@ while read -r temp_envvar_line ||
 done < <(declare -x)
 unset temp_envvar_line \
 envvar_name
+
+# Shown in '--version' output
+daemon_version='1.34.1'
 
 # To prevent segfault trying to open display in C modules
 if [[ -z "$DISPLAY" ]]; then
