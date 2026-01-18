@@ -88,9 +88,9 @@ exec_on_event(){
 
   # Notify user about execution
   if [[ "$passed_command_type" == 'default' ]]; then
-    message --info "${passed_event_type^} command ($local_expand_variables_result) ($passed_section) executed $passed_end_of_msg."
+    message --verbose "${passed_event_type^} command ($local_expand_variables_result) ($passed_section) executed $passed_end_of_msg."
   elif [[ "$passed_command_type" == 'lazy' ]]; then
-    message --info "Lazy $passed_event_type command ($local_expand_variables_result) ($passed_section) executed $passed_end_of_msg."
+    message --verbose "Lazy $passed_event_type command ($local_expand_variables_result) ($passed_section) executed $passed_end_of_msg."
   fi
 }
 
