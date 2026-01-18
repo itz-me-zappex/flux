@@ -10,16 +10,16 @@ background_cpu_limit(){
     sleep "$local_unfocus_limits_delay" &
     local local_sleep_pid="$!"
 
-    trap 'message --info "Delayed for $local_unfocus_limits_delay second(s) CPU limiting of process '"'$passed_process_name'"' ($passed_pid) of window ($passed_window_xid) cancelled because of daemon termination." ; \
-    kill "$local_sleep_pid"; \
+    trap 'message --info "Delayed for $local_unfocus_limits_delay second(s) CPU limiting of process '"'$passed_process_name'"' ($passed_pid) of window ($passed_window_xid) cancelled because of daemon termination.";\
+    kill "$local_sleep_pid";\
     exit 0' SIGINT SIGTERM
 
-    trap 'message --info "Delayed for $local_unfocus_limits_delay second(s) CPU limiting of process '"'$passed_process_name'"' ($passed_pid) cancelled on window ($passed_window_xid) focus event." ; \
-    kill "$local_sleep_pid"; \
+    trap 'message --info "Delayed for $local_unfocus_limits_delay second(s) CPU limiting of process '"'$passed_process_name'"' ($passed_pid) cancelled on window ($passed_window_xid) focus event.";\
+    kill "$local_sleep_pid";\
     exit 0' SIGUSR1
 
-    trap 'message --info "Delayed for $local_unfocus_limits_delay second(s) CPU limiting of process '"'$passed_process_name'"' ($passed_pid) cancelled on window ($passed_window_xid) closure event." ; \
-    kill "$local_sleep_pid"; \
+    trap 'message --info "Delayed for $local_unfocus_limits_delay second(s) CPU limiting of process '"'$passed_process_name'"' ($passed_pid) cancelled on window ($passed_window_xid) closure event.";\
+    kill "$local_sleep_pid";\
     exit 0' SIGUSR2
 
     wait "$local_sleep_pid"
@@ -44,16 +44,16 @@ background_cpu_limit(){
       fi
     fi
 
-    trap 'message --info "Process '"'$passed_process_name'"' ($passed_pid) of window ($passed_window_xid) CPU unlimited because of daemon termination." ; \
-    kill "$local_cpulimit_pid" > /dev/null 2>&1 ; \
+    trap 'message --info "Process '"'$passed_process_name'"' ($passed_pid) of window ($passed_window_xid) CPU unlimited because of daemon termination.";\
+    kill "$local_cpulimit_pid" > /dev/null 2>&1;\
     exit 0' SIGINT SIGTERM
 
-    trap 'message --info "Process '"'$passed_process_name'"' ($passed_pid) CPU unlimited on window ($passed_window_xid) focus event." ; \
-    kill "$local_cpulimit_pid" > /dev/null 2>&1 ; \
+    trap 'message --info "Process '"'$passed_process_name'"' ($passed_pid) CPU unlimited on window ($passed_window_xid) focus event.";\
+    kill "$local_cpulimit_pid" > /dev/null 2>&1;\
     exit 0' SIGUSR1
 
-    trap 'message --info "Process '"'$passed_process_name'"' ($passed_pid) CPU unlimited on window ($passed_window_xid) closure event." ; \
-    kill "$local_cpulimit_pid" > /dev/null 2>&1 ; \
+    trap 'message --info "Process '"'$passed_process_name'"' ($passed_pid) CPU unlimited on window ($passed_window_xid) closure event.";\
+    kill "$local_cpulimit_pid" > /dev/null 2>&1;\
     exit 0' SIGUSR2
 
     wait "$local_cpulimit_pid"
