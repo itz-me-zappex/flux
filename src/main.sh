@@ -286,6 +286,7 @@ unset -f validate_sched
 flux-listener > "$flux_listener_fifo_path" &
 flux_listener_pid="$!"
 quiet='' message --info "Flux started."
+message --notification "Flux daemon has been started."
 while read -r raw_event ||
       [[ -n "$raw_event" ]]; do
   (( events_count++ ))
@@ -388,4 +389,5 @@ done < "$flux_listener_fifo_path"
 message --warning "Event reader terminated!"
 safe_exit
 message --error "Flux terminated unexpectedly!"
+message --notification "Flux daemon has been terminated unexpectedly!"
 exit 1

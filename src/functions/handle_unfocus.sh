@@ -127,6 +127,12 @@ handle_unfocus(){
         passed_process_command="$local_process_command" \
         exec_unfocus
       fi
+
+      # Should be displayed only for matching processes when unfocused
+      if [[ -n "$local_section" &&
+            "$local_temp_window_xid" != "$window_xid" ]]; then
+        message --notification "Actions from '$local_section' section were applied on window unfocus of '$local_process_name' process."
+      fi
     fi
   done
 }

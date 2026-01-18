@@ -58,4 +58,9 @@ handle_focus(){
   exec_oneshot
 
   exec_focus
+
+  # Should be displayed only for explicitly opened windows
+  if [[ -z "$hot" ]]; then
+    message --notification "Actions from '$section' section were applied on window focus of '$process_name' process."
+  fi
 }

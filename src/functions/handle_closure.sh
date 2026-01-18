@@ -214,6 +214,11 @@ handle_closure(){
       if [[ -n "$local_closure_notify" ]]; then
         message --verbose "Window ($local_temp_terminated_window_xid) of process '$local_terminated_process_name' ($local_terminated_pid) closed."
       fi
+
+      # Should be displayed only for matching processes
+      if [[ -n "$local_terminated_section" ]]; then
+        message --notification "Actions from '$local_terminated_section' section were applied on window closure of '$local_terminated_process_name' process."
+      fi
     fi
   done
 }

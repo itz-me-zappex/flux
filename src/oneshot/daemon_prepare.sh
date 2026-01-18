@@ -29,7 +29,10 @@ daemon_prepare(){
   
   # Unset CPU and FPS limits on SIGTERM or SIGINT signals and
   # print message about daemon termination
-  trap 'safe_exit ; quiet="" message --info "Flux terminated successfully." ; exit 0' SIGTERM SIGINT
+  trap 'safe_exit;\
+        quiet="" message --info "Flux terminated successfully.";\
+        message --notification "Flux daemon has been terminated successfully.";\
+        exit 0' SIGTERM SIGINT
 
   # Ignore user related signals to avoid Bash's output when
   # 'background_cpu_limit()' receives those, weird
