@@ -16,7 +16,7 @@ unset temp_envvar_line \
 envvar_name
 
 # Shown in '--version' output
-daemon_version='1.34.1'
+daemon_version='1.34.2'
 
 # To prevent segfault trying to open display in C modules
 if [[ -z "$DISPLAY" ]]; then
