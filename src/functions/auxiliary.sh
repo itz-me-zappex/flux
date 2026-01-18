@@ -156,6 +156,11 @@ simplify_bool(){
     if [[ "${local_value,,}" =~ ^('true'|'t'|'yes'|'y'|'1')$ ]]; then
       # Should be declared as local outside
       local_simplify_bool_result='1'
+    else
+      # Should be declared as local outside
+      # For cases when 'false' after 'true' appear
+      # Without that, 'true' will not be changed to 'false'
+      local_simplify_bool_result=''
     fi
   else
     return 1
