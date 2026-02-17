@@ -688,12 +688,63 @@ Command from `lazy-exec-unfocus` is also executed on daemon termination if windo
 
 Add following lines to section responsible for target (use your own values):
 
+For rootful X session:
 ```ini
 lazy-exec-focus += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=200'
 lazy-exec-focus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=2000'
 lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUGraphicsClockOffset[2]=0'
 lazy-exec-unfocus += nvidia-settings -c :0 -a '[gpu:0]/GPUMemoryTransferRateOffset[2]=0'
 ```
+
+In case with rootful session, that is all, you can stop reading.
+
+For rootless X session (`sudo`):
+```ini
+lazy-exec-focus += sudo nvidia-settings -a GPUGraphicsClockOffsetAllPerformanceLevels=200
+lazy-exec-focus += sudo nvidia-settings -a GPUMemoryTransferRateOffsetAllPerformanceLevels=2000
+lazy-exec-unfocus += sudo nvidia-settings -a GPUGraphicsClockOffsetAllPerformanceLevels=0
+lazy-exec-unfocus += sudo nvidia-settings -a GPUMemoryTransferRateOffsetAllPerformanceLevels=0
+```
+
+For rootless X session (`opendoas`):
+```ini
+lazy-exec-focus += doas /usr/bin/nvidia-settings -a GPUGraphicsClockOffsetAllPerformanceLevels=200
+lazy-exec-focus += doas /usr/bin/nvidia-settings -a GPUMemoryTransferRateOffsetAllPerformanceLevels=2000
+lazy-exec-unfocus += doas /usr/bin/nvidia-settings -a GPUGraphicsClockOffsetAllPerformanceLevels=0
+lazy-exec-unfocus += doas /usr/bin/nvidia-settings -a GPUMemoryTransferRateOffsetAllPerformanceLevels=0
+```
+
+Full path to binary in case with `opendoas` is needed because it expects 100% command match with rules in `doas.conf`.
+
+For ability to overclock GPU without password prompt on rootless X session, consider to allow these commands in your favourite privilege elevation tool.
+
+For `sudo`:
+```
+## Allow NVIDIA GPU overclock without password prompt
+%wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/nvidia-settings ^-a GPUGraphicsClockOffsetAllPerformanceLevels=[0-9]+$, /usr/bin/nvidia-settings ^-a GPUMemoryTransferRateOffsetAllPerformanceLevels=[0-9]+$
+```
+
+For `opendoas` (use your own values):
+```
+## Allow NVIDIA GPU overclock without password prompt
+permit nopass :wheel as root cmd /usr/bin/nvidia-settings args -a GPUGraphicsClockOffsetAllPerformanceLevels=0
+permit nopass :wheel as root cmd /usr/bin/nvidia-settings args -a GPUMemoryTransferRateOffsetAllPerformanceLevels=0
+permit nopass :wheel as root cmd /usr/bin/nvidia-settings args -a GPUGraphicsClockOffsetAllPerformanceLevels=200
+permit nopass :wheel as root cmd /usr/bin/nvidia-settings args -a GPUMemoryTransferRateOffsetAllPerformanceLevels=2000
+```
+
+Please notice that in case with `opendoas` you should specify exactly the same frequencies as you did in `flux.ini` to make things work properly, because there is no support for regexp or wildcards (`*`).
+
+If you encounter `"Authorization required, but no authorization protocol specified"` error from `nvidia-settings` in case with `opendoas`, then consider to run `xhost +SI:localuser:root` (this command does not require root) by either adding it to autostart, running it before `flux` daemon or even by adding it to commands in `flux.ini` like this (extremely ugly but works):
+```ini
+lazy-exec-focus += "xhost +SI:localuser:root ; doas /usr/bin/nvidia-settings -a GPUGraphicsClockOffsetAllPerformanceLevels=200"
+lazy-exec-focus += "xhost +SI:localuser:root ; doas /usr/bin/nvidia-settings -a GPUMemoryTransferRateOffsetAllPerformanceLevels=2000"
+lazy-exec-unfocus += "xhost +SI:localuser:root ; doas /usr/bin/nvidia-settings -a GPUGraphicsClockOffsetAllPerformanceLevels=0"
+lazy-exec-unfocus += "xhost +SI:localuser:root ; doas /usr/bin/nvidia-settings -a GPUMemoryTransferRateOffsetAllPerformanceLevels=0"
+```
+
+P.S.: Do not ask why I suggest to use different commands depending on whether session is rootful or rootless. Commands for rootful session refuse to work on rootless session even if they run as root. Thx to `@ewbteewbte` from NVIDIA forum for spending the whole night and founding this ~~three~~ eight years old [solution](https://forums.developer.nvidia.com/t/465-24-02-no-longer-able-to-set-graphics-clock-offset-and-memory-transfer-rate-offset/175640/30).
+
 
 ### Change keyboard layout to English on focus
 Useful for some games/apps that do not understand cyrillic letters and rely on layout instead of scancodes.
