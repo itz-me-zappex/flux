@@ -131,8 +131,9 @@ int main() {
     if (active_window == None) {
       active_window = get_input_focus(display);
 
-      if (active_window != wm_window) {
-        continue;
+      if (active_window == root ||
+          active_window == None) {
+        active_window = wm_window;
       }
     }
 
@@ -188,3 +189,4 @@ int main() {
    */
   return 0;
 }
+
