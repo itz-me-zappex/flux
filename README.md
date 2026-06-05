@@ -103,37 +103,37 @@ Daemon running handling already opened windows (`-H`) in verbose mode (`-v`) and
 
 ## Dependencies
 ### Arch Linux and derivatives
-**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libxres` `libx11` `libxext` `xorgproto` `less`
+**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libxres` `libx11` `libxext` `xorgproto`
 
-**Optional:** `mangohud` `lib32-mangohud` `libnotify` `libpulse`
+**Optional:** `mangohud` `lib32-mangohud` `libnotify` `libpulse` `less`
 
 **Build:** `libxres` `libx11` `libxext` `xorgproto` `make` `gcc`
 
 ### Debian and derivatives
-**Required:** `bash` `cpulimit` `coreutils` `libxres1` `libx11-6` `libxext6` `less`
+**Required:** `bash` `cpulimit` `coreutils` `libxres1` `libx11-6` `libxext6`
 
-**Optional:** `mangohud` `mangohud:i386` `libnotify-bin` `pulseaudio-utils`
+**Optional:** `mangohud` `mangohud:i386` `libnotify-bin` `pulseaudio-utils` `less`
 
 **Build:** `libxres-dev` `libx11-dev` `libxext-dev` `x11proto-dev` `make` `gcc`
 
 ### Void Linux and derivatives
-**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext` `xorgproto` `less`
+**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext` `xorgproto`
 
-**Optional:** `MangoHud` `MangoHud-32bit` `libnotify` `pulseaudio-utils`
+**Optional:** `MangoHud` `MangoHud-32bit` `libnotify` `pulseaudio-utils` `less`
 
 **Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto` `make` `gcc`
 
 ### Fedora and derivatives
-**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext` `less`
+**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext`
 
-**Optional:** `mangohud` `mangohud.i686` `libnotify` `pulseaudio-utils`
+**Optional:** `mangohud` `mangohud.i686` `libnotify` `pulseaudio-utils` `less`
 
 **Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorg-x11-proto-devel` `make` `gcc`
 
 ### OpenSUSE Tumbleweed and derivatives
-**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXRes1` `libX11-6` `libXext6` `less`
+**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXRes1` `libX11-6` `libXext6`
 
-**Optional:** `mangohud` `mangohud-32bit` `libnotify4` `pulseaudio-utils`
+**Optional:** `mangohud` `mangohud-32bit` `libnotify4` `pulseaudio-utils` `less`
 
 **Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto-devel` `make` `gcc`
 
