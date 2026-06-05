@@ -353,3 +353,16 @@ hide_stderr(){
 restore_stderr(){
   exec 2>&3
 }
+
+# To print output of '--get' option without less as this is optional dependency
+# Used via pipe, e.g. "<command> | less_or_echo"
+less_or_echo(){
+  if command -v less > /dev/null 2>&1; then
+    less -FSX
+  else
+    local local_line
+    while read -r local_line || [[ -n "$local_line" ]]; do
+      echo "$local_line"
+    done
+  fi
+}

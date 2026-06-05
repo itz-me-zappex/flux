@@ -125,25 +125,14 @@ parse_options(){
           exit 1
         fi
 
-        if command -v less > /dev/null 2>&1; then
-          echo "XID (decimal): "$window_xid"
+        echo "XID (decimal): "$window_xid"
 XID (hexadecimal): "$(printf "0x%x\n" "$window_xid")" 
 PID: "$pid"
 Name: "$process_name"
 Owner (UID): "$process_owner"
 Owner (username): "$process_owner_username"
 Command: "$process_command"
-" | less -FSX
-        else
-          echo "XID (decimal): "$window_xid"
-XID (hexadecimal): "$(printf "0x%x\n" "$window_xid")" 
-PID: "$pid"
-Name: "$process_name"
-Owner (UID): "$process_owner"
-Owner (username): "$process_owner_username"
-Command: "$process_command"
-"
-        fi
+" | less_or_echo
       fi
 
       exit 0
