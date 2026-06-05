@@ -542,7 +542,7 @@ To avoid repeating yourself, reduce config file size and simplify editing, you m
 
 Order of `group` config key matters a lot, if you want to overwrite value from group, specify key below `group = @<group>`, otherwise - above. If you want to append value to key from group, then use `+=` **after** `group` config key.
 
-Group name does not matter, except section name should begin with `@` symbol. That is how daemon defines whether that is just a section or group.
+Group name does not matter, except section name should begin with `@` symbol. That is how daemon figures out with whether this is section or group.
 
 Position of group declaration section in config file does not matter at all.
 
@@ -588,7 +588,7 @@ group = @games-overclock
 ```
 
 ### Regular expressions
-To simplify config file editing and reduce its size, you may want to use regular expressions. As example, to avoid extremely long strings, like in case with Minecraft as its process name is just `java` and command is extremely long or to make section matchable with multiple process names.
+To simplify config file editing and reduce its size, you may want to use regular expressions. As example, to avoid extremely long strings, like in case with Minecraft, as its process name is just `java` and command is extremely long or to make section match multiple process names.
 
 ```ini
 ; Section matches both 'vkcube' and 'glxgears' processes
@@ -641,7 +641,7 @@ unfocus-sched-idle = true
 ```
 
 ### Environment variables passed to commands
-You can use these variables in your commands and scripts that running from `exec-*` config keys to avoid obtaining window XID and process info twice.
+You can use these variables in your commands and scripts that running from execution-related config keys to avoid obtaining window XID and process info twice.
 
 | Variable | Description |
 |----------|-------------|
@@ -833,7 +833,7 @@ lazy-exec-unfocus += qdbus org.kde.kglobalaccel /component/kwin org.kde.kglobala
 
 ## Possible questions
 ### How does this daemon work?
-- Daemon listens changes in `_NET_ACTIVE_WINDOW` and `_NET_CLIENT_LIST_STACKING` atoms, obtains window XIDs and using those obtains PIDs by "asking" Xorg server through XRes extension for those, reads info about processes from files in `/proc/<PID>` to compare it with identifiers in config file, and, if matching section appears, then it does specified in config file actions, otherwise - nothing.
+- Daemon listens changes in `_NET_ACTIVE_WINDOW` and `_NET_CLIENT_LIST_STACKING` atoms, obtains window XIDs, using XIDs it asks X server for PIDs through XRes extension, reads processes info from `/proc/<PID>`, compares it with specified identifiers in config file, and if matching section appears, then it does actions specified in config file, otherwise - nothing.
 
 ### Does this daemon reduce performance?
 - Daemon uses event-based algorithm to obtain info about windows and processes, when you switching between windows daemon consumes a bit CPU time and just chills out when you doing stuff in single window. Performance loss should not be noticeable even on weak systems.
@@ -851,4 +851,4 @@ lazy-exec-unfocus += qdbus org.kde.kglobalaccel /component/kwin org.kde.kglobala
 - That is impossible, there is no any unified or even per-compositor way to read window related events and obtain PIDs of windows on Wayland. Even if that become possible, it is still will not be possible to e.g. bind cursor to window rectangles, minimize/fullscreenize windows and so on. [Think twice before abandoning X11. Wayland breaks everything!](https://gist.github.com/probonopd/9feb7c20257af5dd915e3a9f2d1f2277)
 
 ### Why did you write it in Bash?
-- This is (scripting) language I know pretty good, despite a fact that Bash as all interpretators works slower than compilable languages, it still fits my needs almost perfectly.
+- This is (scripting) language I know pretty good, despite a fact that Bash as all interpreters works slower than compilable languages, it still fits my needs almost perfectly.
