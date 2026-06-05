@@ -96,7 +96,7 @@ if [[ -n "${missing_build_deps[*]}" ]]; then
   # Install build deps if answer is blank or positive
   case "$install_missing_deps" in
   Y | y | '' )
-    if ! sudo apt install --mark-auto "${missing_build_deps[@]}" -y; then
+    if ! sudo apt install --mark-auto "${missing_build_deps[@]}"; then
       msg_error "Unable to install missing dependencies!"
       exit 1
     fi
