@@ -5,7 +5,7 @@
 ###############################
 # --- Available to modify --- #
 ###############################
-version='1.34.2'
+version='1.34.3'
 rev='1'
 arch="$(dpkg --print-architecture)"
 package="flux_${version}-${rev}_${arch}"
@@ -26,7 +26,6 @@ required_deps=(
 'libxres1'
 'libx11-6'
 'libxext6'
-'less' # optional in next release
 )
 
 optional_deps=(
@@ -34,7 +33,7 @@ optional_deps=(
 'mangohud:i386'
 'libnotify-bin'
 'pulseaudio-utils'
-#'less'
+'less'
 )
 
 
