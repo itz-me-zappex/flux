@@ -22,13 +22,14 @@ depends=(
   'libx11'
   'libxext'
   'xorgproto'
-  'less'
+  'less' # optional in next release
 )
 optdepends=(
   'mangohud: FPS limit support'
   'lib32-mangohud: FPS limit support (32-bit)'
   'libnotify: notifications support'
   'libpulse: mute apps on unfocus'
+  #"less: make '--get' output scrollable if needed"
 )
 source=("${url}/archive/refs/tags/v${pkgver}.tar.gz")
 sha256sums=('SKIP')

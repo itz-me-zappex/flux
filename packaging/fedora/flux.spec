@@ -7,6 +7,7 @@ License:        GPL-3.0-only
 URL:            https://github.com/itz-me-zappex/flux
 Source0:        %{url}/archive/refs/tags/v%{version}.tar.gz
 
+# 'less' is optional in next release
 BuildRequires:  libXres-devel, libX11-devel, libXext-devel, xorg-x11-proto-devel, make, gcc
 Requires:       bash, util-linux, cpulimit, coreutils, libXres, libX11, libXext, less
 Recommends:     mangohud, mangohud.i686, libnotify, pulseaudio-utils

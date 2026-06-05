@@ -26,7 +26,7 @@ required_deps=(
 'libxres1'
 'libx11-6'
 'libxext6'
-'less'
+'less' # optional in next release
 )
 
 optional_deps=(
@@ -34,6 +34,7 @@ optional_deps=(
 'mangohud:i386'
 'libnotify-bin'
 'pulseaudio-utils'
+#'less'
 )
 
 
