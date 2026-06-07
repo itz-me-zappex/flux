@@ -86,19 +86,19 @@ Daemon running handling already opened windows (`-H`) in verbose mode (`-v`) and
 ![](images/preview.png)
 
 ## Features
-- Applying CPU or FPS limit to process on unfocus and unlimit on focus. FPS limiting requires game running using MangoHud with already existing config file.
-- Reducing process priority on unfocus and restore it on focus.
-- Minimizing window on unfocus, useful for borderless windows.
-- Expanding window to fullscreen on focus. Useful for games which handle a window mode in a weird way.
-- Grabbing cursor and redirect input into focused window to prevent cursor from escaping to second monitor in case with borderless windows.
-- Executing commands and scripts on focus, unfocus and window closure events to extend daemon functionality. Daemon provides info about window and process through environment variables.
+- Applying CPU/FPS limit to process on unfocus and unsetting on focus. Note: FPS limiting requires game running using MangoHud with already existing config file.
+- Reducing process priority on unfocus and restoring on focus.
+- Minimizing window on unfocus. May be useful for borderless windows.
+- Expanding window to fullscreen on focus. May be useful for games that handle window mode in a weird way.
+- Grabbing cursor and redirecting mouse input into focused window to prevent cursor from escaping to e.g. second monitor in case with borderless windows.
+- Executing commands and scripts on focus, unfocus and window closure events with aim to extend daemon functionality. Daemon provides info about window and process through environment variables.
 - Logging support.
 - Notifications support.
-- Flexible identifiers support to avoid false positives, including regular expressions.
+- Flexible identifiers support with aim to avoid false positives, including regular expressions.
 - Working with processes running through sandbox with PID namespaces, e.g. Firejail.
-- Handling DE/WM restart or switching it on the fly.
-- Support for most of X11 DEs/WMs ([EWMH-compatible ones](https://specifications.freedesktop.org/wm-spec/latest/)) and does not rely on either GPU or its driver.
-- Detection and handling both explicitly and implicitly opened windows.
+- Surviving DE/WM restart or switching it on the fly.
+- Support for most of X11 DEs/WMs ([EWMH-compatible ones](https://specifications.freedesktop.org/wm-spec/latest/)) and GPU/driver agnostic.
+- Detection and handling explicitly and/or implicitly opened windows.
 - Muting processes on unfocus and unmuting on focus with Pulseaudio and Pipewire support, including Pipewire Media Session and Wireplumber.
 
 ## Dependencies
