@@ -11,7 +11,7 @@ cmdline_get(){
   # Remember that option is passed to check whether it is passed
   # again or not 
   option_repeat_check "$passed_check" "$passed_option"
-  eval "$passed_check"='1'
+  printf -v "$passed_check" '%u' '1'
 
   # Define option type and remember specified value
   # 'short', 'long' or 'long=value'
@@ -21,7 +21,7 @@ cmdline_get(){
     # Regexp means long or short option
     if [[ -n "$2" &&
           ! "$2" =~ ^(--.*|-.*)$ ]]; then
-      eval "$passed_set"=\'"$2"\'
+      printf -v "$passed_set" '%s' "$2"
       shift='2'
     else
       shift='1'
@@ -29,7 +29,7 @@ cmdline_get(){
   ;;
   * )
     # Remove option name from string
-    eval "$passed_set"=\'"${1/"$passed_option"=/}"\'
+    printf -v "$passed_set" '%s' "${1/"$passed_option"=/}"
     shift='1'
   esac
 }
