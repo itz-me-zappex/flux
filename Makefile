@@ -44,9 +44,6 @@ all:
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/flux-grab-cursor $(CMODULES_DIR)/flux_grab_cursor.c \
 	-lX11 -lXext -lXRes
 
-	$(CC) $(CFLAGS) -o $(BUILD_DIR)/validate-x11-session $(CMODULES_DIR)/validate_x11_session.c \
-	-lX11
-
 clean:
 	rm -rf $(BUILD_DIR)
 
@@ -59,7 +56,6 @@ install:
 	install -Dm 755 $(BUILD_DIR)/window-fullscreen $(PREFIX)/lib/flux/
 	install -Dm 755 $(BUILD_DIR)/select-window $(PREFIX)/lib/flux/
 	install -Dm 755 $(BUILD_DIR)/flux-grab-cursor $(PREFIX)/lib/flux/
-	install -Dm 755 $(BUILD_DIR)/validate-x11-session $(PREFIX)/lib/flux/
 
 uninstall:
 	rm $(PREFIX)/bin/flux

@@ -46,40 +46,6 @@ parse_options(){
         exit 1
       fi
 
-      validate_x11_session
-      validate_x11_session_exit_code="$?"
-
-      # Define message depending on exit code
-      if (( validate_x11_session_exit_code > 0 )); then
-        case "$get" in
-        focus )
-          case "$validate_x11_session_exit_code" in
-          1 )
-            message --error "Unable to obtain PID and XID of focused window, Wayland is not supported!"
-          ;;
-          2 )
-            message --error "Unable to obtain PID and XID of focused window, X11 session is not running!"
-          ;;
-          3 )
-            message --error "Unable to obtain PID and XID of focused window, EWMH-compatible window manager is not running!"
-          esac
-        ;;
-        pick )
-          case "$validate_x11_session_exit_code" in
-          1 )
-            message --error "Unable to create window picker, Wayland is not supported!"
-          ;;
-          2 )
-            message --error "Unable to create window picker, X11 session is not running!"
-          ;;
-          3 )
-            message --error "Unable to create window picker, EWMH-compatible window manager is not running!"
-          esac
-        esac
-
-        exit 1
-      fi
-
       # Execute module responsible for getting window info and remember output
       window_info="$(select-window "$get" 2>/dev/null)"
       select_window_exit_code="$?"

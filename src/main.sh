@@ -103,7 +103,6 @@ fi
 for temp_module in flux-grab-cursor \
 flux-listener \
 select-window \
-validate-x11-session \
 window-fullscreen \
 window-minimize; do
   if ! command -v "$temp_module" > /dev/null 2>&1; then
@@ -250,9 +249,6 @@ config_line_count
 unset_groups
 unset -f unset_groups \
 section_is_group
-
-validate_x11_session
-unset -f validate_x11_session
 
 create_temp_dirs
 unset -f create_temp_dirs
