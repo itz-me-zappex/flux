@@ -154,8 +154,12 @@ parse_config(){
             config_key_regexp_owner_map["$local_section"]="$local_regexp"
           ;;
           unfocus-cpu-limit | cpu-limit )
+            if ! command -v cpulimit > /dev/null 2>&1; then
+              message --warning "$local_line_count_msg Config key '$local_config_key'$local_section_msg requires 'cpulimit' command which is missing!"
+              (( parse_config_error_count++ ))
+            fi
+
             config_key_unfocus_cpu_limit_map["$local_section"]="${local_config_value/%\%/}"
-            is_section_useful_map["$local_section"]='1'
 
             # Exit with an error if CPU limit is specified incorrectly or
             # greater than maximum allowed
@@ -168,6 +172,7 @@ parse_config(){
               (( parse_config_error_count++ ))
             fi
 
+            is_section_useful_map["$local_section"]='1'
             unset is_section_blank_map["$local_section"]
             config_keys_order_map["$local_section"]+=" $config_line_count.unfocus-cpu-limit"
           ;;
@@ -432,13 +437,15 @@ parse_config(){
             config_keys_order_map["$local_section"]+=" $config_line_count.group"
           ;;
           unfocus-mute | mute )
+            if ! command -v pactl > /dev/null 2>&1; then
+              message --warning "$local_line_count_msg Config key '$local_config_key'$local_section_msg requires 'pactl' command which is missing!"
+              (( parse_config_error_count++ ))
+            fi
+
             # Exit with an error if value is not boolean
             local local_simplify_bool_result
             if ! simplify_bool "$local_config_value"; then
               message --warning "$local_line_count_msg Value '$local_config_value' specified in '$local_config_key' config key$local_section_msg is not boolean!"
-              (( parse_config_error_count++ ))
-            elif ! command -v pactl > /dev/null 2>&1; then
-              message --warning "$local_line_count_msg Config key '$local_config_key'$local_section_msg requires 'pactl' command which is missing!"
               (( parse_config_error_count++ ))
             else
               config_key_unfocus_mute_map["$local_section"]="$local_simplify_bool_result"
