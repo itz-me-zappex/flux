@@ -46,6 +46,8 @@ parse_options(){
         exit 1
       fi
 
+      check_x11
+
       # Execute module responsible for getting window info and remember output
       window_info="$(select-window "$get" 2>/dev/null)"
       select_window_exit_code="$?"

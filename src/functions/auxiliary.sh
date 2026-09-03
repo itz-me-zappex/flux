@@ -366,3 +366,11 @@ less_or_echo(){
     done
   fi
 }
+
+# To check X11 session and crash if unable to connect
+check_x11() {
+  if [[ -z "$DISPLAY" || -z "$XAUTHORITY" ]]; then
+    message --error "Unable to open display!"
+    exit 1
+  fi
+}

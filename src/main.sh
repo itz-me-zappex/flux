@@ -19,11 +19,6 @@ envvar_name
 daemon_version='1.34.3'
 author_github_link='https://github.com/itz-me-zappex'
 
-# To prevent segfault trying to open display in C modules
-if [[ -z "$DISPLAY" ]]; then
-  DISPLAY=':0'
-fi
-
 # Should be unset to prevent issues
 unset IFS
 
@@ -278,6 +273,9 @@ unset -f daemon_prepare
 
 validate_sched
 unset -f validate_sched
+
+check_x11
+unset -f check_x11
 
 # Read events from 'flux-listener' binary
 flux-listener > "$flux_listener_fifo_path" &
