@@ -35,7 +35,7 @@ configure_prefixes(){
     if [[ -n "${!local_variable_name}" ]]; then
       local local_colors_interpret_result
       colors_interpret "$local_variable_name"
-      eval "prefix_$local_temp_prefix_type"=\'"$local_colors_interpret_result"\'
+      printf -v "prefix_$local_temp_prefix_type" '%s' "$local_colors_interpret_result"
       local local_is_prefixes_changed='1'
       unset "new_prefix_$local_temp_prefix_type"
     fi
@@ -63,11 +63,11 @@ configure_prefixes(){
       local local_log_variable_name="log_$local_variable_name"
 
       # Store value of current variable to log related variable
-      eval "$local_log_variable_name"=\'"${!local_variable_name}"\'
+      printf -v "$local_log_variable_name" '%s' "${!local_variable_name}"
 
       # Remove ANSI escape sequences
       while [[ "${!local_log_variable_name}" =~ $'\e'\[[0-9\;]+'m' ]]; do
-        eval "$local_log_variable_name"=\'"${!local_log_variable_name//"${BASH_REMATCH[0]}"/}"\'
+        printf -v "$local_log_variable_name" '%s' "${!local_log_variable_name//"${BASH_REMATCH[0]}"/}"
       done
     done
   fi
