@@ -305,7 +305,7 @@ expand_variables(){
   local -a local_random_map
 
   # Regexp means variable with optional '\' (escaping)
-  while [[ "$local_command" =~ ('\')+?'$'[a-zA-Z0-9_]+ ]]; do
+  while [[ "$local_command" =~ (\\)+?'$'[a-zA-Z0-9_]+ ]]; do
     local local_rematch="${BASH_REMATCH[0]}"
 
     local local_first_backslashes="${local_rematch/[^'\']*/}"
