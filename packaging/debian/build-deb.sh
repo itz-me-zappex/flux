@@ -21,7 +21,7 @@ build_deps=(
 
 required_deps=(
 'bash'
-'cpulimit'
+'cpulimit' # TODO: make optional
 'coreutils'
 'libxres1'
 'libx11-6'

@@ -16,7 +16,7 @@ makedepends=(
 depends=(
   'bash'
   'util-linux'
-  'cpulimit'
+  'cpulimit' # TODO: make optional
   'coreutils'
   'libxres'
   'libx11'

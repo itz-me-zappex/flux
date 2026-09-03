@@ -8,6 +8,7 @@ URL:            https://github.com/itz-me-zappex/flux
 Source0:        %{url}/archive/refs/tags/v%{version}.tar.gz
 
 BuildRequires:  libXres-devel, libX11-devel, libXext-devel, xorg-x11-proto-devel, make, gcc
+# TODO: make cpulimit optional
 Requires:       bash, util-linux, cpulimit, coreutils, libXres, libX11, libXext
 Recommends:     mangohud, mangohud.i686, libnotify, pulseaudio-utils, less
 
