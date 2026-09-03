@@ -96,7 +96,7 @@ get_process_info(){
 
       # Obtain process owner username from '/etc/passwd'
       # file using UID of process
-      if ! check_ro '/etc/passwd'; then
+      if [[ ! -r '/etc/passwd' ]]; then
         local local_shorten_path_result
         shorten_path '/etc/passwd'
         message "$get_process_info_msg_type" "Unable to obtain process ($pid) owner username of window ($window_xid), file '$local_shorten_path_result' is either missing or broken!"

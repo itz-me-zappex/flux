@@ -12,7 +12,7 @@ validate_log(){
     
     # Check for critical errors
     if [[ -f "$log" ]] &&
-       ! check_rw "$log"; then
+       [[ ! -w "$log" ]]; then
       # Exit with an error if specified log file exists but not accessible
       # for read-write operations
       local local_shorten_path_result
@@ -27,7 +27,7 @@ validate_log(){
       message --error "Path '$local_shorten_path_result' specified in '--log' option is expected to be a file!"
       exit 1
     elif [[ -d "${log%/*}" ]] &&
-         ! check_rw "${log%/*}"; then
+         [[ ! -w "${log%/*}" ]]; then
       # Exit with an error if log file directory is not accessible for
       # read-write operations
       local local_shorten_path_result

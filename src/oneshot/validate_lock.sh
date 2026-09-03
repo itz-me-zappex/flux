@@ -3,7 +3,7 @@ validate_lock(){
   # Skip checks if file does not exist
   if [[ -f "$flux_lock_file_path" ]]; then
     # Exit with an error if lock file is not readable
-    if ! check_ro "$flux_lock_file_path"; then
+    if [[ ! -r "$flux_lock_file_path" ]]; then
       local local_shorten_path_result
       shorten_path "$flux_lock_file_path"
       message --error "Lock file '$local_shorten_path_result' is not readable!"
@@ -42,7 +42,7 @@ validate_lock(){
     fi
 
     # Exit with an error if lock file exists but not accessible for writing
-    if ! check_rw "$flux_lock_file_path"; then
+    if [[ ! -w "$flux_lock_file_path" ]]; then
       local local_shorten_path_result
       shorten_path "$flux_lock_file_path"
       message --error "Unable to overwrite '$local_shorten_path_result' lock file!"
@@ -57,7 +57,7 @@ validate_lock(){
   fi
 
   # Exit with an error if lock file directory is not writable
-  if check_rw "$flux_temp_dir_path"; then
+  if [[ -w "$flux_temp_dir_path" ]]; then
     # Store daemon PID to lock file to prevent multiple instances
     echo "$$" > "$flux_lock_file_path"
   else

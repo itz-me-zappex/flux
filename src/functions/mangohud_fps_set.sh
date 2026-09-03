@@ -8,7 +8,7 @@ mangohud_fps_set(){
   if [[ -f "$local_target_config" ]]; then
     # Check for source config readability
     if [[ "$local_target_config" != "$local_source_config" ]]; then
-      if ! check_ro "$local_source_config"; then
+      if [[ ! -r "$local_source_config" ]]; then
         local local_shorten_path_result
         shorten_path "$local_source_config"
         message --warning "Source MangoHud config file ($local_shorten_path_result) ($passed_section) is not readable!"
@@ -17,7 +17,7 @@ mangohud_fps_set(){
     fi
 
     # Check read-write access of target MangoHud config file
-    if ! check_rw "$local_target_config"; then
+    if [[ ! -w "$local_target_config" ]]; then
       local local_shorten_path_result
       shorten_path "$local_target_config"
       message --warning "Target MangoHud config file ($local_shorten_path_result) ($passed_section) is not rewritable!"

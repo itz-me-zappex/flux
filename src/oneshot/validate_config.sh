@@ -35,7 +35,7 @@ validate_config(){
     shorten_path "$config"
     message --error "Config file '$local_shorten_path_result' does not exist!"
     exit 1
-  elif ! check_ro "$config"; then
+  elif [[ ! -r "$config" ]]; then
     # Exit with an error if config file is not readable
     local local_shorten_path_result
     shorten_path "$config"

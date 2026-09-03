@@ -45,29 +45,6 @@ check_pid_existence(){
   fi
 }
 
-# To check read-write access on file
-check_rw(){
-  local local_file="$1"
-
-  if [[ -r "$local_file" &&
-        -w "$local_file" ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-# To check read-only access on file
-check_ro(){
-  local local_file="$1"
-
-  if [[ -r "$local_file" ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
 # Used in 'exec_focus()' and 'exec_unfocus()' as wrapper
 # to run commands
 exec_on_event(){
