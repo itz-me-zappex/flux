@@ -83,6 +83,8 @@ exec_on_event(){
   passed_end_of_msg='' \
   nohup setsid bash -c "$passed_event_command" > /dev/null 2>&1 &
 
+  disown
+
   local local_expand_variables_result
   expand_variables "$passed_event_command"
 
