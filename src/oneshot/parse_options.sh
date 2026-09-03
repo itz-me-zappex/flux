@@ -235,7 +235,6 @@ Examples:
       shift 1
     ;;
     --version | -V )
-      author_github_link='https://github.com/itz-me-zappex'
       echo "flux v$daemon_version
 FLawless User eXperience
 An advanced automation daemon for X11 desktops and window managers.

@@ -17,6 +17,7 @@ envvar_name
 
 # Shown in '--version' output
 daemon_version='1.34.3'
+author_github_link='https://github.com/itz-me-zappex'
 
 # To prevent segfault trying to open display in C modules
 if [[ -z "$DISPLAY" ]]; then
