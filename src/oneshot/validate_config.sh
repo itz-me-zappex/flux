@@ -41,7 +41,7 @@ validate_config(){
     shorten_path "$config"
     message --error "Config file '$local_shorten_path_result' is not accessible for reading!"
     exit 1
-  elif [[ -z "$(<"$config")" ]]; then
+  elif [[ ! -s "$config" ]]; then
     # Exit with an error if config file is blank
     local local_shorten_path_result
     shorten_path "$config"
