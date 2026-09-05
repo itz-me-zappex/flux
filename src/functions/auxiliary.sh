@@ -62,14 +62,13 @@ exec_on_event(){
 
   disown "$!" > /dev/null 2>&1
 
-  local local_expand_variables_result
-  expand_variables "$passed_event_command"
+  local local_expanded_command="$(bash -c "echo \"$passed_event_command\"")"
 
   # Notify user about execution
   if [[ "$passed_command_type" == 'default' ]]; then
-    message --verbose "${passed_event_type^} command ($local_expand_variables_result) ($passed_section) executed $passed_end_of_msg."
+    message --verbose "${passed_event_type^} command ($local_expanded_command) ($passed_section) executed $passed_end_of_msg."
   elif [[ "$passed_command_type" == 'lazy' ]]; then
-    message --verbose "Lazy $passed_event_type command ($local_expand_variables_result) ($passed_section) executed $passed_end_of_msg."
+    message --verbose "Lazy $passed_event_type command ($local_expanded_command) ($passed_section) executed $passed_end_of_msg."
   fi
 }
 
@@ -273,54 +272,6 @@ unset_envvars(){
   UNFOCUSED_PROCESS_OWNER \
   UNFOCUSED_PROCESS_OWNER_USERNAME \
   UNFOCUSED_PROCESS_COMMAND
-}
-
-# To replace variables in commands from config file with actual values
-# Result used to print messages about execution
-expand_variables(){
-  local local_command="$1"
-  local -a local_random_map
-
-  # Regexp means variable with optional '\' (escaping)
-  while [[ "$local_command" =~ (\\)+?'$'[a-zA-Z0-9_]+ ]]; do
-    local local_rematch="${BASH_REMATCH[0]}"
-
-    local local_first_backslashes="${local_rematch/[^'\']*/}"
-    local local_first_backslash_count="${#local_first_backslashes}"
-
-    # '0' if even, '1' if odd
-    local local_backslash_count_is_odd="$(( local_first_backslash_count % 2 ))"
-
-    if (( local_backslash_count_is_odd == 1 )); then
-      # Since we want to ignore escaped variables,
-      # we should replace those temporary with something
-      # Just in case random value will match one in command string
-      while true; do
-        local local_random="$SRANDOM"
-        if [[ "$local_command" == *"$local_random"* ]]; then
-          continue
-        else
-          break
-        fi
-      done
-
-      local local_random_map["$local_random"]="$local_rematch"
-      local local_command="${local_command/"$local_rematch"/"$local_random"}"
-    else
-      # Replace variable with its value
-      local local_variable_name="${local_rematch#"$local_first_backslashes\$"}"
-      local local_command="${local_command/"$local_rematch"/"$local_first_backslashes${!local_variable_name}"}"
-    fi
-  done
-
-  # Now we need to restore escaped variables back
-  local local_temp_random
-  for local_temp_random in "${!local_random_map[@]}"; do
-    local local_command="${local_command/"$local_temp_random"/"${local_random_map["$local_temp_random"]}"}"
-  done
-
-  # Should be declared as local outside
-  local_expand_variables_result="$local_command"
 }
 
 # Hide/restore error messages, even standart ones which appear directly from Bash
