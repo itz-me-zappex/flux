@@ -62,13 +62,21 @@ exec_on_event(){
 
   disown "$!" > /dev/null 2>&1
 
-  local local_expanded_command="$(bash -c "echo \"$passed_event_command\"")"
+  if [[ -n "$verbose" ]]; then
+    local local_expanded_command="$passed_event_command"
 
-  # Notify user about execution
-  if [[ "$passed_command_type" == 'default' ]]; then
-    message --verbose "${passed_event_type^} command ($local_expanded_command) ($passed_section) executed $passed_end_of_msg."
-  elif [[ "$passed_command_type" == 'lazy' ]]; then
-    message --verbose "Lazy $passed_event_type command ($local_expanded_command) ($passed_section) executed $passed_end_of_msg."
+    # To preserve single and double quotes
+    local local_expanded_command="${local_expanded_command//\'/\\\'}"
+    local local_expanded_command="${local_expanded_command//\"/\\\"}"
+
+    local local_expanded_command="$(bash -c "echo \"$local_expanded_command\"")"
+
+    # Notify user about execution
+    if [[ "$passed_command_type" == 'default' ]]; then
+      message --verbose "${passed_event_type^} command ($local_expanded_command) ($passed_section) executed $passed_end_of_msg."
+    elif [[ "$passed_command_type" == 'lazy' ]]; then
+      message --verbose "Lazy $passed_event_type command ($local_expanded_command) ($passed_section) executed $passed_end_of_msg."
+    fi
   fi
 }
 
