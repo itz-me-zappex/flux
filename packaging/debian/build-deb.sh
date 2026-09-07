@@ -85,7 +85,7 @@ for build_dep in wget tar "${build_deps[@]}"; do
   fi
 done
 
-if [[ -n "${missing_build_deps[*]}" ]]; then
+if (( ${#missing_build_deps[*]} > 0 )); then
   # Ask user before install missing build dependencies
   msg_info "Following build dependencies are missing:"
   for missing_build_dep in "${missing_build_deps[@]}"; do
