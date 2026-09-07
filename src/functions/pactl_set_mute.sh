@@ -71,7 +71,7 @@ pactl_set_mute(){
   done
 
   # Mute all matching sink inputs
-  if [[ -n "${local_matching_sink_inputs_array[*]}" ]]; then
+  if (( ${#local_matching_sink_inputs_array[*]} > 0 )); then
     local local_temp_matching_sink_input
     for local_temp_matching_sink_input in "${local_matching_sink_inputs_array[@]}"; do
       if ! pactl set-sink-input-mute "$local_temp_matching_sink_input" "$passed_action" > /dev/null 2>&1; then

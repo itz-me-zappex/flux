@@ -23,7 +23,7 @@ parse_config(){
         (( parse_config_error_count++ ))
       elif [[ "$local_temp_config_line" =~ ^\[.*\]$ ]]; then
         # Exit with an error if section is repeated
-        if [[ -n "${sections_array[*]}" ]]; then
+        if (( ${#sections_array[*]} > 0 )); then
           local local_temp_section
           for local_temp_section in "${sections_array[@]}"; do
             if [[ "[$local_temp_section]" == "$local_temp_config_line" ]]; then
@@ -34,7 +34,7 @@ parse_config(){
         fi
 
         # Exit with an error if group is repeated
-        if [[ -n "${groups_array[*]}" ]]; then
+        if (( ${#groups_array[*]} > 0 )); then
           local local_temp_group
           for local_temp_group in "${groups_array[@]}"; do
             if [[ "[$local_temp_group]" == "$local_temp_config_line" ]]; then
