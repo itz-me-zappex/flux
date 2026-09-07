@@ -60,6 +60,8 @@ get_process_info(){
         process_name="${process_name/*'\'/}"
         # Regular apps
         process_name="${process_name/*'/'/}"
+        # Chromium/Electron (flags separated with spaces)
+        process_name="${process_name/' --'*/}"
       fi
 
       # Bufferize to avoid failure from 'read' in case file become
