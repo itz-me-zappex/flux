@@ -57,7 +57,7 @@ validate_config_keys(){
 
       # Exit with an error if section contains only identifiers
       if [[ -z "${is_section_useful_map["$local_temp_section_or_group"]}" ]]; then
-        message --warning "L$local_section_or_group_line: $local_section_msg_head '$local_temp_section_or_group' is useless because there is no action specified!"
+        message --warning "L$local_section_or_group_line: $local_section_msg_head '$local_temp_section_or_group' is useless because there is no any action specified!"
         (( parse_config_error_count++ ))
       fi
     fi
