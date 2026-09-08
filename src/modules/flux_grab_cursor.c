@@ -55,8 +55,6 @@ int main(int argc, char *argv[]) {
     XCloseDisplay(display);
     printf("error\n");
     return 1;
-  } else {
-    XUngrabPointer(display, CurrentTime);
   }
 
   /* Attempt to grab cursor */
@@ -73,13 +71,13 @@ int main(int argc, char *argv[]) {
    * Wine/Proton expects for mouse cursor being ungrabbed and
    * freezes the whole process
    */
-  bool wine_window = is_wine_window(display, window);
-  if (wine_window) {
+  if (is_wine_window(display, window)) {
     printf("wine_window\n");
     /* Check whether process hangs after cursor grab or not */
-    bool process_cpu_idle;
+    int attempts = 3;
+    bool process_cpu_idle = false;
     bool first_loop = true;
-    while (true) {
+    for (int i = 0; i < attempts; i++) {
       /* Cursor is already grabbed
        * No need to wait until it become ungrabbed due to hang
        */
@@ -104,7 +102,7 @@ int main(int argc, char *argv[]) {
        * without this delay, some games will hang because cursor
        * will not be ungrabbed
        */
-      for (int i = 0; i < 50; i++) {
+      for (int j = 0; j < 50; j++) {
         usleep(100000);
         process_cpu_idle = is_process_cpu_idle(window_process);
         /* Stop check and ungrab cursor to unfreeze process if hanged */
@@ -117,17 +115,21 @@ int main(int argc, char *argv[]) {
       forward_input_on_hang_wait_t_args.stop = true;
       pthread_join(forward_input_on_hang_wait_t, NULL);
 
-      /* If process hangs after cursor grab, then ungrab it and repeat
-       * until it stop hang
-       * E.g. after loading or Wine/Proton initialization
+      /* Ungrabbing every iteration because of both,
+       * if that is last iteration - without ungrabbing
+       * cursor will not be confined to window, if not -
+       * cursor should be ungrabbed to unfreeze Wine/Proton
+       * app.
        */
+      XUngrabPointer(display, CurrentTime);
+      XSync(display, False);
+
+      if (i == attempts) {
+        break;
+      }
+
       if (process_cpu_idle) {
         printf("wine_hang\n");
-        XUngrabPointer(display, CurrentTime);
-        /* Without it cursor will not be really ungrabbed and this
-         * loop will not break
-         */
-        XSync(display, False);
         sleep(1);
       } else {
         break;
@@ -135,14 +137,25 @@ int main(int argc, char *argv[]) {
     }
   } else {
     printf("window\n");
-    wait_for_cursor_ungrab(display, window);
   }
 
-  /* Send mouse related events to window in realtime */
+  /* Should be (re)grabbed anyway */
+  wait_for_cursor_ungrab(display, window);
+
+  long int event_masks[] = {
+    ButtonPressMask |
+    ButtonReleaseMask |
+    ButtonMotionMask |
+    PointerMotionMask |
+    PointerMotionHintMask
+  };
+
   printf("success\n");
+
+  /* Send mouse related events to window in realtime */
   XEvent event;
   while (true) {
-    XMaskEvent(display, ButtonPressMask | ButtonReleaseMask | PointerMotionMask, &event);
+    XMaskEvent(display, *event_masks, &event);
     XSendEvent(display, window, True, NoEventMask, &event);
   }
 
