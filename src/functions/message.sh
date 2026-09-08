@@ -26,6 +26,7 @@ message(){
     shift 1
     printf "$local_timestamp" "$local_current_time" "$prefix_error $*" >&2
     echo "$prefix_info Try 'flux --help' for more information."
+    return 0
   ;;
   --info )
     shift 1
