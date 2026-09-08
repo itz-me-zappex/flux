@@ -12,6 +12,14 @@
 #include "include/process.h"
 #include "include/cursor.h"
 
+long int cursor_event_masks[] = {
+  ButtonPressMask |
+  ButtonReleaseMask |
+  ButtonMotionMask |
+  PointerMotionMask |
+  PointerMotionHintMask
+};
+
 /* Ugly layer between focused window and mouse
  * XGrabPointer() grabs cursor cutting input off window,
  * but that is only one adequate way to prevent cursor
@@ -138,20 +146,12 @@ int main(int argc, char *argv[]) {
   /* Should be (re)grabbed anyway */
   wait_for_cursor_ungrab(display, window);
 
-  long int event_masks[] = {
-    ButtonPressMask |
-    ButtonReleaseMask |
-    ButtonMotionMask |
-    PointerMotionMask |
-    PointerMotionHintMask
-  };
-
   printf("success\n");
 
   /* Send mouse related events to window in realtime */
   XEvent event;
   while (true) {
-    XMaskEvent(display, *event_masks, &event);
+    XMaskEvent(display, *cursor_event_masks, &event);
     XSendEvent(display, window, True, NoEventMask, &event);
   }
 
