@@ -6,7 +6,7 @@ CFLAGS ?= -O2 -s
 PWD = $(shell pwd)
 
 CMODULES_DIR = $(PWD)/src/modules
-CFUNCTIONS_DIR = $(CMODULES_DIR)/functions
+CINCLUDE_DIR = $(CMODULES_DIR)/include
 
 BUILD_DIR = $(PWD)/build
 
@@ -28,20 +28,29 @@ all:
 	chmod +x $(FLUX_BUILD)
 
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/flux-listener $(CMODULES_DIR)/flux_listener.c \
+	$(CINCLUDE_DIR)/window.c \
+	$(CINCLUDE_DIR)/process.c \
 	-lX11 -lXext -lXRes
 
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/window-minimize $(CMODULES_DIR)/window_minimize.c \
+	$(CINCLUDE_DIR)/window.c \
 	-lX11
 
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/window-fullscreen $(CMODULES_DIR)/window_fullscreen.c \
+	$(CINCLUDE_DIR)/window.c \
 	-lX11
 
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/select-window $(CMODULES_DIR)/select_window.c \
-	$(CFUNCTIONS_DIR)/third-party/xprop/clientwin.c \
-	$(CFUNCTIONS_DIR)/third-party/xprop/dsimple.c \
+	$(CINCLUDE_DIR)/window.c \
+	$(CINCLUDE_DIR)/process.c \
+	$(CINCLUDE_DIR)/third-party/xprop/clientwin.c \
+	$(CINCLUDE_DIR)/third-party/xprop/dsimple.c \
 	-lX11 -lXRes -lXext
 
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/flux-grab-cursor $(CMODULES_DIR)/flux_grab_cursor.c \
+	$(CINCLUDE_DIR)/window.c \
+	$(CINCLUDE_DIR)/process.c \
+	$(CINCLUDE_DIR)/cursor.c \
 	-lX11 -lXext -lXRes
 
 clean:
