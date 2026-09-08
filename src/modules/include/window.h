@@ -6,8 +6,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 
-#include "get_opened_windows.h"
-
 bool check_window_existence(Display* display, Window root, Window window);
 bool check_wm_restart(Display* display, Window root);
 Window get_active_window(Display* display, Window root);
