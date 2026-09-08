@@ -12,13 +12,7 @@ typedef struct {
   volatile bool stop;
 } forward_input_on_hang_wait_args;
 
-long int cursor_event_masks[] = {
-  ButtonPressMask |
-  ButtonReleaseMask |
-  ButtonMotionMask |
-  PointerMotionMask |
-  PointerMotionHintMask
-};
+extern long int cursor_event_masks[];
 
 void* forward_input_on_hang_wait(void *arg);
 

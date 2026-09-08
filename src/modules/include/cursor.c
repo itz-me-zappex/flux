@@ -9,18 +9,10 @@
 void* forward_input_on_hang_wait(void *arg) {
   forward_input_on_hang_wait_args* args = (forward_input_on_hang_wait_args *)arg;
 
-  long int event_masks[] = {
-    ButtonPressMask |
-    ButtonReleaseMask |
-    ButtonMotionMask |
-    PointerMotionMask |
-    PointerMotionHintMask
-  };
-
   XEvent event;
   while (!args->stop) {
     while (XPending(args->display)) {
-      XMaskEvent(args->display, *event_masks, &event);
+      XMaskEvent(args->display, *cursor_event_masks, &event);
       XSendEvent(args->display, args->window, True, NoEventMask, &event);
     }
     usleep(500); // 0.5ms, busy waiting, otherwise - thread locks
