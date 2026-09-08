@@ -10,14 +10,11 @@
 #include <X11/Xutil.h>
 #include <stdarg.h>
 
-#include "functions/get_active_window.h"
-#include "functions/get_wm_window.h"
-#include "functions/get_window_process.h"
-#include "functions/get_opened_windows.h"
-#include "functions/check_window_existence.h"
+#include "include/window.h"
+#include "include/process.h"
 
-#include "functions/third-party/xprop/clientwin.h"
-#include "functions/third-party/xprop/dsimple.h"
+#include "include/third-party/xprop/clientwin.h"
+#include "include/third-party/xprop/dsimple.h"
 
 /* To avoid compilation breakage, used in 'xprop' source code */
 void usage(const char *errmsg) {}

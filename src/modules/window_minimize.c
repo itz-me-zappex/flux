@@ -4,8 +4,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#include "functions/get_opened_windows.h"
-#include "functions/check_window_existence.h"
+#include "include/window.h"
 
 /* Minimize window if passed window XID is valid */
 int main(int argc, char *argv[]) {

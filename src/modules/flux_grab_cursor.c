@@ -8,13 +8,9 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#include "functions/get_opened_windows.h"
-#include "functions/check_window_existence.h"
-#include "functions/get_window_process.h"
-#include "functions/is_wine_window.h"
-#include "functions/is_process_cpu_idle.h"
-#include "functions/forward_input_on_hang_wait.h"
-#include "functions/wait_for_cursor_ungrab.h"
+#include "include/window.h"
+#include "include/process.h"
+#include "include/cursor.h"
 
 /* Ugly layer between focused window and mouse
  * XGrabPointer() grabs cursor cutting input off window,

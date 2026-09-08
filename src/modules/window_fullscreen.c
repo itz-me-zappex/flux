@@ -5,8 +5,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 
-#include "functions/get_opened_windows.h"
-#include "functions/check_window_existence.h"
+#include "include/window.h"
 
 /* Send X11 event to make window fullscreen and resize its child
  * window to screen size

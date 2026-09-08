@@ -6,12 +6,8 @@
 #include <X11/extensions/XRes.h>
 #include <unistd.h>
 
-#include "functions/check_wm_restart.h"
-#include "functions/get_active_window.h"
-#include "functions/get_input_focus.h"
-#include "functions/get_opened_windows.h"
-#include "functions/get_window_process.h"
-#include "functions/get_wm_window.h"
+#include "include/window.h"
+#include "include/process.h"
 
 /* Listen changes in '_NET_ACTIVE_WINDOW' and '_NET_CLIENT_LIST_STACKING'
  * to print their current state for daemon
