@@ -30,7 +30,7 @@ handle_focus(){
 
   # Enforce fullscreen mode for window
   if [[ -n "${config_key_focus_fullscreen_map["$section"]}" ]]; then
-    window_fullscreen &
+    background_window_fullscreen &
   fi
 
   # Run subprocess which binds cursor to window if window
@@ -52,7 +52,7 @@ handle_focus(){
     passed_action='0' \
     passed_action_name='unmute' \
     passed_end_of_msg="$local_end_of_msg" \
-    pactl_set_mute &
+    background_pactl_set_mute &
   fi
 
   exec_oneshot

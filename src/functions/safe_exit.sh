@@ -58,7 +58,7 @@ safe_exit(){
       passed_action='0' \
       passed_action_name='unmute' \
       passed_end_of_msg="$local_end_of_msg" \
-      pactl_set_mute &
+      background_pactl_set_mute &
     fi
 
     # Execute 'exec-exit', 'exec-exit-focus' and 'exec-exit-unfocus' commands

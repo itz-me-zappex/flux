@@ -1,5 +1,5 @@
 # To mute and unmute processes
-pactl_set_mute(){
+background_pactl_set_mute(){
   local -A local_application_name_map \
   local_application_id_map \
   local_application_icon_name_map \

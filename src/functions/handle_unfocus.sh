@@ -26,7 +26,7 @@ handle_unfocus(){
       # Minimize window if requested
       if [[ -n "${request_minimize_map["$local_pid"]}" ]]; then
         unset request_minimize_map["$local_pid"]
-        window_minimize &
+        background_window_minimize &
       fi
 
       # Return an error if daemon has insufficient rights to apply limit,
@@ -111,7 +111,7 @@ handle_unfocus(){
         passed_action='1' \
         passed_action_name='mute' \
         passed_end_of_msg="on window ($local_temp_window_xid) unfocus event" \
-        pactl_set_mute &
+        background_pactl_set_mute &
       fi
 
       # Execute unfocus event command
