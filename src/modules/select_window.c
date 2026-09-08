@@ -1,15 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <X11/cursorfont.h>
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/extensions/XRes.h>
-#include <X11/Xos.h>
-#include <X11/Xutil.h>
-#include <stdarg.h>
-
 #include "include/window.h"
 #include "include/process.h"
 
