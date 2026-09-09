@@ -2,36 +2,28 @@
 # 'flux-grab-cursor'
 create_fifo_files(){
   # Needed to read output of and to kill 'flux-listener' process
-  if [[ -e "$flux_listener_fifo_path" &&
-        ! -p "$flux_listener_fifo_path" ]]; then
-    local local_shorten_path_result
-    shorten_path "$flux_listener_fifo_path"
-    message --error "Unable to continue, '$local_shorten_path_result' is expected to be a FIFO file!"
-    exit 1
-  elif [[ ! -p "$flux_listener_fifo_path" ]] &&
-       ! mkfifo "$flux_listener_fifo_path" > /dev/null 2>&1; then
-    local local_shorten_path_result
-    shorten_path "$flux_listener_fifo_path"
-    message --error "Unable to create '$local_shorten_path_result' FIFO file!"
-    exit 1
-  fi
+  local local_fifo_files_array+=("$flux_listener_fifo_path")
 
   # Needed to read output of 'flux-grab-cursor' process
   if [[ -n "$should_create_fifo_for_flux_grab_cursor" ]]; then
-    if [[ -e "$flux_grab_cursor_fifo_path" &&
-          ! -p "$flux_grab_cursor_fifo_path" ]]; then
+    unset should_create_fifo_for_flux_grab_cursor
+    local local_fifo_files_array+=("$flux_grab_cursor_fifo_path")
+  fi
+
+  local local_temp_fifo
+  for local_temp_fifo in "${local_fifo_files_array[@]}"; do
+    if [[ -e "$local_temp_fifo" &&
+          ! -p "$local_temp_fifo" ]]; then
       local local_shorten_path_result
-      shorten_path "$flux_grab_cursor_fifo_path"
+      shorten_path "$local_temp_fifo"
       message --error "Unable to continue, '$local_shorten_path_result' is expected to be a FIFO file!"
       exit 1
-    elif [[ ! -p "$flux_grab_cursor_fifo_path" ]] &&
-         ! mkfifo "$flux_grab_cursor_fifo_path" > /dev/null 2>&1; then
+    elif [[ ! -p "$local_temp_fifo" ]] &&
+        ! mkfifo "$local_temp_fifo" > /dev/null 2>&1; then
       local local_shorten_path_result
-      shorten_path "$flux_grab_cursor_fifo_path"
-      message --warning "Unable to create '$local_shorten_path_result' FIFO file!"
+      shorten_path "$local_temp_fifo"
+      message --error "Unable to create '$local_shorten_path_result' FIFO file!"
       exit 1
     fi
-
-    unset should_create_fifo_for_flux_grab_cursor
-  fi
+  done
 }
