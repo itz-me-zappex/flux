@@ -9,12 +9,8 @@ exec_focus(){
       local local_temp_command
       while read -r local_temp_command ||
             [[ -n "$local_temp_command" ]]; do
-        passed_command_type='default' \
-        passed_section="$section" \
-        passed_event_command="$local_temp_command" \
-        passed_end_of_msg="$local_end_of_msg" \
-        passed_event_type='focus' \
-        exec_on_event
+        exec_on_event "$section" "$local_end_of_msg" \
+                      'default' 'focus' "$local_temp_command"
       done <<< "${config_key_exec_focus_map["$section"]}"
     fi
 
@@ -24,12 +20,8 @@ exec_focus(){
       local local_temp_command
       while read -r local_temp_command ||
             [[ -n "$local_temp_command" ]]; do
-        passed_command_type='lazy' \
-        passed_section="$section" \
-        passed_event_command="$local_temp_command" \
-        passed_end_of_msg="$local_end_of_msg" \
-        passed_event_type='focus' \
-        exec_on_event
+        exec_on_event "$section" "$local_end_of_msg" \
+                      'lazy' 'focus' "$local_temp_command"
       done <<< "${config_key_lazy_exec_focus_map["$section"]}"
     fi
     

@@ -8,12 +8,8 @@ exec_unfocus(){
     local local_temp_command
     while read -r local_temp_command ||
           [[ -n "$local_temp_command" ]]; do
-      passed_command_type='default' \
-      passed_section="$passed_section" \
-      passed_event_command="$local_temp_command" \
-      passed_end_of_msg="$local_end_of_msg" \
-      passed_event_type='unfocus' \
-      exec_on_event
+      exec_on_event "$passed_section" "$local_end_of_msg" \
+                    'default' 'unfocus' "$local_temp_command"
     done <<< "${config_key_exec_unfocus_map["$passed_section"]}"
   fi
 
@@ -23,12 +19,8 @@ exec_unfocus(){
     local local_temp_command
     while read -r local_temp_command ||
           [[ -n "$local_temp_command" ]]; do
-      passed_command_type='lazy' \
-      passed_section="$passed_section" \
-      passed_event_command="$local_temp_command" \
-      passed_end_of_msg="$local_end_of_msg" \
-      passed_event_type='unfocus' \
-      exec_on_event
+      exec_on_event "$passed_section" "$local_end_of_msg" \
+                    'lazy' 'unfocus' "$local_temp_command"
     done <<< "${config_key_lazy_exec_unfocus_map["$passed_section"]}"
   fi
   

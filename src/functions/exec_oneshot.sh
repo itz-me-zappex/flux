@@ -7,12 +7,9 @@ exec_oneshot(){
     local local_temp_command
     while read -r local_temp_command ||
           [[ -n "$local_temp_command" ]]; do
-      passed_command_type='default' \
-      passed_section="$section" \
-      passed_event_command="$local_temp_command" \
-      passed_end_of_msg="on window ($window_xid) appearance event of process '$process_name' ($pid)" \
-      passed_event_type='oneshot' \
-      exec_on_event
+      exec_on_event "$section" \
+                    "on window ($window_xid) appearance event of process '$process_name' ($pid)" \
+                    'default' 'oneshot' "$local_temp_command"
     done <<< "${config_key_exec_oneshot_map["$section"]}"
 
     is_exec_oneshot_executed_map["$pid"]='1'
