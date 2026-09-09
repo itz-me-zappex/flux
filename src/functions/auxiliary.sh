@@ -8,11 +8,8 @@ option_repeat_check(){
 
 # To obtain values from command line options
 cmdline_get(){
-  local local_write_shift_to="$1"
-  local local_check="$2"
-  local local_option="$3"
-  local local_short_option="$4"
-  local local_target="$5"
+  local local_write_shift_to="$1" local_check="$2" local_option="$3" \
+        local_short_option="$4" local_target="$5"
 
   shift 5 # everything else handled as options
 
@@ -56,34 +53,37 @@ check_pid_existence(){
 # Used in 'exec_focus()' and 'exec_unfocus()' as wrapper
 # to run commands
 exec_on_event(){
+  local local_section="$1" local_end_of_msg="$2" local_command_type="$3" \
+        local_event_type="$4" local_event_command="$5"
+
   # Workaround for case when new line character is passed as command
   # Caused by appending support (using '+=' key declaration)
-  if [[ -z "$passed_event_command" ]]; then
+  if [[ -z "$local_event_command" ]]; then
     return 0
   fi
 
   # Run command separately from daemon in background
-  passed_section='' \
-  passed_event_command='' \
-  passed_end_of_msg='' \
-  nohup setsid bash -c "$passed_event_command" > /dev/null 2>&1 &
-
+  # TODO: spawn shell only when needed
+  # I.e. if no file with '$local_event_command' name & not in '$PATH'
+  nohup setsid bash -c "$local_event_command" > /dev/null 2>&1 &
   disown "$!" > /dev/null 2>&1
 
   if [[ -n "$verbose" ]]; then
-    local local_expanded_command="$passed_event_command"
+    local local_expanded_command="$local_event_command"
 
     # To preserve single and double quotes
     local local_expanded_command="${local_expanded_command//\'/\\\'}"
     local local_expanded_command="${local_expanded_command//\"/\\\"}"
 
+    # The only one way I'm aware of which can replace variables with
+    # their values, even SPEs
     local local_expanded_command="$(bash -c "echo \"$local_expanded_command\"")"
 
     # Notify user about execution
-    if [[ "$passed_command_type" == 'default' ]]; then
-      message --verbose "${passed_event_type^} command ($local_expanded_command) ($passed_section) executed $passed_end_of_msg."
-    elif [[ "$passed_command_type" == 'lazy' ]]; then
-      message --verbose "Lazy $passed_event_type command ($local_expanded_command) ($passed_section) executed $passed_end_of_msg."
+    if [[ "$local_command_type" == 'default' ]]; then
+      message --verbose "${local_event_type^} command ($local_expanded_command) ($local_section) executed $local_end_of_msg."
+    elif [[ "$local_command_type" == 'lazy' ]]; then
+      message --verbose "Lazy $local_event_type command ($local_expanded_command) ($local_section) executed $local_end_of_msg."
     fi
   fi
 }
