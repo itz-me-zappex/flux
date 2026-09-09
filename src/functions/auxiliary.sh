@@ -8,29 +8,37 @@ option_repeat_check(){
 
 # To obtain values from command line options
 cmdline_get(){
+  local local_write_shift_to="$1"
+  local local_check="$2"
+  local local_option="$3"
+  local local_short_option="$4"
+  local local_target="$5"
+
+  shift 5 # everything else handled as options
+
   # Remember that option is passed to check whether it is passed
-  # again or not 
-  option_repeat_check "$passed_check" "$passed_option"
-  printf -v "$passed_check" '%u' '1'
+  # again or not
+  option_repeat_check "$local_check" "$local_option"
+  printf -v "$local_check" '%u' '1'
 
   # Define option type and remember specified value
   # 'short', 'long' or 'long=value'
   case "$1" in
-  "$passed_option" | "$passed_short_option" )
+  "$local_option" | "$local_short_option" )
     # Remember value only if that is not an another option
     # Regexp means long or short option
     if [[ -n "$2" &&
           ! "$2" =~ ^(--.*|-.*)$ ]]; then
-      printf -v "$passed_set" '%s' "$2"
-      shift='2'
+      printf -v "$local_target" '%s' "$2"
+      printf -v "$local_write_shift_to" '%u' '2'
     else
-      shift='1'
+      printf -v "$local_write_shift_to" '%u' '1'
     fi
   ;;
   * )
     # Remove option name from string
-    printf -v "$passed_set" '%s' "${1/"$passed_option"=/}"
-    shift='1'
+    printf -v "$local_target" '%s' "${1/"$local_option"=/}"
+    printf -v "$local_write_shift_to" '%u' '1'
   esac
 }
 
