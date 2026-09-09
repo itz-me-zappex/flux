@@ -1,25 +1,17 @@
 # To parse command line options
 parse_options(){
+  local local_shift_request
+
   # Continue until count of passed command line options become zero
   while (( $# > 0 )); do
     case "$1" in
     --color | -C | --color=* )
-      passed_check='color_is_passed' \
-      passed_set='color' \
-      passed_option='--color' \
-      passed_short_option='-C' \
-      cmdline_get "$@"
-
-      shift "$shift"
+      cmdline_get 'local_shift_request' 'color_is_passed' '--color' '-C' 'color' "$@"
+      shift "$local_shift_request"
     ;;
     --config | -c | --config=* )
-      passed_check='config_is_passed' \
-      passed_set='config' \
-      passed_option='--config' \
-      passed_short_option='-c' \
-      cmdline_get "$@"
-
-      shift "$shift"
+      cmdline_get 'local_shift_request' 'config_is_passed' '--config' '-c' 'config' "$@"
+      shift "$local_shift_request"
 
       if [[ -n "$config" ]]; then
         local local_get_realpath_result
@@ -28,14 +20,10 @@ parse_options(){
       fi
     ;;
     --get | -g | --get=* )
-      passed_check='get_is_passed' \
-      passed_set='get' \
-      passed_option='--get' \
-      passed_short_option='-g' \
-      cmdline_get "$@"
+      cmdline_get 'local_shift_request' 'get_is_passed' '--get' '-g' 'get' "$@"
+      shift "$local_shift_request"
 
-      shift "$shift"
-
+      # 'PiCk' -> 'pick' etc.
       get="${get,,}"
 
       if [[ -z "$get" ]]; then
@@ -94,7 +82,7 @@ parse_options(){
         fi
 
         echo "XID (decimal): "$window_xid"
-XID (hexadecimal): "$(printf "0x%x\n" "$window_xid")" 
+XID (hexadecimal): "$(printf "0x%x\n" "$window_xid")"
 PID: "$pid"
 Name: "$process_name"
 Owner (UID): "$process_owner"
@@ -154,13 +142,8 @@ Examples:
       shift 1
     ;;
     --log | -l | --log=* )
-      passed_check='log_is_passed' \
-      passed_set='log' \
-      passed_option='--log' \
-      passed_short_option='-l' \
-      cmdline_get "$@"
-
-      shift "$shift"
+      cmdline_get 'local_shift_request' 'log_is_passed' '--log' '-l' 'log' "$@"
+      shift "$local_shift_request"
 
       if [[ -n "$log" ]]; then
         local local_get_realpath_result
@@ -184,13 +167,8 @@ Examples:
       shift 1
     ;;
     --timestamp-format | -T | --timestamp-format=* )
-      passed_check='timestamp_is_passed' \
-      passed_set='new_timestamp_format' \
-      passed_option='--timestamp-format' \
-      passed_short_option='-T' \
-      cmdline_get "$@"
-
-      shift "$shift"
+      cmdline_get 'local_shift_request' 'timestamp_is_passed' '--timestamp-format' '-T' 'new_timestamp_format' "$@"
+      shift "$local_shift_request"
     ;;
     --timestamps | -t )
       option_repeat_check timestamps --timestamps
@@ -218,40 +196,20 @@ There is NO WARRANTY, to the extent permitted by law.
       exit 0
     ;;
     --prefix-error | --pe | --prefix-error=* )
-      passed_check='prefix_error_is_passed' \
-      passed_set='new_prefix_error' \
-      passed_option='--prefix-error' \
-      passed_short_option='--pe' \
-      cmdline_get "$@"
-
-      shift "$shift"
+      cmdline_get 'local_shift_request' 'prefix_error_is_passed' '--prefix-error' '--pe' 'new_prefix_error' "$@"
+      shift "$local_shift_request"
     ;;
     --prefix-info | --pi | --prefix-info=* )
-      passed_check='prefix_info_is_passed' \
-      passed_set='new_prefix_info' \
-      passed_option='--prefix-info' \
-      passed_short_option='--pi' \
-      cmdline_get "$@"
-
-      shift "$shift"
+      cmdline_get 'local_shift_request' 'prefix_info_is_passed' '--prefix-info' '--pi' 'new_prefix_info' "$@"
+      shift "$local_shift_request"
     ;;
     --prefix-verbose | --pv | --prefix-verbose=* )
-      passed_check='prefix_verbose_is_passed' \
-      passed_set='new_prefix_verbose' \
-      passed_option='--prefix-verbose' \
-      passed_short_option='--pv' \
-      cmdline_get "$@"
-
-      shift "$shift"
+      cmdline_get 'local_shift_request' 'prefix_verbose_is_passed' '--prefix-verbose' '--pv' 'new_prefix_verbose' "$@"
+      shift "$local_shift_request"
     ;;
     --prefix-warning | --pw | --prefix-warning=* )
-      passed_check='prefix_warning_is_passed' \
-      passed_set='new_prefix_warning' \
-      passed_option='--prefix-warning' \
-      passed_short_option='--pw' \
-      cmdline_get "$@"
-
-      shift "$shift"
+      cmdline_get 'local_shift_request' 'prefix_warning_is_passed' '--prefix-warning' '--pw' 'new_prefix_warning' "$@"
+      shift "$local_shift_request"
     ;;
     * )
       # First regexp means 2+ symbols after hyphen (combined short options)
@@ -276,6 +234,4 @@ There is NO WARRANTY, to the extent permitted by law.
       fi
     esac
   done
-
-  unset shift
 }
