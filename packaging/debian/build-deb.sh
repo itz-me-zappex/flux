@@ -5,35 +5,35 @@
 ###############################
 # --- Available to modify --- #
 ###############################
-version='1.34.3'
+version='1.34.4'
 rev='1'
 arch="$(dpkg --print-architecture)"
 package="flux_${version}-${rev}_${arch}"
 
 build_deps=(
-'libxres-dev'
-'libx11-dev'
-'libxext-dev'
-'x11proto-dev'
-'make'
-'gcc'
+  'libxres-dev'
+  'libx11-dev'
+  'libxext-dev'
+  'x11proto-dev'
+  'make'
+  'gcc'
 )
 
 required_deps=(
-'bash'
-'cpulimit' # TODO: make optional
-'coreutils'
-'libxres1'
-'libx11-6'
-'libxext6'
+  'bash'
+  'coreutils'
+  'libxres1'
+  'libx11-6'
+  'libxext6'
 )
 
 optional_deps=(
-'mangohud'
-'mangohud:i386'
-'libnotify-bin'
-'pulseaudio-utils'
-'less'
+  'cpulimit'
+  'mangohud'
+  'mangohud:i386'
+  'libnotify-bin'
+  'pulseaudio-utils'
+  'less'
 )
 
 

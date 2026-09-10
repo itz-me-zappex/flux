@@ -103,57 +103,43 @@ Daemon running handling already opened windows (`-H`) in verbose mode (`-v`) and
 
 ## Dependencies
 ### Arch Linux and derivatives
-**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libxres` `libx11` `libxext` `xorgproto`
+**Required:** `bash` `util-linux` `coreutils` `libxres` `libx11` `libxext` `xorgproto`
 
-**Optional:** `mangohud` `lib32-mangohud` `libnotify` `libpulse` `less`
+**Optional:** `cpulimit` `mangohud` `lib32-mangohud` `libnotify` `libpulse` `less`
 
 **Build:** `libxres` `libx11` `libxext` `xorgproto` `make` `gcc`
 
 ### Debian and derivatives
-**Required:** `bash` `cpulimit` `coreutils` `libxres1` `libx11-6` `libxext6`
+**Required:** `bash` `coreutils` `libxres1` `libx11-6` `libxext6`
 
-**Optional:** `mangohud` `mangohud:i386` `libnotify-bin` `pulseaudio-utils` `less`
+**Optional:** `cpulimit` `mangohud` `mangohud:i386` `libnotify-bin` `pulseaudio-utils` `less`
 
 **Build:** `libxres-dev` `libx11-dev` `libxext-dev` `x11proto-dev` `make` `gcc`
 
 ### Void Linux and derivatives
-**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext` `xorgproto`
+**Required:** `bash` `util-linux` `coreutils` `libXres` `libX11` `libXext` `xorgproto`
 
-**Optional:** `MangoHud` `MangoHud-32bit` `libnotify` `pulseaudio-utils` `less`
+**Optional:** `cpulimit` `MangoHud` `MangoHud-32bit` `libnotify` `pulseaudio-utils` `less`
 
 **Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto` `make` `gcc`
 
 ### Fedora and derivatives
-**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXres` `libX11` `libXext`
+**Required:** `bash` `util-linux` `coreutils` `libXres` `libX11` `libXext`
 
-**Optional:** `mangohud` `mangohud.i686` `libnotify` `pulseaudio-utils` `less`
+**Optional:** `cpulimit` `mangohud` `mangohud.i686` `libnotify` `pulseaudio-utils` `less`
 
 **Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorg-x11-proto-devel` `make` `gcc`
 
 ### OpenSUSE Tumbleweed and derivatives
-**Required:** `bash` `util-linux` `cpulimit` `coreutils` `libXRes1` `libX11-6` `libXext6`
+**Required:** `bash` `util-linux` `coreutils` `libXRes1` `libX11-6` `libXext6`
 
-**Optional:** `mangohud` `mangohud-32bit` `libnotify4` `pulseaudio-utils` `less`
+**Optional:** `cpulimit` `mangohud` `mangohud-32bit` `libnotify4` `pulseaudio-utils` `less`
 
 **Build:** `libXres-devel` `libX11-devel` `libXext-devel` `xorgproto-devel` `make` `gcc`
 
 ## Building and installation
 ### Arch Linux and derivatives
 Make sure you have installed `base-devel` package before continue.
-
-#### Install `cpulimit` dependency from AUR
-```bash
-git clone https://aur.archlinux.org/cpulimit.git
-```
-```bash
-cd cpulimit
-```
-```bash
-makepkg -sric
-```
-```bash
-cd ..
-```
 
 #### Clone this repository and use PKGBUILD to install daemon
 ```bash
@@ -169,6 +155,20 @@ makepkg -sric
 #### Remove useless packages installed during building
 ```bash
 sudo pacman -Rns $(pacman -Qttdq)
+```
+
+#### Optional `cpulimit` dependency (AUR)
+```bash
+git clone https://aur.archlinux.org/cpulimit.git
+```
+```bash
+cd cpulimit
+```
+```bash
+makepkg -sric
+```
+```bash
+cd ..
 ```
 
 ### Debian and derivatives
