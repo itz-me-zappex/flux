@@ -1,5 +1,5 @@
 pkgname='flux'
-pkgver='1.34.3'
+pkgver='1.34.4'
 pkgrel='1'
 pkgdesc='An advanced automation daemon for X11 desktops and window managers. Designed to limit FPS/CPU usage and run commands on window focus and unfocus events. Provides gaming-oriented features. Written mostly in Bash and partially in C.'
 arch=('any')
@@ -16,7 +16,6 @@ makedepends=(
 depends=(
   'bash'
   'util-linux'
-  'cpulimit' # TODO: make optional
   'coreutils'
   'libxres'
   'libx11'
@@ -24,6 +23,7 @@ depends=(
   'xorgproto'
 )
 optdepends=(
+  'cpulimit: CPU limit support'
   'mangohud: FPS limit support'
   'lib32-mangohud: FPS limit support (32-bit)'
   'libnotify: notifications support'

@@ -16,7 +16,7 @@ unset temp_envvar_line \
 envvar_name
 
 # Shown in '--version' output
-daemon_version='1.34.3'
+daemon_version='1.34.4'
 author_github_link='https://github.com/itz-me-zappex'
 
 # Should be unset to prevent issues

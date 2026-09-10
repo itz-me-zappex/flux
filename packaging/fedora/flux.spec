@@ -1,5 +1,5 @@
 Name:           flux
-Version:        1.34.3
+Version:        1.34.4
 Release:        1%{?dist}
 Summary:        Advanced daemon for X11 desktops and window managers
 
@@ -8,9 +8,8 @@ URL:            https://github.com/itz-me-zappex/flux
 Source0:        %{url}/archive/refs/tags/v%{version}.tar.gz
 
 BuildRequires:  libXres-devel, libX11-devel, libXext-devel, xorg-x11-proto-devel, make, gcc
-# TODO: make cpulimit optional
-Requires:       bash, util-linux, cpulimit, coreutils, libXres, libX11, libXext
-Recommends:     mangohud, mangohud.i686, libnotify, pulseaudio-utils, less
+Requires:       bash, util-linux, coreutils, libXres, libX11, libXext
+Recommends:     cpulimit, mangohud, mangohud.i686, libnotify, pulseaudio-utils, less
 
 %description
 An advanced automation daemon for X11 desktops and window managers.
