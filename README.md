@@ -735,13 +735,9 @@ permit nopass :wheel as root cmd /usr/bin/nvidia-settings args -a GPUMemoryTrans
 
 Please notice that in case with `opendoas` you should specify exactly the same frequencies as you did in `flux.ini` to make things work properly, because there is no support for regexp or wildcards (`*`).
 
-If you encounter `"Authorization required, but no authorization protocol specified"` error from `nvidia-settings` in case with `opendoas`, then consider to run `xhost +SI:localuser:root` (this command does not require root) by either adding it to autostart, running it before `flux` daemon or even by adding it to commands in `flux.ini` like this (extremely ugly but works):
-```ini
-lazy-exec-focus += "xhost +SI:localuser:root ; doas /usr/bin/nvidia-settings -a GPUGraphicsClockOffsetAllPerformanceLevels=200"
-lazy-exec-focus += "xhost +SI:localuser:root ; doas /usr/bin/nvidia-settings -a GPUMemoryTransferRateOffsetAllPerformanceLevels=2000"
-lazy-exec-unfocus += "xhost +SI:localuser:root ; doas /usr/bin/nvidia-settings -a GPUGraphicsClockOffsetAllPerformanceLevels=0"
-lazy-exec-unfocus += "xhost +SI:localuser:root ; doas /usr/bin/nvidia-settings -a GPUMemoryTransferRateOffsetAllPerformanceLevels=0"
-```
+If you encounter `"Authorization required, but no authorization protocol specified"` error from `nvidia-settings` in case with `opendoas`, then consider to either:
+- run `xhost +SI:localuser:root` by either adding it to autostart or running it before `flux` daemon (does not require root, not recommended but works).
+- configure `opendoas` to preserve `$XAUTHORITY` - `permit setenv { XAUTHORITY LANG LC_ALL } :wheel` (recommended, `$LANG` and `$LC_ALL` are optional but recommended too).
 
 P.S.: Do not ask why I suggest to use different commands depending on whether session is rootful or rootless. Commands for rootful session refuse to work on rootless session even if they run as root. Thx to `@ewbteewbte` from NVIDIA forum for spending the whole night and founding this ~~three~~ eight years old [solution](https://forums.developer.nvidia.com/t/465-24-02-no-longer-able-to-set-graphics-clock-offset-and-memory-transfer-rate-offset/175640/30).
 
