@@ -2,7 +2,9 @@
 exec_unfocus(){
   local local_end_of_msg="on window ($passed_window_xid) unfocus event of process '$passed_process_name' ($passed_pid)"
 
-  export_unfocus_envvars
+  export_unfocus_envvars "$passed_window_xid" "$passed_pid" "$passed_process_name" \
+                         "$passed_process_owner" "$passed_process_owner_username" \
+                         "$passed_process_command"
 
   if [[ -n "${config_key_exec_unfocus_map["$passed_section"]}" ]]; then
     local local_temp_command

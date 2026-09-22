@@ -5,7 +5,9 @@ exec_exit(){
     return 0
   fi
 
-  export_unfocus_envvars
+  export_unfocus_envvars "$passed_window_xid" "$passed_pid" "$passed_process_name" \
+                         "$passed_process_owner" "$passed_process_owner_username" \
+                         "$passed_process_command"
 
   if [[ -n "${config_key_exec_exit_map["$passed_section"]}" ]]; then
     local local_temp_command
