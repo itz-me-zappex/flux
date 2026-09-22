@@ -120,14 +120,9 @@ handle_closure(){
       fi
 
       # Execute closure event command
-      passed_window_xid="$local_temp_terminated_window_xid" \
-      passed_pid="$local_terminated_pid" \
-      passed_section="$local_terminated_section" \
-      passed_process_name="$local_terminated_process_name" \
-      passed_process_owner="$local_terminated_process_owner" \
-      passed_process_owner_username="$local_terminated_process_owner_username" \
-      passed_process_command="$local_terminated_process_command" \
-      exec_closure
+      exec_closure "$local_temp_terminated_window_xid" "$local_terminated_pid" "$local_terminated_section" \
+                   "$local_terminated_process_name" "$local_terminated_process_owner" \
+                   "$local_terminated_process_owner_username" "$local_terminated_process_command"
 
       if [[ -n "$local_terminated_section" &&
             -n "${config_key_exec_closure_map["$local_terminated_section"]}" ]]; then
