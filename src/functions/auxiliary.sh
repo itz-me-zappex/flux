@@ -259,18 +259,22 @@ export_focus_envvars(){
 # To use environment variables with previous and focused window info
 # in commands from execution related config keys (unfocus)
 export_unfocus_envvars(){
+  local local_unfocused_window_xid="$1" local_unfocused_pid="$2" local_unfocused_process_name="$3" \
+        local_unfocused_process_owner="$4" local_unfocused_process_owner_username="$5" \
+        local_unfocused_process_command="$6"
+
   export FOCUSED_WINDOW_XID="$window_xid" \
   FOCUSED_PID="$pid" \
   FOCUSED_PROCESS_NAME="$process_name" \
   FOCUSED_PROCESS_OWNER="$process_owner" \
   FOCUSED_PROCESS_OWNER_USERNAME="$process_owner_username" \
   FOCUSED_PROCESS_COMMAND="$process_command" \
-  UNFOCUSED_WINDOW_XID="$passed_window_xid" \
-  UNFOCUSED_PID="$passed_pid" \
-  UNFOCUSED_PROCESS_NAME="$passed_process_name" \
-  UNFOCUSED_PROCESS_OWNER="$passed_process_owner" \
-  UNFOCUSED_PROCESS_OWNER_USERNAME="$passed_process_owner_username" \
-  UNFOCUSED_PROCESS_COMMAND="$passed_process_command"
+  UNFOCUSED_WINDOW_XID="$local_unfocused_window_xid" \
+  UNFOCUSED_PID="$local_unfocused_pid" \
+  UNFOCUSED_PROCESS_NAME="$local_unfocused_process_name" \
+  UNFOCUSED_PROCESS_OWNER="$local_unfocused_process_owner" \
+  UNFOCUSED_PROCESS_OWNER_USERNAME="$local_unfocused_process_owner_username" \
+  UNFOCUSED_PROCESS_COMMAND="$local_unfocused_process_command"
 }
 
 # To unset environment variables that were exported to commands
