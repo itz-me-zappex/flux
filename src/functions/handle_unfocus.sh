@@ -118,14 +118,9 @@ handle_unfocus(){
       if [[ -n "${request_exec_unfocus_general_map["$local_pid"]}" ]]; then
         unset request_exec_unfocus_general_map["$local_pid"]
 
-        passed_window_xid="$local_temp_window_xid" \
-        passed_pid="$local_pid" \
-        passed_section="$local_section" \
-        passed_process_name="$local_process_name" \
-        passed_process_owner="$local_process_owner" \
-        passed_process_owner_username="$local_process_owner_username" \
-        passed_process_command="$local_process_command" \
-        exec_unfocus
+        exec_unfocus "$local_temp_window_xid" "$local_pid" "$local_section" \
+                     "$local_process_name" "$local_process_owner" "$local_process_owner_username" \
+                     "$local_process_command"
       fi
 
       # Should be displayed only for matching processes when unfocused
