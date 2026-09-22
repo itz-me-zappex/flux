@@ -64,16 +64,9 @@ safe_exit(){
     # Execute 'exec-exit', 'exec-exit-focus' and 'exec-exit-unfocus' commands
     # Previous section here is currently focused window matching section
     # It is moved to previous because daemon does that after handling event
-    passed_window_xid="$local_temp_window_xid" \
-    passed_pid="$local_pid" \
-    passed_section="$local_section" \
-    passed_process_name="$local_process_name" \
-    passed_process_owner="$local_process_owner" \
-    passed_process_owner_username="$local_process_owner_username" \
-    passed_process_command="$local_process_command" \
-    passed_focused_section="$previous_section" \
-    passed_end_of_msg="$local_end_of_msg" \
-    exec_exit
+    exec_exit "$local_temp_window_xid" "$local_pid" "$local_section" \
+              "$local_process_name" "$local_process_owner" "$local_process_owner_username" \
+              "$local_process_command" "$previous_section" "$local_end_of_msg"
   done
 
   # Terminate 'flux-listener'
