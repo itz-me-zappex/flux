@@ -1,8 +1,9 @@
 # To change FPS limit in specified MangoHud config
 mangohud_fps_set(){
-  local local_target_config="$1"
-  local local_source_config="$2"
-  local local_fps_to_set="$3"
+  local local_section="$1"
+  local local_target_config="$2"
+  local local_source_config="$3"
+  local local_fps_to_set="$4"
 
   # Check whether config file exists or not before continue
   if [[ -f "$local_target_config" ]]; then
@@ -11,7 +12,7 @@ mangohud_fps_set(){
       if [[ ! -r "$local_source_config" ]]; then
         local local_shorten_path_result
         shorten_path "$local_source_config"
-        message --warning "Source MangoHud config file ($local_shorten_path_result) ($passed_section) is not readable!"
+        message --warning "Source MangoHud config file ($local_shorten_path_result) ($local_section) is not readable!"
         return 1
       fi
     fi
@@ -20,7 +21,7 @@ mangohud_fps_set(){
     if [[ ! -w "$local_target_config" ]]; then
       local local_shorten_path_result
       shorten_path "$local_target_config"
-      message --warning "Target MangoHud config file ($local_shorten_path_result) ($passed_section) is not rewritable!"
+      message --warning "Target MangoHud config file ($local_shorten_path_result) ($local_section) is not rewritable!"
       return 1
     else
       # Replace "fps_limit" string if exists in config content
@@ -49,7 +50,7 @@ mangohud_fps_set(){
   else
     local local_shorten_path_result
     shorten_path "$local_target_config"
-    message --warning "Target MangoHud config file ($local_shorten_path_result) ($passed_section) does not exist!"
+    message --warning "Target MangoHud config file ($local_shorten_path_result) ($local_section) does not exist!"
     return 1
   fi
 }
