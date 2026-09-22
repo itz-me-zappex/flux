@@ -1,16 +1,18 @@
 # To get process info from cache using window XID
 cache_get_process_info(){
-  process_name="${cache_process_name_map["$passed_window_xid"]}"
-  process_owner="${cache_process_owner_map["$passed_window_xid"]}"
-  process_command="${cache_process_command_map["$passed_window_xid"]}"
-  process_owner_username="${cache_process_owner_username_map["$passed_window_xid"]}"
+  local local_window_xid="$1"
+
+  process_name="${cache_process_name_map["$local_window_xid"]}"
+  process_owner="${cache_process_owner_map["$local_window_xid"]}"
+  process_command="${cache_process_command_map["$local_window_xid"]}"
+  process_owner_username="${cache_process_owner_username_map["$local_window_xid"]}"
 }
 
 # To get process info using PID
 get_process_info(){
   # Get process info from cache if exists
   if [[ -n "${cache_pid_map["$window_xid"]}" ]]; then
-    passed_window_xid="$window_xid" cache_get_process_info
+    cache_get_process_info "$window_xid"
   else
     # Attempt to find cached info about the same process
     local local_temp_cached_window_xid
@@ -25,7 +27,7 @@ get_process_info(){
 
     if [[ -n "$local_matching_window_xid" ]]; then
       # Get process info from cache
-      passed_window_xid="$local_matching_window_xid" cache_get_process_info
+      cache_get_process_info "$local_matching_window_xid"
     else
       # Get process command by reading file ignoring '^@' (zero bytes)
       # Those are replaced with spaces automatically because of arrays nature :D
